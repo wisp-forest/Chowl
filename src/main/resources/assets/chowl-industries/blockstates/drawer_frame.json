@@ -1,0 +1,9 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "chowl-industries:block/drawer_frame"
+      }
+    ]
+  }
+}

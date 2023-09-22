@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "chowl-industries",
+  "version": "${version}",
+  "name": "chowl-industries",
+  "description": "",
+  "authors": ["chyzman", "BasiqueEvangelist"],
+  "contact": {
+  },
+  "license": "All-Rights-Reserved",
+  "icon": "assets/chowl/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "com.chyzman.chowl.client.ChowlClient"
+    ],
+    "main": [
+      "com.chyzman.chowl.Chowl"
+    ]
+  },
+  "mixins": [
+    "chowl.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  },
+  "custom": {
+    "loom:injected_interfaces": {
+    }
+  },
+  "accessWidener" : "chowl.accesswidener"
+}
