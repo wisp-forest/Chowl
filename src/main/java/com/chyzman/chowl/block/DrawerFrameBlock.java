@@ -6,24 +6,29 @@ import com.chyzman.chowl.item.DrawerPanelItem;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 import java.math.BigInteger;
 
@@ -101,17 +106,43 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     }
 
     @Override
-    public @NotNull ActionResult onAttack(World world, BlockState state, BlockHitResult hitResult, PlayerEntity
-            player) {
+    public @NotNull ActionResult onAttack(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player) {
         var blockEntity = world.getBlockEntity(hitResult.getBlockPos());
         if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
             var stacks = drawerFrameBlockEntity.stacks;
             var panel = stacks[hitResult.getSide().getId()];
             if (!panel.isEmpty()) {
-                player.getInventory().offerOrDrop(panel);
-                stacks[hitResult.getSide().getId()] = ItemStack.EMPTY;
-                drawerFrameBlockEntity.markDirty();
-                return ActionResult.SUCCESS;
+                Vector3f vec = hitResult.getPos().subtract(hitResult.getBlockPos().toCenterPos()).toVector3f();
+                vec.rotate(hitResult.getSide().getRotationQuaternion().invert()).rotate(Direction.WEST.getRotationQuaternion());
+                vec.add(0.5f, 0.5f, 0.5f);
+                if ((vec.y > 0.8f && vec.z > 0.8f) || !(panel.getItem() instanceof DrawerPanelItem)) {
+                    player.getInventory().offerOrDrop(panel);
+                    stacks[hitResult.getSide().getId()] = ItemStack.EMPTY;
+                    drawerFrameBlockEntity.markDirty();
+                    return ActionResult.SUCCESS;
+                } else {
+                    var drawerComponent = new DrawerComponent();
+                    if (panel.hasNbt()) {
+                        var nbt = panel.getOrCreateNbt();
+                        if (nbt.contains("DrawerComponent")) {
+                            drawerComponent.readNbt(nbt.getCompound("DrawerComponent"));
+                            var amount = player.isSneaking() ? drawerComponent.itemVariant.getItem().getMaxCount() : 1;
+                            var stack = drawerComponent.extract(amount);
+                            if (!stack.isEmpty()) {
+                                var drawerNbt = new NbtCompound();
+                                if (drawerComponent.count.compareTo(BigInteger.ZERO) > 0) {
+                                    drawerComponent.writeNbt(drawerNbt);
+                                }
+                                nbt.put("DrawerComponent", drawerNbt);
+                                player.getInventory().offerOrDrop(stack);
+                                stacks[hitResult.getSide().getId()] = panel;
+                                drawerFrameBlockEntity.stacks = stacks;
+                                drawerFrameBlockEntity.markDirty();
+                                return ActionResult.SUCCESS;
+                            }
+                        }
+                    }
+                }
             }
         }
         return ActionResult.PASS;

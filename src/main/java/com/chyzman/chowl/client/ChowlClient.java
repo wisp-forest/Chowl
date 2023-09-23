@@ -16,8 +16,8 @@ public class ChowlClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         BlockEntityRendererRegistry.register(DRAWER_FRAME_BLOCK_ENTITY_TYPE, DrawerFrameBlockEntityRenderer::new);
-        BlockRenderLayerMap.INSTANCE.putBlock(ChowlRegistry.DRAWER_FRAME, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(ChowlRegistry.DRAWER_FRAME_BLOCK, RenderLayer.getCutout());
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.DRAWER_FRAME_ITEM, new DrawerFrameItemRenderer());
-        BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.DRAWER_PANEL, new DrawerPanelItemRenderer());
+        BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.DRAWER_PANEL_ITEM, new DrawerPanelItemRenderer());
     }
 }

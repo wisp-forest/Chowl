@@ -21,10 +21,10 @@ public class ChowlRegistry {
         return Registry.register(Registries.BLOCK, id(name), block);
     }
 
-    public static final Item DRAWER_PANEL = registerItem("drawer_panel", new DrawerPanelItem(new Item.Settings()));
+    public static final Item DRAWER_PANEL_ITEM = registerItem("drawer_panel", new DrawerPanelItem(new Item.Settings()));
 
-    public static final Block DRAWER_FRAME = registerBlock("drawer_frame", new DrawerFrameBlock(AbstractBlock.Settings.copy(Blocks.OAK_PLANKS)));
-    public static final Item DRAWER_FRAME_ITEM = registerItem("drawer_frame", new BlockItem(DRAWER_FRAME, new Item.Settings()));
+    public static final Block DRAWER_FRAME_BLOCK = registerBlock("drawer_frame", new DrawerFrameBlock(AbstractBlock.Settings.copy(Blocks.OAK_PLANKS)));
+    public static final Item DRAWER_FRAME_ITEM = registerItem("drawer_frame", new BlockItem(DRAWER_FRAME_BLOCK, new Item.Settings()));
 
     public static void init() {}
 }
