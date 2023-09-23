@@ -12,6 +12,7 @@ import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
+import net.minecraft.world.World;
 import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
@@ -23,6 +24,10 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
     public void render(DrawerFrameBlockEntity entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         var client = MinecraftClient.getInstance();
         var world = entity.getWorld();
+        renderPanels(entity, client, world, tickDelta, matrices, vertexConsumers, light, overlay);
+    }
+
+    public static void renderPanels(DrawerFrameBlockEntity entity, MinecraftClient client, World world, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         for (int i = 0; i < entity.stacks.length; i++) {
             var stack = entity.stacks[i];
             if (!stack.isEmpty()) {

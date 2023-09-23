@@ -42,6 +42,7 @@ public class DrawerFrameBlockEntity extends BlockEntity {
 
     public void readNbt(NbtCompound nbt) {
         super.readNbt(nbt);
+        if (nbt == null) return;
         var nbtList = nbt.getList("Inventory", NbtElement.COMPOUND_TYPE);
         stacks = new ItemStack[6];
         for (int i = 0; i < nbtList.size(); i++) {
