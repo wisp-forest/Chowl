@@ -82,7 +82,6 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                                     drawerComponent.readNbt(nbt.getCompound("DrawerComponent"));
                                 } else {
                                     drawerComponent.itemVariant = ItemVariant.of(stackInHand);
-                                    drawerComponent.count = BigInteger.valueOf(stack.getCount());
                                 }
                                 stackInHand.setCount(drawerComponent.insert(stackInHand));
                                 var drawerNbt = new NbtCompound();
