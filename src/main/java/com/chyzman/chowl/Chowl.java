@@ -22,7 +22,13 @@ import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 public class Chowl implements ModInitializer {
     public static final String MODID = "chowl-industries";
 
-    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(id(FabricLoader.getInstance().getModContainer("chowl-industries").isPresent() ? FabricLoader.getInstance().getModContainer("chowl-industries").get().getMetadata().getVersion().getFriendlyString() : "main"));
+    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(id(FabricLoader.getInstance()
+        .getModContainer("chowl-industries")
+        .orElseThrow()
+        .getMetadata()
+        .getVersion()
+        .getFriendlyString()
+    ));
 
     public static BlockEntityType<DrawerFrameBlockEntity> DRAWER_FRAME_BLOCK_ENTITY_TYPE = Registry.register(Registries.BLOCK_ENTITY_TYPE, id("drawer_frame"), FabricBlockEntityTypeBuilder.create(DrawerFrameBlockEntity::new, ChowlRegistry.DRAWER_FRAME_BLOCK).build());
 

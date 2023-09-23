@@ -1,5 +1,6 @@
 package com.chyzman.chowl.item;
 
+import io.wispforest.owo.nbt.NbtKey;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -7,6 +8,16 @@ import net.minecraft.nbt.NbtCompound;
 import java.math.BigInteger;
 
 public class DrawerComponent {
+    public static final NbtKey.Type<DrawerComponent> KEY_TYPE = NbtKey.Type.COMPOUND.then(compound -> {
+        var component = new DrawerComponent();
+        component.readNbt(compound);
+        return component;
+    }, component -> {
+        var tag = new NbtCompound();
+        component.writeNbt(tag);
+        return tag;
+    });
+
     public ItemVariant itemVariant = ItemVariant.blank();
     public BigInteger count = BigInteger.ZERO;
 
@@ -19,7 +30,10 @@ public class DrawerComponent {
     }
 
     public int insert(ItemStack stack) {
-        if (this.itemVariant.matches(stack) || this.itemVariant.isBlank()) {
+        if (this.itemVariant.isBlank())
+            this.itemVariant = ItemVariant.of(stack);
+
+        if (this.itemVariant.matches(stack)) {
             this.count = this.count.add(BigInteger.valueOf(stack.getCount()));
             return 0;
         } else {

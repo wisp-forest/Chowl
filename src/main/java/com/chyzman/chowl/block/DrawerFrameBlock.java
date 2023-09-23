@@ -8,7 +8,10 @@ import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.context.LootContextParameterSet;
+import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
@@ -31,11 +34,13 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 import java.math.BigInteger;
+import java.util.List;
 
-public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, AttackInteractionReceiver {
+public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver {
 
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
     public static final VoxelShape SHAPE = Block.createCuboidShape(0, 0, 0, 16, 16, 16);
+    public static final BlockButtonProvider.Button REMOVE_BUTTON = new Button(0.8f, 0.8f, 1, 1, true);
 
     public DrawerFrameBlock(Settings settings) {
         super(settings);
@@ -78,70 +83,68 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                     return ActionResult.SUCCESS;
                 } else {
                     var stack = stacks[hit.getSide().getId()];
-                    if (stack.hasNbt() || stack.getItem() instanceof DrawerPanelItem) {
-                        var nbt = stack.getOrCreateNbt();
-                        if (nbt.contains("DrawerComponent") || stack.getItem() instanceof DrawerPanelItem) {
-                            if (!world.isClient) {
-                                var drawerComponent = new DrawerComponent();
-                                if (nbt.contains("DrawerComponent")) {
-                                    drawerComponent.readNbt(nbt.getCompound("DrawerComponent"));
-                                } else {
-                                    drawerComponent.itemVariant = ItemVariant.of(stackInHand);
-                                }
-                                stackInHand.setCount(drawerComponent.insert(stackInHand));
-                                var drawerNbt = new NbtCompound();
-                                drawerComponent.writeNbt(drawerNbt);
-                                nbt.put("DrawerComponent", drawerNbt);
-                                stacks[hit.getSide().getId()] = stack;
-                                drawerFrameBlockEntity.stacks = stacks;
-                                drawerFrameBlockEntity.markDirty();
-                            }
-                            return ActionResult.SUCCESS;
+                    if (stack.getItem() instanceof DrawerPanelItem panel) {
+                        if (!world.isClient) {
+                            panel.insert(stack, stackInHand);
+                            blockEntity.markDirty();
                         }
+
+                        return ActionResult.SUCCESS;
                     }
                 }
             }
         }
         return ActionResult.PASS;
+    }
+
+    @Override
+    public List<Button> listButtons(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player) {
+        if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity)) return List.of();
+
+        var selected = blockEntity.stacks[hitResult.getSide().getId()];
+
+        if (selected.isEmpty()) return List.of();
+
+        return List.of(REMOVE_BUTTON);
+    }
+
+    @Override
+    public ActionResult attackButton(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player, Button button) {
+        if (button != REMOVE_BUTTON) return ActionResult.PASS;
+        if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity)) return ActionResult.PASS;
+
+        var selected = blockEntity.stacks[hitResult.getSide().getId()];
+
+        player.getInventory().offerOrDrop(selected);
+        blockEntity.stacks[hitResult.getSide().getId()] = ItemStack.EMPTY;
+        blockEntity.markDirty();
+
+        return ActionResult.SUCCESS;
     }
 
     @Override
     public @NotNull ActionResult onAttack(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player) {
+        var res = BlockButtonProvider.super.onAttack(world, state, hitResult, player);
+        if (res != ActionResult.PASS) return res;
+
         var blockEntity = world.getBlockEntity(hitResult.getBlockPos());
         if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
             var stacks = drawerFrameBlockEntity.stacks;
-            var panel = stacks[hitResult.getSide().getId()];
-            if (!panel.isEmpty()) {
-                Vector3f vec = hitResult.getPos().subtract(hitResult.getBlockPos().toCenterPos()).toVector3f();
-                vec.rotate(hitResult.getSide().getRotationQuaternion().invert()).rotate(Direction.WEST.getRotationQuaternion());
-                vec.add(0.5f, 0.5f, 0.5f);
-                if ((vec.y > 0.8f && vec.z > 0.8f) || !(panel.getItem() instanceof DrawerPanelItem)) {
-                    player.getInventory().offerOrDrop(panel);
+            var selected = stacks[hitResult.getSide().getId()];
+            if (!selected.isEmpty()) {
+                if (selected.getItem() instanceof DrawerPanelItem panel) {
+                    var extracted = panel.extract(selected, player.isSneaking());
+
+                    if (!extracted.isEmpty()) {
+                        player.getInventory().offerOrDrop(extracted);
+                        blockEntity.markDirty();
+                        return ActionResult.SUCCESS;
+                    }
+                } else {
+                    player.getInventory().offerOrDrop(selected);
                     stacks[hitResult.getSide().getId()] = ItemStack.EMPTY;
                     drawerFrameBlockEntity.markDirty();
                     return ActionResult.SUCCESS;
-                } else {
-                    var drawerComponent = new DrawerComponent();
-                    if (panel.hasNbt()) {
-                        var nbt = panel.getOrCreateNbt();
-                        if (nbt.contains("DrawerComponent")) {
-                            drawerComponent.readNbt(nbt.getCompound("DrawerComponent"));
-                            var amount = player.isSneaking() ? drawerComponent.itemVariant.getItem().getMaxCount() : 1;
-                            var stack = drawerComponent.extract(amount);
-                            if (!stack.isEmpty()) {
-                                var drawerNbt = new NbtCompound();
-                                if (drawerComponent.count.compareTo(BigInteger.ZERO) > 0) {
-                                    drawerComponent.writeNbt(drawerNbt);
-                                }
-                                nbt.put("DrawerComponent", drawerNbt);
-                                player.getInventory().offerOrDrop(stack);
-                                stacks[hitResult.getSide().getId()] = panel;
-                                drawerFrameBlockEntity.stacks = stacks;
-                                drawerFrameBlockEntity.markDirty();
-                                return ActionResult.SUCCESS;
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -149,10 +152,15 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     }
 
     @Override
-    public void onBroken(WorldAccess world, BlockPos pos, BlockState state) {
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
-            ItemScatterer.spawn((World) world, pos, DefaultedList.copyOf(ItemStack.EMPTY, drawerFrameBlockEntity.stacks));
+    public List<ItemStack> getDroppedStacks(BlockState state, LootContextParameterSet.Builder builder) {
+        var list = super.getDroppedStacks(state, builder);
+
+        if (builder.getOptional(LootContextParameters.BLOCK_ENTITY) instanceof DrawerFrameBlockEntity blockEntity) {
+            ItemStack stack = new ItemStack(this.asItem());
+            BlockItem.setBlockEntityNbt(stack, blockEntity.getType(), blockEntity.createNbt());
+            list.add(stack);
         }
+
+        return list;
     }
 }
