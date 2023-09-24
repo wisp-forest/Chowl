@@ -1,7 +1,11 @@
 package com.chyzman.chowl.block;
 
 import com.chyzman.chowl.Chowl;
+import com.chyzman.chowl.item.DrawerPanelItem;
 import io.wispforest.owo.ops.WorldOps;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
@@ -13,9 +17,10 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
-public class DrawerFrameBlockEntity extends BlockEntity {
+public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageBlockEntity {
 
     public ItemStack[] stacks = DefaultedList.ofSize(6, ItemStack.EMPTY).toArray(new ItemStack[6]);
 
@@ -32,6 +37,16 @@ public class DrawerFrameBlockEntity extends BlockEntity {
     @Override
     public Packet<ClientPlayPacketListener> toUpdatePacket() {
         return BlockEntityUpdateS2CPacket.create(this);
+    }
+
+    @Override
+    public @Nullable Storage<ItemVariant> getItemStorage(Direction side) {
+        var stack = stacks[side.getId()];
+
+        if (stack.isEmpty()) return null;
+        if (!(stack.getItem() instanceof DrawerPanelItem panel)) return null;
+
+        return panel.getStorage(stack);
     }
 
     @Override
