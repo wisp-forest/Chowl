@@ -1,9 +1,5 @@
 package com.chyzman.chowl.block;
 
-import com.chyzman.chowl.mixin.client.DrawContextAccessor;
-import io.wispforest.owo.ui.core.OwoUIDrawContext;
-import io.wispforest.owo.ui.util.NinePatchTexture;
-import io.wispforest.owo.ui.util.OwoNinePatchRenderers;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -54,16 +50,17 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
         matrices.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(90));
         matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
 
-        matrices.translate(-button.minX() + 0.5, button.minY() - 0.5, 0);
+        matrices.translate(-0.5, 0.5, 0);
         matrices.scale(button.maxX() - button.minX(), button.maxY() - button.minY(), 1);
+        matrices.translate(0.5, -0.5, 0);
 //        matrices.scale(-1, -1, -1);
 
 //        var drawCtx = OwoUIDrawContext.of(new DrawContext(client, client.getBufferBuilders().getEntityVertexConsumers()));
 //        ((DrawContextAccessor) drawCtx).setMatrices(matrices);
 //        drawCtx.drawPanel(0, 0, 1, 1, false);
 
-        var bone = Items.BONE.getDefaultStack();
-        client.getItemRenderer().renderItem(bone, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, client.getItemRenderer().getModels().getModel(bone));
+        var stack = Items.BARRIER.getDefaultStack();
+        client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, client.getItemRenderer().getModels().getModel(stack));
 
         matrices.pop();
     }

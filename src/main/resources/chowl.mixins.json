@@ -6,6 +6,7 @@
     "mixins": [],
     "client": [
         "client.DrawContextAccessor",
+        ,
         "client.MinecraftClientMixin"
     ],
     "injectors": {
