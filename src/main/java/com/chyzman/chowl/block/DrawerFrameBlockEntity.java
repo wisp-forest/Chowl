@@ -39,6 +39,7 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
         return BlockEntityUpdateS2CPacket.create(this);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public @Nullable Storage<ItemVariant> getItemStorage(Direction side) {
         var stack = stacks[side.getId()];
@@ -46,7 +47,7 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
         if (stack.isEmpty()) return null;
         if (!(stack.getItem() instanceof DrawerPanelItem panel)) return null;
 
-        return panel.getStorage(stack);
+        return panel.getStorage(stack, this);
     }
 
     @Override

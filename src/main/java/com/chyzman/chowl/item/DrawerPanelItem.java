@@ -1,18 +1,15 @@
 package com.chyzman.chowl.item;
 
+import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import io.wispforest.owo.nbt.NbtKey;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
-import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.ActionResult;
 
 import java.math.BigInteger;
-import java.util.Iterator;
 
+@SuppressWarnings("UnstableApiUsage")
 public class DrawerPanelItem extends Item {
     public static final NbtKey<DrawerComponent> COMPONENT = new NbtKey<>("DrawerComponent", DrawerComponent.KEY_TYPE);
 
@@ -47,7 +44,8 @@ public class DrawerPanelItem extends Item {
         return component.itemVariant;
     }
 
-    public Storage<ItemVariant> getStorage(ItemStack stack) {
-        return new DrawerPanelStorage(stack);
+    @SuppressWarnings("UnstableApiUsage")
+    public Storage<ItemVariant> getStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity) {
+        return new DrawerPanelStorage(stack, blockEntity);
     }
 }
