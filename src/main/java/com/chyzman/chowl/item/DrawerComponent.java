@@ -49,6 +49,13 @@ public class DrawerComponent {
         return temp;
     }
 
+    public boolean setVariant(ItemVariant itemVariant) {
+        var returned = this.itemVariant.equals(itemVariant);
+        this.itemVariant = itemVariant;
+        return returned;
+
+    }
+
     public void readNbt(NbtCompound nbt) {
         this.itemVariant = ItemVariant.fromNbt(nbt.getCompound("Variant"));
         this.count = !nbt.getString("Count").isBlank() ? new BigInteger(nbt.getString("Count")) : BigInteger.ZERO;

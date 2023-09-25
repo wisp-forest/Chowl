@@ -1,5 +1,6 @@
 package com.chyzman.chowl.block;
 
+import com.chyzman.chowl.item.DrawerPanelItem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -72,11 +73,14 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                 matrices.push();
                 matrices.translate(0.5, 0.5, 0.5);
                 matrices.multiply(Direction.byId(i).getRotationQuaternion());
-                matrices.translate(0, 0.5, 0);
+                matrices.translate(0, 0.5 - 1/32f, 0);
                 matrices.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(90));
                 matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
-                var light_level = world != null ? WorldRenderer.getLightmapCoordinates(world, entity.getPos().offset(Direction.byId(i))) : LightmapTextureManager.MAX_LIGHT_COORDINATE;
-                client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light_level, overlay, client.getItemRenderer().getModels().getModel(stack));
+//                var light_level = world != null ? WorldRenderer.getLightmapCoordinates(world, entity.getPos().offset(Direction.byId(i))) : LightmapTextureManager.MAX_LIGHT_COORDINATE;
+                if (!(stack.getItem() instanceof DrawerPanelItem)) {
+                    matrices.scale(0.875f, 0.875f, 0.875f);
+                }
+                client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));
                 matrices.pop();
             }
         }

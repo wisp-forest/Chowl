@@ -37,6 +37,16 @@ public class DrawerPanelItem extends Item {
         return returned;
     }
 
+    public BigInteger getCount(ItemStack stack) {
+        var component = stack.get(COMPONENT);
+        return component.count;
+    }
+
+    public ItemVariant getVariant(ItemStack stack) {
+        var component = stack.get(COMPONENT);
+        return component.itemVariant;
+    }
+
     public Storage<ItemVariant> getStorage(ItemStack stack) {
         return new DrawerPanelStorage(stack);
     }

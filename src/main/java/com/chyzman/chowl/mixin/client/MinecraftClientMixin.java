@@ -1,13 +1,18 @@
 package com.chyzman.chowl.mixin.client;
 
 import com.chyzman.chowl.Chowl;
+import com.chyzman.chowl.block.DrawerFrameBlock;
+import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.classes.AttackInteractionReceiver;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -17,6 +22,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Environment(EnvType.CLIENT)
@@ -55,5 +61,14 @@ public abstract class MinecraftClientMixin {
 
         options.attackKey.setPressed(false);
         cir.setReturnValue(true);
+    }
+
+    @Inject(method = "addBlockEntityNbt", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/item/BlockItem;setBlockEntityNbt(Lnet/minecraft/item/ItemStack;Lnet/minecraft/block/entity/BlockEntityType;Lnet/minecraft/nbt/NbtCompound;)V",
+    shift = At.Shift.AFTER), cancellable = true)
+    private void removeTheNbtLore(ItemStack stack, BlockEntity blockEntity, CallbackInfo ci) {
+        if (blockEntity instanceof DrawerFrameBlockEntity) {
+            ci.cancel();
+        }
     }
 }
