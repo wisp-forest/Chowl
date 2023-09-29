@@ -1,10 +1,13 @@
 package com.chyzman.chowl.item;
 
+import com.chyzman.chowl.block.DrawerFrameBlockEntity;
+import com.chyzman.chowl.client.RenderGlobals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.model.BakedModelManagerHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -42,33 +45,40 @@ public class MirrorPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
                 matrices.translate(0, 0, -1 / 16f);
                 client.getItemRenderer().renderItem(filterVariant.toStack(), ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(filterVariant.toStack()));
                 matrices.pop();
+
+                matrices.push();
+                matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
+                matrices.translate(0, 0.25, -1 / 31f);
+                matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
+                MutableText title = (MutableText) filterVariant.toStack().getName();
+                var titleWidth = client.textRenderer.getWidth(title);
+                if (titleWidth > maxwidth) {
+                    matrices.scale(maxwidth / titleWidth, maxwidth / titleWidth, maxwidth / titleWidth);
+                }
+                client.textRenderer.draw(title, -titleWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
+                matrices.pop();
             }
-//            if (drawerComponent.count.compareTo(BigInteger.ZERO) > 0 && !drawerComponent.hideCount) {
-//                matrices.push();
-//                matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
-//                matrices.translate(0, -3/8f, -1 / 31f);
-//                matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
-//                var amount = drawerComponent.count.toString();
-//                var amountWidth = client.textRenderer.getWidth(amount);
-//                if (amountWidth > maxwidth) {
-//                    matrices.scale(maxwidth / amountWidth, maxwidth / amountWidth, maxwidth / amountWidth);
-//                }
-//                client.textRenderer.draw(drawerComponent.styleText(amount), -amountWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
-//                matrices.pop();
-//            }
-//            if (drawerComponent.itemVariant != ItemVariant.blank() && !drawerComponent.hideName) {
-//                matrices.push();
-//                matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
-//                matrices.translate(0, 0.25, -1 / 31f);
-//                matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
-//                MutableText title = (MutableText) drawerComponent.itemVariant.toStack().getName();
-//                var titleWidth = client.textRenderer.getWidth(title);
-//                if (titleWidth > maxwidth) {
-//                    matrices.scale(maxwidth / titleWidth, maxwidth / titleWidth, maxwidth / titleWidth);
-//                }
-//                client.textRenderer.draw(drawerComponent.styleText(title), -titleWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
-//                matrices.pop();
-//            }
+
+            DrawerFrameBlockEntity drawerFrame = RenderGlobals.DRAWER_FRAME.get();
+            if (drawerFrame == null) return;
+
+            var storage = ((MirrorPanelItem) stack.getItem()).getStorage(stack, drawerFrame, RenderGlobals.FRAME_SIDE.get());
+
+            if (!(storage instanceof SingleSlotStorage<ItemVariant> singleSlot)) return;
+
+            if (singleSlot.getAmount() > 0) {
+                matrices.push();
+                matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
+                matrices.translate(0, -3/8f, -1 / 31f);
+                matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
+                var amount = Long.toString(singleSlot.getAmount());
+                var amountWidth = client.textRenderer.getWidth(amount);
+                if (amountWidth > maxwidth) {
+                    matrices.scale(maxwidth / amountWidth, maxwidth / amountWidth, maxwidth / amountWidth);
+                }
+                client.textRenderer.draw(amount, -amountWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
+                matrices.pop();
+            }
         }
     }
 }

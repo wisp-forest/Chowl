@@ -1,6 +1,6 @@
 package com.chyzman.chowl.commands;
 
-import com.chyzman.chowl.graph.CrudeGraphState;
+import com.chyzman.chowl.graph.ServerGraphStore;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.server.command.ServerCommandSource;
@@ -25,7 +25,7 @@ public final class GraphCommand {
 
     private static int dump(CommandContext<ServerCommandSource> ctx) {
         StringBuilder sb = new StringBuilder();
-        CrudeGraphState state = CrudeGraphState.getFor(ctx.getSource().getWorld());
+        ServerGraphStore state = ServerGraphStore.get(ctx.getSource().getWorld());
 
         sb.append("Dumping all graph data");
         for (var entry : state.graphs().values()) {
@@ -44,7 +44,7 @@ public final class GraphCommand {
     }
 
     private static int clear(CommandContext<ServerCommandSource> ctx) {
-        CrudeGraphState state = CrudeGraphState.getFor(ctx.getSource().getWorld());
+        ServerGraphStore state = ServerGraphStore.get(ctx.getSource().getWorld());
 
         state.clear();
 

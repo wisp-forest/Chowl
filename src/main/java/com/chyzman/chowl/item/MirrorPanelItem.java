@@ -1,7 +1,8 @@
 package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
-import com.chyzman.chowl.graph.CrudeGraphState;
+import com.chyzman.chowl.graph.GraphStore;
+import com.chyzman.chowl.graph.ServerGraphStore;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.CombinedSingleSlotStorage;
 import com.chyzman.chowl.transfer.TransferState;
@@ -18,11 +19,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 @SuppressWarnings("UnstableApiUsage")
 public class MirrorPanelItem extends Item implements PanelItem {
@@ -73,11 +74,11 @@ public class MirrorPanelItem extends Item implements PanelItem {
             var filter = stack.get(FILTER);
 
             if (!filter.isBlank()) {
-                if (world.isClient) return ActionResult.SUCCESS;
 
                 var storage = panel.getStorage(stack, drawerFrame, side);
 
                 if (storage == null) return ActionResult.FAIL;
+                if (world.isClient) return ActionResult.SUCCESS;
 
                 try (var tx = Transaction.openOuter()) {
                     var extracted = storage.extract(filter, player.isSneaking() ? filter.toStack().getMaxCount() : 1, tx);
@@ -102,13 +103,15 @@ public class MirrorPanelItem extends Item implements PanelItem {
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public @Nullable SlottedStorage<ItemVariant> getStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
+        World w = blockEntity.getWorld();
+
         if (TransferState.TRAVERSING.get()) return null;
-        if (!(blockEntity.getWorld() instanceof ServerWorld sw)) return null;
+        if (w == null) return null;
 
         ItemVariant filter = stack.get(FILTER);
         if (filter.isBlank()) return null;
 
-        CrudeGraphState state = CrudeGraphState.getFor(sw);
+        GraphStore state = GraphStore.get(w);
         var graph = state.getGraphFor(blockEntity.getPos());
 
         if (graph == null) return null;
@@ -117,10 +120,10 @@ public class MirrorPanelItem extends Item implements PanelItem {
             TransferState.TRAVERSING.set(true);
 
             List<SlottedStorage<ItemVariant>> storages = new ArrayList<>();
-            for (var node : graph.nodes.values()) {
+            for (var node : graph.nodes()) {
                 if (!node.state().isOf(ChowlRegistry.DRAWER_FRAME_BLOCK)) continue;
 
-                var otherBE = sw.getBlockEntity(node.pos());
+                var otherBE = w.getBlockEntity(node.pos());
                 if (!(otherBE instanceof DrawerFrameBlockEntity otherFrame)) continue;
 
                 otherFrame.collectPanelStorages(storages);

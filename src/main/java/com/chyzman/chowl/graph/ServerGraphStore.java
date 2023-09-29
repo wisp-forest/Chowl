@@ -1,17 +1,23 @@
 package com.chyzman.chowl.graph;
 
+import com.chyzman.chowl.Chowl;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.PersistentState;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,16 +25,16 @@ import java.util.*;
 
 // I tried to look at how Kneelawk's graph library, and died inside from how complex it is.
 // - Basique
-public class CrudeGraphState extends PersistentState {
+public class ServerGraphStore extends PersistentState implements GraphStore {
     private final ServerWorld world;
     private final Map<UUID, GraphEntry> graphs = new HashMap<>();
     private final Long2ObjectMap<UUID> blockToGraph = new Long2ObjectOpenHashMap<>();
 
-    private CrudeGraphState(ServerWorld world) {
+    private ServerGraphStore(ServerWorld world) {
         this.world = world;
     }
 
-    private CrudeGraphState(ServerWorld world, NbtCompound tag) {
+    private ServerGraphStore(ServerWorld world, NbtCompound tag) {
         this(world);
 
         NbtList graphsTag = tag.getList("Graphs", NbtElement.COMPOUND_TYPE);
@@ -40,16 +46,22 @@ public class CrudeGraphState extends PersistentState {
         }
     }
 
-    public static CrudeGraphState getFor(ServerWorld world) {
+    public static ServerGraphStore get(ServerWorld world) {
         return world.getPersistentStateManager().getOrCreate(
-            tag -> new CrudeGraphState(world, tag),
-            () -> new CrudeGraphState(world),
+            tag -> new ServerGraphStore(world, tag),
+            () -> new ServerGraphStore(world),
             "chowl_graph"
         );
     }
 
     public Map<UUID, GraphEntry> graphs() {
         return graphs;
+    }
+
+    public void syncAllWith(ServerPlayerEntity player) {
+        for (var graph : graphs.values()) {
+            Chowl.CHANNEL.serverHandle(player).send(graph.toPacket());
+        }
     }
 
     public void clear() {
@@ -71,6 +83,7 @@ public class CrudeGraphState extends PersistentState {
 
         if (graph.nodes.size() == 0) {
             graphs.remove(graphId);
+            graph.syncRemove();
         }
     }
 
@@ -118,7 +131,7 @@ public class CrudeGraphState extends PersistentState {
         return tag;
     }
 
-    public class GraphEntry {
+    public class GraphEntry implements GraphStore.Graph {
         public final UUID graphId;
         public final Long2ObjectOpenHashMap<GraphNodeEntry> nodes;
 
@@ -137,7 +150,7 @@ public class CrudeGraphState extends PersistentState {
                 NbtCompound nodeTag = nodesTag.getCompound(i);
                 var node = GraphNodeEntry.read(nodeTag);
 
-                CrudeGraphState.this.blockToGraph.put(node.pos.asLong(), this.graphId);
+                ServerGraphStore.this.blockToGraph.put(node.pos.asLong(), this.graphId);
 
                 this.nodes.put(node.pos.asLong(), node);
             }
@@ -156,23 +169,59 @@ public class CrudeGraphState extends PersistentState {
             return tag;
         }
 
+        public Set<ServerPlayerEntity> trackingPlayers() {
+            Set<ChunkPos> chunkTargets = new HashSet<>();
+
+            for (var node : nodes.values()) {
+                chunkTargets.add(new ChunkPos(node.pos()));
+            }
+
+            Set<ServerPlayerEntity> targetPlayers = new HashSet<>();
+
+            for (var chunkPos : chunkTargets) {
+                targetPlayers.addAll(PlayerLookup.tracking(ServerGraphStore.this.world, chunkPos));
+            }
+
+            return targetPlayers;
+        }
+
+        public void sync() {
+            Chowl.CHANNEL.serverHandle(trackingPlayers()).send(toPacket());
+        }
+
+        public void syncRemove() {
+            Chowl.CHANNEL.serverHandle(trackingPlayers()).send(new DestroyGraphPacket(graphId));
+        }
+
+        public SyncGraphPacket toPacket() {
+            var networkNodes = new ArrayList<SyncGraphPacket.Node>();
+
+            for (var node : nodes.values()) {
+                networkNodes.add(new SyncGraphPacket.Node(node.pos(), node.state(), node.links().toLongArray()));
+            }
+
+            return new SyncGraphPacket(graphId, networkNodes);
+        }
+
         public GraphNodeEntry insert(BlockPos pos, BlockState state, Set<BlockPos> links) {
             GraphNodeEntry entry = new GraphNodeEntry(pos, state, new LongOpenHashSet());
 
             nodes.put(entry.pos.asLong(), entry);
-            CrudeGraphState.this.blockToGraph.put(pos.asLong(), graphId);
+            ServerGraphStore.this.blockToGraph.put(pos.asLong(), graphId);
 
             for (var linkPos : links) {
                 entry.links.add(linkPos.asLong());
 
-                var linkGraphId = CrudeGraphState.this.blockToGraph.get(linkPos.asLong());
+                var linkGraphId = ServerGraphStore.this.blockToGraph.get(linkPos.asLong());
                 if (linkGraphId != null && linkGraphId != graphId) {
-                    mergeIn(CrudeGraphState.this.graphs.get(linkGraphId));
+                    mergeIn(ServerGraphStore.this.graphs.get(linkGraphId));
                 }
 
                 var other = nodes.get(linkPos.asLong());
                 if (other != null) other.links.add(pos.asLong());
             }
+
+            sync();
 
             return entry;
         }
@@ -180,15 +229,16 @@ public class CrudeGraphState extends PersistentState {
         public void mergeIn(GraphEntry other) {
             for (var node : other.nodes.values()) {
                 this.nodes.put(node.pos.asLong(), node);
-                CrudeGraphState.this.blockToGraph.put(node.pos.asLong(), this.graphId);
+                ServerGraphStore.this.blockToGraph.put(node.pos.asLong(), this.graphId);
             }
 
-            CrudeGraphState.this.graphs.values().remove(other);
+            ServerGraphStore.this.graphs.values().remove(other);
+            other.syncRemove();
         }
 
         public void removeAndSplitBy(GraphNodeEntry node) {
             nodes.remove(node.pos.asLong());
-            CrudeGraphState.this.blockToGraph.remove(node.pos.asLong());
+            ServerGraphStore.this.blockToGraph.remove(node.pos.asLong());
             for (var other : nodes.values()) {
                 other.links().remove(node.pos().asLong());
             }
@@ -201,15 +251,20 @@ public class CrudeGraphState extends PersistentState {
 
                 var graph = new GraphEntry(UUID.randomUUID(), graphEntries);
                 for (var subEntry : graphEntries.values()) {
-                    CrudeGraphState.this.blockToGraph.put(subEntry.pos.asLong(), graph.graphId);
+                    ServerGraphStore.this.blockToGraph.put(subEntry.pos.asLong(), graph.graphId);
                 }
-                CrudeGraphState.this.graphs.put(graph.graphId, graph);
+                graph.sync();
+                ServerGraphStore.this.graphs.put(graph.graphId, graph);
             }
         }
 
+        @Override
+        public Collection<GraphNodeEntry> nodes() {
+            return nodes.values();
+        }
     }
 
-    public record GraphNodeEntry(BlockPos pos, BlockState state, LongSet links) {
+    public record GraphNodeEntry(BlockPos pos, BlockState state, LongSet links) implements GraphStore.GraphNode {
 
         public static GraphNodeEntry read(NbtCompound tag) {
             BlockPos pos = BlockPos.fromLong(tag.getLong("Pos"));

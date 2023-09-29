@@ -1,8 +1,7 @@
 package com.chyzman.chowl.block;
 
 import com.chyzman.chowl.classes.AttackInteractionReceiver;
-import com.chyzman.chowl.graph.CrudeGraphState;
-import com.chyzman.chowl.item.DrawerPanelItem;
+import com.chyzman.chowl.graph.ServerGraphStore;
 import com.chyzman.chowl.item.PanelItem;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -117,14 +116,14 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     @Override
     public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
         if (oldState.getBlock() != this && world instanceof ServerWorld sw) {
-            CrudeGraphState.getFor(sw).tryAdd(pos, state, findLinks(world, pos));
+            ServerGraphStore.get(sw).tryAdd(pos, state, findLinks(world, pos));
         }
     }
 
     @Override
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (newState.getBlock() != this && world instanceof ServerWorld sw) {
-            CrudeGraphState.getFor(sw).tryRemove(pos);
+            ServerGraphStore.get(sw).tryRemove(pos);
         }
     }
 

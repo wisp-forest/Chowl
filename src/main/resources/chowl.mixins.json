@@ -3,7 +3,9 @@
     "minVersion": "0.8",
     "package": "com.chyzman.chowl.mixin",
     "compatibilityLevel": "JAVA_17",
-    "mixins": [],
+    "mixins": [
+        "ServerWorldMixin"
+    ],
     "client": [
         "client.DrawContextAccessor",
         "client.MinecraftClientMixin"
