@@ -8,10 +8,14 @@ import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.LightmapTextureManager;
+import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.nbt.NbtCompound;
@@ -46,30 +50,100 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 
     public static final VoxelShape BASE = VoxelShapes.union(
-            Block.createCuboidShape(0, 0, 0, 16, 1, 1),
-            Block.createCuboidShape(0, 0, 15, 16, 1, 16),
-            Block.createCuboidShape(0, 15, 15, 16, 16, 16),
-            Block.createCuboidShape(0, 15, 0, 16, 16, 1),
-            Block.createCuboidShape(0, 15, 1, 1, 16, 15),
-            Block.createCuboidShape(0, 0, 1, 1, 1, 15),
-            Block.createCuboidShape(15, 0, 1, 16, 1, 15),
-            Block.createCuboidShape(15, 15, 1, 16, 16, 15),
-            Block.createCuboidShape(15, 1, 0, 16, 15, 1),
-            Block.createCuboidShape(0, 1, 0, 1, 15, 1),
-            Block.createCuboidShape(0, 1, 15, 1, 15, 16),
-            Block.createCuboidShape(15, 1, 15, 16, 15, 16)
+            Block.createCuboidShape(0, 0, 0, 16, 2, 2),
+            Block.createCuboidShape(0, 0, 14, 16, 2, 16),
+            Block.createCuboidShape(0, 14, 14, 16, 16, 16),
+            Block.createCuboidShape(0, 14, 0, 16, 16, 2),
+            Block.createCuboidShape(0, 14, 2, 2, 16, 14),
+            Block.createCuboidShape(0, 0, 2, 2, 2, 14),
+            Block.createCuboidShape(14, 0, 2, 16, 2, 14),
+            Block.createCuboidShape(14, 14, 2, 16, 16, 14),
+            Block.createCuboidShape(14, 2, 0, 16, 14, 2),
+            Block.createCuboidShape(0, 2, 0, 2, 14, 2),
+            Block.createCuboidShape(0, 2, 14, 2, 14, 16),
+            Block.createCuboidShape(14, 2, 14, 16, 14, 16)
     );
 
     public static final VoxelShape[] SIDES = {
-            Block.createCuboidShape(1, 0, 1, 15, 1, 15),
-            Block.createCuboidShape(1, 15, 1, 15, 16, 15),
-            Block.createCuboidShape(1, 1, 0, 15, 15, 1),
-            Block.createCuboidShape(1, 1, 15, 15, 15, 16),
-            Block.createCuboidShape(0, 1, 1, 1, 15, 15),
-            Block.createCuboidShape(15, 1, 1, 16, 15, 15),
+            Block.createCuboidShape(2, 0, 2, 14, 1, 14),
+            Block.createCuboidShape(2, 14, 2, 14, 16, 14),
+            Block.createCuboidShape(2, 2, 0, 14, 14, 1),
+            Block.createCuboidShape(2, 2, 14, 14, 14, 16),
+            Block.createCuboidShape(0, 2, 2, 1, 14, 14),
+            Block.createCuboidShape(14, 2, 2, 16, 14, 14),
     };
 
-    public static final BlockButtonProvider.Button REMOVE_BUTTON = new Button(0.8f, 0.8f, 1, 1, true);
+    public static final BlockButtonProvider.Button DRAWER_BUTTON = new Button(1 / 8f, 1 / 8f, 7 / 8f, 7 / 8f,
+            (state, world, pos, player, hand, hit) -> {
+                var side = getSide(hit);
+                var blockEntity = world.getBlockEntity(pos);
+                if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
+                    var stacks = drawerFrameBlockEntity.stacks;
+                    var stackInHand = player.getStackInHand(hand);
+                    if (!stackInHand.isEmpty()) {
+                        if (stacks[side.getId()].isEmpty()) {
+                            var temp = stackInHand.copy();
+                            temp.setCount(1);
+                            stacks[side.getId()] = temp;
+                            stackInHand.decrement(1);
+                            drawerFrameBlockEntity.markDirty();
+                            return ActionResult.SUCCESS;
+                        } else {
+                            var stack = stacks[side.getId()];
+                            if (stack.getItem() instanceof DrawerPanelItem panel) {
+                                if (!world.isClient) {
+                                    panel.insert(stack, stackInHand);
+                                    blockEntity.markDirty();
+                                }
+                                return ActionResult.SUCCESS;
+                            }
+                        }
+                    }
+                }
+                return ActionResult.PASS;
+            },
+            (world, state, hitResult, player) -> {
+                var side = getSide(hitResult);
+                var blockEntity = world.getBlockEntity(hitResult.getBlockPos());
+                if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
+                    var stacks = drawerFrameBlockEntity.stacks;
+                    var selected = stacks[side.getId()];
+                    if (!selected.isEmpty()) {
+                        if (selected.getItem() instanceof DrawerPanelItem panel && !panel.getVariant(selected).isBlank()) {
+                            var extracted = panel.extract(selected, player.isSneaking());
+                            if (!extracted.isEmpty()) {
+                                player.getInventory().offerOrDrop(extracted);
+                                blockEntity.markDirty();
+                                return ActionResult.SUCCESS;
+                            }
+                        } else {
+                            player.getInventory().offerOrDrop(selected);
+                            stacks[side.getId()] = ItemStack.EMPTY;
+                            drawerFrameBlockEntity.markDirty();
+                            return ActionResult.SUCCESS;
+                        }
+                    }
+                }
+                return ActionResult.PASS;
+            },
+            null);
+    public static final BlockButtonProvider.Button REMOVE_BUTTON = new Button(7 / 8f, 7 / 8f, 1, 1, null,
+            (world, state, hitResult, player) -> {
+                if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
+                    return ActionResult.PASS;
+
+                var selected = blockEntity.stacks[hitResult.getSide().getId()];
+
+                player.getInventory().offerOrDrop(selected);
+                blockEntity.stacks[hitResult.getSide().getId()] = ItemStack.EMPTY;
+                blockEntity.markDirty();
+
+                return ActionResult.SUCCESS;
+            },
+            (client, entity, vertexConsumers, matrices) -> {
+                var stack = Items.BARRIER.getDefaultStack();
+                client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, client.getItemRenderer().getModels().getModel(stack));
+            });
 
     public DrawerFrameBlock(Settings settings) {
         super(settings);
@@ -125,6 +199,8 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        var res = BlockButtonProvider.super.onUse(state, world, pos, player, hand, hit);
+        if (res != ActionResult.PASS) return res;
         var side = getSide(hit);
         var blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
@@ -138,15 +214,6 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                     stackInHand.decrement(1);
                     drawerFrameBlockEntity.markDirty();
                     return ActionResult.SUCCESS;
-                } else {
-                    var stack = stacks[side.getId()];
-                    if (stack.getItem() instanceof DrawerPanelItem panel) {
-                        if (!world.isClient) {
-                            panel.insert(stack, stackInHand);
-                            blockEntity.markDirty();
-                        }
-                        return ActionResult.SUCCESS;
-                    }
                 }
             }
         }
@@ -154,7 +221,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     }
 
     @Override
-    public List<Button> listButtons(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player) {
+    public List<Button> listButtons(World world, BlockState state, BlockHitResult hitResult) {
         if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
             return List.of();
 
@@ -162,22 +229,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
         if (selected.isEmpty()) return List.of();
 
-        return List.of(REMOVE_BUTTON);
-    }
-
-    @Override
-    public ActionResult attackButton(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player, Button button) {
-        if (button != REMOVE_BUTTON) return ActionResult.PASS;
-        if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
-            return ActionResult.PASS;
-
-        var selected = blockEntity.stacks[hitResult.getSide().getId()];
-
-        player.getInventory().offerOrDrop(selected);
-        blockEntity.stacks[hitResult.getSide().getId()] = ItemStack.EMPTY;
-        blockEntity.markDirty();
-
-        return ActionResult.SUCCESS;
+        return List.of(REMOVE_BUTTON, DRAWER_BUTTON);
     }
 
     @Override
@@ -189,20 +241,8 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
             var stacks = drawerFrameBlockEntity.stacks;
             var selected = stacks[side.getId()];
-            if (!selected.isEmpty()) {
-                if (selected.getItem() instanceof DrawerPanelItem panel && !panel.getVariant(selected).isBlank()) {
-                    var extracted = panel.extract(selected, player.isSneaking());
-                    if (!extracted.isEmpty()) {
-                        player.getInventory().offerOrDrop(extracted);
-                        if (panel.getCount(selected).compareTo(BigInteger.ZERO) <= 0) {
-                            var component = selected.get(DrawerPanelItem.COMPONENT);
-                            component.setVariant(ItemVariant.blank());
-                            selected.put(DrawerPanelItem.COMPONENT, component);
-                        }
-                        blockEntity.markDirty();
-                        return ActionResult.SUCCESS;
-                    }
-                } else {
+            if (selected.isEmpty()) {
+                if (!(selected.getItem() instanceof DrawerPanelItem panel) || panel.getVariant(selected).isBlank()) {
                     player.getInventory().offerOrDrop(selected);
                     stacks[side.getId()] = ItemStack.EMPTY;
                     drawerFrameBlockEntity.markDirty();
@@ -221,7 +261,6 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             BlockItem.setBlockEntityNbt(stack, blockEntity.getType(), blockEntity.createNbt());
             list.add(stack);
         }
-
         return list;
     }
 

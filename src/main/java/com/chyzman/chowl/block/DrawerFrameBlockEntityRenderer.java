@@ -40,7 +40,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
         if (!hitResult.getBlockPos().equals(entity.getPos())) return;
         if (!(entity.getCachedState().getBlock() instanceof BlockButtonProvider buttonProvider)) return;
 
-        var button = buttonProvider.findButton(entity.getWorld(), entity.getCachedState(), hitResult, client.player);
+        var button = buttonProvider.findButton(entity.getWorld(), entity.getCachedState(), hitResult);
 
         if (button == null) return;
 
@@ -51,7 +51,8 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
         matrices.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(90));
         matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
 
-        matrices.translate(-0.5, 0.5, 0);
+        matrices.translate(0.5, -0.5, 0);
+        matrices.translate(-button.maxX(), button.maxY(), 0);
         matrices.scale(button.maxX() - button.minX(), button.maxY() - button.minY(), 1);
         matrices.translate(0.5, -0.5, 0);
 //        matrices.scale(-1, -1, -1);
@@ -60,8 +61,9 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
 //        ((DrawContextAccessor) drawCtx).setMatrices(matrices);
 //        drawCtx.drawPanel(0, 0, 1, 1, false);
 
-        var stack = Items.BARRIER.getDefaultStack();
-        client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, client.getItemRenderer().getModels().getModel(stack));
+        if (button.render() != null) {
+            button.render().consume(client, entity, vertexConsumers, matrices);
+        }
 
         matrices.pop();
     }
@@ -73,12 +75,11 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                 matrices.push();
                 matrices.translate(0.5, 0.5, 0.5);
                 matrices.multiply(Direction.byId(i).getRotationQuaternion());
-                matrices.translate(0, 0.5 - 1/32f, 0);
+                matrices.translate(0, 0.5 - 1 / 32f, 0);
                 matrices.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(90));
                 matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
-//                var light_level = world != null ? WorldRenderer.getLightmapCoordinates(world, entity.getPos().offset(Direction.byId(i))) : LightmapTextureManager.MAX_LIGHT_COORDINATE;
                 if (!(stack.getItem() instanceof DrawerPanelItem)) {
-                    matrices.scale(0.875f, 0.875f, 0.875f);
+                    matrices.scale(3 / 4f, 3 / 4f, 1f);
                 }
                 client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));
                 matrices.pop();

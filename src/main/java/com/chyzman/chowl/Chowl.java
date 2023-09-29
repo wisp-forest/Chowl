@@ -4,6 +4,7 @@ import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.registry.ServerBoundPackets;
 import com.chyzman.chowl.registry.ServerEventListeners;
+import com.chyzman.chowl.registry.client.ClientEventListeners;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.network.OwoNetChannel;

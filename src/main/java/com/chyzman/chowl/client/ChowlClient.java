@@ -4,6 +4,7 @@ import com.chyzman.chowl.block.DrawerFrameBlockEntityRenderer;
 import com.chyzman.chowl.item.DrawerFrameItemRenderer;
 import com.chyzman.chowl.item.DrawerPanelItemRenderer;
 import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.registry.client.ClientEventListeners;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
@@ -17,6 +18,7 @@ import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 public class ChowlClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        ClientEventListeners.init();
         BlockEntityRendererRegistry.register(DRAWER_FRAME_BLOCK_ENTITY_TYPE, DrawerFrameBlockEntityRenderer::new);
         BlockRenderLayerMap.INSTANCE.putBlock(ChowlRegistry.DRAWER_FRAME_BLOCK, RenderLayer.getCutout());
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.DRAWER_FRAME_ITEM, new DrawerFrameItemRenderer());
