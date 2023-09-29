@@ -2,6 +2,7 @@ package com.chyzman.chowl.block;
 
 import com.chyzman.chowl.Chowl;
 import com.chyzman.chowl.item.DrawerPanelItem;
+import com.chyzman.chowl.item.PanelItem;
 import io.wispforest.owo.ops.WorldOps;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
@@ -9,6 +10,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.SlabBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -45,17 +47,24 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     }
 
     @SuppressWarnings("UnstableApiUsage")
+    public void collectPanelStorages(List<SlottedStorage<ItemVariant>> storages) {
+        for (int sideId = 0; sideId < 6; sideId++) {
+            var stack = stacks[sideId];
+
+            if (!(stack.getItem() instanceof PanelItem panelItem)) continue;
+
+            var storage = panelItem.getStorage(stack, this, Direction.byId(sideId));
+
+            if (storage != null) storages.add(storage);
+        }
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public @Nullable Storage<ItemVariant> getItemStorage(Direction fromSide) {
         List<SlottedStorage<ItemVariant>> storages = new ArrayList<>();
 
-        for (int sideId = 0; sideId < 6; sideId++) {
-            var stack = stacks[sideId];
-
-            if (!(stack.getItem() instanceof DrawerPanelItem panelItem)) continue;
-
-            storages.add(panelItem.getStorage(stack, this, Direction.byId(sideId)));
-        }
+        collectPanelStorages(storages);
 
         return new CombinedSlottedStorage<>(storages);
     }

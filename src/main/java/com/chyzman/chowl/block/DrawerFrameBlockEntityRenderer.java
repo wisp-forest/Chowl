@@ -1,6 +1,7 @@
 package com.chyzman.chowl.block;
 
 import com.chyzman.chowl.item.DrawerPanelItem;
+import com.chyzman.chowl.item.PanelItem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -78,7 +79,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                 matrices.translate(0, 0.5 - 1 / 32f, 0);
                 matrices.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(90));
                 matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
-                if (!(stack.getItem() instanceof DrawerPanelItem)) {
+                if (!(stack.getItem() instanceof PanelItem)) {
                     matrices.scale(3 / 4f, 3 / 4f, 1f);
                 }
                 client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));

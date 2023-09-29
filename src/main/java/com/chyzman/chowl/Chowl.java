@@ -19,8 +19,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 
-import static com.chyzman.chowl.registry.ChowlRegistry.DRAWER_FRAME_ITEM;
-import static com.chyzman.chowl.registry.ChowlRegistry.DRAWER_PANEL_ITEM;
+import static com.chyzman.chowl.registry.ChowlRegistry.*;
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
 public class Chowl implements ModInitializer {
@@ -41,6 +40,7 @@ public class Chowl implements ModInitializer {
                 group.addCustomTab(Icon.of(DRAWER_FRAME_ITEM), "general", (context, entries) -> {
                     entries.add(new ItemStack(DRAWER_FRAME_ITEM));
                     entries.add(new ItemStack(DRAWER_PANEL_ITEM));
+                    entries.add(new ItemStack(ACCESS_PANEL_ITEM));
                 }, true);
             })
             .build();

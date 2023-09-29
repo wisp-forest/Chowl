@@ -12,7 +12,7 @@ import net.minecraft.util.math.Direction;
 import java.math.BigInteger;
 
 @SuppressWarnings("UnstableApiUsage")
-public class DrawerPanelItem extends Item {
+public class DrawerPanelItem extends Item implements PanelItem {
     public static final NbtKey<DrawerComponent> COMPONENT = new NbtKey<>("DrawerComponent", DrawerComponent.KEY_TYPE);
 
     public DrawerPanelItem(Settings settings) {

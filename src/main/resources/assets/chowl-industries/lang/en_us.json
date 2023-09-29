@@ -1,5 +1,6 @@
 {
   "itemGroup.chowl-industries.group": "Chowl Industries",
   "block.chowl-industries.drawer_frame": "Drawer Frame",
-  "item.chowl-industries.drawer_panel": "Drawer Panel"
+  "item.chowl-industries.drawer_panel": "Drawer Panel",
+  "item.chowl-industries.access_panel": "Access Panel"
 }

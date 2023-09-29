@@ -13,6 +13,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.PersistentState;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -91,6 +92,13 @@ public class CrudeGraphState extends PersistentState {
 
         GraphEntry graph = graphs.get(graphId);
         graph.insert(pos, state, links);
+    }
+
+    public @Nullable GraphEntry getGraphFor(BlockPos pos) {
+        var graphId = blockToGraph.get(pos.asLong());
+        if (graphId == null) return null;
+
+        return graphs.get(graphId);
     }
 
     @Override
