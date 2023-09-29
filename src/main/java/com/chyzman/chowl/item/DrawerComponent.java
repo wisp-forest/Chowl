@@ -63,10 +63,14 @@ public class DrawerComponent {
         this.count = this.count.subtract(BigInteger.valueOf(actualCount));
         var temp = itemVariant.toStack();
         temp.setCount(actualCount);
+        updateVariant();
+        return temp;
+    }
+
+    public void updateVariant() {
         if (this.count.compareTo(BigInteger.ZERO) <= 0 && !locked) {
             setVariant(ItemVariant.blank());
         }
-        return temp;
     }
 
     public boolean setVariant(ItemVariant itemVariant) {

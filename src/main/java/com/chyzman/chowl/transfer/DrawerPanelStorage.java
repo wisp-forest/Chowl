@@ -64,6 +64,7 @@ public class DrawerPanelStorage extends SnapshotParticipant<ItemStack> implement
             removed = maxAmount;
         }
         component.count = component.count.subtract(BigInteger.valueOf(removed));
+        component.updateVariant();
 
         updateSnapshots(transaction);
         stack.put(DrawerPanelItem.COMPONENT, component);
