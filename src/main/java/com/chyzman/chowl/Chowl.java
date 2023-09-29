@@ -41,6 +41,7 @@ public class Chowl implements ModInitializer {
                     entries.add(new ItemStack(DRAWER_FRAME_ITEM));
                     entries.add(new ItemStack(DRAWER_PANEL_ITEM));
                     entries.add(new ItemStack(ACCESS_PANEL_ITEM));
+                    entries.add(new ItemStack(MIRROR_PANEL_ITEM));
                 }, true);
             })
             .build();

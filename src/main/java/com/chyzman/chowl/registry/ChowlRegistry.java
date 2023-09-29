@@ -3,6 +3,7 @@ package com.chyzman.chowl.registry;
 import com.chyzman.chowl.block.DrawerFrameBlock;
 import com.chyzman.chowl.item.AccessPanelItem;
 import com.chyzman.chowl.item.DrawerPanelItem;
+import com.chyzman.chowl.item.MirrorPanelItem;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -25,6 +26,8 @@ public class ChowlRegistry {
     public static final Item DRAWER_PANEL_ITEM = registerItem("drawer_panel", new DrawerPanelItem(new Item.Settings().maxCount(1)));
 
     public static final Item ACCESS_PANEL_ITEM = registerItem("access_panel", new AccessPanelItem(new Item.Settings().maxCount(1)));
+
+    public static final Item MIRROR_PANEL_ITEM = registerItem("mirror_panel", new MirrorPanelItem(new Item.Settings().maxCount(1)));
 
     public static final Block DRAWER_FRAME_BLOCK = registerBlock("drawer_frame",
             new DrawerFrameBlock(

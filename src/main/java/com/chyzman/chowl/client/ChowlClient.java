@@ -3,6 +3,7 @@ package com.chyzman.chowl.client;
 import com.chyzman.chowl.block.DrawerFrameBlockEntityRenderer;
 import com.chyzman.chowl.item.DrawerFrameItemRenderer;
 import com.chyzman.chowl.item.DrawerPanelItemRenderer;
+import com.chyzman.chowl.item.MirrorPanelItemRenderer;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.registry.client.ClientEventListeners;
 import net.fabricmc.api.ClientModInitializer;
@@ -23,6 +24,10 @@ public class ChowlClient implements ClientModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlock(ChowlRegistry.DRAWER_FRAME_BLOCK, RenderLayer.getCutout());
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.DRAWER_FRAME_ITEM, new DrawerFrameItemRenderer());
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.DRAWER_PANEL_ITEM, new DrawerPanelItemRenderer());
-        ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> out.accept(id("item/drawer_panel_base")));
+        BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.MIRROR_PANEL_ITEM, new MirrorPanelItemRenderer());
+        ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> {
+            out.accept(id("item/drawer_panel_base"));
+            out.accept(id("item/mirror_panel_base"));
+        });
     }
 }

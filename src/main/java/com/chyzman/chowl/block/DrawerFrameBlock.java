@@ -2,13 +2,10 @@ package com.chyzman.chowl.block;
 
 import com.chyzman.chowl.classes.AttackInteractionReceiver;
 import com.chyzman.chowl.graph.CrudeGraphState;
-import com.chyzman.chowl.item.DrawerComponent;
 import com.chyzman.chowl.item.DrawerPanelItem;
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import com.chyzman.chowl.item.PanelItem;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.ShulkerBoxBlockEntity;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
@@ -19,16 +16,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
-import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -37,12 +30,9 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 
-import java.math.BigInteger;
 import java.util.*;
 
 public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver {
@@ -73,60 +63,34 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             Block.createCuboidShape(14, 2, 2, 16, 14, 14),
     };
 
-    public static final BlockButtonProvider.Button DRAWER_BUTTON = new Button(1 / 8f, 1 / 8f, 7 / 8f, 7 / 8f,
-            (state, world, pos, player, hand, hit) -> {
-                var side = getSide(hit);
-                var blockEntity = world.getBlockEntity(pos);
-                if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
-                    var stacks = drawerFrameBlockEntity.stacks;
-                    var stackInHand = player.getStackInHand(hand);
-                    if (!stackInHand.isEmpty()) {
-                        if (stacks[side.getId()].isEmpty()) {
-                            var temp = stackInHand.copy();
-                            temp.setCount(1);
-                            stacks[side.getId()] = temp;
-                            stackInHand.decrement(1);
-                            drawerFrameBlockEntity.markDirty();
-                            return ActionResult.SUCCESS;
-                        } else {
-                            var stack = stacks[side.getId()];
-                            if (stack.getItem() instanceof DrawerPanelItem panel) {
-                                if (!world.isClient) {
-                                    panel.insert(stack, stackInHand);
-                                    blockEntity.markDirty();
-                                }
-                                return ActionResult.SUCCESS;
-                            }
-                        }
-                    }
-                }
-                return ActionResult.PASS;
-            },
-            (world, state, hitResult, player) -> {
-                var side = getSide(hitResult);
-                var blockEntity = world.getBlockEntity(hitResult.getBlockPos());
-                if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
-                    var stacks = drawerFrameBlockEntity.stacks;
-                    var selected = stacks[side.getId()];
-                    if (!selected.isEmpty()) {
-                        if (selected.getItem() instanceof DrawerPanelItem panel && !panel.getVariant(selected).isBlank()) {
-                            var extracted = panel.extract(selected, player.isSneaking());
-                            if (!extracted.isEmpty()) {
-                                player.getInventory().offerOrDrop(extracted);
-                                blockEntity.markDirty();
-                                return ActionResult.SUCCESS;
-                            }
-                        } else {
-                            player.getInventory().offerOrDrop(selected);
-                            stacks[side.getId()] = ItemStack.EMPTY;
-                            drawerFrameBlockEntity.markDirty();
-                            return ActionResult.SUCCESS;
-                        }
-                    }
-                }
-                return ActionResult.PASS;
-            },
-            null);
+    public static final PanelItem.Button DEFAULT_PANEL_BUTTON = new PanelItem.Button(
+        1 / 8f, 1 / 8f, 7 / 8f, 7 / 8f,
+        (world, drawerFrame, side, stack, player, hand) -> {
+            var stacks = drawerFrame.stacks;
+            var stackInHand = player.getStackInHand(hand);
+
+            if (stackInHand.isEmpty()) return ActionResult.PASS;
+            if (!stack.isEmpty()) return ActionResult.PASS;
+
+            var temp = stackInHand.copy();
+            temp.setCount(1);
+            stacks[side.getId()] = temp;
+            stackInHand.decrement(1);
+            drawerFrame.markDirty();
+
+            return ActionResult.SUCCESS;
+        },
+        (world, drawerFrame, side, stack, player) -> {
+            var stacks = drawerFrame.stacks;
+
+            if (stack.isEmpty()) return ActionResult.PASS;
+
+            player.getInventory().offerOrDrop(stack);
+            stacks[side.getId()] = ItemStack.EMPTY;
+            drawerFrame.markDirty();
+            return ActionResult.SUCCESS;
+        },
+        null);
     public static final BlockButtonProvider.Button REMOVE_BUTTON = new Button(7 / 8f, 7 / 8f, 1, 1, null,
             (world, state, hitResult, player) -> {
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
@@ -258,28 +222,25 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
         if (selected.isEmpty()) return List.of();
 
-        return List.of(REMOVE_BUTTON, DRAWER_BUTTON);
+        List<Button> buttons = new ArrayList<>();
+        buttons.add(REMOVE_BUTTON);
+
+        if (selected.getItem() instanceof PanelItem panelItem) {
+            var panelButtons = panelItem.listButtons(blockEntity, hitResult.getSide(), blockEntity.stacks[hitResult.getSide().getId()]);
+
+            for (var panelButton : panelButtons) {
+                buttons.add(panelButton.toBlockButton());
+            }
+        } else {
+            buttons.add(DEFAULT_PANEL_BUTTON.toBlockButton());
+        }
+
+        return buttons;
     }
 
     @Override
     public @NotNull ActionResult onAttack(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player) {
-        var res = BlockButtonProvider.super.onAttack(world, state, hitResult, player);
-        if (res != ActionResult.PASS) return res;
-        var side = getSide(hitResult);
-        var blockEntity = world.getBlockEntity(hitResult.getBlockPos());
-        if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
-            var stacks = drawerFrameBlockEntity.stacks;
-            var selected = stacks[side.getId()];
-            if (!selected.isEmpty()) {
-                if (!(selected.getItem() instanceof DrawerPanelItem panel) || panel.getVariant(selected).isBlank()) {
-                    player.getInventory().offerOrDrop(selected);
-                    stacks[side.getId()] = ItemStack.EMPTY;
-                    drawerFrameBlockEntity.markDirty();
-                    return ActionResult.SUCCESS;
-                }
-            }
-        }
-        return ActionResult.PASS;
+        return BlockButtonProvider.super.onAttack(world, state, hitResult, player);
     }
 
     @Override

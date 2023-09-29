@@ -3,6 +3,7 @@ package com.chyzman.chowl.item;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.graph.CrudeGraphState;
 import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.transfer.TransferState;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
@@ -16,8 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AccessPanelItem extends Item implements PanelItem {
-    private static final ThreadLocal<Boolean> TRAVERSING = ThreadLocal.withInitial(() -> false);
-
     public AccessPanelItem(Settings settings) {
         super(settings);
     }
@@ -25,7 +24,7 @@ public class AccessPanelItem extends Item implements PanelItem {
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public @Nullable SlottedStorage<ItemVariant> getStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
-        if (TRAVERSING.get()) return null;
+        if (TransferState.TRAVERSING.get()) return null;
         if (!(blockEntity.getWorld() instanceof ServerWorld sw)) return null;
 
         CrudeGraphState state = CrudeGraphState.getFor(sw);
@@ -34,7 +33,7 @@ public class AccessPanelItem extends Item implements PanelItem {
         if (graph == null) return null;
 
         try {
-            TRAVERSING.set(true);
+            TransferState.TRAVERSING.set(true);
 
             List<SlottedStorage<ItemVariant>> storages = new ArrayList<>();
             for (var node : graph.nodes.values()) {
@@ -48,7 +47,7 @@ public class AccessPanelItem extends Item implements PanelItem {
 
             return new CombinedSlottedStorage<>(storages);
         } finally {
-            TRAVERSING.set(false);
+            TransferState.TRAVERSING.set(false);
         }
     }
 }

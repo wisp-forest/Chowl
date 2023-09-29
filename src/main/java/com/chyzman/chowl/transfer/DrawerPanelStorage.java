@@ -31,6 +31,7 @@ public class DrawerPanelStorage extends SnapshotParticipant<ItemStack> implement
     @Override
     protected void readSnapshot(ItemStack snapshot) {
         this.stack = snapshot;
+        blockEntity.stacks[side.getId()] = snapshot;
     }
 
     @Override
