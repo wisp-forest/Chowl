@@ -241,7 +241,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
             var stacks = drawerFrameBlockEntity.stacks;
             var selected = stacks[side.getId()];
-            if (selected.isEmpty()) {
+            if (!selected.isEmpty()) {
                 if (!(selected.getItem() instanceof DrawerPanelItem panel) || panel.getVariant(selected).isBlank()) {
                     player.getInventory().offerOrDrop(selected);
                     stacks[side.getId()] = ItemStack.EMPTY;
