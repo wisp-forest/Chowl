@@ -1,6 +1,7 @@
 package com.chyzman.chowl.block;
 
 import com.chyzman.chowl.classes.AttackInteractionReceiver;
+import com.chyzman.chowl.graph.CrudeGraphState;
 import com.chyzman.chowl.item.DrawerComponent;
 import com.chyzman.chowl.item.DrawerPanelItem;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -19,6 +20,7 @@ import net.minecraft.item.Items;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
@@ -41,9 +43,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver {
 
@@ -148,6 +148,35 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     public DrawerFrameBlock(Settings settings) {
         super(settings);
         this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, Boolean.FALSE));
+    }
+
+    @Override
+    public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
+        if (oldState.getBlock() != this && world instanceof ServerWorld sw) {
+            CrudeGraphState.getFor(sw).tryAdd(pos, state, findLinks(world, pos));
+        }
+    }
+
+    @Override
+    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+        if (newState.getBlock() != this && world instanceof ServerWorld sw) {
+            CrudeGraphState.getFor(sw).tryRemove(pos);
+        }
+    }
+
+    private Set<BlockPos> findLinks(World world, BlockPos pos) {
+        Set<BlockPos> links = new HashSet<>();
+
+        for (BlockPos possible : BlockPos.iterate(
+            pos.getX() - 1, pos.getY() - 1, pos.getZ() - 1,
+            pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1
+        )) {
+            if (pos.equals(possible) || world.getBlockState(possible).getBlock() != this) continue;
+
+            links.add(possible.toImmutable());
+        }
+
+        return links;
     }
 
     @Nullable

@@ -1,14 +1,17 @@
 package com.chyzman.chowl;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
+import com.chyzman.chowl.commands.GraphCommand;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.registry.ServerBoundPackets;
 import com.chyzman.chowl.registry.ServerEventListeners;
 import com.chyzman.chowl.registry.client.ClientEventListeners;
+import io.wispforest.owo.Owo;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.network.OwoNetChannel;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntityType;
@@ -47,6 +50,11 @@ public class Chowl implements ModInitializer {
         ChowlRegistry.init();
         ServerBoundPackets.init();
         ServerEventListeners.init();
+
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            if (Owo.DEBUG) GraphCommand.register(dispatcher);
+        });
+
         CHOWL_GROUP.initialize();
     }
 }
