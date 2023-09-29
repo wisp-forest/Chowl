@@ -1,11 +1,13 @@
 package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
+import com.chyzman.chowl.transfer.DrawerPanelStorage;
 import io.wispforest.owo.nbt.NbtKey;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.Direction;
 
 import java.math.BigInteger;
 
@@ -45,7 +47,7 @@ public class DrawerPanelItem extends Item {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    public Storage<ItemVariant> getStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity) {
-        return new DrawerPanelStorage(stack, blockEntity);
+    public SlottedStorage<ItemVariant> getStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
+        return new DrawerPanelStorage(stack, blockEntity, side);
     }
 }

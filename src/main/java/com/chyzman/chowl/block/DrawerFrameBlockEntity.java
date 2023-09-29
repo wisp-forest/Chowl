@@ -4,7 +4,9 @@ import com.chyzman.chowl.Chowl;
 import com.chyzman.chowl.item.DrawerPanelItem;
 import io.wispforest.owo.ops.WorldOps;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -19,6 +21,9 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageBlockEntity {
 
@@ -41,13 +46,18 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public @Nullable Storage<ItemVariant> getItemStorage(Direction side) {
-        var stack = stacks[side.getId()];
+    public @Nullable Storage<ItemVariant> getItemStorage(Direction fromSide) {
+        List<SlottedStorage<ItemVariant>> storages = new ArrayList<>();
 
-        if (stack.isEmpty()) return null;
-        if (!(stack.getItem() instanceof DrawerPanelItem panel)) return null;
+        for (int sideId = 0; sideId < 6; sideId++) {
+            var stack = stacks[sideId];
 
-        return panel.getStorage(stack, this);
+            if (!(stack.getItem() instanceof DrawerPanelItem panelItem)) continue;
+
+            storages.add(panelItem.getStorage(stack, this, Direction.byId(sideId)));
+        }
+
+        return new CombinedSlottedStorage<>(storages);
     }
 
     @Override

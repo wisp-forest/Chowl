@@ -1,25 +1,26 @@
-package com.chyzman.chowl.item;
+package com.chyzman.chowl.transfer;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
+import com.chyzman.chowl.item.DrawerPanelItem;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.Direction;
 
 import java.math.BigInteger;
-import java.util.Iterator;
-import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
-public class DrawerPanelStorage extends SnapshotParticipant<ItemStack> implements Storage<ItemVariant> {
+public class DrawerPanelStorage extends SnapshotParticipant<ItemStack> implements SingleSlotStorage<ItemVariant> {
     private ItemStack stack;
     private final DrawerFrameBlockEntity blockEntity;
+    private final Direction side;
 
-    public DrawerPanelStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity) {
+    public DrawerPanelStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
         this.stack = stack;
         this.blockEntity = blockEntity;
+        this.side = side;
     }
 
     @Override
@@ -76,32 +77,40 @@ public class DrawerPanelStorage extends SnapshotParticipant<ItemStack> implement
     }
 
     @Override
-    public Iterator<StorageView<ItemVariant>> iterator() {
-        return List.of(new StorageView<ItemVariant>() {
-            @Override
-            public long extract(ItemVariant resource, long maxAmount, TransactionContext transaction) {
-                return DrawerPanelStorage.this.extract(resource, maxAmount, transaction);
-            }
+    public boolean isResourceBlank() {
+        return stack.get(DrawerPanelItem.COMPONENT).itemVariant.isBlank();
+    }
 
-            @Override
-            public boolean isResourceBlank() {
-                return stack.get(DrawerPanelItem.COMPONENT).itemVariant.isBlank();
-            }
+    @Override
+    public ItemVariant getResource() {
+        return stack.get(DrawerPanelItem.COMPONENT).itemVariant;
+    }
 
-            @Override
-            public ItemVariant getResource() {
-                return stack.get(DrawerPanelItem.COMPONENT).itemVariant;
-            }
+    @Override
+    public long getAmount() {
+        return stack.get(DrawerPanelItem.COMPONENT).count.longValue();
+    }
 
-            @Override
-            public long getAmount() {
-                return stack.get(DrawerPanelItem.COMPONENT).count.longValue();
-            }
-
-            @Override
-            public long getCapacity() {
+    @Override
+    public long getCapacity() {
                 return Long.MAX_VALUE;
             }
-        }.getUnderlyingView()).iterator();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DrawerPanelStorage that = (DrawerPanelStorage) o;
+
+        if (!blockEntity.equals(that.blockEntity)) return false;
+        return side == that.side;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = blockEntity.hashCode();
+        result = 31 * result + side.hashCode();
+        return result;
     }
 }
