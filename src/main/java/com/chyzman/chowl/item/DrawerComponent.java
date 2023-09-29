@@ -54,7 +54,12 @@ public class DrawerComponent {
     }
 
     public ItemStack extract(int count) {
-        int actualCount = Math.min(count, this.count.intValue());
+        int actualCount;
+        try {
+            actualCount = Math.min(this.count.intValueExact(), count);
+        } catch (ArithmeticException e) {
+            actualCount = count;
+        }
         this.count = this.count.subtract(BigInteger.valueOf(actualCount));
         var temp = itemVariant.toStack();
         temp.setCount(actualCount);

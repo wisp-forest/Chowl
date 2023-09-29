@@ -56,7 +56,12 @@ public class DrawerPanelStorage extends SnapshotParticipant<ItemStack> implement
 
         if (!component.itemVariant.equals(resource)) return 0;
 
-        long removed = Math.min(maxAmount, component.count.longValue());
+        long removed;
+        try {
+            removed = Math.min(component.count.longValueExact(), maxAmount);
+        } catch (ArithmeticException e) {
+            removed = maxAmount;
+        }
         component.count = component.count.subtract(BigInteger.valueOf(removed));
 
         updateSnapshots(transaction);
