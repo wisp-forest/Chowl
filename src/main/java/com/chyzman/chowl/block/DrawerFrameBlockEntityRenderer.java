@@ -1,6 +1,5 @@
 package com.chyzman.chowl.block;
 
-import com.chyzman.chowl.client.RenderGlobals;
 import com.chyzman.chowl.item.DrawerPanelItem;
 import com.chyzman.chowl.item.PanelItem;
 import net.fabricmc.api.EnvType;
@@ -71,30 +70,23 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
     }
 
     public static void renderPanels(DrawerFrameBlockEntity entity, MinecraftClient client, World world, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        try {
-            RenderGlobals.DRAWER_FRAME.set(entity);
-
-            for (int i = 0; i < entity.stacks.length; i++) {
-                var stack = entity.stacks[i];
-                if (!stack.isEmpty()) {
-                    RenderGlobals.FRAME_SIDE.set(Direction.byId(i));
-
-                    matrices.push();
-                    matrices.translate(0.5, 0.5, 0.5);
-                    matrices.multiply(Direction.byId(i).getRotationQuaternion());
-                    matrices.translate(0, 0.5 - 1 / 32f, 0);
-                    matrices.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(90));
-                    matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
-                    if (!(stack.getItem() instanceof PanelItem)) {
-                        matrices.scale(3 / 4f, 3 / 4f, 1f);
-                    }
-                    client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));
-                    matrices.pop();
+        for (int i = 0; i < entity.stacks.length; i++) {
+            var stack = entity.stacks[i];
+            if (!stack.isEmpty()) {
+                matrices.push();
+                matrices.translate(0.5, 0.5, 0.5);
+                matrices.multiply(Direction.byId(i).getRotationQuaternion());
+                matrices.translate(0, 0.5 - 1 / 32f, 0);
+                matrices.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(90));
+                matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
+                if (!(stack.getItem() instanceof PanelItem)) {
+                    matrices.translate(0, 0,-1 / 32f);
+                    matrices.scale(3 / 4f, 3 / 4f, 3/4f);
+                    matrices.translate(0, 0,1 / 32f);
                 }
+                client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));
+                matrices.pop();
             }
-        } finally {
-            RenderGlobals.DRAWER_FRAME.remove();
-            RenderGlobals.FRAME_SIDE.remove();
         }
     }
 }

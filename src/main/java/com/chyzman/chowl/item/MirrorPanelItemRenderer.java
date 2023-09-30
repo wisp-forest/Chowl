@@ -48,7 +48,7 @@ public class MirrorPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
 
                 matrices.push();
                 matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
-                matrices.translate(0, 0.25, -1 / 31f);
+                matrices.translate(0, 3/16f, -1 / 31f);
                 matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
                 MutableText title = (MutableText) filterVariant.toStack().getName();
                 var titleWidth = client.textRenderer.getWidth(title);
