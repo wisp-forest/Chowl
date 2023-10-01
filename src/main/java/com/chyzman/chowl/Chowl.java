@@ -1,9 +1,8 @@
 package com.chyzman.chowl;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
-import com.chyzman.chowl.commands.GraphCommand;
+import com.chyzman.chowl.commands.DebugCommands;
 import com.chyzman.chowl.registry.ChowlRegistry;
-import com.chyzman.chowl.registry.client.ClientBoundPackets;
 import com.chyzman.chowl.registry.ServerBoundPackets;
 import com.chyzman.chowl.registry.ServerEventListeners;
 import com.chyzman.chowl.screen.PanelConfigSreenHandler;
@@ -57,7 +56,7 @@ public class Chowl implements ModInitializer {
         Registry.register(Registries.SCREEN_HANDLER, id("panel_config"), PanelConfigSreenHandler.TYPE);
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            if (Owo.DEBUG) GraphCommand.register(dispatcher);
+            if (Owo.DEBUG) DebugCommands.register(dispatcher, registryAccess);
         });
 
         CHOWL_GROUP.initialize();
