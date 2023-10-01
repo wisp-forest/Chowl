@@ -2,6 +2,7 @@ package com.chyzman.chowl.item;
 
 import com.google.gson.Gson;
 import io.wispforest.owo.nbt.NbtKey;
+import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -13,9 +14,10 @@ import net.minecraft.util.Formatting;
 import java.math.BigInteger;
 import java.time.format.TextStyle;
 
+import static net.minecraft.datafixer.fix.BlockEntitySignTextStrictJsonFix.GSON;
+
 @SuppressWarnings("UnstableApiUsage")
 public class DrawerComponent {
-    private static final Gson GSON = new Gson();
     public static final NbtKey.Type<DrawerComponent> KEY_TYPE = NbtKey.Type.COMPOUND.then(compound -> {
         var component = new DrawerComponent();
         component.readNbt(compound);
@@ -28,11 +30,7 @@ public class DrawerComponent {
 
     public ItemVariant itemVariant = ItemVariant.blank();
     public BigInteger count = BigInteger.ZERO;
-    public boolean locked = false;
-    public boolean hideCount = false;
-    public boolean hideName = false;
-    public boolean hideItem = false;
-    public Style textStyle = Style.EMPTY.withColor(Formatting.WHITE);
+    public DrawerConfig config = new DrawerConfig();
 
     public DrawerComponent() {
     }
@@ -69,7 +67,7 @@ public class DrawerComponent {
     }
 
     public void updateVariant() {
-        if (this.count.compareTo(BigInteger.ZERO) <= 0 && !locked) {
+        if (this.count.compareTo(BigInteger.ZERO) <= 0 && !config.locked) {
             setVariant(ItemVariant.blank());
         }
     }
@@ -83,29 +81,47 @@ public class DrawerComponent {
     public void readNbt(NbtCompound nbt) {
         this.itemVariant = ItemVariant.fromNbt(nbt.getCompound("Variant"));
         this.count = !nbt.getString("Count").isBlank() ? new BigInteger(nbt.getString("Count")) : BigInteger.ZERO;
-        this.locked = nbt.getBoolean("Locked");
-        this.hideCount = nbt.getBoolean("HideCount");
-        this.hideName = nbt.getBoolean("HideName");
-        this.hideItem = nbt.getBoolean("HideItem");
-        this.textStyle = GSON.fromJson(nbt.getString("TextStyle"), Style.class);
+        config.readNbt(nbt.getCompound("DrawerConfig"));
     }
 
     public void writeNbt(NbtCompound nbt) {
         nbt.put("Variant", itemVariant.toNbt());
         nbt.putString("Count", count.toString());
-        nbt.putBoolean("Locked", locked);
-        nbt.putBoolean("HideCount", hideCount);
-        nbt.putBoolean("HideName", hideName);
-        nbt.putBoolean("HideItem", hideItem);
-        nbt.putString("TextStyle", (textStyle == null ? Style.EMPTY : textStyle).toString());
+        NbtCompound drawerConfig = new NbtCompound();
+        config.writeNbt(drawerConfig);
+        nbt.put("DrawerConfig", drawerConfig);
     }
 
     public MutableText styleText(MutableText text) {
-        if (textStyle == null || textStyle.isEmpty()) return text;
-        return text.setStyle(textStyle);
+        if (config.textStyle == null || config.textStyle.isEmpty()) return text;
+        return text.setStyle(config.textStyle);
     }
 
     public MutableText styleText(String string) {
         return styleText(Text.literal(string));
+    }
+
+    public static class DrawerConfig {
+        public boolean locked = false;
+        public boolean hideCount = false;
+        public boolean hideName = false;
+        public boolean hideItem = false;
+        public Style textStyle = Style.EMPTY.withColor(Formatting.WHITE);
+
+        public void readNbt(NbtCompound nbt) {
+            this.locked = nbt.getBoolean("Locked");
+            this.hideCount = nbt.getBoolean("HideCount");
+            this.hideName = nbt.getBoolean("HideName");
+            this.hideItem = nbt.getBoolean("HideItem");
+            this.textStyle = GSON.fromJson(nbt.getString("TextStyle"), Style.class);
+        }
+
+        public void writeNbt(NbtCompound nbt) {
+            nbt.putBoolean("Locked", locked);
+            nbt.putBoolean("HideCount", hideCount);
+            nbt.putBoolean("HideName", hideName);
+            nbt.putBoolean("HideItem", hideItem);
+            nbt.putString("TextStyle", (textStyle == null ? Style.EMPTY : textStyle).toString());
+        }
     }
 }

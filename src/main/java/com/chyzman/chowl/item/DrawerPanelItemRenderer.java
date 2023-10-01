@@ -39,17 +39,17 @@ public class DrawerPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
             if (nbt != null && nbt.contains("DrawerComponent")) {
                 DrawerComponent drawerComponent = new DrawerComponent();
                 drawerComponent.readNbt(nbt.getCompound("DrawerComponent"));
-                if (!drawerComponent.itemVariant.isBlank() && !drawerComponent.hideItem) {
+                if (!drawerComponent.itemVariant.isBlank() && !drawerComponent.config.hideItem) {
                     matrices.push();
-                    matrices.scale(1 / 2f, 1 / 2f, 1 / 2f);
-                    matrices.translate(0, 0, -1 / 16f);
+                    matrices.scale(1 / 3f, 1 / 3f, 1 / 3f);
+                    matrices.translate(0, 0, -3 / 32f);
                     client.getItemRenderer().renderItem(drawerComponent.itemVariant.toStack(), ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(drawerComponent.itemVariant.toStack()));
                     matrices.pop();
                 }
-                if (drawerComponent.count.compareTo(BigInteger.ZERO) > 0 && !drawerComponent.hideCount) {
+                if (drawerComponent.count.compareTo(BigInteger.ZERO) > 0 && !drawerComponent.config.hideCount) {
                     matrices.push();
                     matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
-                    matrices.translate(0, -3/8f, -1 / 31f);
+                    matrices.translate(0, -3 / 8f, -1 / 31f);
                     matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
                     var amount = drawerComponent.count.toString();
                     var amountWidth = client.textRenderer.getWidth(amount);
@@ -59,16 +59,17 @@ public class DrawerPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
                     client.textRenderer.draw(drawerComponent.styleText(amount), -amountWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
                     matrices.pop();
                 }
-                if (drawerComponent.itemVariant != ItemVariant.blank() && !drawerComponent.hideName) {
+                if (drawerComponent.itemVariant != ItemVariant.blank() && !drawerComponent.config.hideName) {
                     matrices.push();
                     matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
-                    matrices.translate(0, 3/16f, -1 / 31f);
+                    matrices.translate(0, 3 / 8f, -1 / 31f);
                     matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
                     MutableText title = (MutableText) drawerComponent.itemVariant.toStack().getName();
                     var titleWidth = client.textRenderer.getWidth(title);
                     if (titleWidth > maxwidth) {
                         matrices.scale(maxwidth / titleWidth, maxwidth / titleWidth, maxwidth / titleWidth);
                     }
+                    matrices.translate(0, -client.textRenderer.fontHeight + 1f, 0);
                     client.textRenderer.draw(drawerComponent.styleText(title), -titleWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
                     matrices.pop();
                 }

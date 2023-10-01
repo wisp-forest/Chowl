@@ -47,7 +47,9 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
         var button = buttonProvider.findButton(entity.getWorld(), entity.getCachedState(), hitResult);
 
         if (button == null) {
-            WorldRenderer.drawCuboidShapeOutline(matrices, vertexConsumers.getBuffer(RenderLayer.getLines()), DrawerFrameBlock.BASE, 0, 0, 0, 0, 0, 0, 0.4f);
+            if (!client.player.isBlockBreakingRestricted(client.world, hitResult.getBlockPos(), client.interactionManager.getCurrentGameMode())) {
+                WorldRenderer.drawCuboidShapeOutline(matrices, vertexConsumers.getBuffer(RenderLayer.getLines()), DrawerFrameBlock.BASE, 0, 0, 0, 0, 0, 0, 0.4f);
+            }
             return;
         }
 
@@ -61,8 +63,10 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
         matrices.translate(0.5, -0.5, 0);
         matrices.translate(-button.maxX(), button.maxY(), 0);
         matrices.scale(button.maxX() - button.minX(), button.maxY() - button.minY(), 1);
-        var shape = Block.createCuboidShape(0, 0, 0, 16, 16, 1);
-        WorldRenderer.drawShapeOutline(matrices, vertexConsumers.getBuffer(RenderLayer.LINES), shape, 0, -1, 0, 0, 0, 0, 0.4f, false);
+        if (!client.player.isBlockBreakingRestricted(client.world, hitResult.getBlockPos(), client.interactionManager.getCurrentGameMode())) {
+            var shape = Block.createCuboidShape(0, 0, 0, 16, 16, 1);
+            WorldRenderer.drawShapeOutline(matrices, vertexConsumers.getBuffer(RenderLayer.LINES), shape, 0, -1, 0, 0, 0, 0, 0.4f, false);
+        }
         matrices.translate(0.5, -0.5, 0);
 
 //        matrices.scale(-1, -1, -1);

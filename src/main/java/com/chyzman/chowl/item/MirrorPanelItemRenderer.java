@@ -41,20 +41,21 @@ public class MirrorPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
 
             if (!filterVariant.isBlank()) {
                 matrices.push();
-                matrices.scale(1 / 2f, 1 / 2f, 1 / 2f);
-                matrices.translate(0, 0, -1 / 16f);
+                matrices.scale(1 / 3f, 1 / 3f, 1 / 3f);
+                matrices.translate(0, 0, -3 / 32f);
                 client.getItemRenderer().renderItem(filterVariant.toStack(), ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(filterVariant.toStack()));
                 matrices.pop();
 
                 matrices.push();
                 matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
-                matrices.translate(0, 3/16f, -1 / 31f);
+                matrices.translate(0, 3 / 8f, -1 / 31f);
                 matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
                 MutableText title = (MutableText) filterVariant.toStack().getName();
                 var titleWidth = client.textRenderer.getWidth(title);
                 if (titleWidth > maxwidth) {
                     matrices.scale(maxwidth / titleWidth, maxwidth / titleWidth, maxwidth / titleWidth);
                 }
+                matrices.translate(0, -client.textRenderer.fontHeight + 1f, 0);
                 client.textRenderer.draw(title, -titleWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
                 matrices.pop();
             }

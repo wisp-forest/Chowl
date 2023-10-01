@@ -6,6 +6,8 @@ import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.registry.client.ClientBoundPackets;
 import com.chyzman.chowl.registry.ServerBoundPackets;
 import com.chyzman.chowl.registry.ServerEventListeners;
+import com.chyzman.chowl.screen.PanelConfigSreenHandler;
+import com.google.gson.Gson;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
@@ -24,6 +26,7 @@ import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
 public class Chowl implements ModInitializer {
     public static final String MODID = "chowl-industries";
+    private static final Gson GSON = new Gson();
 
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(id(FabricLoader.getInstance()
         .getModContainer("chowl-industries")
@@ -51,6 +54,7 @@ public class Chowl implements ModInitializer {
         ChowlRegistry.init();
         ServerBoundPackets.init();
         ServerEventListeners.init();
+        Registry.register(Registries.SCREEN_HANDLER, id("panel_config"), PanelConfigSreenHandler.TYPE);
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             if (Owo.DEBUG) GraphCommand.register(dispatcher);

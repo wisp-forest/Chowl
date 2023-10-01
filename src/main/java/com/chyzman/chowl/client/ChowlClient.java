@@ -8,11 +8,14 @@ import com.chyzman.chowl.item.MirrorPanelItemRenderer;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.registry.client.ClientBoundPackets;
 import com.chyzman.chowl.registry.client.ClientEventListeners;
+import com.chyzman.chowl.screen.PanelConfigScreen;
+import com.chyzman.chowl.screen.PanelConfigSreenHandler;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
+import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 
@@ -34,5 +37,7 @@ public class ChowlClient implements ClientModInitializer {
             out.accept(id("item/drawer_panel_base"));
             out.accept(id("item/mirror_panel_base"));
         });
+        HandledScreens.register(PanelConfigSreenHandler.TYPE, PanelConfigScreen::new);
+
     }
 }

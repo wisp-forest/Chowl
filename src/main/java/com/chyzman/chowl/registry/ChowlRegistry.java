@@ -2,6 +2,7 @@ package com.chyzman.chowl.registry;
 
 import com.chyzman.chowl.block.DrawerFrameBlock;
 import com.chyzman.chowl.item.AccessPanelItem;
+import com.chyzman.chowl.item.DrawerFrameBlockItem;
 import com.chyzman.chowl.item.DrawerPanelItem;
 import com.chyzman.chowl.item.MirrorPanelItem;
 import net.minecraft.block.AbstractBlock;
@@ -39,7 +40,7 @@ public class ChowlRegistry {
                             .blockVision(Blocks::never)
             )
     );
-    public static final Item DRAWER_FRAME_ITEM = registerItem("drawer_frame", new BlockItem(DRAWER_FRAME_BLOCK, new Item.Settings()));
+    public static final Item DRAWER_FRAME_ITEM = registerItem("drawer_frame", new DrawerFrameBlockItem(DRAWER_FRAME_BLOCK, new Item.Settings()));
 
     public static void init() {
     }

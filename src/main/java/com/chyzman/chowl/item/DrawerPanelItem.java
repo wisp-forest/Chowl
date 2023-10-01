@@ -3,21 +3,41 @@ package com.chyzman.chowl.item;
 import com.chyzman.chowl.block.BlockButtonProvider;
 import com.chyzman.chowl.block.DrawerFrameBlock;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
+import com.chyzman.chowl.network.C2SConfigPanel;
+import com.chyzman.chowl.screen.PanelConfigScreen;
+import com.chyzman.chowl.screen.PanelConfigSreenHandler;
 import com.chyzman.chowl.transfer.DrawerPanelStorage;
 import io.wispforest.owo.nbt.NbtKey;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.minecraft.block.Block;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.Inventories;
+import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.math.BigInteger;
 import java.util.List;
+
+import static com.chyzman.chowl.Chowl.CHANNEL;
 
 @SuppressWarnings("UnstableApiUsage")
 public class DrawerPanelItem extends Item implements PanelItem {
@@ -101,5 +121,49 @@ public class DrawerPanelItem extends Item implements PanelItem {
     @Override
     public List<Button> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
         return List.of(DRAWER_BUTTON);
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        if (!world.isClient) {
+            if (user.isSneaking()) {
+                var stack = user.getStackInHand(hand);
+                var factory = new ExtendedScreenHandlerFactory() {
+                    @Override
+                    public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+                        return new PanelConfigSreenHandler(syncId, playerInventory, stack);
+                    }
+
+                    @Override
+                    public Text getDisplayName() {
+                        return Text.translatable("container.chowl.panel_config.title");
+                    }
+
+                    @Override
+                    public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
+                        buf.writeItemStack(user.getStackInHand(hand));
+                    }
+                };
+                user.openHandledScreen(factory);
+            }
+        }
+        return super.use(world, user, hand);
+    }
+
+    public static SimpleInventory createTrackedInventory(ItemStack stack) {
+        var inventory = new SimpleInventory(1);
+        var component = stack.get(COMPONENT);
+        inventory.setStack(0, component.itemVariant.toStack(1));
+
+        inventory.addListener(sender -> storeInventory(stack, inventory));
+        return inventory;
+    }
+
+    public static void storeInventory(ItemStack stack, SimpleInventory inventory) {
+        var component = stack.get(COMPONENT);
+        if (!component.config.locked || component.count.compareTo(BigInteger.ZERO) <= 0) {
+            component.setVariant(ItemVariant.of(inventory.getStack(0)));
+            stack.put(COMPONENT, component);
+        }
     }
 }
