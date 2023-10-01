@@ -47,57 +47,6 @@ public class MirrorPanelItem extends Item implements PanelItem {
         null,
         null);
 
-    public static final PanelItem.Button DRAWER_BUTTON = new PanelItem.Button(1 / 8f, 1 / 8f, 7 / 8f, 7 / 8f,
-        (world, drawerFrame, side, stack, player, hand) -> {
-            var stackInHand = player.getStackInHand(hand);
-            if (stackInHand.isEmpty()) return ActionResult.PASS;
-
-            MirrorPanelItem panel = (MirrorPanelItem) stack.getItem();
-
-            if (!world.isClient) {
-                var storage = panel.getStorage(stack, drawerFrame, side);
-
-                try (var tx = Transaction.openOuter()) {
-                    var from = PlayerInventoryStorage.of(player).getHandSlot(hand);
-                    StorageUtil.move(from, storage, variant -> true, stackInHand.getCount(), tx);
-                    tx.commit();
-                }
-
-                drawerFrame.markDirty();
-            }
-
-            return ActionResult.SUCCESS;
-
-        },
-        (world, drawerFrame, side, stack, player) -> {
-            var stacks = drawerFrame.stacks;
-            MirrorPanelItem panel = (MirrorPanelItem) stack.getItem();
-            var filter = stack.get(FILTER);
-
-            if (!filter.isBlank()) {
-
-                var storage = panel.getStorage(stack, drawerFrame, side);
-
-                if (storage == null) return ActionResult.FAIL;
-                if (world.isClient) return ActionResult.SUCCESS;
-
-                try (var tx = Transaction.openOuter()) {
-                    var extracted = storage.extract(filter, player.isSneaking() ? filter.toStack().getMaxCount() : 1, tx);
-                    PlayerInventoryStorage.of(player).offerOrDrop(filter, extracted, tx);
-                    tx.commit();
-
-                    return ActionResult.SUCCESS;
-                }
-            }
-
-            player.getInventory().offerOrDrop(stack);
-            stacks[side.getId()] = ItemStack.EMPTY;
-            drawerFrame.markDirty();
-            return ActionResult.SUCCESS;
-        },
-        null,
-        null);
-
     public MirrorPanelItem(Settings settings) {
         super(settings);
     }
@@ -151,7 +100,7 @@ public class MirrorPanelItem extends Item implements PanelItem {
         if (stack.get(FILTER).isBlank()) {
             return List.of(SET_FILTER_BUTTON);
         } else {
-            return List.of(DRAWER_BUTTON);
+            return List.of(STORAGE_BUTTON);
         }
     }
 }

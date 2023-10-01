@@ -14,6 +14,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class AccessPanelItem extends Item implements PanelItem {
@@ -51,5 +52,15 @@ public class AccessPanelItem extends Item implements PanelItem {
         } finally {
             TransferState.TRAVERSING.set(false);
         }
+    }
+
+    @Override
+    public List<Button> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
+        return Collections.singletonList(STORAGE_BUTTON);
+    }
+
+    @Override
+    public boolean canExtractFromButton() {
+        return false;
     }
 }

@@ -3,6 +3,7 @@ package com.chyzman.chowl.item;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.screen.PanelConfigSreenHandler;
 import com.chyzman.chowl.transfer.DrawerPanelStorage;
+import com.chyzman.chowl.transfer.TransferState;
 import io.wispforest.owo.nbt.NbtKey;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -24,6 +25,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -31,65 +33,6 @@ import java.util.List;
 @SuppressWarnings("UnstableApiUsage")
 public class DrawerPanelItem extends Item implements PanelItem {
     public static final NbtKey<DrawerComponent> COMPONENT = new NbtKey<>("DrawerComponent", DrawerComponent.KEY_TYPE);
-    public static final PanelItem.Button DRAWER_BUTTON = new PanelItem.Button(1 / 8f, 1 / 8f, 7 / 8f, 7 / 8f,
-            (world, drawerFrame, side, stack, player, hand) -> {
-                var stackInHand = player.getStackInHand(hand);
-                if (stackInHand.isEmpty()) return ActionResult.PASS;
-
-                DrawerPanelItem panel = (DrawerPanelItem) stack.getItem();
-
-                if (!world.isClient) {
-                    panel.insert(stack, stackInHand);
-                    drawerFrame.markDirty();
-                }
-
-                return ActionResult.SUCCESS;
-            },
-            (world, drawerFrame, side, stack, player) -> {
-                var stacks = drawerFrame.stacks;
-                if (!stack.isEmpty()) {
-                    DrawerPanelItem panel = (DrawerPanelItem) stack.getItem();
-
-                    if (!panel.getVariant(stack).isBlank()) {
-                        if (world.isClient && panel.getCount(stack).signum() > 0) {
-                            return ActionResult.SUCCESS;
-                        }
-
-                        var extracted = panel.extract(stack, player.isSneaking());
-                        if (!extracted.isEmpty()) {
-                            player.getInventory().offerOrDrop(extracted);
-                            drawerFrame.markDirty();
-                            return ActionResult.SUCCESS;
-                        }
-                    } else {
-                        if (world.isClient) return ActionResult.SUCCESS;
-
-                        player.getInventory().offerOrDrop(stack);
-                        stacks[side.getId()] = ItemStack.EMPTY;
-                        drawerFrame.markDirty();
-                        return ActionResult.SUCCESS;
-                    }
-                }
-
-                return ActionResult.PASS;
-            },
-            (world, frame, side, stack, player) -> {
-                var panel = (DrawerPanelItem) stack.getItem();
-                var storage = panel.getStorage(stack, frame, side);
-
-                if (storage == null) return ActionResult.FAIL;
-                if (world.isClient) return ActionResult.SUCCESS;
-
-                try (var tx = Transaction.openOuter()) {
-                    ItemVariant stored = panel.getVariant(stack);
-                    StorageUtil.move(PlayerInventoryStorage.of(player), storage, variant -> variant.equals(stored), Long.MAX_VALUE, tx);
-
-                    tx.commit();
-
-                    return ActionResult.SUCCESS;
-                }
-            },
-            null);
 
     public DrawerPanelItem(Settings settings) {
         super(settings);
@@ -123,13 +66,15 @@ public class DrawerPanelItem extends Item implements PanelItem {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    public SlottedStorage<ItemVariant> getStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
+    public @Nullable SlottedStorage<ItemVariant> getStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
+        if (TransferState.NO_BLANK_DRAWERS.get() && getVariant(stack).isBlank()) return null;
+
         return new DrawerPanelStorage(stack, blockEntity, side);
     }
 
     @Override
     public List<Button> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
-        return List.of(DRAWER_BUTTON);
+        return List.of(STORAGE_BUTTON);
     }
 
     @Override
