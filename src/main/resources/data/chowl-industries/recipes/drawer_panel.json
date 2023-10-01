@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " w ",
+    "wcw",
+    " w "
+  ],
+  "key": {
+    "w": {
+      "tag": "minecraft:planks"
+    },
+    "c": {
+      "item": "minecraft:chest"
+    }
+  },
+  "result": {
+    "item": "chowl-industries:drawer_panel"
+  }
+}

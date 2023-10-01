@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " w ",
+    "whw",
+    " w "
+  ],
+  "key": {
+    "w": {
+      "tag": "minecraft:planks"
+    },
+    "h": {
+      "item": "minecraft:hopper"
+    }
+  },
+  "result": {
+    "item": "chowl-industries:access_panel"
+  }
+}
