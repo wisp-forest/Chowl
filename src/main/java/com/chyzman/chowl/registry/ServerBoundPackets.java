@@ -1,5 +1,6 @@
 package com.chyzman.chowl.registry;
 
+import com.chyzman.chowl.block.DoubleClickableBlock;
 import com.chyzman.chowl.classes.AttackInteractionReceiver;
 import com.chyzman.chowl.graph.DestroyGraphPacket;
 import com.chyzman.chowl.graph.SyncGraphPacket;
@@ -48,6 +49,16 @@ public class ServerBoundPackets {
             if (!(state.getBlock() instanceof AttackInteractionReceiver receiver)) return;
 
             receiver.onAttack(world, state, message.hitResult(), player);
+            player.swingHand(Hand.MAIN_HAND);
+        });
+        CHANNEL.registerServerbound(DoubleClickableBlock.DoubleClickPacket.class, (message, access) -> {
+            var player = access.player();
+            var world = player.getWorld();
+
+            var state = world.getBlockState(message.hitResult().getBlockPos());
+            if (!(state.getBlock() instanceof DoubleClickableBlock receiver)) return;
+
+            receiver.onDoubleClick(world, state, message.hitResult(), player);
             player.swingHand(Hand.MAIN_HAND);
         });
 

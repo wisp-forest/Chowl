@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public interface BlockButtonProvider extends AttackInteractionReceiver {
+public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleClickableBlock {
     List<Button> listButtons(World world, BlockState state, BlockHitResult hitResult);
 
     default @Nullable Button findButton(World world, BlockState state, BlockHitResult hitResult) {
@@ -57,8 +57,17 @@ public interface BlockButtonProvider extends AttackInteractionReceiver {
         return button.attack.apply(world, state, hitResult, player);
     }
 
+    @Override
+    default @NotNull ActionResult onDoubleClick(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player) {
+        Button button = findButton(world, state, hitResult);
+
+        if (button == null) return ActionResult.PASS;
+        if (button.attack == null) return ActionResult.PASS;
+        return button.doubleClick.apply(world, state, hitResult, player);
+    }
+
     record Button(
-            float minX, float minY, float maxX, float maxY, UseFunction use, AttackFunction attack, RenderConsumer render) {
+            float minX, float minY, float maxX, float maxY, UseFunction use, AttackFunction attack, DoubleClickFunction doubleClick, RenderConsumer render) {
         public boolean isIn(float x, float y) {
             return minX <= x && x <= maxX && minY <= y && y <= maxY;
         }
@@ -71,6 +80,11 @@ public interface BlockButtonProvider extends AttackInteractionReceiver {
 
     @FunctionalInterface
     public interface AttackFunction {
+        ActionResult apply(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player);
+    }
+
+    @FunctionalInterface
+    public interface DoubleClickFunction {
         ActionResult apply(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player);
     }
 

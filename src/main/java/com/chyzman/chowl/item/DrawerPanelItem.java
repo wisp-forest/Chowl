@@ -1,30 +1,22 @@
 package com.chyzman.chowl.item;
 
-import com.chyzman.chowl.block.BlockButtonProvider;
-import com.chyzman.chowl.block.DrawerFrameBlock;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
-import com.chyzman.chowl.network.C2SConfigPanel;
-import com.chyzman.chowl.screen.PanelConfigScreen;
 import com.chyzman.chowl.screen.PanelConfigSreenHandler;
 import com.chyzman.chowl.transfer.DrawerPanelStorage;
 import io.wispforest.owo.nbt.NbtKey;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
-import net.minecraft.block.Block;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.WorldRenderer;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -32,12 +24,9 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
 import java.math.BigInteger;
 import java.util.List;
-
-import static com.chyzman.chowl.Chowl.CHANNEL;
 
 @SuppressWarnings("UnstableApiUsage")
 public class DrawerPanelItem extends Item implements PanelItem {
@@ -55,7 +44,6 @@ public class DrawerPanelItem extends Item implements PanelItem {
                 }
 
                 return ActionResult.SUCCESS;
-
             },
             (world, drawerFrame, side, stack, player) -> {
                 var stacks = drawerFrame.stacks;
@@ -63,6 +51,10 @@ public class DrawerPanelItem extends Item implements PanelItem {
                     DrawerPanelItem panel = (DrawerPanelItem) stack.getItem();
 
                     if (!panel.getVariant(stack).isBlank()) {
+                        if (world.isClient && panel.getCount(stack).signum() > 0) {
+                            return ActionResult.SUCCESS;
+                        }
+
                         var extracted = panel.extract(stack, player.isSneaking());
                         if (!extracted.isEmpty()) {
                             player.getInventory().offerOrDrop(extracted);
@@ -70,6 +62,8 @@ public class DrawerPanelItem extends Item implements PanelItem {
                             return ActionResult.SUCCESS;
                         }
                     } else {
+                        if (world.isClient) return ActionResult.SUCCESS;
+
                         player.getInventory().offerOrDrop(stack);
                         stacks[side.getId()] = ItemStack.EMPTY;
                         drawerFrame.markDirty();
@@ -79,8 +73,23 @@ public class DrawerPanelItem extends Item implements PanelItem {
 
                 return ActionResult.PASS;
             },
-            (client, entity, hitResult, vertexConsumers, matrices) -> {
-                });
+            (world, frame, side, stack, player) -> {
+                var panel = (DrawerPanelItem) stack.getItem();
+                var storage = panel.getStorage(stack, frame, side);
+
+                if (storage == null) return ActionResult.FAIL;
+                if (world.isClient) return ActionResult.SUCCESS;
+
+                try (var tx = Transaction.openOuter()) {
+                    ItemVariant stored = panel.getVariant(stack);
+                    StorageUtil.move(PlayerInventoryStorage.of(player), storage, variant -> variant.equals(stored), Long.MAX_VALUE, tx);
+
+                    tx.commit();
+
+                    return ActionResult.SUCCESS;
+                }
+            },
+            null);
 
     public DrawerPanelItem(Settings settings) {
         super(settings);

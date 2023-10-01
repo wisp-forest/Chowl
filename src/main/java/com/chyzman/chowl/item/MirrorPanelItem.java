@@ -44,6 +44,7 @@ public class MirrorPanelItem extends Item implements PanelItem {
             return ActionResult.PASS;
         },
         (world, drawerFrame, side, stack, player) -> ActionResult.PASS,
+        null,
         null);
 
     public static final PanelItem.Button DRAWER_BUTTON = new PanelItem.Button(1 / 8f, 1 / 8f, 7 / 8f, 7 / 8f,
@@ -94,6 +95,7 @@ public class MirrorPanelItem extends Item implements PanelItem {
             drawerFrame.markDirty();
             return ActionResult.SUCCESS;
         },
+        null,
         null);
 
     public MirrorPanelItem(Settings settings) {

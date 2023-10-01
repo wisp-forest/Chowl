@@ -2,6 +2,7 @@ package com.chyzman.chowl.block;
 
 import com.chyzman.chowl.Chowl;
 import com.chyzman.chowl.classes.FunniVertexConsumerProvider;
+import com.chyzman.chowl.client.RenderGlobals;
 import com.chyzman.chowl.item.DrawerPanelItem;
 import com.chyzman.chowl.item.PanelItem;
 import com.chyzman.chowl.registry.ChowlRegistry;
@@ -48,7 +49,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
 
         if (button == null) {
             if (!client.player.isBlockBreakingRestricted(client.world, hitResult.getBlockPos(), client.interactionManager.getCurrentGameMode())) {
-                WorldRenderer.drawCuboidShapeOutline(matrices, vertexConsumers.getBuffer(RenderLayer.getLines()), DrawerFrameBlock.BASE, 0, 0, 0, 0, 0, 0, 0.4f);
+                WorldRenderer.drawCuboidShapeOutline(matrices, vertexConsumers.getBuffer(RenderLayer.getLines()), DrawerFrameBlock.BASE, 0, 0, 0, 0.1f, 0.1f, 0.1f, 1);
             }
             return;
         }
@@ -65,7 +66,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
         matrices.scale(button.maxX() - button.minX(), button.maxY() - button.minY(), 1);
         if (!client.player.isBlockBreakingRestricted(client.world, hitResult.getBlockPos(), client.interactionManager.getCurrentGameMode())) {
             var shape = Block.createCuboidShape(0, 0, 0, 16, 16, 1);
-            WorldRenderer.drawShapeOutline(matrices, vertexConsumers.getBuffer(RenderLayer.LINES), shape, 0, -1, 0, 0, 0, 0, 0.4f, false);
+            WorldRenderer.drawShapeOutline(matrices, vertexConsumers.getBuffer(RenderLayer.LINES), shape, 0, -1, 0, 0.1f, 0.1f, 0.1f, 1, false);
         }
         matrices.translate(0.5, -0.5, 0);
 
@@ -83,23 +84,30 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
     }
 
     public static void renderPanels(DrawerFrameBlockEntity entity, MinecraftClient client, World world, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        for (int i = 0; i < entity.stacks.length; i++) {
-            var stack = entity.stacks[i];
-            if (!stack.isEmpty()) {
-                matrices.push();
-                matrices.translate(0.5, 0.5, 0.5);
-                matrices.multiply(Direction.byId(i).getRotationQuaternion());
-                matrices.translate(0, 0.5 - 1 / 32f, 0);
-                matrices.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(90));
-                matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
-                if (!(stack.getItem() instanceof PanelItem)) {
-                    matrices.translate(0, 0,-1 / 32f);
-                    matrices.scale(3 / 4f, 3 / 4f, 3/4f);
-                    matrices.translate(0, 0,1 / 32f);
+        try {
+            for (int i = 0; i < entity.stacks.length; i++) {
+                var stack = entity.stacks[i];
+                if (!stack.isEmpty()) {
+                    matrices.push();
+                    matrices.translate(0.5, 0.5, 0.5);
+                    matrices.multiply(Direction.byId(i).getRotationQuaternion());
+                    matrices.translate(0, 0.5 - 1 / 32f, 0);
+                    matrices.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(90));
+                    matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
+                    if (!(stack.getItem() instanceof PanelItem)) {
+                        matrices.translate(0, 0, -1 / 32f);
+                        matrices.scale(3 / 4f, 3 / 4f, 3 / 4f);
+                        matrices.translate(0, 0, 1 / 32f);
+                    }
+                    RenderGlobals.DRAWER_FRAME.set(entity);
+                    RenderGlobals.FRAME_SIDE.set(Direction.byId(i));
+                    client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));
+                    matrices.pop();
                 }
-                client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));
-                matrices.pop();
             }
+        } finally {
+            RenderGlobals.DRAWER_FRAME.remove();
+            RenderGlobals.FRAME_SIDE.remove();
         }
     }
 }
