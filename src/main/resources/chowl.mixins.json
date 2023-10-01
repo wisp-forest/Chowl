@@ -4,6 +4,7 @@
     "package": "com.chyzman.chowl.mixin",
     "compatibilityLevel": "JAVA_17",
     "mixins": [
+        "DataPackContentsMixin",
         "ServerWorldMixin"
     ],
     "client": [
