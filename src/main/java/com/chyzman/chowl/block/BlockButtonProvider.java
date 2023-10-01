@@ -76,6 +76,6 @@ public interface BlockButtonProvider extends AttackInteractionReceiver {
 
     @FunctionalInterface
     public interface RenderConsumer {
-        void consume(MinecraftClient client, DrawerFrameBlockEntity entity, VertexConsumerProvider vertexConsumers, MatrixStack matrices);
+        void consume(MinecraftClient client, DrawerFrameBlockEntity entity, BlockHitResult hitResult, VertexConsumerProvider vertexConsumers, MatrixStack matrices);
     }
 }

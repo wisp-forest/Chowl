@@ -1,12 +1,14 @@
 package com.chyzman.chowl.block;
 
 import com.chyzman.chowl.classes.AttackInteractionReceiver;
+import com.chyzman.chowl.classes.FunniVertexConsumer;
+import com.chyzman.chowl.classes.FunniVertexConsumerProvider;
 import com.chyzman.chowl.graph.ServerGraphStore;
 import com.chyzman.chowl.item.PanelItem;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.*;
+import net.minecraft.client.render.model.BakedModelManager;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -15,6 +17,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.loot.context.LootContextParameterSet;
 import net.minecraft.loot.context.LootContextParameters;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
@@ -33,6 +36,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+
+import static com.chyzman.chowl.classes.FunniVertexConsumerProvider.consumer;
 
 public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver {
 
@@ -103,7 +108,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
                 return ActionResult.SUCCESS;
             },
-            (client, entity, vertexConsumers, matrices) -> {
+            (client, entity, hitResult, vertexConsumers, matrices) -> {
                 var stack = Items.BARRIER.getDefaultStack();
                 client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, client.getItemRenderer().getModels().getModel(stack));
             });

@@ -11,6 +11,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.math.BigInteger;
+import java.time.format.TextStyle;
 
 @SuppressWarnings("UnstableApiUsage")
 public class DrawerComponent {
@@ -100,7 +101,7 @@ public class DrawerComponent {
     }
 
     public MutableText styleText(MutableText text) {
-        if (textStyle == null) return text;
+        if (textStyle == null || textStyle.isEmpty()) return text;
         return text.setStyle(textStyle);
     }
 

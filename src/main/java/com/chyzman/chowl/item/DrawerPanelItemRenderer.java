@@ -1,5 +1,6 @@
 package com.chyzman.chowl.item;
 
+import com.chyzman.chowl.classes.FunniVertexConsumerProvider;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.model.BakedModelManagerHelper;
@@ -7,7 +8,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.*;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
@@ -17,6 +18,7 @@ import net.minecraft.util.math.RotationAxis;
 
 import java.math.BigInteger;
 
+import static com.chyzman.chowl.classes.FunniVertexConsumerProvider.consumer;
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
 @Environment(EnvType.CLIENT)

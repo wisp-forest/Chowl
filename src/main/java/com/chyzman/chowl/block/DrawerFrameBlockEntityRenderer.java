@@ -1,19 +1,22 @@
 package com.chyzman.chowl.block;
 
+import com.chyzman.chowl.Chowl;
+import com.chyzman.chowl.classes.FunniVertexConsumerProvider;
 import com.chyzman.chowl.item.DrawerPanelItem;
 import com.chyzman.chowl.item.PanelItem;
+import com.chyzman.chowl.registry.ChowlRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.client.render.*;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.enchantment.Enchantments;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
@@ -43,7 +46,10 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
 
         var button = buttonProvider.findButton(entity.getWorld(), entity.getCachedState(), hitResult);
 
-        if (button == null) return;
+        if (button == null) {
+            WorldRenderer.drawCuboidShapeOutline(matrices, vertexConsumers.getBuffer(RenderLayer.getLines()), DrawerFrameBlock.BASE, 0, 0, 0, 0, 0, 0, 0.4f);
+            return;
+        }
 
         matrices.push();
         matrices.translate(0.5, 0.5, 0.5);
@@ -55,7 +61,10 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
         matrices.translate(0.5, -0.5, 0);
         matrices.translate(-button.maxX(), button.maxY(), 0);
         matrices.scale(button.maxX() - button.minX(), button.maxY() - button.minY(), 1);
+        var shape = Block.createCuboidShape(0, 0, 0, 16, 16, 1);
+        WorldRenderer.drawShapeOutline(matrices, vertexConsumers.getBuffer(RenderLayer.LINES), shape, 0, -1, 0, 0, 0, 0, 0.4f, false);
         matrices.translate(0.5, -0.5, 0);
+
 //        matrices.scale(-1, -1, -1);
 
 //        var drawCtx = OwoUIDrawContext.of(new DrawContext(client, client.getBufferBuilders().getEntityVertexConsumers()));
@@ -63,7 +72,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
 //        drawCtx.drawPanel(0, 0, 1, 1, false);
 
         if (button.render() != null) {
-            button.render().consume(client, entity, vertexConsumers, matrices);
+            button.render().consume(client, entity, hitResult, vertexConsumers, matrices);
         }
 
         matrices.pop();
