@@ -1,6 +1,7 @@
 package com.chyzman.chowl.client;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntityRenderer;
+import com.chyzman.chowl.block.DrawerFrameBlockModel;
 import com.chyzman.chowl.graph.ClientGraphStore;
 import com.chyzman.chowl.item.DrawerFrameItemRenderer;
 import com.chyzman.chowl.item.DrawerPanelItemRenderer;
@@ -15,13 +16,17 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
+import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import static com.chyzman.chowl.Chowl.DRAWER_FRAME_BLOCK_ENTITY_TYPE;
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
@@ -38,11 +43,18 @@ public class ChowlClient implements ClientModInitializer {
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.DRAWER_FRAME_ITEM, new DrawerFrameItemRenderer());
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.DRAWER_PANEL_ITEM, new DrawerPanelItemRenderer());
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.MIRROR_PANEL_ITEM, new MirrorPanelItemRenderer());
-        ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, out) -> {
-            out.accept(id("item/drawer_panel_base"));
-            out.accept(id("item/mirror_panel_base"));
-        });
         HandledScreens.register(PanelConfigSreenHandler.TYPE, PanelConfigScreen::new);
+
+        ModelLoadingPlugin.register(ctx -> {
+            ctx.addModels(id("item/drawer_panel_base"), id("item/mirror_panel_base"),
+                    id("block/drawer_frame_base"));
+
+            ctx.resolveModel().register(context -> {
+                if (!context.id().equals(id("block/drawer_frame"))) return null;
+
+                return new DrawerFrameBlockModel.Unbaked(id("block/drawer_frame_base"));
+            });
+        });
 
         if (Owo.DEBUG) {
             ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
@@ -51,5 +63,14 @@ public class ChowlClient implements ClientModInitializer {
                 }
             });
         }
+    }
+
+    public static void reloadPos(World world, BlockPos pos) {
+        MinecraftClient client = MinecraftClient.getInstance();
+
+        if (world == client.world) {
+            client.worldRenderer.scheduleBlockRender(pos.getX(), pos.getY(), pos.getZ());
+        }
+
     }
 }
