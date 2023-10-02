@@ -7,6 +7,7 @@ import com.chyzman.chowl.transfer.TransferState;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Direction;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class AccessPanelItem extends Item implements PanelItem {
@@ -38,15 +40,19 @@ public class AccessPanelItem extends Item implements PanelItem {
         try {
             TransferState.TRAVERSING.set(true);
 
-            List<SlottedStorage<ItemVariant>> storages = new ArrayList<>();
+            List<SingleSlotStorage<ItemVariant>> storages = new ArrayList<>();
             for (var node : graph.nodes()) {
                 if (!node.state().isOf(ChowlRegistry.DRAWER_FRAME_BLOCK)) continue;
 
                 var otherBE = w.getBlockEntity(node.pos());
                 if (!(otherBE instanceof DrawerFrameBlockEntity otherFrame)) continue;
 
-                otherFrame.collectPanelStorages(storages);
+                otherFrame.collectPanelStorages(storage -> {
+                    storages.addAll(storage.getSlots());
+                });
             }
+
+            storages.sort(Comparator.comparing(x -> -x.getAmount()));
 
             return new CombinedSlottedStorage<>(storages);
         } finally {

@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageBlockEntity {
 
@@ -47,7 +48,7 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    public void collectPanelStorages(List<SlottedStorage<ItemVariant>> storages) {
+    public void collectPanelStorages(Consumer<SlottedStorage<ItemVariant>> storageConsumer) {
         for (int sideId = 0; sideId < 6; sideId++) {
             var stack = stacks[sideId];
 
@@ -55,7 +56,7 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
 
             var storage = panelItem.getStorage(stack, this, Direction.byId(sideId));
 
-            if (storage != null) storages.add(storage);
+            if (storage != null) storageConsumer.accept(storage);
         }
     }
 
@@ -64,7 +65,7 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     public @Nullable Storage<ItemVariant> getItemStorage(Direction fromSide) {
         List<SlottedStorage<ItemVariant>> storages = new ArrayList<>();
 
-        collectPanelStorages(storages);
+        collectPanelStorages(storages::add);
 
         return new CombinedSlottedStorage<>(storages);
     }

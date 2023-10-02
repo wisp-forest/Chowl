@@ -70,22 +70,21 @@ public class MirrorPanelItem extends Item implements PanelItem {
         try {
             TransferState.TRAVERSING.set(true);
 
-            List<SlottedStorage<ItemVariant>> storages = new ArrayList<>();
+            List<SingleSlotStorage<ItemVariant>> slots = new ArrayList<>();
             for (var node : graph.nodes()) {
                 if (!node.state().isOf(ChowlRegistry.DRAWER_FRAME_BLOCK)) continue;
 
                 var otherBE = w.getBlockEntity(node.pos());
                 if (!(otherBE instanceof DrawerFrameBlockEntity otherFrame)) continue;
 
-                otherFrame.collectPanelStorages(storages);
-            }
+                otherFrame.collectPanelStorages(storage -> {
+                    for (var slot : storage.getSlots()) {
+                        if (!slot.getResource().equals(filter)) continue;
 
-            List<SingleSlotStorage<ItemVariant>> slots = new ArrayList<>();
-            for (var storage : storages) {
-                slots.addAll(storage.getSlots());
+                        slots.add(slot);
+                    }
+                });
             }
-
-            slots.removeIf(x -> !x.getResource().equals(filter));
 
             if (slots.isEmpty()) return null;
 
