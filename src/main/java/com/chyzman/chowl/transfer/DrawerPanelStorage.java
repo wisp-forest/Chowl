@@ -90,7 +90,11 @@ public class DrawerPanelStorage extends SnapshotParticipant<ItemStack> implement
 
     @Override
     public long getAmount() {
-        return stack.get(DrawerPanelItem.COMPONENT).count.longValue();
+        try {
+            return stack.get(DrawerPanelItem.COMPONENT).count.longValueExact();
+        } catch (ArithmeticException e) {
+            return Long.MAX_VALUE;
+        }
     }
 
     @Override
