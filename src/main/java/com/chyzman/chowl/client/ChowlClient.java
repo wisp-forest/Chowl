@@ -26,6 +26,7 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.world.World;
 
 import static com.chyzman.chowl.Chowl.DRAWER_FRAME_BLOCK_ENTITY_TYPE;
@@ -69,7 +70,7 @@ public class ChowlClient implements ClientModInitializer {
         MinecraftClient client = MinecraftClient.getInstance();
 
         if (world == client.world) {
-            client.worldRenderer.scheduleBlockRender(pos.getX(), pos.getY(), pos.getZ());
+            client.worldRenderer.scheduleBlockRender(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4);
         }
 
     }

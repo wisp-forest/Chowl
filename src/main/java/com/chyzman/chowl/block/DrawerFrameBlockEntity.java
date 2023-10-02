@@ -94,6 +94,7 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
 
             if (prevTemplateState != templateState && world != null && world.isClient) {
                 ChowlClient.reloadPos(world, pos);
+                this.prevTemplateState = templateState;
             }
         }
     }
