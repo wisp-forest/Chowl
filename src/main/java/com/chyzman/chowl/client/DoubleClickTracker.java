@@ -2,11 +2,9 @@ package com.chyzman.chowl.client;
 
 import com.chyzman.chowl.Chowl;
 import com.chyzman.chowl.block.DoubleClickableBlock;
-import com.chyzman.chowl.classes.AttackInteractionReceiver;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
-import org.slf4j.LoggerFactory;
 
 public class DoubleClickTracker {
     private static long lastClickTime = 0;
@@ -20,16 +18,22 @@ public class DoubleClickTracker {
             long duration = world.getTime() - lastClickTime;
 
             if (hitResult.getBlockPos().equals(lastBlockPos) && duration > 0 && duration <= 5) {
-                player.swingHand(hand);
-                Chowl.CHANNEL.clientHandle().send(new DoubleClickableBlock.DoubleClickPacket(hitResult));
+                var pos = hitResult.getBlockPos();
+                var state = world.getBlockState(pos);
+                if (state.getBlock() instanceof DoubleClickableBlock receiver) {
+                    if (receiver.onDoubleClick(world, state, hitResult, player).isAccepted()) {
+                        player.swingHand(hand);
+                        Chowl.CHANNEL.clientHandle().send(new DoubleClickableBlock.DoubleClickPacket(hitResult));
 
-                return ActionResult.FAIL;
-            } else {
-                lastClickTime = world.getTime();
-                lastBlockPos = hitResult.getBlockPos().toImmutable();
-
-                return ActionResult.PASS;
+                        return ActionResult.FAIL;
+                    }
+                }
             }
+
+            lastClickTime = world.getTime();
+            lastBlockPos = hitResult.getBlockPos().toImmutable();
+
+            return ActionResult.PASS;
         });
     }
 }

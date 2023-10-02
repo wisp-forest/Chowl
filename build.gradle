@@ -10,6 +10,7 @@ group = project.maven_group
 repositories {
     maven { url 'https://jitpack.io' }
     maven { url 'https://maven.wispforest.io' }
+    maven { url 'https://maven.nucleoid.xyz/' }
 }
 
 dependencies {
@@ -27,6 +28,8 @@ dependencies {
 
     annotationProcessor modImplementation("com.github.LlamaLad7:MixinExtras:${project.me_version}")
     include "com.github.LlamaLad7:MixinExtras:${project.me_version}"
+
+    modImplementation include("eu.pb4:common-protection-api:${project.cpa_version}")
 }
 
 processResources {

@@ -5,13 +5,13 @@ import com.chyzman.chowl.classes.AttackInteractionReceiver;
 import com.chyzman.chowl.graph.DestroyGraphPacket;
 import com.chyzman.chowl.graph.SyncGraphPacket;
 import com.chyzman.chowl.item.DrawerComponent;
-import com.chyzman.chowl.network.C2SConfigPanel;
+import eu.pb4.common.protection.api.CommonProtection;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Style;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
 
 import static com.chyzman.chowl.Chowl.CHANNEL;
 import static net.minecraft.datafixer.fix.BlockEntitySignTextStrictJsonFix.GSON;
@@ -44,9 +44,15 @@ public class ServerBoundPackets {
         CHANNEL.registerServerbound(AttackInteractionReceiver.InteractionPacket.class, (message, access) -> {
             var player = access.player();
             var world = player.getWorld();
+            BlockPos pos = message.hitResult().getBlockPos();
 
-            var state = world.getBlockState(message.hitResult().getBlockPos());
+            var state = world.getBlockState(pos);
             if (!(state.getBlock() instanceof AttackInteractionReceiver receiver)) return;
+
+            if (!CommonProtection.canInteractBlock(world, pos, player.getGameProfile(), player)) {
+                // TODO: tell client interaction failed.
+                return;
+            }
 
             receiver.onAttack(world, state, message.hitResult(), player);
             player.swingHand(Hand.MAIN_HAND);
@@ -54,9 +60,15 @@ public class ServerBoundPackets {
         CHANNEL.registerServerbound(DoubleClickableBlock.DoubleClickPacket.class, (message, access) -> {
             var player = access.player();
             var world = player.getWorld();
+            BlockPos pos = message.hitResult().getBlockPos();
 
-            var state = world.getBlockState(message.hitResult().getBlockPos());
+            var state = world.getBlockState(pos);
             if (!(state.getBlock() instanceof DoubleClickableBlock receiver)) return;
+
+            if (!CommonProtection.canInteractBlock(world, pos, player.getGameProfile(), player)) {
+                // TODO: tell client interaction failed.
+                return;
+            }
 
             receiver.onDoubleClick(world, state, message.hitResult(), player);
             player.swingHand(Hand.MAIN_HAND);
