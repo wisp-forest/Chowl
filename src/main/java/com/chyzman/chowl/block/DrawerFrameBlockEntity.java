@@ -91,11 +91,11 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
 
         if (nbt.contains("TemplateState", NbtElement.COMPOUND_TYPE)) {
             templateState = NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), nbt.getCompound("TemplateState"));
+        }
 
-            if (prevTemplateState != templateState && world != null && world.isClient) {
-                ChowlClient.reloadPos(world, pos);
-                this.prevTemplateState = templateState;
-            }
+        if (prevTemplateState != templateState && world != null && world.isClient) {
+            ChowlClient.reloadPos(world, pos);
+            this.prevTemplateState = templateState;
         }
     }
 

@@ -17,8 +17,13 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.SkullItem;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
@@ -101,6 +106,10 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                     }
                     RenderGlobals.DRAWER_FRAME.set(entity);
                     RenderGlobals.FRAME_SIDE.set(Direction.byId(i));
+                    if (stack.getItem() instanceof SkullItem) {
+                        matrices.translate(0,0, 1 / 19f);
+                        matrices.scale(2f, 2f, 1/3f);
+                    }
                     client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));
                     matrices.pop();
                 }
