@@ -33,13 +33,16 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class DrawerFrameBlockModel extends ForwardingBakedModel {
+
+    private static RetextureTransform.DirectionInfo fallback;
+
     public DrawerFrameBlockModel(BakedModel wrapped) {
         this.wrapped = wrapped;
     }
 
     @Override
     public void emitBlockQuads(BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context) {
-        var template = (BlockState)((RenderAttachedBlockView) blockView).getBlockEntityRenderAttachment(pos);
+        var template = (BlockState) ((RenderAttachedBlockView) blockView).getBlockEntityRenderAttachment(pos);
 
         if (template != null) context.pushTransform(RetextureTransform.CACHE.getUnchecked(template));
         super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
@@ -86,6 +89,13 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
                 var quad = quads.get(0);
 
                 directions[dirId] = new DirectionInfo(quad.getSprite(), quad.hasColor(), quad.getColorIndex());
+                if (directions[dirId].sprite == null) {
+                    if (fallback.sprite != null) {
+                        directions[dirId] = fallback;
+                    }
+                } else if (fallback == null) {
+                    fallback = directions[dirId];
+                }
             }
         }
 
@@ -102,6 +112,7 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
             return true;
         }
 
-        record DirectionInfo(Sprite sprite, boolean hasColor, int colorIdx) {}
+        record DirectionInfo(Sprite sprite, boolean hasColor, int colorIdx) {
+        }
     }
 }
