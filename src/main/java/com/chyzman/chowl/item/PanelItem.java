@@ -114,25 +114,25 @@ public interface PanelItem {
         public BlockButtonProvider.Button toBlockButton() {
             return new BlockButtonProvider.Button(
                 minX, minY, maxX, maxY,
-                (state, world, pos, player, hand, hit) -> {
+                use != null ? (state, world, pos, player, hand, hit) -> {
                     if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrame)) return ActionResult.PASS;
 
                     return use.onUse(world, drawerFrame, hit.getSide(), drawerFrame.stacks[hit.getSide().getId()], player, hand);
-                },
-                (world, state, hit, player) -> {
+                } : null,
+                attack != null ? (world, state, hit, player) -> {
                     var pos = hit.getBlockPos();
 
                     if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrame)) return ActionResult.PASS;
 
                     return attack.onAttack(world, drawerFrame, hit.getSide(), drawerFrame.stacks[hit.getSide().getId()], player);
-                },
-                (world, state, hit, player) -> {
+                } : null,
+                doubleClick != null ? (world, state, hit, player) -> {
                     var pos = hit.getBlockPos();
 
                     if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrame)) return ActionResult.PASS;
 
                     return doubleClick.onDoubleClick(world, drawerFrame, hit.getSide(), drawerFrame.stacks[hit.getSide().getId()], player);
-                },
+                } : null,
                 render
             );
         }

@@ -62,7 +62,7 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
         Button button = findButton(world, state, hitResult);
 
         if (button == null) return ActionResult.PASS;
-        if (button.attack == null) return ActionResult.PASS;
+        if (button.doubleClick == null) return ActionResult.PASS;
         return button.doubleClick.apply(world, state, hitResult, player);
     }
 
