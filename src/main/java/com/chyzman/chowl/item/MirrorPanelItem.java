@@ -29,7 +29,7 @@ import java.util.List;
 public class MirrorPanelItem extends Item implements PanelItem {
     public static final NbtKey.Type<ItemVariant> ITEM_VARIANT_TYPE = NbtKey.Type.COMPOUND.then(ItemVariant::fromNbt, TransferVariant::toNbt);
     public static final NbtKey<ItemVariant> FILTER = new NbtKey<>("Filter", ITEM_VARIANT_TYPE);
-    public static final PanelItem.Button SET_FILTER_BUTTON = new PanelItem.Button(1 / 8f, 1 / 8f, 7 / 8f, 7 / 8f,
+    public static final PanelItem.Button SET_FILTER_BUTTON = new PanelItem.Button(2, 2, 14, 14,
         (world, drawerFrame, side, stack, player, hand) -> {
             var stackInHand = player.getStackInHand(hand);
             if (!stackInHand.isEmpty()) {

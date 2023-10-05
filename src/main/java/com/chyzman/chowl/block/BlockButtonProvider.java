@@ -14,6 +14,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,9 +27,12 @@ import java.util.function.Function;
 public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleClickableBlock {
     List<Button> listButtons(World world, BlockState state, BlockHitResult hitResult);
 
-    default @Nullable Button findButton(World world, BlockState state, BlockHitResult hitResult) {
+    default @Nullable Button findButton(World world, BlockState state, BlockHitResult hitResult, int orientation) {
         Vector3f vec = hitResult.getPos().subtract(hitResult.getBlockPos().toCenterPos()).toVector3f();
-        vec.rotate(hitResult.getSide().getRotationQuaternion().invert()).rotate(Direction.WEST.getRotationQuaternion());
+        vec.rotate(DrawerFrameBlock.getSide(hitResult).getRotationQuaternion().invert())
+                .rotate(Direction.WEST.getRotationQuaternion())
+                .rotate(RotationAxis.NEGATIVE_X.rotationDegrees(orientation * 90));
+
         vec.add(0.5f, 0.5f, 0.5f);
 
         for (var button : listButtons(world, state, hitResult)) {
@@ -41,7 +45,7 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
     }
 
     default @NotNull ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        Button button = findButton(world, state, hit);
+        Button button = findButton(world, state, hit, DrawerFrameBlock.getOrientation(world, hit));
 
         if (button == null) return ActionResult.PASS;
         if (button.use == null) return ActionResult.PASS;
@@ -50,7 +54,7 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
 
     @Override
     default @NotNull ActionResult onAttack(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player) {
-        Button button = findButton(world, state, hitResult);
+        Button button = findButton(world, state, hitResult, DrawerFrameBlock.getOrientation(world, hitResult));
 
         if (button == null) return ActionResult.PASS;
         if (button.attack == null) return ActionResult.PASS;
@@ -59,7 +63,7 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
 
     @Override
     default @NotNull ActionResult onDoubleClick(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player) {
-        Button button = findButton(world, state, hitResult);
+        Button button = findButton(world, state, hitResult, DrawerFrameBlock.getOrientation(world, hitResult));
 
         if (button == null) return ActionResult.PASS;
         if (button.doubleClick == null) return ActionResult.PASS;
@@ -67,9 +71,10 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
     }
 
     record Button(
-            float minX, float minY, float maxX, float maxY, UseFunction use, AttackFunction attack, DoubleClickFunction doubleClick, RenderConsumer render) {
+            float minX, float minY, float maxX, float maxY, UseFunction use, AttackFunction attack,
+            DoubleClickFunction doubleClick, RenderConsumer render) {
         public boolean isIn(float x, float y) {
-            return minX <= x && x <= maxX && minY <= y && y <= maxY;
+            return minX <= x * 16 && x * 16 <= maxX && minY <= y * 16 && y * 16 <= maxY;
         }
     }
 

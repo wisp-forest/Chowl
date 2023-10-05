@@ -84,18 +84,14 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
                 Direction dir = Direction.byId(dirId);
 
                 var quads = templateModel.getQuads(template, dir, Random.create());
-                if (quads.size() == 0) continue;
+                if (quads.isEmpty()) {
+                    quads = templateModel.getQuads(template, null, Random.create());
+                }
+                if (quads.isEmpty()) continue;
 
                 var quad = quads.get(0);
 
                 directions[dirId] = new DirectionInfo(quad.getSprite(), quad.hasColor(), quad.getColorIndex());
-                if (directions[dirId].sprite == null) {
-                    if (fallback.sprite != null) {
-                        directions[dirId] = fallback;
-                    }
-                } else if (fallback == null) {
-                    fallback = directions[dirId];
-                }
             }
         }
 
@@ -103,7 +99,7 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
         public boolean transform(MutableQuadView quad) {
             Direction face = quad.nominalFace();
             if (face == null) return true;
-            if (directions[face.getId()] == null) return true;
+            if (directions[face.getId()] == null) return false;
 
             quad.spriteBake(directions[face.getId()].sprite, MutableQuadView.BAKE_LOCK_UV);
 

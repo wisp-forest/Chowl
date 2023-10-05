@@ -1,6 +1,7 @@
 package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.BlockButtonProvider;
+import com.chyzman.chowl.block.DrawerFrameBlock;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.transfer.TransferState;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -12,6 +13,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Pair;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -21,10 +23,11 @@ import java.util.List;
 
 public interface PanelItem {
     @SuppressWarnings("UnstableApiUsage")
-    Button STORAGE_BUTTON = new Button(1 / 8f, 1 / 8f, 7 / 8f, 7 / 8f,
+    Button STORAGE_BUTTON = new Button(2, 2, 14, 14,
         (world, frame, side, stack, player, hand) -> {
             var stackInHand = player.getStackInHand(hand);
             if (stackInHand.isEmpty()) return ActionResult.PASS;
+            if (!(stack.getItem() instanceof PanelItem)) return ActionResult.PASS;
 
             PanelItem panel = (PanelItem) stack.getItem();
 
@@ -71,7 +74,7 @@ public interface PanelItem {
             }
 
             player.getInventory().offerOrDrop(stack);
-            drawerFrame.stacks[side.getId()] = ItemStack.EMPTY;
+            drawerFrame.stacks.set(side.getId(), new Pair<>(ItemStack.EMPTY, 0));
             drawerFrame.markDirty();
             return ActionResult.SUCCESS;
         },
@@ -116,22 +119,25 @@ public interface PanelItem {
                 minX, minY, maxX, maxY,
                 use != null ? (state, world, pos, player, hand, hit) -> {
                     if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrame)) return ActionResult.PASS;
+                    var side = DrawerFrameBlock.getSide(hit);
 
-                    return use.onUse(world, drawerFrame, hit.getSide(), drawerFrame.stacks[hit.getSide().getId()], player, hand);
+                    return use.onUse(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).getLeft(), player, hand);
                 } : null,
                 attack != null ? (world, state, hit, player) -> {
                     var pos = hit.getBlockPos();
+                    var side = DrawerFrameBlock.getSide(hit);
 
                     if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrame)) return ActionResult.PASS;
 
-                    return attack.onAttack(world, drawerFrame, hit.getSide(), drawerFrame.stacks[hit.getSide().getId()], player);
+                    return attack.onAttack(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).getLeft(), player);
                 } : null,
                 doubleClick != null ? (world, state, hit, player) -> {
                     var pos = hit.getBlockPos();
+                    var side = DrawerFrameBlock.getSide(hit);
 
                     if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrame)) return ActionResult.PASS;
 
-                    return doubleClick.onDoubleClick(world, drawerFrame, hit.getSide(), drawerFrame.stacks[hit.getSide().getId()], player);
+                    return doubleClick.onDoubleClick(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).getLeft(), player);
                 } : null,
                 render
             );

@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -21,6 +22,7 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
+import net.minecraft.util.Pair;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -32,7 +34,7 @@ import java.util.function.Consumer;
 
 public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageBlockEntity, RenderAttachmentBlockEntity {
 
-    public ItemStack[] stacks = DefaultedList.ofSize(6, ItemStack.EMPTY).toArray(new ItemStack[6]);
+    public List<Pair<ItemStack, Integer>> stacks = new ArrayList<>(DefaultedList.ofSize(6, new Pair<>(ItemStack.EMPTY, 0)).stream().toList());
     public BlockState templateState = null;
     public BlockState prevTemplateState = null;
 
@@ -54,11 +56,11 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     @SuppressWarnings("UnstableApiUsage")
     public void collectPanelStorages(Consumer<SlottedStorage<ItemVariant>> storageConsumer) {
         for (int sideId = 0; sideId < 6; sideId++) {
-            var stack = stacks[sideId];
+            var stack = stacks.get(sideId);
 
-            if (!(stack.getItem() instanceof PanelItem panelItem)) continue;
+            if (!(stack.getLeft().getItem() instanceof PanelItem panelItem)) continue;
 
-            var storage = panelItem.getStorage(stack, this, Direction.byId(sideId));
+            var storage = panelItem.getStorage(stack.getLeft(), this, Direction.byId(sideId));
 
             if (storage != null) storageConsumer.accept(storage);
         }
@@ -84,9 +86,9 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
         if (nbt == null) return;
         super.readNbt(nbt);
         var nbtList = nbt.getList("Inventory", NbtElement.COMPOUND_TYPE);
-        stacks = new ItemStack[6];
         for (int i = 0; i < nbtList.size(); i++) {
-            stacks[i] = ItemStack.fromNbt((NbtCompound) nbtList.get(i));
+            NbtCompound compound = (NbtCompound) nbtList.get(i);
+            stacks.set(i, new Pair<>(ItemStack.fromNbt(compound.getCompound("Stack")), compound.getInt("Orientation")));
         }
 
         if (nbt.contains("TemplateState", NbtElement.COMPOUND_TYPE)) {
@@ -104,7 +106,10 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
         super.writeNbt(nbt);
         var nbtList = new NbtList();
         for (var stack : stacks) {
-            nbtList.add(stack.writeNbt(new NbtCompound()));
+            var compound = new NbtCompound();
+            compound.put("Stack", stack.getLeft().writeNbt(new NbtCompound()));
+            compound.putInt("Orientation", stack.getRight());
+            nbtList.add(compound);
         }
         nbt.put("Inventory", nbtList);
 

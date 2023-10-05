@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Pair;
 import net.minecraft.util.math.Direction;
 
 import java.math.BigInteger;
@@ -31,7 +32,7 @@ public class DrawerPanelStorage extends SnapshotParticipant<ItemStack> implement
     @Override
     protected void readSnapshot(ItemStack snapshot) {
         this.stack = snapshot;
-        blockEntity.stacks[side.getId()] = snapshot;
+        blockEntity.stacks.set(side.getId(), new Pair<>(stack, blockEntity.stacks.get(side.getId()).getRight()));
     }
 
     @Override

@@ -49,8 +49,9 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
         if (!(client.crosshairTarget instanceof BlockHitResult hitResult)) return;
         if (!hitResult.getBlockPos().equals(entity.getPos())) return;
         if (!(entity.getCachedState().getBlock() instanceof BlockButtonProvider buttonProvider)) return;
-
-        var button = buttonProvider.findButton(entity.getWorld(), entity.getCachedState(), hitResult);
+        var side = DrawerFrameBlock.getSide(hitResult);
+        var orientation = entity.stacks.get(side.getId()).getRight();
+        var button = buttonProvider.findButton(entity.getWorld(), entity.getCachedState(), hitResult, orientation);
 
         if (button == null) {
             if (!client.player.isBlockBreakingRestricted(client.world, hitResult.getBlockPos(), client.interactionManager.getCurrentGameMode()) && !client.options.hudHidden) {
@@ -58,17 +59,17 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
             }
             return;
         }
-
         matrices.push();
         matrices.translate(0.5, 0.5, 0.5);
-        matrices.multiply(hitResult.getSide().getRotationQuaternion());
+        matrices.multiply(side.getRotationQuaternion());
         matrices.translate(0, 0.5, 0);
         matrices.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(90));
         matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
+        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(orientation * 90));
 
         matrices.translate(0.5, -0.5, 0);
-        matrices.translate(-button.maxX(), button.maxY(), 0);
-        matrices.scale(button.maxX() - button.minX(), button.maxY() - button.minY(), 1);
+        matrices.translate(-button.maxX() / 16, button.maxY() / 16, 0);
+        matrices.scale((button.maxX() - button.minX()) / 16, (button.maxY() - button.minY()) / 16, 1);
         if (!client.player.isBlockBreakingRestricted(client.world, hitResult.getBlockPos(), client.interactionManager.getCurrentGameMode()) && !client.options.hudHidden) {
             var shape = Block.createCuboidShape(0, 0, 0, 16, 16, 1);
             WorldRenderer.drawShapeOutline(matrices, vertexConsumers.getBuffer(RenderLayer.LINES), shape, 0, -1, 0, 0.15f, 0.15f, 0.15f, 1, false);
@@ -90,8 +91,9 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
 
     public static void renderPanels(DrawerFrameBlockEntity entity, MinecraftClient client, World world, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         try {
-            for (int i = 0; i < entity.stacks.length; i++) {
-                var stack = entity.stacks[i];
+            for (int i = 0; i < entity.stacks.size(); i++) {
+                var stack = entity.stacks.get(i).getLeft();
+                var orientation = entity.stacks.get(i).getRight();
                 if (!stack.isEmpty()) {
                     matrices.push();
                     matrices.translate(0.5, 0.5, 0.5);
@@ -99,6 +101,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                     matrices.translate(0, 0.5 - 1 / 32f, 0);
                     matrices.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(90));
                     matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
+                    matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(orientation * 90));
                     if (!(stack.getItem() instanceof PanelItem)) {
                         matrices.translate(0, 0, -1 / 32f);
                         matrices.scale(3 / 4f, 3 / 4f, 3 / 4f);
