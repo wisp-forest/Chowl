@@ -23,6 +23,7 @@ import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -65,34 +66,34 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     };
 
     public static final PanelItem.Button DEFAULT_PANEL_BUTTON = new PanelItem.Button(
-        1 / 8f, 1 / 8f, 7 / 8f, 7 / 8f,
-        (world, drawerFrame, side, stack, player, hand) -> {
-            var stacks = drawerFrame.stacks;
-            var stackInHand = player.getStackInHand(hand);
+            1 / 8f, 1 / 8f, 7 / 8f, 7 / 8f,
+            (world, drawerFrame, side, stack, player, hand) -> {
+                var stacks = drawerFrame.stacks;
+                var stackInHand = player.getStackInHand(hand);
 
-            if (stackInHand.isEmpty()) return ActionResult.PASS;
-            if (!stack.isEmpty()) return ActionResult.PASS;
+                if (stackInHand.isEmpty()) return ActionResult.PASS;
+                if (!stack.isEmpty()) return ActionResult.PASS;
 
-            var temp = stackInHand.copy();
-            temp.setCount(1);
-            stacks[side.getId()] = temp;
-            stackInHand.decrement(1);
-            drawerFrame.markDirty();
+                var temp = stackInHand.copy();
+                temp.setCount(1);
+                stacks[side.getId()] = temp;
+                stackInHand.decrement(1);
+                drawerFrame.markDirty();
 
-            return ActionResult.SUCCESS;
-        },
-        (world, drawerFrame, side, stack, player) -> {
-            var stacks = drawerFrame.stacks;
+                return ActionResult.SUCCESS;
+            },
+            (world, drawerFrame, side, stack, player) -> {
+                var stacks = drawerFrame.stacks;
 
-            if (stack.isEmpty()) return ActionResult.PASS;
+                if (stack.isEmpty()) return ActionResult.PASS;
 
-            player.getInventory().offerOrDrop(stack);
-            stacks[side.getId()] = ItemStack.EMPTY;
-            drawerFrame.markDirty();
-            return ActionResult.SUCCESS;
-        },
-        null,
-        null);
+                player.getInventory().offerOrDrop(stack);
+                stacks[side.getId()] = ItemStack.EMPTY;
+                drawerFrame.markDirty();
+                return ActionResult.SUCCESS;
+            },
+            null,
+            null);
     public static final BlockButtonProvider.Button REMOVE_BUTTON = new Button(7 / 8f, 7 / 8f, 1, 1, null,
             (world, state, hitResult, player) -> {
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
@@ -127,6 +128,14 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
     @Override
     public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+        if (!state.isOf(newState.getBlock())) {
+            BlockEntity blockEntity = world.getBlockEntity(pos);
+            if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
+                for (ItemStack stack : drawerFrameBlockEntity.stacks) {
+                    ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), stack);
+                }
+            }
+        }
         super.onStateReplaced(state, world, pos, newState, moved);
         if (newState.getBlock() != this && world instanceof ServerWorld sw) {
             ServerGraphStore.get(sw).tryRemove(pos);
@@ -137,8 +146,8 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         Set<BlockPos> links = new HashSet<>();
 
         for (BlockPos possible : BlockPos.iterate(
-            pos.getX() - 1, pos.getY() - 1, pos.getZ() - 1,
-            pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1
+                pos.getX() - 1, pos.getY() - 1, pos.getZ() - 1,
+                pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1
         )) {
             if (pos.equals(possible) || world.getBlockState(possible).getBlock() != this) continue;
 
@@ -258,33 +267,16 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         return BlockButtonProvider.super.onDoubleClick(world, state, hitResult, player);
     }
 
-    @Override
-    public List<ItemStack> getDroppedStacks(BlockState state, LootContextParameterSet.Builder builder) {
-        var list = super.getDroppedStacks(state, builder);
-        if (builder.getOptional(LootContextParameters.BLOCK_ENTITY) instanceof DrawerFrameBlockEntity blockEntity) {
-            ItemStack stack = new ItemStack(this.asItem());
-            BlockItem.setBlockEntityNbt(stack, blockEntity.getType(), blockEntity.createNbt());
-            list.add(stack);
-        }
-        return list;
-    }
-
-    @Override
-    public void onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
-            if (!world.isClient && player.isCreative() && !Arrays.stream(drawerFrameBlockEntity.stacks).allMatch(ItemStack::isEmpty)) {
-                ItemStack stack = new ItemStack(this.asItem());
-                BlockItem.setBlockEntityNbt(stack, blockEntity.getType(), blockEntity.createNbt());
-                if (!player.getInventory().contains(stack)) {
-                    ItemEntity itemEntity = new ItemEntity(world, (double) pos.getX() + 0.5, (double) pos.getY() + 0.5, (double) pos.getZ() + 0.5, stack);
-                    itemEntity.setToDefaultPickupDelay();
-                    world.spawnEntity(itemEntity);
-                }
-            }
-        }
-        super.onBreak(world, pos, state, player);
-    }
+//    @Override
+//    public List<ItemStack> getDroppedStacks(BlockState state, LootContextParameterSet.Builder builder) {
+//        var list = super.getDroppedStacks(state, builder);
+//        if (builder.getOptional(LootContextParameters.BLOCK_ENTITY) instanceof DrawerFrameBlockEntity blockEntity) {
+//            ItemStack stack = new ItemStack(this.asItem());
+//            BlockItem.setBlockEntityNbt(stack, blockEntity.getType(), blockEntity.createNbt());
+//            list.add(stack);
+//        }
+//        return list;
+//    }
 
     @Override
     public ItemStack getPickStack(BlockView world, BlockPos pos, BlockState state) {
