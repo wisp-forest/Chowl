@@ -6,7 +6,6 @@ import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.registry.ServerBoundPackets;
 import com.chyzman.chowl.registry.ServerEventListeners;
 import com.chyzman.chowl.screen.PanelConfigSreenHandler;
-import com.google.gson.Gson;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
@@ -25,7 +24,7 @@ import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
 public class Chowl implements ModInitializer {
     public static final String MODID = "chowl-industries";
-    private static final Gson GSON = new Gson();
+//    public static final ChowlIndustriesConfig CONFIG = ChowlIndustriesConfig.createAndLoad();
 
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(id(FabricLoader.getInstance()
         .getModContainer("chowl-industries")

@@ -1,4 +1,4 @@
-package com.chyzman.chowl.item;
+package com.chyzman.chowl.screen;
 
 import io.wispforest.owo.client.screens.ValidatingSlot;
 import io.wispforest.owo.ops.ItemOps;

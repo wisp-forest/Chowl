@@ -2,6 +2,7 @@ package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.graph.GraphStore;
+import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.TransferState;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;

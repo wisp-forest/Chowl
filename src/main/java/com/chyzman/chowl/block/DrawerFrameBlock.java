@@ -2,33 +2,27 @@ package com.chyzman.chowl.block;
 
 import com.chyzman.chowl.classes.AttackInteractionReceiver;
 import com.chyzman.chowl.graph.ServerGraphStore;
-import com.chyzman.chowl.item.PanelItem;
+import com.chyzman.chowl.item.component.PanelItem;
 import io.wispforest.owo.ops.ItemOps;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
-import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.loot.context.LootContextParameterSet;
-import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
-import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.Pair;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -217,10 +211,11 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         var side = getSide(hit);
         var orientation = 0;
-        if (side == Direction.UP) {
-            orientation = (int) player.getHorizontalFacing().getOpposite().asRotation()/90;
+        if (side == Direction.UP || (side == Direction.DOWN && player.getHorizontalFacing().getAxis() == Direction.Axis.Z)) {
+            orientation = (int) player.getHorizontalFacing().getOpposite().asRotation() / 90;
         } else if (side == Direction.DOWN) {
-            orientation = (int) player.getHorizontalFacing().asRotation()/90;
+            orientation = (int) player.getHorizontalFacing().asRotation() / 90;
+
         }
         var res = BlockButtonProvider.super.onUse(state, world, pos, player, hand, hit);
         if (res != ActionResult.PASS) return res;
@@ -299,10 +294,10 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 ))).orElse(hitResult.getSide());
     }
 
-    public static int getOrientation(World world, HitResult hitResult) {
-        var blockEntity = world.getBlockEntity(BlockPos.ofFloored(hitResult.getPos()));
+    public static int getOrientation(World world, BlockHitResult hitResult) {
+        var blockEntity = world.getBlockEntity(hitResult.getBlockPos());
         if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
-            var side = getSide((BlockHitResult) hitResult);
+            var side = getSide(hitResult);
             return drawerFrameBlockEntity.stacks.get(side.getId()).getRight();
         }
         return 0;

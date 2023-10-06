@@ -1,4 +1,4 @@
-package com.chyzman.chowl.item;
+package com.chyzman.chowl.item.renderer;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.block.DrawerFrameBlockEntityRenderer;

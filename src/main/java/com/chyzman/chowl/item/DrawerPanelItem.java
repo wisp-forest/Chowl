@@ -1,73 +1,38 @@
 package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
+import com.chyzman.chowl.item.component.*;
 import com.chyzman.chowl.screen.PanelConfigSreenHandler;
 import com.chyzman.chowl.transfer.DrawerPanelStorage;
 import com.chyzman.chowl.transfer.TransferState;
-import io.wispforest.owo.nbt.NbtKey;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
-import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.math.BigInteger;
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
-public class DrawerPanelItem extends Item implements PanelItem {
-    public static final NbtKey<DrawerComponent> COMPONENT = new NbtKey<>("DrawerComponent", DrawerComponent.KEY_TYPE);
+public class DrawerPanelItem extends Item implements PanelItem, DrawerFilterHolder, DrawerCountHolder, DrawerLockHolder, DrawerCustomizationHolder {
 
     public DrawerPanelItem(Settings settings) {
         super(settings);
     }
 
-    public void insert(ItemStack stack, ItemStack inserted) {
-        var component = stack.get(COMPONENT);
-        inserted.setCount(component.insert(inserted));
-        stack.put(COMPONENT, component);
-    }
-
-    public ItemStack extract(ItemStack stack, boolean sneaking) {
-        var component = stack.get(COMPONENT);
-        var amount = sneaking ? component.itemVariant.getItem().getMaxCount() : 1;
-        var returned = component.extract(amount);
-
-        if (returned.isEmpty()) return returned;
-
-        stack.put(COMPONENT, component);
-        return returned;
-    }
-
-    public BigInteger getCount(ItemStack stack) {
-        var component = stack.get(COMPONENT);
-        return component.count;
-    }
-
-    public ItemVariant getVariant(ItemStack stack) {
-        var component = stack.get(COMPONENT);
-        return component.itemVariant;
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
     public @Nullable SlottedStorage<ItemVariant> getStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
-        if (TransferState.NO_BLANK_DRAWERS.get() && getVariant(stack).isBlank()) return null;
+        if (TransferState.NO_BLANK_DRAWERS.get() && filter(stack).isBlank()) return null;
 
         return new DrawerPanelStorage(stack, blockEntity, side);
     }
@@ -102,22 +67,5 @@ public class DrawerPanelItem extends Item implements PanelItem {
             }
         }
         return super.use(world, user, hand);
-    }
-
-    public static SimpleInventory createTrackedInventory(ItemStack stack) {
-        var inventory = new SimpleInventory(1);
-        var component = stack.get(COMPONENT);
-        inventory.setStack(0, component.itemVariant.toStack(1));
-
-        inventory.addListener(sender -> storeInventory(stack, inventory));
-        return inventory;
-    }
-
-    public static void storeInventory(ItemStack stack, SimpleInventory inventory) {
-        var component = stack.get(COMPONENT);
-        if (!component.config.locked || component.count.compareTo(BigInteger.ZERO) <= 0) {
-            component.setVariant(ItemVariant.of(inventory.getStack(0)));
-            stack.put(COMPONENT, component);
-        }
     }
 }

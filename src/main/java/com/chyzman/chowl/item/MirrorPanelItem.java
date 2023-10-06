@@ -2,21 +2,17 @@ package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.graph.GraphStore;
-import com.chyzman.chowl.graph.ServerGraphStore;
+import com.chyzman.chowl.item.component.DrawerCustomizationHolder;
+import com.chyzman.chowl.item.component.DrawerFilterHolder;
+import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.CombinedSingleSlotStorage;
 import com.chyzman.chowl.transfer.TransferState;
-import io.wispforest.owo.nbt.NbtKey;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
-import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
-import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -26,9 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
-public class MirrorPanelItem extends Item implements PanelItem {
-    public static final NbtKey.Type<ItemVariant> ITEM_VARIANT_TYPE = NbtKey.Type.COMPOUND.then(ItemVariant::fromNbt, TransferVariant::toNbt);
-    public static final NbtKey<ItemVariant> FILTER = new NbtKey<>("Filter", ITEM_VARIANT_TYPE);
+public class MirrorPanelItem extends Item implements PanelItem, DrawerFilterHolder, DrawerCustomizationHolder {
+
     public static final PanelItem.Button SET_FILTER_BUTTON = new PanelItem.Button(2, 2, 14, 14,
         (world, drawerFrame, side, stack, player, hand) -> {
             var stackInHand = player.getStackInHand(hand);

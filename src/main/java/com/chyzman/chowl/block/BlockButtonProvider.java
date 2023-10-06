@@ -9,6 +9,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -29,7 +30,8 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
 
     default @Nullable Button findButton(World world, BlockState state, BlockHitResult hitResult, int orientation) {
         Vector3f vec = hitResult.getPos().subtract(hitResult.getBlockPos().toCenterPos()).toVector3f();
-        vec.rotate(DrawerFrameBlock.getSide(hitResult).getRotationQuaternion().invert())
+        var side = DrawerFrameBlock.getSide(hitResult);
+        vec.rotate(side.getRotationQuaternion().invert())
                 .rotate(Direction.WEST.getRotationQuaternion())
                 .rotate(RotationAxis.NEGATIVE_X.rotationDegrees(orientation * 90));
 
@@ -55,7 +57,6 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
     @Override
     default @NotNull ActionResult onAttack(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player) {
         Button button = findButton(world, state, hitResult, DrawerFrameBlock.getOrientation(world, hitResult));
-
         if (button == null) return ActionResult.PASS;
         if (button.attack == null) return ActionResult.PASS;
         return button.attack.apply(world, state, hitResult, player);

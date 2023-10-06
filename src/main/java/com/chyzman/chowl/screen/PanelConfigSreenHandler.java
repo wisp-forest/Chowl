@@ -1,10 +1,12 @@
 package com.chyzman.chowl.screen;
 
-import com.chyzman.chowl.item.*;
+import com.chyzman.chowl.item.component.DrawerCountHolder;
+import com.chyzman.chowl.item.component.DrawerCustomizationHolder;
+import com.chyzman.chowl.item.component.DrawerFilterHolder;
+import com.chyzman.chowl.item.component.DrawerLockHolder;
 import io.wispforest.owo.client.screens.ScreenUtils;
 import io.wispforest.owo.client.screens.SlotGenerator;
 import io.wispforest.owo.client.screens.SyncedProperty;
-import io.wispforest.owo.ops.ItemOps;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.entity.player.PlayerEntity;
@@ -13,10 +15,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.util.Colors;
 
 import java.math.BigInteger;
-
-import static com.chyzman.chowl.item.DrawerPanelItem.COMPONENT;
 
 public class PanelConfigSreenHandler extends ScreenHandler {
 
@@ -29,24 +30,35 @@ public class PanelConfigSreenHandler extends ScreenHandler {
         super(TYPE, syncId);
         this.inventory = playerInventory;
         this.stack = this.createProperty(ItemStack.class, stack);
-        var component = stack.get(COMPONENT);
         this.addServerboundMessage(ConfigFilter.class, (message) -> {
-            if (component.count.compareTo(BigInteger.ZERO) <= 0) {
-                component.setVariant(ItemVariant.of(message.stack));
-                component.config.locked = true;
-                stack.put(COMPONENT, component);
+            var temp = this.stack.get();
+            if (message.stack.getItem() instanceof DrawerCountHolder<?> drawerCountHolder) {
+                if (drawerCountHolder.count(message.stack).compareTo(BigInteger.ZERO) <= 0) {
+                    drawerCountHolder.count(temp, BigInteger.ONE);
+                    if (temp.getItem() instanceof DrawerLockHolder<?> lockHolder) lockHolder.locked(temp, true);
+                }
+                this.stack.set(temp);
                 this.stack.markDirty();
             }
         });
         this.addServerboundMessage(ConfigConfig.class, (message) -> {
-            component.config.locked = message.locked;
-            component.config.hideCount = !message.showCount;
-            component.config.hideItem = !message.showItem;
-            component.config.hideName = !message.showName;
-            if (!message.locked && component.count.compareTo(BigInteger.ZERO) <= 0) {
-                component.setVariant(ItemVariant.blank());
+            var temp = this.stack.get();
+            if (temp.getItem() instanceof DrawerCustomizationHolder<?> drawerCustomizationHolder) {
+                drawerCustomizationHolder
+                        .showCount(temp, message.showCount)
+                        .showItem(temp, message.showItem)
+                        .showName(temp, message.showName)
+                        .textStyle(temp, drawerCustomizationHolder.textStyle(temp));
             }
-            stack.put(COMPONENT, component);
+            if (temp.getItem() instanceof DrawerLockHolder<?> drawerLockHolder) {
+                drawerLockHolder.locked(temp, message.locked);
+            }
+            if (temp.getItem() instanceof DrawerCountHolder<?> drawerCountHolder) {
+                if (!message.locked && drawerCountHolder.count(temp).compareTo(BigInteger.ZERO) <= 0) {
+                    drawerCountHolder.count(temp, BigInteger.ZERO);
+                }
+            }
+            this.stack.set(temp);
             this.stack.markDirty();
         });
         SlotGenerator.begin(this::addSlot, 8, 84).slotFactory(

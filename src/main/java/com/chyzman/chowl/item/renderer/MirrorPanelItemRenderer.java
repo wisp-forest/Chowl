@@ -1,7 +1,8 @@
-package com.chyzman.chowl.item;
+package com.chyzman.chowl.item.renderer;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.client.RenderGlobals;
+import com.chyzman.chowl.item.MirrorPanelItem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.model.BakedModelManagerHelper;

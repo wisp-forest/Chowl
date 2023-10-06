@@ -2,6 +2,8 @@ package com.chyzman.chowl.transfer;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.item.DrawerPanelItem;
+import com.chyzman.chowl.item.component.DrawerCountHolder;
+import com.chyzman.chowl.item.component.DrawerFilterHolder;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
@@ -37,41 +39,39 @@ public class DrawerPanelStorage extends SnapshotParticipant<ItemStack> implement
 
     @Override
     public long insert(ItemVariant resource, long maxAmount, TransactionContext transaction) {
-        var component = stack.get(DrawerPanelItem.COMPONENT);
-
-        if (component.itemVariant.isBlank()) component.itemVariant = resource;
-
-        if (component.itemVariant.equals(resource)) {
-            component.count = component.count.add(BigInteger.valueOf(maxAmount));
-
-            updateSnapshots(transaction);
-            stack.put(DrawerPanelItem.COMPONENT, component);
-
-            return maxAmount;
-        } else {
-            return 0;
+        if (stack.getItem() instanceof DrawerFilterHolder<?> filterHolder) {
+            if (filterHolder.filter(stack).isBlank()) {
+                filterHolder.filter(stack, resource);
+            }
+            if (filterHolder.filter(stack).equals(resource)) {
+                if (stack.getItem() instanceof DrawerCountHolder<?> countHolder) {
+                    countHolder.count(stack, countHolder.count(stack).add(BigInteger.valueOf(maxAmount)));
+                }
+                updateSnapshots(transaction);
+                return maxAmount;
+            }
         }
+        return 0;
     }
 
     @Override
     public long extract(ItemVariant resource, long maxAmount, TransactionContext transaction) {
-        var component = stack.get(DrawerPanelItem.COMPONENT);
-
-        if (!component.itemVariant.equals(resource)) return 0;
-
-        long removed;
-        try {
-            removed = Math.min(component.count.longValueExact(), maxAmount);
-        } catch (ArithmeticException e) {
-            removed = maxAmount;
+        if (stack.getItem() instanceof DrawerFilterHolder<?> filterHolder) {
+            if (filterHolder.filter(stack).isBlank()) {
+                return 0;
+            }
+            if (stack.getItem() instanceof DrawerCountHolder<?> countHolder) {
+                long removed;
+                try {
+                    removed = Math.min(countHolder.count(stack).longValueExact(), maxAmount);
+                } catch (ArithmeticException e) {
+                    removed = maxAmount;
+                }
+                countHolder.count(stack, countHolder.count(stack).subtract(BigInteger.valueOf(removed)));
+                return removed;
+            }
         }
-        component.count = component.count.subtract(BigInteger.valueOf(removed));
-        component.updateVariant();
-
-        updateSnapshots(transaction);
-        stack.put(DrawerPanelItem.COMPONENT, component);
-
-        return removed;
+        return 0;
     }
 
     @Override
@@ -81,27 +81,32 @@ public class DrawerPanelStorage extends SnapshotParticipant<ItemStack> implement
 
     @Override
     public boolean isResourceBlank() {
-        return stack.get(DrawerPanelItem.COMPONENT).itemVariant.isBlank();
+        return (stack.getItem() instanceof DrawerFilterHolder<?> filterHolder &&
+                filterHolder.filter(stack).isBlank()) || !(stack.getItem() instanceof DrawerFilterHolder<?>);
     }
 
     @Override
     public ItemVariant getResource() {
-        return stack.get(DrawerPanelItem.COMPONENT).itemVariant;
+        return (stack.getItem() instanceof DrawerFilterHolder<?> filterHolder) ? filterHolder.filter(stack) : ItemVariant.blank();
     }
 
     @Override
     public long getAmount() {
-        try {
-            return stack.get(DrawerPanelItem.COMPONENT).count.longValueExact();
-        } catch (ArithmeticException e) {
-            return Long.MAX_VALUE;
-        }
-    }
-
-    @Override
-    public long getCapacity() {
+        if ((stack.getItem() instanceof DrawerCountHolder<?> countHolder)) {
+            try {
+                return countHolder.count(stack).longValueExact();
+            } catch (ArithmeticException e) {
                 return Long.MAX_VALUE;
             }
+        }
+        return 0;
+    }
+
+    //todo make getamount return lower value so that getcapacity will allow you to insert (for when theres more then an entire long inside panel)
+    @Override
+    public long getCapacity() {
+        return Long.MAX_VALUE;
+    }
 
     @Override
     public boolean equals(Object o) {

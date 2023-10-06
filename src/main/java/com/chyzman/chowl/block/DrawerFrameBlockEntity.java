@@ -2,7 +2,7 @@ package com.chyzman.chowl.block;
 
 import com.chyzman.chowl.Chowl;
 import com.chyzman.chowl.client.ChowlClient;
-import com.chyzman.chowl.item.PanelItem;
+import com.chyzman.chowl.item.component.PanelItem;
 import io.wispforest.owo.ops.WorldOps;
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachmentBlockEntity;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -11,7 +11,6 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;

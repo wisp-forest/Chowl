@@ -1,13 +1,15 @@
-package com.chyzman.chowl.item;
+package com.chyzman.chowl.item.component;
 
 import com.chyzman.chowl.block.BlockButtonProvider;
 import com.chyzman.chowl.block.DrawerFrameBlock;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.transfer.TransferState;
+import io.wispforest.owo.nbt.NbtKey;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
+import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -21,8 +23,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 
+@SuppressWarnings("UnstableApiUsage")
 public interface PanelItem {
-    @SuppressWarnings("UnstableApiUsage")
     Button STORAGE_BUTTON = new Button(2, 2, 14, 14,
         (world, frame, side, stack, player, hand) -> {
             var stackInHand = player.getStackInHand(hand);
