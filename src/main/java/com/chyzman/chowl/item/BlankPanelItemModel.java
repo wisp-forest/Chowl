@@ -41,20 +41,24 @@ public class BlankPanelItemModel extends ForwardingBakedModel {
             return;
         }
 
-        context.pushTransform(RetextureQuadTransform
-            .get(drawerFrame.templateState)
-            .withRotation(direction ->
-                switch (RenderGlobals.FRAME_SIDE.get()) {
-                    case DOWN -> direction.rotateCounterclockwise(Direction.Axis.X);
-                    case UP -> direction.rotateClockwise(Direction.Axis.X);
-                    case NORTH -> direction.getOpposite();
-                    case SOUTH -> direction;
-                    case WEST -> direction.rotateClockwise(Direction.Axis.Y);
-                    case EAST -> direction.rotateCounterclockwise(Direction.Axis.Y);
-                }
-            ));
-        super.emitItemQuads(stack, randomSupplier, context);
-        context.popTransform();
+        var transform = RetextureQuadTransform.get(drawerFrame.templateState);
+        try (var ignored = transform.withRotation(direction -> {
+            //todo: fix this
+            if (RenderGlobals.FRAME_SIDE.get() == null) return direction;
+
+            return switch (RenderGlobals.FRAME_SIDE.get()) {
+                case DOWN -> direction.rotateCounterclockwise(Direction.Axis.X);
+                case UP -> direction.rotateClockwise(Direction.Axis.X);
+                case NORTH -> direction.getOpposite();
+                case SOUTH -> direction;
+                case WEST -> direction.rotateClockwise(Direction.Axis.Y);
+                case EAST -> direction.rotateCounterclockwise(Direction.Axis.Y);
+            };
+        })) {
+            context.pushTransform(transform);
+            super.emitItemQuads(stack, randomSupplier, context);
+            context.popTransform();
+        }
     }
 
     public record Unbaked(Identifier baseModel) implements UnbakedModel {

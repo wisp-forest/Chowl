@@ -1,5 +1,6 @@
 package com.chyzman.chowl.client;
 
+import com.chyzman.chowl.util.InfallibleCloseable;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -46,12 +47,15 @@ public class RetextureQuadTransform implements RenderContext.QuadTransform {
     }
 
     public static RetextureQuadTransform get(BlockState template) {
-        return CACHE.getUnchecked(template).withRotation(dir -> dir);
+        return CACHE.getUnchecked(template);
     }
 
-    public RetextureQuadTransform withRotation(Function<Direction, Direction> rotater) {
+    public InfallibleCloseable withRotation(Function<Direction, Direction> rotater) {
+        Function<Direction, Direction> oldRotater = this.rotater;
+
         this.rotater = rotater;
-        return this;
+
+        return () -> this.rotater = oldRotater;
     }
 
     @Override
