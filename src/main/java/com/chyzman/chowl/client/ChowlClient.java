@@ -3,6 +3,7 @@ package com.chyzman.chowl.client;
 import com.chyzman.chowl.block.DrawerFrameBlockEntityRenderer;
 import com.chyzman.chowl.block.DrawerFrameBlockModel;
 import com.chyzman.chowl.graph.ClientGraphStore;
+import com.chyzman.chowl.item.BlankPanelItemModel;
 import com.chyzman.chowl.item.renderer.DrawerFrameItemRenderer;
 import com.chyzman.chowl.item.renderer.DrawerPanelItemRenderer;
 import com.chyzman.chowl.item.renderer.MirrorPanelItemRenderer;
@@ -48,9 +49,13 @@ public class ChowlClient implements ClientModInitializer {
                     id("block/drawer_frame_base"));
 
             ctx.resolveModel().register(context -> {
-                if (!context.id().equals(id("block/drawer_frame"))) return null;
-
-                return new DrawerFrameBlockModel.Unbaked(id("block/drawer_frame_base"));
+                if (context.id().equals(id("block/drawer_frame"))) {
+                    return new DrawerFrameBlockModel.Unbaked(id("block/drawer_frame_base"));
+                } else if (context.id().equals(id("item/blank_panel"))) {
+                    return new BlankPanelItemModel.Unbaked(id("item/blank_panel_base"));
+                } else {
+                    return null;
+                }
             });
         });
 
