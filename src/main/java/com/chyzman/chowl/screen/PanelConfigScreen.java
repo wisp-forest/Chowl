@@ -1,14 +1,8 @@
 package com.chyzman.chowl.screen;
 
-import com.chyzman.chowl.item.component.DrawerCountHolder;
-import com.chyzman.chowl.item.component.DrawerCustomizationHolder;
-import com.chyzman.chowl.item.component.DrawerFilterHolder;
-import com.chyzman.chowl.item.component.DrawerLockHolder;
+import com.chyzman.chowl.item.component.*;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.component.ItemComponent;
-import io.wispforest.owo.ui.component.SmallCheckboxComponent;
-import io.wispforest.owo.ui.component.TextureComponent;
+import io.wispforest.owo.ui.component.*;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.GridLayout;
@@ -18,11 +12,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
-import java.math.BigInteger;
-
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
 public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelConfigSreenHandler> {
+    private FakeSlotComponent filterSlot;
+    private SmallCheckboxComponent lockedCheckbox;
+    private SmallCheckboxComponent showCountCheckBox;
+    private SmallCheckboxComponent showItemCheckBox;
+    private SmallCheckboxComponent showNameCheckBox;
 
     public PanelConfigScreen(PanelConfigSreenHandler screenHandler, PlayerInventory inventory, Text title) {
         super(screenHandler, inventory, title);
@@ -35,48 +32,43 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
 
     @Override
     protected void build(FlowLayout rootComponent) {
-        var filter = (handler.stack.get().getItem() instanceof DrawerFilterHolder<?> drawerFilterHolder) ? drawerFilterHolder.filter(handler.stack.get()).toStack() : ItemStack.EMPTY;
-        var locked = handler.stack.get().getItem() instanceof DrawerLockHolder<?> lockHolder && lockHolder.locked(handler.stack.get());
-        var customization = (handler.stack.get().getItem() instanceof DrawerCustomizationHolder<?> drawerCustomizationHolder) ? drawerCustomizationHolder.customizationComponent(handler.stack.get()) : new DrawerCustomizationHolder.DrawerCustomizationComponent();
-        var filterQuoteSlotUnQuote = new FakeSlotComponent(filter)
-                .<FakeSlotComponent>configure(fakeSlot -> {
-                    fakeSlot.mouseDown().subscribe((mouseX, mouseY, button) -> {
-                        if (button == 0) {
-                            handler.sendMessage(new PanelConfigSreenHandler.ConfigFilter(handler.getCursorStack()));
-                        }
-                        return true;
-                    });
-                    fakeSlot.setTooltipFromStack(true);
-                    fakeSlot.id("filter-slot");
-                });
-        var lockedCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.locked"))
-                .<SmallCheckboxComponent>configure(smallCheckboxComponent -> {
-                    smallCheckboxComponent.checked(locked);
-                    smallCheckboxComponent.onChanged().subscribe(nowChecked -> {
-                        handler.sendMessage(new PanelConfigSreenHandler.ConfigConfig(nowChecked, customization.showCount(), customization.showItem(), customization.showName()));
-                    });
-                });
-        var showCountCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_count"))
-                .<SmallCheckboxComponent>configure(smallCheckboxComponent -> {
-                    smallCheckboxComponent.checked(handler.stack.get().getItem() instanceof DrawerCustomizationHolder<?> customizationHolder && customizationHolder.showCount(handler.stack.get()));
-                    smallCheckboxComponent.onChanged().subscribe(nowChecked -> {
-                        handler.sendMessage(new PanelConfigSreenHandler.ConfigConfig(locked, nowChecked, customization.showItem(), customization.showName()));
-                    });
-                });
-        var showItemCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_item"))
-                .<SmallCheckboxComponent>configure(smallCheckboxComponent -> {
-                    smallCheckboxComponent.checked(customization.showItem());
-                    smallCheckboxComponent.onChanged().subscribe(nowChecked -> {
-                        handler.sendMessage(new PanelConfigSreenHandler.ConfigConfig(locked, customization.showCount(), nowChecked, customization.showName()));
-                    });
-                });
-        var showNameCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_name"))
-                .<SmallCheckboxComponent>configure(smallCheckboxComponent -> {
-                    smallCheckboxComponent.checked(customization.showName());
-                    smallCheckboxComponent.onChanged().subscribe(nowChecked -> {
-                        handler.sendMessage(new PanelConfigSreenHandler.ConfigConfig(locked, customization.showCount(), customization.showItem(), nowChecked));
-                    });
-                });
+        ItemStack stack = handler.stack.get();
+
+        if (stack.getItem() instanceof FilteringPanelItem filtering) {
+            this.filterSlot = new FakeSlotComponent(filtering.currentFilter(stack).toStack());
+
+            filterSlot.mouseDown().subscribe((mouseX, mouseY, button) -> {
+                if (button == 0) {
+                    handler.sendMessage(new PanelConfigSreenHandler.ConfigFilter(handler.getCursorStack()));
+                }
+                return true;
+            });
+            filterSlot.setTooltipFromStack(true);
+            filterSlot.id("filter-slot");
+        }
+
+        if (stack.getItem() instanceof LockablePanelItem lockable) {
+            this.lockedCheckbox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.locked"));
+
+            lockedCheckbox.checked(lockable.locked(stack));
+            lockedCheckbox.onChanged().subscribe(nowChecked -> resendConfig());
+        }
+
+        if (stack.getItem() instanceof DisplayingPanelItem) {
+            var config = stack.get(DisplayingPanelItem.CONFIG);
+
+            this.showCountCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_count"));
+            showCountCheckBox.checked(!config.hideCount());
+            showCountCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
+
+            this.showItemCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_item"));
+            showItemCheckBox.checked(!config.hideItem());
+            showItemCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
+
+            this.showNameCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_name"));
+            showNameCheckBox.checked(!config.hideName());
+            showNameCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
+        }
 
         var inventoryFlow = Containers.grid(Sizing.content(), Sizing.content(), 4, 9)
                 .<GridLayout>configure(gridLayout -> {
@@ -93,53 +85,79 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                 .<FlowLayout>configure(flowLayout -> {
                     flowLayout.surface(Surface.PANEL);
                     flowLayout.padding(Insets.of(7));
-                    flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
-                            .<FlowLayout>configure(flow -> {
-                                flow.margins(Insets.bottom(1));
-                                flow.verticalAlignment(VerticalAlignment.CENTER);
-                            })
-                            .child(filterQuoteSlotUnQuote.margins(Insets.of(1).withRight(3)))
+
+                    if (filterSlot != null) {
+                        var slotFlow = Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18));
+                        slotFlow
+                            .margins(Insets.bottom(1))
+                            .verticalAlignment(VerticalAlignment.CENTER);
+
+                        slotFlow
+                            .child(filterSlot
+                                .margins(Insets.of(1).withRight(3)))
                             .child(Components.texture(id("textures/gui/container/slot.png"), 0, 0, 18, 18, 18, 18)
-                                    .<TextureComponent>configure(textureComponent -> {
-                                        textureComponent.positioning(Positioning.absolute(0, 0));
-                                    }))
-                            .child(Components.label(Text.translatable("ui.chowl-industries.config_panel.filter"))
-                            ));
-                    flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
+                                .positioning(Positioning.absolute(0, 0)))
+                            .child(Components.label(Text.translatable("ui.chowl-industries.config_panel.filter")));
+
+                        flowLayout.child(slotFlow);
+                    }
+
+                    if (lockedCheckbox != null) {
+                        flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
                             .<FlowLayout>configure(flow -> {
                                 flow.margins(Insets.bottom(1));
                                 flow.verticalAlignment(VerticalAlignment.CENTER);
                             })
-                            .child(lockedCheckBox));
-                    flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
+                            .child(lockedCheckbox));
+                    }
+
+                    if (showCountCheckBox != null) {
+                        flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
                             .<FlowLayout>configure(flow -> {
                                 flow.margins(Insets.bottom(1));
                                 flow.verticalAlignment(VerticalAlignment.CENTER);
                             })
                             .child(showCountCheckBox));
-                    flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
+                    }
+
+                    if (showItemCheckBox != null) {
+                        flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
                             .<FlowLayout>configure(flow -> {
                                 flow.margins(Insets.bottom(1));
                                 flow.verticalAlignment(VerticalAlignment.CENTER);
                             })
                             .child(showItemCheckBox));
-                    flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
+                    }
+
+                    if (showNameCheckBox != null) {
+                        flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
                             .<FlowLayout>configure(flow -> {
                                 flow.margins(Insets.bottom(1));
                                 flow.verticalAlignment(VerticalAlignment.CENTER);
                             })
                             .child(showNameCheckBox));
+                    }
+
                     flowLayout.child(inventoryFlow);
                 });
 
 
-        handler.stack.observe(stack -> {
-            var newCustomization = (handler.stack.get().getItem() instanceof DrawerCustomizationHolder<?> drawerCustomizationHolder) ? drawerCustomizationHolder.customizationComponent(handler.stack.get()) : new DrawerCustomizationHolder.DrawerCustomizationComponent();
-            filterQuoteSlotUnQuote.stack((handler.stack.get().getItem() instanceof DrawerFilterHolder<?> drawerFilterHolder) ? drawerFilterHolder.filter(handler.stack.get()).toStack() : ItemStack.EMPTY);
-            lockedCheckBox.checked(handler.stack.get().getItem() instanceof DrawerCustomizationHolder<?> customizationHolder && customizationHolder.showCount(handler.stack.get()));
-            showCountCheckBox.checked(newCustomization.showCount());
-            showItemCheckBox.checked(newCustomization.showItem());
-            showNameCheckBox.checked(newCustomization.showName());
+        handler.stack.observe(newStack -> {
+            if (newStack.getItem() instanceof FilteringPanelItem filtering) {
+                filterSlot.stack(filtering.currentFilter(newStack).toStack());
+            }
+
+            if (newStack.getItem() instanceof LockablePanelItem lockable) {
+                lockedCheckbox.checked(lockable.locked(newStack));
+            }
+
+            if (stack.getItem() instanceof DisplayingPanelItem) {
+                var newConfig = newStack.get(DisplayingPanelItem.CONFIG);
+
+                showCountCheckBox.checked(!newConfig.hideCount());
+                showItemCheckBox.checked(!newConfig.hideItem());
+                showNameCheckBox.checked(!newConfig.hideName());
+            }
         });
 
         rootComponent.child(Containers.verticalFlow(Sizing.fill(100), Sizing.fill(100))
@@ -151,6 +169,17 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
         );
     }
 
+    private void resendConfig() {
+        var displayConfig = new DisplayingPanelItem.Config();
+        boolean locked = false;
+
+        if (lockedCheckbox != null) locked = lockedCheckbox.checked();
+        if (showNameCheckBox != null) displayConfig.hideName(!showNameCheckBox.checked());
+        if (showItemCheckBox != null) displayConfig.hideItem(!showItemCheckBox.checked());
+        if (showCountCheckBox != null) displayConfig.hideCount(!showCountCheckBox.checked());
+
+        handler.sendMessage(new PanelConfigSreenHandler.ConfigConfig(displayConfig, locked));
+    }
 
     @Override
     public boolean shouldPause() {

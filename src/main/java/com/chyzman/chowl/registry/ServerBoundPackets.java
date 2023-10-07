@@ -4,33 +4,36 @@ import com.chyzman.chowl.block.DoubleClickableBlock;
 import com.chyzman.chowl.classes.AttackInteractionReceiver;
 import com.chyzman.chowl.graph.DestroyGraphPacket;
 import com.chyzman.chowl.graph.SyncGraphPacket;
-import com.chyzman.chowl.item.component.DrawerCustomizationHolder;
+import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import eu.pb4.common.protection.api.CommonProtection;
 import io.wispforest.owo.network.serialization.PacketBufSerializer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.text.Style;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 
 import static com.chyzman.chowl.Chowl.CHANNEL;
-import static net.minecraft.datafixer.fix.BlockEntitySignTextStrictJsonFix.GSON;
 
 public class ServerBoundPackets {
     public static void init() {
         PacketBufSerializer.register(
-                DrawerCustomizationHolder.DrawerCustomizationComponent.class,
+                DisplayingPanelItem.Config.class,
                 (buf, config) -> {
-                    buf.writeBoolean(config.showCount());
-                    buf.writeBoolean(config.showName());
-                    buf.writeBoolean(config.showItem());
-                    buf.writeString(GSON.toJson(config.textStyle));
+                    buf.writeBoolean(config.hideCount());
+                    buf.writeBoolean(config.hideName());
+                    buf.writeBoolean(config.hideItem());
+                    buf.encode(NbtOps.INSTANCE, Style.CODEC, config.textStyle());
                 }, buf -> {
-                    return new DrawerCustomizationHolder.DrawerCustomizationComponent()
-                            .showCount(buf.readBoolean())
-                            .showName(buf.readBoolean())
-                            .showItem(buf.readBoolean())
-                            .textStyle(GSON.fromJson(buf.readString(), Style.class));
+                    var config = new DisplayingPanelItem.Config();
+
+                    config.hideCount(buf.readBoolean());
+                    config.hideName(buf.readBoolean());
+                    config.hideItem(buf.readBoolean());
+                    config.textStyle(buf.decode(NbtOps.INSTANCE, Style.CODEC));
+
+                    return config;
                 });
 
 

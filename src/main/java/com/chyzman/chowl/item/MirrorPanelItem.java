@@ -2,18 +2,22 @@ package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.graph.GraphStore;
-import com.chyzman.chowl.item.component.DrawerCustomizationHolder;
-import com.chyzman.chowl.item.component.DrawerFilterHolder;
+import com.chyzman.chowl.item.component.FilteringPanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.CombinedSingleSlotStorage;
 import com.chyzman.chowl.transfer.TransferState;
+import com.chyzman.chowl.util.NbtKeyTypes;
+import io.wispforest.owo.nbt.NbtKey;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -22,7 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
-public class MirrorPanelItem extends Item implements PanelItem, DrawerFilterHolder, DrawerCustomizationHolder {
+public class MirrorPanelItem extends Item implements PanelItem, FilteringPanelItem {
+    public static final NbtKey<ItemVariant> FILTER = new NbtKey<>("Filter", NbtKeyTypes.ITEM_VARIANT);
 
     public static final PanelItem.Button SET_FILTER_BUTTON = new PanelItem.Button(2, 2, 14, 14,
         (world, drawerFrame, side, stack, player, hand) -> {
@@ -96,5 +101,26 @@ public class MirrorPanelItem extends Item implements PanelItem, DrawerFilterHold
         } else {
             return List.of(STORAGE_BUTTON);
         }
+    }
+
+    @Override
+    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
+        tryOpenConfigScreen(world, user, hand);
+        return super.use(world, user, hand);
+    }
+
+    @Override
+    public ItemVariant currentFilter(ItemStack stack) {
+        return stack.get(FILTER);
+    }
+
+    @Override
+    public boolean canSetFilter(ItemStack stack, ItemVariant to) {
+        return true;
+    }
+
+    @Override
+    public void setFilter(ItemStack stack, ItemVariant newFilter) {
+        stack.put(FILTER, newFilter);
     }
 }

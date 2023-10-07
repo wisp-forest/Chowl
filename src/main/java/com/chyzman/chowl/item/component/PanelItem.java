@@ -3,16 +3,21 @@ package com.chyzman.chowl.item.component;
 import com.chyzman.chowl.block.BlockButtonProvider;
 import com.chyzman.chowl.block.DrawerFrameBlock;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
+import com.chyzman.chowl.screen.PanelConfigSreenHandler;
 import com.chyzman.chowl.transfer.TransferState;
-import io.wispforest.owo.nbt.NbtKey;
+import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
-import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Pair;
@@ -112,6 +117,31 @@ public interface PanelItem {
 
     default boolean canExtractFromButton() {
         return true;
+    }
+
+    default void tryOpenConfigScreen(World world, PlayerEntity user, Hand hand) {
+        if (!world.isClient) {
+            if (user.isSneaking()) {
+                var stack = user.getStackInHand(hand);
+                var factory = new ExtendedScreenHandlerFactory() {
+                    @Override
+                    public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+                        return new PanelConfigSreenHandler(syncId, playerInventory, stack);
+                    }
+
+                    @Override
+                    public Text getDisplayName() {
+                        return Text.translatable("container.chowl.panel_config.title");
+                    }
+
+                    @Override
+                    public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
+                        buf.writeItemStack(user.getStackInHand(hand));
+                    }
+                };
+                user.openHandledScreen(factory);
+            }
+        }
     }
 
     record Button(float minX, float minY, float maxX, float maxY, UseFunction use,

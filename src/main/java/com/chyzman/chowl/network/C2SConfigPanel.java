@@ -1,7 +1,7 @@
 package com.chyzman.chowl.network;
 
 
-import com.chyzman.chowl.item.component.DrawerCustomizationHolder;
+import com.chyzman.chowl.item.component.DisplayingPanelItem;
 
-public record C2SConfigPanel(DrawerCustomizationHolder.DrawerCustomizationComponent config) {
+public record C2SConfigPanel(DisplayingPanelItem.Config config) {
 }
