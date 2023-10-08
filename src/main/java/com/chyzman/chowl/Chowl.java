@@ -1,6 +1,7 @@
 package com.chyzman.chowl;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
+import com.chyzman.chowl.classes.ChowlIndustriesConfig;
 import com.chyzman.chowl.commands.DebugCommands;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.registry.ServerBoundPackets;
@@ -24,7 +25,7 @@ import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
 public class Chowl implements ModInitializer {
     public static final String MODID = "chowl-industries";
-//    public static final ChowlIndustriesConfig CONFIG = ChowlIndustriesConfig.createAndLoad();
+    public static final ChowlIndustriesConfig CHOWL_CONFIG = ChowlIndustriesConfig.createAndLoad();
 
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(id(FabricLoader.getInstance()
         .getModContainer("chowl-industries")

@@ -23,11 +23,13 @@ import org.jetbrains.annotations.Nullable;
 import java.math.BigInteger;
 import java.util.List;
 
+import static com.chyzman.chowl.Chowl.CHOWL_CONFIG;
+
 @SuppressWarnings("UnstableApiUsage")
 public class DrawerPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem {
     public static final NbtKey<ItemVariant> VARIANT = new NbtKey<>("Variant", NbtKeyTypes.ITEM_VARIANT);
     public static final NbtKey<BigInteger> COUNT = new NbtKey<>("Count", NbtKeyTypes.BIG_INTEGER);
-//    public static final NbtKey<BigInteger> CAPACITY = new NbtKey<>("Capacity", NbtKeyTypes.BIG_INTEGER);
+    public static final NbtKey<BigInteger> CAPACITY = new NbtKey<>("Capacity", NbtKeyTypes.BIG_INTEGER);
     public static final NbtKey<Boolean> LOCKED = new NbtKey<>("Locked", NbtKey.Type.BOOLEAN);
 
     public DrawerPanelItem(Settings settings) {
@@ -89,6 +91,11 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
         return stack.get(COUNT);
     }
 
+
+    public static BigInteger getCapacity(ItemStack stack) {
+        return new BigInteger(CHOWL_CONFIG.base_panel_capacity()).multiply(BigIntUtils.pow(BigInteger.valueOf(2), stack.get(CAPACITY)));
+    }
+
     @SuppressWarnings("UnstableApiUsage")
     private static class Storage extends PanelStorage implements SingleSlotStorage<ItemVariant> {
         public Storage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
@@ -102,10 +109,16 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
             if (contained.isBlank()) contained = resource;
             if (!contained.equals(resource)) return 0;
 
+            var currentCount = stack.get(COUNT);
+            var capacity = DrawerPanelItem.getCapacity(stack);
+            var full = currentCount.compareTo(capacity) >= 0;
+            long inserted = full ? 0 : Math.min(BigIntUtils.longValueSaturating(capacity.subtract(currentCount)), maxAmount);
+            var newCount = full ? capacity : currentCount.add(BigInteger.valueOf(maxAmount));
+
             updateSnapshots(transaction);
             stack.put(VARIANT, contained);
-            stack.put(COUNT, stack.get(COUNT).add(BigInteger.valueOf(maxAmount))); // TODO: add capacity.
-            return maxAmount;
+            stack.put(COUNT, newCount);
+            return inserted;
         }
 
         @Override

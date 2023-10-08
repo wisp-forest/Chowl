@@ -2,6 +2,7 @@ package com.chyzman.chowl.item.renderer;
 
 import com.chyzman.chowl.item.DrawerPanelItem;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
+import com.chyzman.chowl.util.BigIntUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
@@ -18,6 +19,8 @@ import net.minecraft.util.math.RotationAxis;
 
 import java.math.BigInteger;
 
+import static com.chyzman.chowl.Chowl.CHOWL_CONFIG;
+import static com.chyzman.chowl.item.DrawerPanelItem.CAPACITY;
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
 @Environment(EnvType.CLIENT)
@@ -71,7 +74,8 @@ public class DrawerPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
             matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
             matrices.translate(0, -3 / 8f, -1 / 31f);
             matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
-            var amount = count.toString();
+            var cap = stack.get(CAPACITY).compareTo(BigInteger.valueOf(64)) > 0 ? "2^" + stack.get(CAPACITY).toString() : DrawerPanelItem.getCapacity(stack);
+            var amount = count + "/" + cap;
             var amountWidth = client.textRenderer.getWidth(amount);
             if (amountWidth > maxwidth) {
                 matrices.scale(maxwidth / amountWidth, maxwidth / amountWidth, maxwidth / amountWidth);
