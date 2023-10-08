@@ -3,6 +3,7 @@
 
 package com.chyzman.chowl.block;
 
+import com.chyzman.chowl.client.RenderGlobals;
 import com.chyzman.chowl.client.RetextureQuadTransform;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
@@ -14,6 +15,7 @@ import net.minecraft.client.render.model.ModelBakeSettings;
 import net.minecraft.client.render.model.UnbakedModel;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.SpriteIdentifier;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
@@ -41,6 +43,16 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
 
         if (template != null) context.pushTransform(RetextureQuadTransform.get(template));
         super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
+        if (template != null) context.popTransform();
+    }
+
+    @Override
+    public void emitItemQuads(ItemStack stack, Supplier<Random> randomSupplier, RenderContext context) {
+        var frame = RenderGlobals.DRAWER_FRAME.get();
+        BlockState template = frame != null ? frame.templateState : null;
+
+        if (template != null) context.pushTransform(RetextureQuadTransform.get(template));
+        super.emitItemQuads(stack, randomSupplier, context);
         if (template != null) context.popTransform();
     }
 
