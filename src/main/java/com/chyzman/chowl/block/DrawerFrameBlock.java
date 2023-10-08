@@ -110,6 +110,24 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 var stack = Items.BARRIER.getDefaultStack();
                 client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, client.getItemRenderer().getModels().getModel(stack));
             });
+    public static final BlockButtonProvider.Button CONFIG_BUTTON = new Button(12, 14, 14, 16, null,
+            (world, state, hitResult, player) -> {
+                if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
+                    return ActionResult.PASS;
+
+                var selected = blockEntity.stacks.get(hitResult.getSide().getId()).getLeft();
+
+                player.getInventory().offerOrDrop(selected);
+                blockEntity.stacks.set(hitResult.getSide().getId(), new Pair<>(ItemStack.EMPTY, 0));
+                blockEntity.markDirty();
+
+                return ActionResult.SUCCESS;
+            },
+            null,
+            (client, entity, hitResult, vertexConsumers, matrices) -> {
+                var stack = Items.STRUCTURE_VOID.getDefaultStack();
+                client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, client.getItemRenderer().getModels().getModel(stack));
+            });
 
     public DrawerFrameBlock(Settings settings) {
         super(settings);
@@ -246,6 +264,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         if (selected.isEmpty()) return List.of();
 
         List<Button> buttons = new ArrayList<>();
+        buttons.add(CONFIG_BUTTON);
         buttons.add(REMOVE_BUTTON);
 
         if (selected.getItem() instanceof PanelItem panelItem) {

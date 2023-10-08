@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.OptionalInt;
 
 @SuppressWarnings("UnstableApiUsage")
-public class CompressingPanelItem extends Item implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem {
+public class CompressingPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem {
     public static final NbtKey<Item> ITEM = new NbtKey<>("Variant", NbtKey.Type.ofRegistry(Registries.ITEM));
     public static final NbtKey<BigInteger> COUNT = new NbtKey<>("Count", NbtKeyTypes.BIG_INTEGER);
     //    public static final NbtKey<BigInteger> CAPACITY = new NbtKey<>("Capacity", NbtKeyTypes.BIG_INTEGER);

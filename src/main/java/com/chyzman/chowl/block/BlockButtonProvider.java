@@ -38,7 +38,7 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
         vec.add(0.5f, 0.5f, 0.5f);
 
         for (var button : listButtons(world, state, hitResult)) {
-            if (!button.isIn(vec.y, vec.z)) continue;
+            if (!button.isIn(vec.z, vec.y)) continue;
 
             return button;
         }
@@ -80,22 +80,22 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
     }
 
     @FunctionalInterface
-    public interface UseFunction {
+    interface UseFunction {
         ActionResult apply(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit);
     }
 
     @FunctionalInterface
-    public interface AttackFunction {
+    interface AttackFunction {
         ActionResult apply(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player);
     }
 
     @FunctionalInterface
-    public interface DoubleClickFunction {
+    interface DoubleClickFunction {
         ActionResult apply(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player);
     }
 
     @FunctionalInterface
-    public interface RenderConsumer {
+    interface RenderConsumer {
         void consume(MinecraftClient client, DrawerFrameBlockEntity entity, BlockHitResult hitResult, VertexConsumerProvider vertexConsumers, MatrixStack matrices);
     }
 }

@@ -1,7 +1,7 @@
 {
   "credit": "made by basik",
-  "parent": "minecraft:item/generated",
+  "parent": "chowl-industries:item/panel_base",
   "textures": {
-    "layer0": "chowl-industries:item/mirror_panel"
+    "0": "chowl-industries:item/mirror_panel"
   }
 }
