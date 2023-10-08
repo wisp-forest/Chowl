@@ -43,6 +43,9 @@ public class CompressionManager {
         sb.append("digraph \"Compression Ladder\" {\n");
 
         for (var node : NODES.values()) {
+            sb.append("    ");
+            sb.append('"').append(Registries.ITEM.getId(node.item)).append("\";\n");
+
             if (node.next == null) continue;
 
             sb.append("    ");
@@ -61,6 +64,42 @@ public class CompressionManager {
         node.tryFill();
         return node;
     }
+
+    public static Item followDown(Item item) {
+        var node = getOrCreateNode(item);
+
+        while (node.previous != null) node = node.previous;
+
+        return node.item;
+    }
+
+    public static @Nullable DescendResult downBy(Item item, int amount) {
+        var node = getOrCreateNode(item);
+        int totalMultiplier = 1;
+
+        for (int i = 0; i < amount; i++) {
+            if (node.previous == null) return null;
+            totalMultiplier *= node.previousAmount;
+            node = node.previous;
+        }
+
+        return new DescendResult(node.item, totalMultiplier);
+    }
+
+    public static @Nullable DescendResult upBy(Item item, int amount) {
+        var node = getOrCreateNode(item);
+        int totalMultiplier = 1;
+
+        for (int i = 0; i < amount; i++) {
+            if (node.next == null) return null;
+            totalMultiplier *= node.nextAmount;
+            node = node.next;
+        }
+
+        return new DescendResult(node.item, totalMultiplier);
+    }
+
+    public record DescendResult(Item item, int total) {}
 
     public static class Node {
         public final Item item;

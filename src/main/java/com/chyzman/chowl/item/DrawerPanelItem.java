@@ -113,6 +113,7 @@ public class DrawerPanelItem extends Item implements PanelItem, FilteringPanelIt
             var contained = stack.get(VARIANT);
 
             if (contained.isBlank()) return 0;
+            if (!contained.equals(resource)) return 0;
 
             var currentCount = stack.get(COUNT);
 
