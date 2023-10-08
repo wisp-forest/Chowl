@@ -3,7 +3,8 @@ package com.chyzman.chowl.client;
 import com.chyzman.chowl.block.DrawerFrameBlockEntityRenderer;
 import com.chyzman.chowl.block.DrawerFrameBlockModel;
 import com.chyzman.chowl.graph.ClientGraphStore;
-import com.chyzman.chowl.item.model.BlankPanelItemModel;
+import com.chyzman.chowl.item.BlankPanelItemModel;
+import com.chyzman.chowl.item.renderer.CompressingPanelItemRenderer;
 import com.chyzman.chowl.item.renderer.DrawerFrameItemRenderer;
 import com.chyzman.chowl.item.renderer.DrawerPanelItemRenderer;
 import com.chyzman.chowl.item.renderer.MirrorPanelItemRenderer;
@@ -42,11 +43,13 @@ public class ChowlClient implements ClientModInitializer {
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.DRAWER_FRAME_ITEM, new DrawerFrameItemRenderer());
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.DRAWER_PANEL_ITEM, new DrawerPanelItemRenderer());
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.MIRROR_PANEL_ITEM, new MirrorPanelItemRenderer());
+        BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.COMPRESSING_PANEL_ITEM, new CompressingPanelItemRenderer());
         HandledScreens.register(PanelConfigSreenHandler.TYPE, PanelConfigScreen::new);
 
         ModelLoadingPlugin.register(ctx -> {
             ctx.addModels(id("item/drawer_panel_base"), id("item/mirror_panel_base"),
-                    id("block/drawer_frame_base"));
+                    id("block/drawer_frame_base"), id("item/compressing_panel_base"),
+                    id("block/drawer_frame"));
 
             ctx.resolveModel().register(context -> {
                 if (context.id().equals(id("block/drawer_frame"))) {

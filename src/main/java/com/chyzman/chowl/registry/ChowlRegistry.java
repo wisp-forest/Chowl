@@ -5,7 +5,6 @@ import com.chyzman.chowl.item.*;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -28,6 +27,8 @@ public class ChowlRegistry {
     public static final Item MIRROR_PANEL_ITEM = registerItem("mirror_panel", new MirrorPanelItem(new Item.Settings().maxCount(1)));
 
     public static final Item BLANK_PANEL_ITEM = registerItem("blank_panel", new BlankPanelItem(new Item.Settings().maxCount(1)));
+
+    public static final Item COMPRESSING_PANEL_ITEM = registerItem("compressing_panel", new CompressingPanelItem(new Item.Settings().maxCount(1)));
 
     public static final Block DRAWER_FRAME_BLOCK = registerBlock("drawer_frame",
             new DrawerFrameBlock(
