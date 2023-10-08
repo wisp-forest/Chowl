@@ -1,9 +1,8 @@
-package com.chyzman.chowl.item;
+package com.chyzman.chowl.item.model;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.client.RenderGlobals;
 import com.chyzman.chowl.client.RetextureQuadTransform;
-import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.render.model.BakedModel;

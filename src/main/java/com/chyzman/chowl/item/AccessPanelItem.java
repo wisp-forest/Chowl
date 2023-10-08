@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class AccessPanelItem extends Item implements PanelItem {
+public class AccessPanelItem extends BasePanelItem implements PanelItem {
     public AccessPanelItem(Settings settings) {
         super(settings);
     }

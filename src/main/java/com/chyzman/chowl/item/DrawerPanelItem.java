@@ -24,7 +24,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
-public class DrawerPanelItem extends Item implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem {
+public class DrawerPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem {
     public static final NbtKey<ItemVariant> VARIANT = new NbtKey<>("Variant", NbtKeyTypes.ITEM_VARIANT);
     public static final NbtKey<BigInteger> COUNT = new NbtKey<>("Count", NbtKeyTypes.BIG_INTEGER);
 //    public static final NbtKey<BigInteger> CAPACITY = new NbtKey<>("Capacity", NbtKeyTypes.BIG_INTEGER);

@@ -10,7 +10,7 @@ import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
-public class BlankPanelItem extends Item implements PanelItem {
+public class BlankPanelItem extends BasePanelItem implements PanelItem {
     public BlankPanelItem(Settings settings) {
         super(settings);
     }

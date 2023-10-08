@@ -3,7 +3,7 @@ package com.chyzman.chowl.client;
 import com.chyzman.chowl.block.DrawerFrameBlockEntityRenderer;
 import com.chyzman.chowl.block.DrawerFrameBlockModel;
 import com.chyzman.chowl.graph.ClientGraphStore;
-import com.chyzman.chowl.item.BlankPanelItemModel;
+import com.chyzman.chowl.item.model.BlankPanelItemModel;
 import com.chyzman.chowl.item.renderer.DrawerFrameItemRenderer;
 import com.chyzman.chowl.item.renderer.DrawerPanelItemRenderer;
 import com.chyzman.chowl.item.renderer.MirrorPanelItemRenderer;

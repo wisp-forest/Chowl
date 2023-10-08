@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
-public class MirrorPanelItem extends Item implements PanelItem, FilteringPanelItem {
+public class MirrorPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem {
     public static final NbtKey<ItemVariant> FILTER = new NbtKey<>("Filter", NbtKeyTypes.ITEM_VARIANT);
 
     public static final PanelItem.Button SET_FILTER_BUTTON = new PanelItem.Button(2, 2, 14, 14,

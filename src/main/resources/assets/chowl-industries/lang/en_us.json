@@ -10,5 +10,7 @@
   "ui.chowl-industries.config_panel.locked": "Locked",
   "ui.chowl-industries.config_panel.show_count": "Show Count",
   "ui.chowl-industries.config_panel.show_item": "Show Item",
-  "ui.chowl-industries.config_panel.show_name": "Show Name"
+  "ui.chowl-industries.config_panel.show_name": "Show Name",
+  "ui.chowl-industries.panel.tooltip.filter.label": "Filter:",
+  "ui.chowl-industries.panel.tooltip.count.label": "Count: %s"
 }
