@@ -1,7 +1,56 @@
 {
-  "credit": "made by chyzman",
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "chowl-industries:item/blank_panel"
-  }
+	"credit": "Made by chyzman",
+	"textures": {
+		"0": "chowl-industries:item/blank_panel"
+	},
+	"elements": [
+		{
+			"from": [2, 2, 7.8],
+			"to": [14, 14, 8.5],
+			"faces": {
+				"north": {"uv": [2, 2, 14, 14], "texture": "#0"},
+				"east": {"uv": [2, 2, 3, 14], "texture": "#0"},
+				"south": {"uv": [2, 2, 14, 14], "texture": "#0"},
+				"west": {"uv": [2, 2, 3, 14], "texture": "#0"},
+				"up": {"uv": [2, 2, 14, 3], "texture": "#0"},
+				"down": {"uv": [2, 2, 14, 3], "texture": "#0"}
+			}
+		}
+	],
+	"gui_light": "front",
+	"display": {
+		"thirdperson_righthand": {
+			"translation": [0, 3, 1],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"thirdperson_lefthand": {
+			"translation": [0, 3, 1],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"firstperson_righthand": {
+			"rotation": [-10, -10, 0],
+			"translation": [-0.5, 5.5, 0],
+			"scale": [0.68, 0.68, 0.68]
+		},
+		"firstperson_lefthand": {
+			"rotation": [-10, -10, 0],
+			"translation": [-0.5, 5.5, 0],
+			"scale": [0.68, 0.68, 0.68]
+		},
+		"ground": {
+			"translation": [0, 2, 0],
+			"scale": [0.66667, 0.66667, 0.66667]
+		},
+		"gui": {
+			"scale": [1.33333, 1.33333, 1.33333]
+		},
+		"head": {
+			"rotation": [0, 180, 0],
+			"translation": [0, 0, -6.33333],
+			"scale": [1.06667, 1.06667, 1.06667]
+		},
+		"fixed": {
+			"rotation": [0, 180, 0]
+		}
+	}
 }
