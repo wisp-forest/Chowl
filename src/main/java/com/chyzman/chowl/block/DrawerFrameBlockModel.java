@@ -4,7 +4,8 @@
 package com.chyzman.chowl.block;
 
 import com.chyzman.chowl.client.RenderGlobals;
-import com.chyzman.chowl.client.RetextureQuadTransform;
+import com.chyzman.chowl.client.RetextureInfo;
+import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
@@ -18,9 +19,11 @@ import net.minecraft.client.util.SpriteIdentifier;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
@@ -41,7 +44,10 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
     public void emitBlockQuads(BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context) {
         var template = (BlockState) ((RenderAttachedBlockView) blockView).getBlockEntityRenderAttachment(pos);
 
-        if (template != null) context.pushTransform(RetextureQuadTransform.get(template));
+        if (template != null) {
+            var info = RetextureInfo.get(template);
+            context.pushTransform(new RetextureTransform(info, blockView, pos));
+        }
         super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
         if (template != null) context.popTransform();
     }
@@ -51,9 +57,36 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
         var frame = RenderGlobals.DRAWER_FRAME.get();
         BlockState template = frame != null ? frame.templateState : null;
 
-        if (template != null) context.pushTransform(RetextureQuadTransform.get(template));
+        if (template != null) {
+            var info = RetextureInfo.get(template);
+            context.pushTransform(new RetextureTransform(info, null, null));
+        }
         super.emitItemQuads(stack, randomSupplier, context);
         if (template != null) context.popTransform();
+    }
+
+    private static class RetextureTransform implements RenderContext.QuadTransform {
+        private final RetextureInfo info;
+        private final @Nullable BlockRenderView world;
+        private final @Nullable BlockPos pos;
+
+        private RetextureTransform(RetextureInfo info, @Nullable BlockRenderView world, @Nullable BlockPos pos) {
+            this.info = info;
+            this.world = world;
+            this.pos = pos;
+        }
+
+        @Override
+        public boolean transform(MutableQuadView quad) {
+            Direction face = quad.nominalFace();
+            if (face == null) return true;
+
+            if (!info.changeSprite(quad, face)) return false;
+
+            if (world != null && pos != null) info.changeColor(quad, face, world, pos);
+
+            return true;
+        }
     }
 
     public record Unbaked(Identifier baseModel) implements UnbakedModel {

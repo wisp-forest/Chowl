@@ -56,6 +56,8 @@ public class ChowlClient implements ClientModInitializer {
                     return new DrawerFrameBlockModel.Unbaked(id("block/drawer_frame_base"));
                 } else if (context.id().equals(id("item/blank_panel"))) {
                     return new BlankPanelItemModel.Unbaked(id("item/blank_panel_base"));
+                } else if (context.id().equals(id("item/phantom_panel"))) {
+                    return new BlankPanelItemModel.Unbaked(id("item/phantom_panel_base"));
                 } else {
                     return null;
                 }

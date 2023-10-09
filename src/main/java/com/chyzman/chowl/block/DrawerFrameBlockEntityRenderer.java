@@ -94,8 +94,12 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                         matrices.scale(3 / 4f, 3 / 4f, 3 / 4f);
                         matrices.translate(0, 0, 1 / 32f);
                     }
+
                     RenderGlobals.DRAWER_FRAME.set(entity);
                     RenderGlobals.FRAME_SIDE.set(Direction.byId(i));
+                    RenderGlobals.FRAME_POS.set(entity.getPos());
+                    RenderGlobals.FRAME_WORLD.set(world);
+
                     if (stack.getItem() instanceof SkullItem) {
                         matrices.translate(0,0, 1 / 19f);
                         matrices.scale(2f, 2f, 1/3f);
@@ -107,6 +111,8 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
         } finally {
             RenderGlobals.DRAWER_FRAME.remove();
             RenderGlobals.FRAME_SIDE.remove();
+            RenderGlobals.FRAME_POS.remove();
+            RenderGlobals.FRAME_WORLD.remove();
         }
     }
 }

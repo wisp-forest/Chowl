@@ -3,6 +3,7 @@ package com.chyzman.chowl.block;
 import com.chyzman.chowl.classes.AttackInteractionReceiver;
 import com.chyzman.chowl.graph.ServerGraphStore;
 import com.chyzman.chowl.item.component.PanelItem;
+import com.chyzman.chowl.registry.ChowlRegistry;
 import io.wispforest.owo.ops.ItemOps;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -191,7 +192,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
             for (int i = 0; i < drawerFrameBlockEntity.stacks.size(); i++) {
                 var stack = drawerFrameBlockEntity.stacks.get(i).getLeft();
-                if (!stack.isEmpty()) {
+                if (!stack.isEmpty() && stack.getItem() != ChowlRegistry.PHANTOM_PANEL_ITEM) {
                     shape = VoxelShapes.union(shape, SIDES[i]);
                 }
             }
@@ -207,7 +208,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
             for (int i = 0; i < drawerFrameBlockEntity.stacks.size(); i++) {
                 var stack = drawerFrameBlockEntity.stacks.get(i).getLeft();
-                if (!stack.isEmpty()) {
+                if (!stack.isEmpty() && stack.getItem() != ChowlRegistry.PHANTOM_PANEL_ITEM) {
                     shape = VoxelShapes.union(shape, SIDES[i]);
                 }
             }

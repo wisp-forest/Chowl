@@ -2,7 +2,8 @@ package com.chyzman.chowl.item.model;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.client.RenderGlobals;
-import com.chyzman.chowl.client.RetextureQuadTransform;
+import com.chyzman.chowl.client.RetextureInfo;
+import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.render.model.BakedModel;
@@ -40,24 +41,36 @@ public class BlankPanelItemModel extends ForwardingBakedModel {
             return;
         }
 
-        var transform = RetextureQuadTransform.get(drawerFrame.templateState);
-        try (var ignored = transform.withRotation(direction -> {
-            //todo: fix this
-            if (RenderGlobals.FRAME_SIDE.get() == null) return direction;
+        var info = RetextureInfo.get(drawerFrame.templateState);
+        var world = RenderGlobals.FRAME_WORLD.get();
+        var pos = RenderGlobals.FRAME_POS.get();
 
-            return switch (RenderGlobals.FRAME_SIDE.get()) {
-                case DOWN -> direction.rotateCounterclockwise(Direction.Axis.X);
-                case UP -> direction.rotateClockwise(Direction.Axis.X);
-                case NORTH -> direction.getOpposite();
-                case SOUTH -> direction;
-                case WEST -> direction.rotateClockwise(Direction.Axis.Y);
-                case EAST -> direction.rotateCounterclockwise(Direction.Axis.Y);
-            };
-        })) {
-            context.pushTransform(transform);
-            super.emitItemQuads(stack, randomSupplier, context);
-            context.popTransform();
+        class RetextureTransform implements RenderContext.QuadTransform {
+            @Override
+            public boolean transform(MutableQuadView quad) {
+                Direction face = quad.nominalFace();
+                if (face == null) return true;
+
+                face = switch (RenderGlobals.FRAME_SIDE.get()) {
+                    case DOWN -> face.rotateCounterclockwise(Direction.Axis.X);
+                    case UP -> face.rotateClockwise(Direction.Axis.X);
+                    case NORTH -> face.getOpposite();
+                    case SOUTH -> face;
+                    case WEST -> face.rotateClockwise(Direction.Axis.Y);
+                    case EAST -> face.rotateCounterclockwise(Direction.Axis.Y);
+                };
+
+                if (!info.changeSprite(quad, face)) return false;
+
+                if (world != null && pos != null) info.changeColor(quad, face, world, pos);
+
+                return true;
+            }
         }
+
+        context.pushTransform(new RetextureTransform());
+        super.emitItemQuads(stack, randomSupplier, context);
+        context.popTransform();
     }
 
     public record Unbaked(Identifier baseModel) implements UnbakedModel {
