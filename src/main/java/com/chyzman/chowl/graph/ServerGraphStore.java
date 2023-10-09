@@ -288,7 +288,10 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
             for (var link : links) {
                 if (visited.containsKey(link.longValue())) continue;
 
-                removeFrom.get(link.longValue()).dfs(visited, removeFrom);
+                var linked = removeFrom.get(link.longValue());
+                if (linked == null) continue;
+
+                linked.dfs(visited, removeFrom);
             }
         }
     }
