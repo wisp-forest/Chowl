@@ -107,9 +107,11 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 return ActionResult.SUCCESS;
             },
             null,
-            (client, entity, hitResult, vertexConsumers, matrices) -> {
-                var stack = Items.BARRIER.getDefaultStack();
-                client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, client.getItemRenderer().getModels().getModel(stack));
+            (client, entity, hitResult, vertexConsumers, matrices, hovered) -> {
+                if (hovered) {
+                    var stack = Items.BARRIER.getDefaultStack();
+                    client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, client.getItemRenderer().getModels().getModel(stack));
+                }
             });
     public static final BlockButtonProvider.Button CONFIG_BUTTON = new Button(12, 14, 14, 16, null,
             (world, state, hitResult, player) -> {
@@ -125,9 +127,11 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 return ActionResult.SUCCESS;
             },
             null,
-            (client, entity, hitResult, vertexConsumers, matrices) -> {
-                var stack = Items.STRUCTURE_VOID.getDefaultStack();
-                client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, client.getItemRenderer().getModels().getModel(stack));
+            (client, entity, hitResult, vertexConsumers, matrices, hovered) -> {
+                if (hovered) {
+                    var stack = Items.STRUCTURE_VOID.getDefaultStack();
+                    client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, client.getItemRenderer().getModels().getModel(stack));
+                }
             });
 
     public DrawerFrameBlock(Settings settings) {

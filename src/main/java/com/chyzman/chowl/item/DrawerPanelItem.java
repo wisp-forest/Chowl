@@ -7,30 +7,45 @@ import com.chyzman.chowl.transfer.TransferState;
 import com.chyzman.chowl.util.BigIntUtils;
 import com.chyzman.chowl.util.NbtKeyTypes;
 import io.wispforest.owo.nbt.NbtKey;
+import io.wispforest.owo.ops.ItemOps;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.minecraft.client.render.LightmapTextureManager;
+import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Pair;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.chyzman.chowl.Chowl.CHOWL_CONFIG;
+import static com.chyzman.chowl.Chowl.POWER_CACHE;
 
 @SuppressWarnings("UnstableApiUsage")
-public class DrawerPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem {
+public class DrawerPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem, UpgradeablePanelItem {
     public static final NbtKey<ItemVariant> VARIANT = new NbtKey<>("Variant", NbtKeyTypes.ITEM_VARIANT);
     public static final NbtKey<BigInteger> COUNT = new NbtKey<>("Count", NbtKeyTypes.BIG_INTEGER);
     public static final NbtKey<BigInteger> CAPACITY = new NbtKey<>("Capacity", NbtKeyTypes.BIG_INTEGER);
     public static final NbtKey<Boolean> LOCKED = new NbtKey<>("Locked", NbtKey.Type.BOOLEAN);
+    public static final NbtKey.ListKey<ItemStack> ITEMSTACK_LIST = new NbtKey.ListKey<>("Items", NbtKey.Type.ITEM_STACK);
 
     public DrawerPanelItem(Settings settings) {
         super(settings);
@@ -44,7 +59,59 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public List<Button> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
-        return List.of(STORAGE_BUTTON);
+        var returned = new ArrayList<Button>();
+        returned.add(STORAGE_BUTTON);
+        for (int i = 0; i < 8; i++) {
+            int finalI = i;
+            returned.add(new Button(i * 2, 0, (i + 1) * 2, 2,
+                    (world, frame, useSide, useStack, player, hand) -> {
+                        var stackInHand = player.getStackInHand(hand);
+                        if (stackInHand.isEmpty()) return ActionResult.PASS;
+                        if (!(useStack.getItem() instanceof PanelItem)) return ActionResult.PASS;
+
+                        var upgrades = upgrades(useStack);
+
+                        if (upgrades.get(finalI).isEmpty()) {
+                            var upgrade = ItemOps.singleCopy(stackInHand);
+                            stackInHand.decrement(1);
+                            if (world.isClient) return ActionResult.SUCCESS;
+                            upgrades.set(finalI, upgrade);
+                        } else {
+                            return ActionResult.FAIL;
+                        }
+
+                        setUpgrades(useStack, upgrades);
+                        frame.stacks.set(useSide.getId(), new Pair<>(useStack, 0));
+                        frame.markDirty();
+
+                        return ActionResult.SUCCESS;
+                    },
+                    (world, attackedDrawerFrame, attackedSide, attackedStack, player) -> {
+                        var upgrades = upgrades(attackedStack);
+
+                        if (!upgrades.get(finalI).isEmpty()) {
+                            var upgrade = upgrades.get(finalI);
+                            if (world.isClient) return ActionResult.SUCCESS;
+                            upgrades.set(finalI, ItemStack.EMPTY);
+                            player.getInventory().offerOrDrop(upgrade);
+                        } else {
+                            return ActionResult.FAIL;
+                        }
+                        setUpgrades(attackedStack, upgrades);
+                        attackedDrawerFrame.stacks.set(attackedSide.getId(), new Pair<>(attackedStack, 0));
+                        attackedDrawerFrame.markDirty();
+                        return ActionResult.SUCCESS;
+                    },
+                    null,
+                    (client, entity, hitResult, vertexConsumers, matrices, hovered) -> {
+                        var upgrades = upgrades(stack);
+                        if (upgrades.get(finalI).isEmpty()) return;
+                        matrices.scale(1, 1, 1 / 8f);
+                        client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, client.getItemRenderer().getModels().getModel(upgrades.get(finalI)));
+                        matrices.scale(1, 1, 8);
+                    }));
+        }
+        return returned;
     }
 
     @Override
@@ -91,9 +158,23 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
         return stack.get(COUNT);
     }
 
-
     public static BigInteger getCapacity(ItemStack stack) {
-        return new BigInteger(CHOWL_CONFIG.base_panel_capacity()).multiply(BigIntUtils.pow(BigInteger.valueOf(2), stack.get(CAPACITY)));
+        return new BigInteger(CHOWL_CONFIG.base_panel_capacity()).multiply(POWER_CACHE.getUnchecked(stack.get(CAPACITY).min(BigInteger.valueOf(100000000))));
+    }
+
+    @Override
+    public List<ItemStack> upgrades(ItemStack stack) {
+        var returned = new ArrayList<ItemStack>();
+        stack.get(ITEMSTACK_LIST).forEach(nbtElement -> returned.add(ItemStack.fromNbt((NbtCompound) nbtElement)));
+        while (returned.size() < 8) returned.add(ItemStack.EMPTY);
+        return returned;
+    }
+
+    @Override
+    public void setUpgrades(ItemStack stack, List<ItemStack> upgrades) {
+        var nbtList = new NbtList();
+        upgrades.forEach(itemStack -> nbtList.add(itemStack.writeNbt(new NbtCompound())));
+        stack.put(ITEMSTACK_LIST, nbtList);
     }
 
     @SuppressWarnings("UnstableApiUsage")

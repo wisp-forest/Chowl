@@ -39,7 +39,6 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
 
         for (var button : listButtons(world, state, hitResult)) {
             if (!button.isIn(vec.z, vec.y)) continue;
-
             return button;
         }
 
@@ -77,6 +76,11 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
         public boolean isIn(float x, float y) {
             return minX <= x * 16 && x * 16 <= maxX && minY <= y * 16 && y * 16 <= maxY;
         }
+
+        public boolean equals(Button button) {
+            if (button == null) return false;
+            return button.minX == minX && button.minY == minY && button.maxX == maxX && button.maxY == maxY;
+        }
     }
 
     @FunctionalInterface
@@ -96,6 +100,6 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
 
     @FunctionalInterface
     interface RenderConsumer {
-        void consume(MinecraftClient client, DrawerFrameBlockEntity entity, BlockHitResult hitResult, VertexConsumerProvider vertexConsumers, MatrixStack matrices);
+        void consume(MinecraftClient client, DrawerFrameBlockEntity entity, BlockHitResult hitResult, VertexConsumerProvider vertexConsumers, MatrixStack matrices, boolean hovered);
     }
 }

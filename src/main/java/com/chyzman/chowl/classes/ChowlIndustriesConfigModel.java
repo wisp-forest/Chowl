@@ -17,6 +17,9 @@ public class ChowlIndustriesConfigModel {
     @Sync(Option.SyncMode.OVERRIDE_CLIENT)
     public boolean has_chyz_been_reminded_to_add_more_config = false;
 
+    @Sync(Option.SyncMode.NONE)
+    public long max_capacity_level_before_exponents = 64L;
+
     @SectionHeader("Server")
 
     @Sync(Option.SyncMode.OVERRIDE_CLIENT)

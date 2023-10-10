@@ -7,6 +7,10 @@ import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.registry.ServerBoundPackets;
 import com.chyzman.chowl.registry.ServerEventListeners;
 import com.chyzman.chowl.screen.PanelConfigSreenHandler;
+import com.chyzman.chowl.util.BigIntUtils;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
@@ -20,12 +24,24 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 
+import java.math.BigInteger;
+
 import static com.chyzman.chowl.registry.ChowlRegistry.*;
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
 public class Chowl implements ModInitializer {
     public static final String MODID = "chowl-industries";
     public static final ChowlIndustriesConfig CHOWL_CONFIG = ChowlIndustriesConfig.createAndLoad();
+
+    public static LoadingCache<BigInteger, BigInteger> POWER_CACHE = CacheBuilder.newBuilder()
+            .concurrencyLevel(1)
+            .maximumSize(200)
+            .build(CacheLoader.from(input -> {
+                if (input.compareTo(BigInteger.valueOf(10)) > 0) {
+                    System.out.println("Calculating 2^" + input);
+                }
+                return BigIntUtils.pow(BigInteger.TWO, input);
+            }));
 
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(id(FabricLoader.getInstance()
         .getModContainer("chowl-industries")
