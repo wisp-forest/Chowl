@@ -107,10 +107,10 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 return ActionResult.SUCCESS;
             },
             null,
-            (client, entity, hitResult, vertexConsumers, matrices, hovered) -> {
+            (client, entity, hitResult, vertexConsumers, matrices, light, overlay, hovered) -> {
                 if (hovered) {
                     var stack = Items.BARRIER.getDefaultStack();
-                    client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, client.getItemRenderer().getModels().getModel(stack));
+                    client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));
                 }
             });
     public static final BlockButtonProvider.Button CONFIG_BUTTON = new Button(12, 14, 14, 16, null,
@@ -127,10 +127,10 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 return ActionResult.SUCCESS;
             },
             null,
-            (client, entity, hitResult, vertexConsumers, matrices, hovered) -> {
+            (client, entity, hitResult, vertexConsumers, matrices, light, overlay, hovered) -> {
                 if (hovered) {
                     var stack = Items.STRUCTURE_VOID.getDefaultStack();
-                    client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, client.getItemRenderer().getModels().getModel(stack));
+                    client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));
                 }
             });
 

@@ -27,12 +27,12 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
         var client = MinecraftClient.getInstance();
         var world = entity.getWorld();
 
-        renderButtons(client, entity, vertexConsumers, matrices);
+        renderButtons(client, entity,matrices, vertexConsumers, light, overlay);
 
         renderPanels(entity, client, world, tickDelta, matrices, vertexConsumers, light, overlay);
     }
 
-    public void renderButtons(MinecraftClient client, DrawerFrameBlockEntity entity, VertexConsumerProvider vertexConsumers, MatrixStack matrices) {
+    public void renderButtons(MinecraftClient client, DrawerFrameBlockEntity entity, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         if (!(client.crosshairTarget instanceof BlockHitResult hitResult)) return;
         if (!hitResult.getBlockPos().equals(entity.getPos())) return;
         if (!(entity.getCachedState().getBlock() instanceof BlockButtonProvider buttonProvider)) return;
@@ -59,7 +59,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
             matrices.translate(0.5, -0.5, 0);
 
             if (button.render() != null) {
-                button.render().consume(client, entity, hitResult, vertexConsumers, matrices, button == hoveredButton);
+                button.render().consume(client, entity, hitResult, vertexConsumers, matrices, light, overlay, button == hoveredButton);
             }
 
             matrices.pop();

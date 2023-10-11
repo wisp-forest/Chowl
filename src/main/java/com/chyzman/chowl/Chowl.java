@@ -20,9 +20,12 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.TagKey;
 
 import java.math.BigInteger;
 
@@ -33,15 +36,17 @@ public class Chowl implements ModInitializer {
     public static final String MODID = "chowl-industries";
     public static final ChowlIndustriesConfig CHOWL_CONFIG = ChowlIndustriesConfig.createAndLoad();
 
+    public static final TagKey<Item> HOPPER_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("hopper_panel_upgrade"));
+    public static final TagKey<Item> LAVA_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("lava_voiding_panel_upgrade"));
+    public static final TagKey<Item> NETHERITE_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("netherite_panel_upgrade"));
+    public static final TagKey<Item> VOID_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("true_voiding_panel_upgrade"));
+    public static final TagKey<Item> GLOWING_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("glowing_panel_upgrade"));
+
+
     public static LoadingCache<BigInteger, BigInteger> POWER_CACHE = CacheBuilder.newBuilder()
             .concurrencyLevel(1)
             .maximumSize(200)
-            .build(CacheLoader.from(input -> {
-                if (input.compareTo(BigInteger.valueOf(10)) > 0) {
-                    System.out.println("Calculating 2^" + input);
-                }
-                return BigIntUtils.pow(BigInteger.TWO, input);
-            }));
+            .build(CacheLoader.from(input -> BigIntUtils.pow(BigInteger.TWO, input)));
 
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(id(FabricLoader.getInstance()
         .getModContainer("chowl-industries")

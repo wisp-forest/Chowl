@@ -1,11 +1,9 @@
 package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
-import com.chyzman.chowl.item.component.FilteringPanelItem;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
 import io.wispforest.owo.ui.base.BaseOwoTooltipComponent;
 import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.component.LabelComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Sizing;
@@ -15,7 +13,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 
 import java.math.BigInteger;
-import java.util.function.Supplier;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PanelTooltipComponent extends BaseOwoTooltipComponent<FlowLayout> {
@@ -49,12 +46,11 @@ public class PanelTooltipComponent extends BaseOwoTooltipComponent<FlowLayout> {
                 }
             }
             if (stack.getItem() instanceof UpgradeablePanelItem panel) {
-                if (!panel.upgrades(stack).isEmpty()) {
+                var upgrades = panel.upgrades(stack).stream().filter(stack1 -> !stack1.isEmpty()).toList();
+                if (!upgrades.isEmpty()) {
                     var currentFlow = Containers.horizontalFlow(Sizing.content(), Sizing.content());
                     currentFlow.child(Components.label(Text.translatable("ui.chowl-industries.panel.tooltip.filter.upgrades")));
-                    panel.upgrades(stack)
-                            .stream().filter(stack1 -> !stack1.isEmpty())
-                            .forEach(upgrade -> currentFlow.child(Components.item(upgrade).sizing(Sizing.fixed(MinecraftClient.getInstance().textRenderer.fontHeight))));
+                    upgrades.forEach(upgrade -> currentFlow.child(Components.item(upgrade).sizing(Sizing.fixed(MinecraftClient.getInstance().textRenderer.fontHeight))));
                     currentFlow.verticalAlignment(VerticalAlignment.CENTER);
                     flow.child(currentFlow);
                 }

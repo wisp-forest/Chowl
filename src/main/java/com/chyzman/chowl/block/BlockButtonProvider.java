@@ -100,6 +100,6 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
 
     @FunctionalInterface
     interface RenderConsumer {
-        void consume(MinecraftClient client, DrawerFrameBlockEntity entity, BlockHitResult hitResult, VertexConsumerProvider vertexConsumers, MatrixStack matrices, boolean hovered);
+        void consume(MinecraftClient client, DrawerFrameBlockEntity entity, BlockHitResult hitResult, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, boolean hovered);
     }
 }

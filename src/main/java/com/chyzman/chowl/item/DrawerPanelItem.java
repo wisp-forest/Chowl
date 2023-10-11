@@ -36,8 +36,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.chyzman.chowl.Chowl.CHOWL_CONFIG;
-import static com.chyzman.chowl.Chowl.POWER_CACHE;
+import static com.chyzman.chowl.Chowl.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public class DrawerPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem, UpgradeablePanelItem {
@@ -81,7 +80,7 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
                         }
 
                         setUpgrades(useStack, upgrades);
-                        frame.stacks.set(useSide.getId(), new Pair<>(useStack, 0));
+                        frame.stacks.set(useSide.getId(), new Pair<>(useStack, frame.stacks.get(useSide.getId()).getRight()));
                         frame.markDirty();
 
                         return ActionResult.SUCCESS;
@@ -98,16 +97,16 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
                             return ActionResult.FAIL;
                         }
                         setUpgrades(attackedStack, upgrades);
-                        attackedDrawerFrame.stacks.set(attackedSide.getId(), new Pair<>(attackedStack, 0));
+                        attackedDrawerFrame.stacks.set(attackedSide.getId(), new Pair<>(attackedStack, attackedDrawerFrame.stacks.get(attackedSide.getId()).getRight()));
                         attackedDrawerFrame.markDirty();
                         return ActionResult.SUCCESS;
                     },
                     null,
-                    (client, entity, hitResult, vertexConsumers, matrices, hovered) -> {
+                    (client, entity, hitResult, vertexConsumers, matrices, light, overlay, hovered) -> {
                         var upgrades = upgrades(stack);
                         if (upgrades.get(finalI).isEmpty()) return;
                         matrices.scale(1, 1, 1 / 8f);
-                        client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV, client.getItemRenderer().getModels().getModel(upgrades.get(finalI)));
+                        client.getItemRenderer().renderItem(upgrades.get(finalI), ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(upgrades.get(finalI)));
                         matrices.scale(1, 1, 8);
                     }));
         }
@@ -193,13 +192,16 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
             var currentCount = stack.get(COUNT);
             var capacity = DrawerPanelItem.getCapacity(stack);
             var full = currentCount.compareTo(capacity) >= 0;
-            long inserted = full ? 0 : Math.min(BigIntUtils.longValueSaturating(capacity.subtract(currentCount)), maxAmount);
             var newCount = full ? capacity : currentCount.add(BigInteger.valueOf(maxAmount));
 
             updateSnapshots(transaction);
             stack.put(VARIANT, contained);
             stack.put(COUNT, newCount);
-            return inserted;
+
+            ItemVariant finalContained = contained;
+            var voiding = ((DrawerPanelItem)stack.getItem()).hasUpgrade(stack, upgrade -> upgrade.isIn(VOID_UPGRADE_TAG) || (!finalContained.getItem().isFireproof() && upgrade.isIn(LAVA_UPGRADE_TAG)));
+            if (voiding) return maxAmount;
+            return full ? 0 : Math.min(BigIntUtils.longValueSaturating(capacity.subtract(currentCount)), maxAmount);
         }
 
         @Override
