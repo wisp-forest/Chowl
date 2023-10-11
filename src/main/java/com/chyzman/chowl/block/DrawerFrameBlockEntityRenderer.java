@@ -27,7 +27,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
         var client = MinecraftClient.getInstance();
         var world = entity.getWorld();
 
-        renderButtons(client, entity,matrices, vertexConsumers, light, overlay);
+        renderButtons(client, entity, matrices, vertexConsumers, light, overlay);
 
         renderPanels(entity, client, world, tickDelta, matrices, vertexConsumers, light, overlay);
     }

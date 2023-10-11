@@ -98,10 +98,11 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
                     return ActionResult.PASS;
 
-                var selected = blockEntity.stacks.get(hitResult.getSide().getId()).getLeft();
+                var side = getSide(hitResult);
+                var selected = blockEntity.stacks.get(side.getId()).getLeft();
 
                 player.getInventory().offerOrDrop(selected);
-                blockEntity.stacks.set(hitResult.getSide().getId(), new Pair<>(ItemStack.EMPTY, 0));
+                blockEntity.stacks.set(side.getId(), new Pair<>(ItemStack.EMPTY, 0));
                 blockEntity.markDirty();
 
                 return ActionResult.SUCCESS;
@@ -118,10 +119,11 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
                     return ActionResult.PASS;
 
-                var selected = blockEntity.stacks.get(hitResult.getSide().getId()).getLeft();
+                var side = getSide(hitResult);
+                var selected = blockEntity.stacks.get(side.getId()).getLeft();
 
                 player.getInventory().offerOrDrop(selected);
-                blockEntity.stacks.set(hitResult.getSide().getId(), new Pair<>(ItemStack.EMPTY, 0));
+                blockEntity.stacks.set(side.getId(), new Pair<>(ItemStack.EMPTY, 0));
                 blockEntity.markDirty();
 
                 return ActionResult.SUCCESS;
@@ -264,7 +266,9 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
             return List.of();
 
-        var selected = blockEntity.stacks.get(hitResult.getSide().getId()).getLeft();
+        var side = getSide(hitResult);
+
+        var selected = blockEntity.stacks.get(side.getId()).getLeft();
 
         if (selected.isEmpty()) return List.of();
 
@@ -273,7 +277,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         buttons.add(REMOVE_BUTTON);
 
         if (selected.getItem() instanceof PanelItem panelItem) {
-            var panelButtons = panelItem.listButtons(blockEntity, hitResult.getSide(), blockEntity.stacks.get(hitResult.getSide().getId()).getLeft());
+            var panelButtons = panelItem.listButtons(blockEntity, side, blockEntity.stacks.get(side.getId()).getLeft());
 
             for (var panelButton : panelButtons) {
                 buttons.add(panelButton.toBlockButton());
