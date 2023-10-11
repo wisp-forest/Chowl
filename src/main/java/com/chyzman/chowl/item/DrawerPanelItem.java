@@ -237,29 +237,28 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
                     }
                 }
             }
-        }
             return removed;
-    }
+        }
 
-    @Override
-    public boolean isResourceBlank() {
-        return stack.get(VARIANT).isBlank();
-    }
+        @Override
+        public boolean isResourceBlank() {
+            return stack.get(VARIANT).isBlank();
+        }
 
-    @Override
-    public ItemVariant getResource() {
-        return stack.get(VARIANT);
-    }
+        @Override
+        public ItemVariant getResource() {
+            return stack.get(VARIANT);
+        }
 
-    @Override
-    public long getAmount() {
-        return BigIntUtils.longValueSaturating(stack.get(COUNT));
-    }
+        @Override
+        public long getAmount() {
+            return BigIntUtils.longValueSaturating(stack.get(COUNT));
+        }
 
-    //todo make getamount return lower value so that getcapacity will allow you to insert (for when theres more then an entire long inside panel)
-    @Override
-    public long getCapacity() {
-        return Long.MAX_VALUE;
+        //todo make getamount return lower value so that getcapacity will allow you to insert (for when theres more then an entire long inside panel)
+        @Override
+        public long getCapacity() {
+            return Long.MAX_VALUE;
+        }
     }
-}
 }
