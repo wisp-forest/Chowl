@@ -9,7 +9,7 @@ import net.minecraft.util.math.Direction;
 @SuppressWarnings("UnstableApiUsage")
 public class PanelStorage extends SnapshotParticipant<ItemStack> {
     protected ItemStack stack;
-    private final DrawerFrameBlockEntity blockEntity;
+    protected final DrawerFrameBlockEntity blockEntity;
     private final Direction side;
 
     public PanelStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {

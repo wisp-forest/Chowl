@@ -78,7 +78,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 stacks.set(side.getId(), new Pair<>(temp, stacks.get(side.getId()).getRight()));
                 stackInHand.decrement(1);
                 drawerFrame.markDirty();
-
+                
                 return ActionResult.SUCCESS;
             },
             (world, drawerFrame, side, stack, player) -> {

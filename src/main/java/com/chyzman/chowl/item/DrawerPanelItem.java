@@ -9,19 +9,12 @@ import com.chyzman.chowl.util.NbtKeyTypes;
 import io.wispforest.owo.nbt.NbtKey;
 import io.wispforest.owo.ops.ItemOps;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
-import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.util.ActionResult;
@@ -35,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.chyzman.chowl.Chowl.*;
 
@@ -44,7 +38,7 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
     public static final NbtKey<BigInteger> COUNT = new NbtKey<>("Count", NbtKeyTypes.BIG_INTEGER);
     public static final NbtKey<BigInteger> CAPACITY = new NbtKey<>("Capacity", NbtKeyTypes.BIG_INTEGER);
     public static final NbtKey<Boolean> LOCKED = new NbtKey<>("Locked", NbtKey.Type.BOOLEAN);
-    public static final NbtKey.ListKey<ItemStack> ITEMSTACK_LIST = new NbtKey.ListKey<>("Items", NbtKey.Type.ITEM_STACK);
+    public static final NbtKey.ListKey<ItemStack> UPGRADES_LIST = new NbtKey.ListKey<>("Upgrades", NbtKey.Type.ITEM_STACK);
 
     public DrawerPanelItem(Settings settings) {
         super(settings);
@@ -164,7 +158,7 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
     @Override
     public List<ItemStack> upgrades(ItemStack stack) {
         var returned = new ArrayList<ItemStack>();
-        stack.get(ITEMSTACK_LIST).forEach(nbtElement -> returned.add(ItemStack.fromNbt((NbtCompound) nbtElement)));
+        stack.get(UPGRADES_LIST).forEach(nbtElement -> returned.add(ItemStack.fromNbt((NbtCompound) nbtElement)));
         while (returned.size() < 8) returned.add(ItemStack.EMPTY);
         return returned;
     }
@@ -173,7 +167,7 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
     public void setUpgrades(ItemStack stack, List<ItemStack> upgrades) {
         var nbtList = new NbtList();
         upgrades.forEach(itemStack -> nbtList.add(itemStack.writeNbt(new NbtCompound())));
-        stack.put(ITEMSTACK_LIST, nbtList);
+        stack.put(UPGRADES_LIST, nbtList);
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -199,7 +193,7 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
             stack.put(COUNT, newCount);
 
             ItemVariant finalContained = contained;
-            var voiding = ((DrawerPanelItem)stack.getItem()).hasUpgrade(stack, upgrade -> upgrade.isIn(VOID_UPGRADE_TAG) || (!finalContained.getItem().isFireproof() && upgrade.isIn(LAVA_UPGRADE_TAG)));
+            var voiding = ((DrawerPanelItem) stack.getItem()).hasUpgrade(stack, upgrade -> upgrade.isIn(VOID_UPGRADE_TAG) || (!finalContained.getItem().isFireproof() && upgrade.isIn(LAVA_UPGRADE_TAG)));
             if (voiding) return maxAmount;
             return full ? 0 : Math.min(BigIntUtils.longValueSaturating(capacity.subtract(currentCount)), maxAmount);
         }
@@ -219,32 +213,53 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
             updateSnapshots(tx);
             stack.put(COUNT, newCount);
 
-            if (newCount.equals(BigInteger.ZERO) && !stack.get(LOCKED)) {
-                stack.put(VARIANT, ItemVariant.blank());
+            if (newCount.compareTo(BigInteger.ZERO) <= 0) {
+                if (!stack.get(LOCKED)) {
+                    stack.put(VARIANT, ItemVariant.blank());
+                }
+
+                //TODO: make this only happen when empty
+                if (stack.getItem() instanceof UpgradeablePanelItem panelItem) {
+                    if (panelItem.hasUpgrade(stack, upgrade -> upgrade.isIn(EXPLOSIVE_UPGRADE_TAG))) {
+                        var world = blockEntity.getWorld();
+                        var pos = blockEntity.getPos();
+                        var upgrades = panelItem.upgrades(stack);
+                        AtomicInteger power = new AtomicInteger();
+                        upgrades.forEach(upgrade -> {
+                                    if (upgrade.isIn(EXPLOSIVE_UPGRADE_TAG)) {
+                                        power.addAndGet(1);
+                                        upgrade.decrement(1);
+                                        panelItem.setUpgrades(stack, upgrades);
+                                        world.createExplosion(null, pos.getX(), pos.getY(), pos.getZ(), power.get() + 1, false, World.ExplosionSourceType.BLOCK);
+                                    }
+                                }
+                        );
+                    }
+                }
             }
-
+        }
             return removed;
-        }
-
-        @Override
-        public boolean isResourceBlank() {
-            return stack.get(VARIANT).isBlank();
-        }
-
-        @Override
-        public ItemVariant getResource() {
-            return stack.get(VARIANT);
-        }
-
-        @Override
-        public long getAmount() {
-            return BigIntUtils.longValueSaturating(stack.get(COUNT));
-        }
-
-        //todo make getamount return lower value so that getcapacity will allow you to insert (for when theres more then an entire long inside panel)
-        @Override
-        public long getCapacity() {
-            return Long.MAX_VALUE;
-        }
     }
+
+    @Override
+    public boolean isResourceBlank() {
+        return stack.get(VARIANT).isBlank();
+    }
+
+    @Override
+    public ItemVariant getResource() {
+        return stack.get(VARIANT);
+    }
+
+    @Override
+    public long getAmount() {
+        return BigIntUtils.longValueSaturating(stack.get(COUNT));
+    }
+
+    //todo make getamount return lower value so that getcapacity will allow you to insert (for when theres more then an entire long inside panel)
+    @Override
+    public long getCapacity() {
+        return Long.MAX_VALUE;
+    }
+}
 }
