@@ -19,6 +19,7 @@ import net.minecraft.util.math.RotationAxis;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import java.util.List;
@@ -70,9 +71,8 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
         return button.doubleClick.apply(world, state, hitResult, player);
     }
 
-    record Button(
-            float minX, float minY, float maxX, float maxY, UseFunction use, AttackFunction attack,
-            DoubleClickFunction doubleClick, RenderConsumer render) {
+    record Button(float minX, float minY, float maxX, float maxY, UseFunction use, AttackFunction attack,
+                  DoubleClickFunction doubleClick, RenderConsumer render) {
         public boolean isIn(float x, float y) {
             return minX <= x * 16 && x * 16 <= maxX && minY <= y * 16 && y * 16 <= maxY;
         }
@@ -80,6 +80,47 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
         public boolean equals(Button button) {
             if (button == null) return false;
             return button.minX == minX && button.minY == minY && button.maxX == maxX && button.maxY == maxY;
+        }
+    }
+
+    class ButtonBuilder {
+        private Vector2f min = new Vector2f();
+        private Vector2f max = new Vector2f();
+
+        private UseFunction use;
+        private AttackFunction attack;
+        private DoubleClickFunction doubleClick;
+        private RenderConsumer render;
+
+        public ButtonBuilder(float minX, float minY, float maxX, float maxY) {
+            this.min.x = minX;
+            this.min.y = minY;
+            this.max.x = maxX;
+            this.max.y = maxY;
+        }
+
+        public ButtonBuilder onUse(UseFunction use) {
+            this.use = use;
+            return this;
+        }
+
+        public ButtonBuilder onAttack(AttackFunction attack) {
+            this.attack = attack;
+            return this;
+        }
+
+        public ButtonBuilder onDoubleClick(DoubleClickFunction doubleClick) {
+            this.doubleClick = doubleClick;
+            return this;
+        }
+
+        public ButtonBuilder onRender(RenderConsumer render) {
+            this.render = render;
+            return this;
+        }
+
+        public Button build() {
+            return new Button(min.x, min.y, max.x, max.y, use, attack, doubleClick, render);
         }
     }
 

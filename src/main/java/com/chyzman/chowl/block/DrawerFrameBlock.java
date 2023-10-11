@@ -93,8 +93,8 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             },
             null,
             null);
-    public static final BlockButtonProvider.Button REMOVE_BUTTON = new Button(14, 14, 16, 16, null,
-            (world, state, hitResult, player) -> {
+    public static final BlockButtonProvider.Button REMOVE_BUTTON = new ButtonBuilder(14, 14, 16, 16)
+            .onAttack((world, state, hitResult, player) -> {
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
                     return ActionResult.PASS;
 
@@ -106,14 +106,14 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 blockEntity.markDirty();
 
                 return ActionResult.SUCCESS;
-            },
-            null,
-            (client, entity, hitResult, vertexConsumers, matrices, light, overlay, hovered) -> {
+            })
+            .onRender((client, entity, hitResult, vertexConsumers, matrices, light, overlay, hovered) -> {
                 if (hovered) {
                     var stack = Items.BARRIER.getDefaultStack();
                     client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));
                 }
-            });
+            })
+            .build();
     public static final BlockButtonProvider.Button CONFIG_BUTTON = new Button(12, 14, 14, 16, null,
             (world, state, hitResult, player) -> {
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
@@ -314,6 +314,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     public ItemStack getPickStack(BlockView world, BlockPos pos, BlockState state) {
         return super.getPickStack(world, pos, state);
     }
+
 
     public static Direction getSide(BlockHitResult hitResult) {
         return Arrays.stream(DIRECTIONS).min(Comparator.comparingDouble(
