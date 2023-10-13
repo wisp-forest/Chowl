@@ -75,10 +75,6 @@ public class DrawerPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
             });
             consumer.vertices.clear();
             var size = bounds[1].subtract(bounds[0]);
-            if (mode == ModelTransformationMode.FIRST_PERSON_RIGHT_HAND) {
-                float precision = 100;
-                MinecraftClient.getInstance().player.sendMessage(Text.of("(" + ((int) (size.x * precision)) / precision + "," + ((int) (size.y * precision)) / precision + "," + ((int) (size.z * precision)) / precision + ")"), true);
-            }
             matrices.pop();
 
             float top = 0f;
