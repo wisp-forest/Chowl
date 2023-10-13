@@ -80,19 +80,10 @@ public class DrawerPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
                 float precision = 100;
                 MinecraftClient.getInstance().player.sendMessage(Text.of("(" + ((int) (size.x * precision)) / precision + "," + ((int) (size.y * precision)) / precision + "," + ((int) (size.z * precision)) / precision + ")"), true);
             }
-            float scale = (float) Math.min(3, (1/Math.min(size.x, size.y)));
             matrices.pop();
 
-            if (!customization.hideItem()) {
-                matrices.push();
-                matrices.translate(0, 0, -1 / 32f);
-                matrices.scale(scale, scale, scale);
-                matrices.scale(1 / 3f, 1 / 3f, 1 / 3f);
-                matrices.push();
-                client.getItemRenderer().renderItem(displayStack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light, overlay, client.getItemRenderer().getModels().getModel(displayStack));
-                matrices.pop();
-                matrices.pop();
-            }
+            float top = 0f;
+            float bottom = 0f;
             if (!customization.hideName()) {
                 matrices.push();
                 matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
@@ -102,7 +93,12 @@ public class DrawerPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
                 var titleWidth = client.textRenderer.getWidth(title);
                 if (titleWidth > maxwidth) {
                     matrices.scale(maxwidth / titleWidth, maxwidth / titleWidth, maxwidth / titleWidth);
+                    top = (maxwidth / titleWidth) / client.textRenderer.fontHeight;
+                } else {
+                    top = 1f / client.textRenderer.fontHeight;
                 }
+
+
                 matrices.translate(0, -client.textRenderer.fontHeight + 1f, 0);
                 client.textRenderer.draw(drawerPanel.styleText(stack, title), -titleWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
                 matrices.pop();
@@ -117,8 +113,29 @@ public class DrawerPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
                 var amountWidth = client.textRenderer.getWidth(amount);
                 if (amountWidth > maxwidth) {
                     matrices.scale(maxwidth / amountWidth, maxwidth / amountWidth, maxwidth / amountWidth);
+                    bottom = (maxwidth / amountWidth) / client.textRenderer.fontHeight;
+                } else {
+                    bottom = 1f / client.textRenderer.fontHeight;
                 }
+
                 client.textRenderer.draw(drawerPanel.styleText(stack, Text.literal(amount)), -amountWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
+                matrices.pop();
+            }
+            if (!customization.hideItem()) {
+                float scale = (float) Math.min(2, (1 / (Math.max(size.x, Math.max(size.y, size.z)))));
+                matrices.push();
+                matrices.translate(0, 0, -1 / 32f);
+                matrices.scale(scale, scale, scale);
+                scale = (12 / 16f);
+                matrices.scale(scale, scale, scale);
+                matrices.translate(0, ((top - bottom)/2), 0);
+                scale = 1 - ((top + bottom) * 3);
+                matrices.scale(scale, scale, scale);
+//                scale = 0.9f;
+//                matrices.scale(scale, scale, scale);
+                matrices.push();
+                client.getItemRenderer().renderItem(displayStack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light, overlay, client.getItemRenderer().getModels().getModel(displayStack));
+                matrices.pop();
                 matrices.pop();
             }
         }
