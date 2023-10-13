@@ -1,5 +1,6 @@
 package com.chyzman.chowl.item;
 
+import com.chyzman.chowl.item.component.CapacityLimitedPanelItem;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
 import io.wispforest.owo.ui.base.BaseOwoTooltipComponent;
@@ -9,7 +10,6 @@ import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.core.VerticalAlignment;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 
@@ -37,8 +37,8 @@ public class PanelTooltipComponent extends BaseOwoTooltipComponent<FlowLayout> {
                     flow.child(currentFlow);
                 }
             }
-            if (stack.getItem() instanceof DrawerPanelItem) {
-                var currentCapacity = DrawerPanelItem.getCapacity(stack);
+            if (stack.getItem() instanceof CapacityLimitedPanelItem cap) {
+                var currentCapacity = cap.capacity(stack);
                 if (currentCapacity.compareTo(BigInteger.ZERO) > 0) {
                     var currentFlow = Containers.horizontalFlow(Sizing.content(), Sizing.content());
                     currentFlow.child(Components.label(Text.translatable("ui.chowl-industries.panel.tooltip.capacity.label", currentCapacity.toString().substring(0, Math.min(1000, currentCapacity.toString().length())))));

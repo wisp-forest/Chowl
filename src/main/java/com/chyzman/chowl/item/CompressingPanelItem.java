@@ -1,10 +1,7 @@
 package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
-import com.chyzman.chowl.item.component.DisplayingPanelItem;
-import com.chyzman.chowl.item.component.FilteringPanelItem;
-import com.chyzman.chowl.item.component.LockablePanelItem;
-import com.chyzman.chowl.item.component.PanelItem;
+import com.chyzman.chowl.item.component.*;
 import com.chyzman.chowl.transfer.CompressingStorage;
 import com.chyzman.chowl.transfer.PanelStorage;
 import com.chyzman.chowl.util.BigIntUtils;
@@ -29,11 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalInt;
 
+import static com.chyzman.chowl.Chowl.*;
+
 @SuppressWarnings("UnstableApiUsage")
-public class CompressingPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem {
+public class CompressingPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem, CapacityLimitedPanelItem {
     public static final NbtKey<Item> ITEM = new NbtKey<>("Variant", NbtKey.Type.ofRegistry(Registries.ITEM));
     public static final NbtKey<BigInteger> COUNT = new NbtKey<>("Count", NbtKeyTypes.BIG_INTEGER);
-    //    public static final NbtKey<BigInteger> CAPACITY = new NbtKey<>("Capacity", NbtKeyTypes.BIG_INTEGER);
     public static final NbtKey<Boolean> LOCKED = new NbtKey<>("Locked", NbtKey.Type.BOOLEAN);
 
     public CompressingPanelItem(Item.Settings settings) {
@@ -101,8 +99,13 @@ public class CompressingPanelItem extends BasePanelItem implements PanelItem, Fi
         return new CombinedSlottedStorage<>(storages);
     }
 
+    @Override
+    public BigInteger baseCapacity() {
+        return new BigInteger(CHOWL_CONFIG.base_compressing_panel_capacity());
+    }
+
     @SuppressWarnings("UnstableApiUsage")
-    private static class BaseStorage extends PanelStorage implements SingleSlotStorage<ItemVariant> {
+    private class BaseStorage extends PanelStorage implements SingleSlotStorage<ItemVariant> {
         public BaseStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
             super(stack, blockEntity, side);
         }
@@ -117,10 +120,23 @@ public class CompressingPanelItem extends BasePanelItem implements PanelItem, Fi
             if (contained == Items.AIR) contained = resource.getItem();
             if (contained != resource.getItem()) return 0;
 
+            var currentCount = stack.get(COUNT);
+            var capacity = CompressingPanelItem.this.capacity(stack);
+            var spaceLeft = capacity.subtract(currentCount).max(BigInteger.ZERO);
+            var inserted = spaceLeft.min(BigInteger.valueOf(maxAmount));
+
             updateSnapshots(transaction);
             stack.put(ITEM, contained);
-            stack.put(COUNT, stack.get(COUNT).add(BigInteger.valueOf(maxAmount))); // TODO: add capacity.
-            return maxAmount;
+            stack.put(COUNT, currentCount.add(inserted));
+
+//            Item finalContained = contained;
+//
+//            if (CompressingPanelItem.this.hasUpgrade(stack,
+//                upgrade -> upgrade.isIn(VOID_UPGRADE_TAG)
+//                    || (!finalContained.isFireproof() && upgrade.isIn(LAVA_UPGRADE_TAG))))
+//                return maxAmount;
+
+            return BigIntUtils.longValueSaturating(inserted);
         }
 
         @Override
@@ -165,7 +181,7 @@ public class CompressingPanelItem extends BasePanelItem implements PanelItem, Fi
         //todo make getamount return lower value so that getcapacity will allow you to insert (for when theres more then an entire long inside panel)
         @Override
         public long getCapacity() {
-            return Long.MAX_VALUE;
+            return BigIntUtils.longValueSaturating(CompressingPanelItem.this.capacity(stack));
         }
     }
 }

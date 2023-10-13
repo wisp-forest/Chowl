@@ -34,10 +34,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.chyzman.chowl.Chowl.*;
 
 @SuppressWarnings("UnstableApiUsage")
-public class DrawerPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem, UpgradeablePanelItem {
+public class DrawerPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem, UpgradeablePanelItem, CapacityLimitedPanelItem {
     public static final NbtKey<ItemVariant> VARIANT = new NbtKey<>("Variant", NbtKeyTypes.ITEM_VARIANT);
     public static final NbtKey<BigInteger> COUNT = new NbtKey<>("Count", NbtKeyTypes.BIG_INTEGER);
-    public static final NbtKey<BigInteger> CAPACITY = new NbtKey<>("Capacity", NbtKeyTypes.BIG_INTEGER);
     public static final NbtKey<Boolean> LOCKED = new NbtKey<>("Locked", NbtKey.Type.BOOLEAN);
     public static final NbtKey.ListKey<ItemStack> UPGRADES_LIST = new NbtKey.ListKey<>("Upgrades", NbtKey.Type.ITEM_STACK);
 
@@ -152,19 +151,6 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
         return stack.get(COUNT);
     }
 
-    public static BigInteger getCapacity(ItemStack stack) {
-        return new BigInteger(CHOWL_CONFIG.base_panel_capacity()).multiply(POWER_CACHE.getUnchecked(capacityTier(stack)));
-    }
-
-    public static BigInteger capacityTier(ItemStack stack) {
-        return stack.get(CAPACITY).min(BigInteger.valueOf(100000000));
-    }
-
-    public static ItemStack setCapacityTier(ItemStack stack, BigInteger tier) {
-        stack.put(CAPACITY, tier);
-        return stack;
-    }
-
     @Override
     public List<ItemStack> upgrades(ItemStack stack) {
         var returned = new ArrayList<ItemStack>();
@@ -180,8 +166,13 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
         stack.put(UPGRADES_LIST, nbtList);
     }
 
+    @Override
+    public BigInteger baseCapacity() {
+        return new BigInteger(CHOWL_CONFIG.base_panel_capacity());
+    }
+
     @SuppressWarnings("UnstableApiUsage")
-    private static class Storage extends PanelStorage implements SingleSlotStorage<ItemVariant> {
+    private class Storage extends PanelStorage implements SingleSlotStorage<ItemVariant> {
         public Storage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
             super(stack, blockEntity, side);
         }
@@ -194,18 +185,22 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
             if (!contained.equals(resource)) return 0;
 
             var currentCount = stack.get(COUNT);
-            var capacity = DrawerPanelItem.getCapacity(stack);
-            var full = currentCount.compareTo(capacity) >= 0;
-            var newCount = full ? capacity : currentCount.add(BigInteger.valueOf(maxAmount));
+            var capacity = DrawerPanelItem.this.capacity(stack);
+            var spaceLeft = capacity.subtract(currentCount).max(BigInteger.ZERO);
+            var inserted = spaceLeft.min(BigInteger.valueOf(maxAmount));
 
             updateSnapshots(transaction);
             stack.put(VARIANT, contained);
-            stack.put(COUNT, newCount);
+            stack.put(COUNT, currentCount.add(inserted));
 
             ItemVariant finalContained = contained;
-            var voiding = ((DrawerPanelItem) stack.getItem()).hasUpgrade(stack, upgrade -> upgrade.isIn(VOID_UPGRADE_TAG) || (!finalContained.getItem().isFireproof() && upgrade.isIn(LAVA_UPGRADE_TAG)));
-            if (voiding) return maxAmount;
-            return full ? 0 : Math.min(BigIntUtils.longValueSaturating(capacity.subtract(currentCount)), maxAmount);
+
+            if (DrawerPanelItem.this.hasUpgrade(stack,
+                upgrade -> upgrade.isIn(VOID_UPGRADE_TAG)
+                 || (!finalContained.getItem().isFireproof() && upgrade.isIn(LAVA_UPGRADE_TAG))))
+                return maxAmount;
+
+            return BigIntUtils.longValueSaturating(inserted);
         }
 
         @Override
@@ -280,7 +275,7 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
         //todo make getamount return lower value so that getcapacity will allow you to insert (for when theres more then an entire long inside panel)
         @Override
         public long getCapacity() {
-            return Long.MAX_VALUE;
+            return BigIntUtils.longValueSaturating(DrawerPanelItem.this.capacity(stack));
         }
     }
 }
