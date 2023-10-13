@@ -4,10 +4,7 @@ import com.chyzman.chowl.block.DrawerFrameBlockEntityRenderer;
 import com.chyzman.chowl.block.DrawerFrameBlockModel;
 import com.chyzman.chowl.graph.ClientGraphStore;
 import com.chyzman.chowl.item.model.BlankPanelItemModel;
-import com.chyzman.chowl.item.renderer.CompressingPanelItemRenderer;
-import com.chyzman.chowl.item.renderer.DrawerFrameItemRenderer;
-import com.chyzman.chowl.item.renderer.DrawerPanelItemRenderer;
-import com.chyzman.chowl.item.renderer.MirrorPanelItemRenderer;
+import com.chyzman.chowl.item.renderer.*;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.registry.client.ClientBoundPackets;
 import com.chyzman.chowl.registry.client.ClientEventListeners;
@@ -41,9 +38,9 @@ public class ChowlClient implements ClientModInitializer {
         BlockEntityRendererFactories.register(DRAWER_FRAME_BLOCK_ENTITY_TYPE, DrawerFrameBlockEntityRenderer::new);
         BlockRenderLayerMap.INSTANCE.putBlock(ChowlRegistry.DRAWER_FRAME_BLOCK, RenderLayer.getCutout());
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.DRAWER_FRAME_ITEM, new DrawerFrameItemRenderer());
-        BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.DRAWER_PANEL_ITEM, new DrawerPanelItemRenderer());
-        BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.MIRROR_PANEL_ITEM, new MirrorPanelItemRenderer());
-        BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.COMPRESSING_PANEL_ITEM, new CompressingPanelItemRenderer());
+        BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.DRAWER_PANEL_ITEM, new GenericPanelItemRenderer(id("item/drawer_panel_base")));
+        BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.MIRROR_PANEL_ITEM, new GenericPanelItemRenderer(id("item/mirror_panel_base")));
+        BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.COMPRESSING_PANEL_ITEM, new GenericPanelItemRenderer(id("item/compressing_panel_base")));
         HandledScreens.register(PanelConfigSreenHandler.TYPE, PanelConfigScreen::new);
 
         ModelLoadingPlugin.register(ctx -> {

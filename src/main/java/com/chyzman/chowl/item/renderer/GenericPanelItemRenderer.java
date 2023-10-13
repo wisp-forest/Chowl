@@ -1,8 +1,8 @@
 package com.chyzman.chowl.item.renderer;
 
-import com.chyzman.chowl.classes.FunniVertexConsumer;
-import com.chyzman.chowl.classes.FunniVertexConsumerProvider;
-import com.chyzman.chowl.item.DrawerPanelItem;
+import com.chyzman.chowl.classes.AABBConstructingVertexConsumer;
+import com.chyzman.chowl.client.RenderGlobals;
+import com.chyzman.chowl.item.component.CapacityLimitedPanelItem;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
 import net.fabricmc.api.EnvType;
@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.LightmapTextureManager;
+import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
@@ -18,18 +19,23 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 
 import java.math.BigInteger;
 
-import static com.chyzman.chowl.Chowl.*;
-import static com.chyzman.chowl.item.DrawerPanelItem.CAPACITY;
-import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
+import static com.chyzman.chowl.Chowl.GLOWING_UPGRADE_TAG;
 
 @Environment(EnvType.CLIENT)
 @SuppressWarnings("UnstableApiUsage")
-public class DrawerPanelItemRenderer implements BuiltinItemRendererRegistry.DynamicItemRenderer {
+public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.DynamicItemRenderer {
+    private final Identifier baseModelId;
+
+    public GenericPanelItemRenderer(Identifier baseModelId) {
+        this.baseModelId = baseModelId;
+    }
+
     @Override
     public void render(ItemStack stack, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         var client = MinecraftClient.getInstance();
@@ -38,37 +44,26 @@ public class DrawerPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
         matrices.translate(0.5, 0.5, 0.5);
         matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
 
-        var baseModel = MinecraftClient.getInstance().getBakedModelManager().getModel(id("item/drawer_panel_base"));
+        var baseModel = client.getBakedModelManager().getModel(baseModelId);
         if (baseModel != null) {
             client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, baseModel);
         }
 
-        if (!(stack.getItem() instanceof DrawerPanelItem drawerPanel)) return;
+        if (!(stack.getItem() instanceof DisplayingPanelItem panel)) return;
 
-        var displayStack = drawerPanel.displayedVariant(stack).toStack();
-        var count = drawerPanel.displayedCount(stack, null);
+        var displayStack = panel.displayedVariant(stack).toStack();
+        var count = panel.displayedCount(stack, RenderGlobals.DRAWER_FRAME.get());
         var customization = stack.get(DisplayingPanelItem.CONFIG);
         var glowing = false;
-        if (stack.getItem() instanceof UpgradeablePanelItem panel) {
-            if (panel.hasUpgrade(stack, upgrade -> upgrade.isIn(GLOWING_UPGRADE_TAG))) {
+
+        if (stack.getItem() instanceof UpgradeablePanelItem upgradeable) {
+            if (upgradeable.hasUpgrade(stack, upgrade -> upgrade.isIn(GLOWING_UPGRADE_TAG))) {
                 glowing = true;
             }
         }
 
-
         if (!displayStack.isEmpty()) {
-            matrices.push();
-            var provider = new FunniVertexConsumerProvider();
-            client.getItemRenderer().renderItem(displayStack, ModelTransformationMode.FIXED, false, new MatrixStack(), provider, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light, overlay, client.getItemRenderer().getModels().getModel(displayStack));
-            final Vec3d[] bounds = {new Vec3d(0, 0, 0), new Vec3d(0, 0, 0)};
-            FunniVertexConsumer consumer = (FunniVertexConsumer) provider.getBuffer(null);
-            consumer.vertices.forEach(vertex -> {
-                bounds[0] = new Vec3d(Math.min(bounds[0].x, vertex.x), Math.min(bounds[0].y, vertex.y), Math.min(bounds[0].z, vertex.z));
-                bounds[1] = new Vec3d(Math.max(bounds[1].x, vertex.x), Math.max(bounds[1].y, vertex.y), Math.max(bounds[1].z, vertex.z));
-            });
-            consumer.vertices.clear();
-            var size = bounds[1].subtract(bounds[0]);
-            matrices.pop();
+            var size = measureItemSize(displayStack, client, matrices);
 
             float top = 0f;
             float bottom = 0f;
@@ -86,19 +81,25 @@ public class DrawerPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
                     top = 1f / client.textRenderer.fontHeight;
                 }
 
-
                 matrices.translate(0, -client.textRenderer.fontHeight + 1f, 0);
-                client.textRenderer.draw(drawerPanel.styleText(stack, title), -titleWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
+                client.textRenderer.draw(panel.styleText(stack, title), -titleWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
                 matrices.pop();
             }
+
             if (count.compareTo(BigInteger.ZERO) > 0 && !customization.hideCount()) {
                 matrices.push();
                 matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
                 matrices.translate(0, -3 / 8f, -1 / 31f);
                 matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
-                var cap = stack.get(CAPACITY).compareTo(BigInteger.valueOf(CHOWL_CONFIG.max_capacity_level_before_exponents())) > 0 ? "2^" + stack.get(CAPACITY).add(BigInteger.valueOf(11)) : drawerPanel.capacity(stack);
-                var amount = count + "/" + cap;
-                var amountWidth = client.textRenderer.getWidth(amount);
+                String countText;
+
+                if (panel instanceof CapacityLimitedPanelItem cap && cap.capacity(stack).signum() > 0) {
+                    countText = count + "/" + cap.formattedCapacity(stack);
+                } else {
+                    countText = count.toString();
+                }
+
+                var amountWidth = client.textRenderer.getWidth(countText);
                 if (amountWidth > maxwidth) {
                     matrices.scale(maxwidth / amountWidth, maxwidth / amountWidth, maxwidth / amountWidth);
                     bottom = (maxwidth / amountWidth) / client.textRenderer.fontHeight;
@@ -106,9 +107,10 @@ public class DrawerPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
                     bottom = 1f / client.textRenderer.fontHeight;
                 }
 
-                client.textRenderer.draw(drawerPanel.styleText(stack, Text.literal(amount)), -amountWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
+                client.textRenderer.draw(panel.styleText(stack, Text.literal(countText)), -amountWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
                 matrices.pop();
             }
+
             if (!customization.hideItem()) {
                 float scale = (float) Math.min(2, (1 / (Math.max(size.x, Math.max(size.y, size.z)))));
                 matrices.push();
@@ -127,5 +129,31 @@ public class DrawerPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
                 matrices.pop();
             }
         }
+    }
+
+    private Vec3d measureItemSize(ItemStack stack, MinecraftClient client, MatrixStack matrices) {
+        matrices.push();
+        matrices.loadIdentity();
+
+        var consumer = new AABBConstructingVertexConsumer();
+
+        client.getItemRenderer().renderItem(
+            stack,
+            ModelTransformationMode.FIXED,
+            false,
+            matrices,
+            layer -> consumer,
+            LightmapTextureManager.MAX_LIGHT_COORDINATE,
+            OverlayTexture.DEFAULT_UV,
+            client.getItemRenderer().getModels().getModel(stack)
+        );
+
+        matrices.pop();
+
+        return new Vec3d(
+            consumer.maxX - consumer.minX,
+            consumer.maxY - consumer.minY,
+            consumer.maxZ - consumer.minZ
+        );
     }
 }
