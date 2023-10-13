@@ -5,7 +5,6 @@ import com.chyzman.chowl.classes.FunniVertexConsumerProvider;
 import com.chyzman.chowl.item.DrawerPanelItem;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
-import com.chyzman.chowl.util.BigIntUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
@@ -112,7 +111,7 @@ public class DrawerPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
                 matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
                 matrices.translate(0, -3 / 8f, -1 / 31f);
                 matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
-                var cap = stack.get(CAPACITY).compareTo(BigInteger.valueOf(CHOWL_CONFIG.max_capacity_level_before_exponents())) > 0 ? "2^" + stack.get(CAPACITY).add(BigInteger.valueOf(11)) : DrawerPanelItem.getCapacity(stack);
+                var cap = stack.get(CAPACITY).compareTo(BigInteger.valueOf(CHOWL_CONFIG.max_capacity_level_before_exponents())) > 0 ? "2^" + stack.get(CAPACITY).add(BigInteger.valueOf(11)) : drawerPanel.capacity(stack);
                 var amount = count + "/" + cap;
                 var amountWidth = client.textRenderer.getWidth(amount);
                 if (amountWidth > maxwidth) {

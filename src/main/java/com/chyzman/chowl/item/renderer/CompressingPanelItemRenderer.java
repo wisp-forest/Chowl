@@ -2,11 +2,13 @@ package com.chyzman.chowl.item.renderer;
 
 import com.chyzman.chowl.item.CompressingPanelItem;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
+import com.chyzman.chowl.item.component.UpgradeablePanelItem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
@@ -18,6 +20,8 @@ import net.minecraft.util.math.RotationAxis;
 
 import java.math.BigInteger;
 
+import static com.chyzman.chowl.Chowl.*;
+import static com.chyzman.chowl.item.DrawerPanelItem.CAPACITY;
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
 @Environment(EnvType.CLIENT)
@@ -41,13 +45,19 @@ public class CompressingPanelItemRenderer implements BuiltinItemRendererRegistry
         var displayStack = compressingPanel.displayedVariant(stack).toStack();
         var count = compressingPanel.displayedCount(stack);
         var customization = stack.get(DisplayingPanelItem.CONFIG);
+        var glowing = false;
+        if (stack.getItem() instanceof UpgradeablePanelItem panel) {
+            if (panel.hasUpgrade(stack, upgrade -> upgrade.isIn(GLOWING_UPGRADE_TAG))) {
+                glowing = true;
+            }
+        }
 
         if (!displayStack.isEmpty()) {
             if (!customization.hideItem()) {
                 matrices.push();
                 matrices.scale(1 / 3f, 1 / 3f, 1 / 3f);
                 matrices.translate(0, 0, -3 / 32f);
-                client.getItemRenderer().renderItem(displayStack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(displayStack));
+                client.getItemRenderer().renderItem(displayStack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light, overlay, client.getItemRenderer().getModels().getModel(displayStack));
                 matrices.pop();
             }
             if (!customization.hideName()) {
@@ -61,7 +71,7 @@ public class CompressingPanelItemRenderer implements BuiltinItemRendererRegistry
                     matrices.scale(maxwidth / titleWidth, maxwidth / titleWidth, maxwidth / titleWidth);
                 }
                 matrices.translate(0, -client.textRenderer.fontHeight + 1f, 0);
-                client.textRenderer.draw(compressingPanel.styleText(stack, title), -titleWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
+                client.textRenderer.draw(compressingPanel.styleText(stack, title), -titleWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
                 matrices.pop();
             }
         }
@@ -71,12 +81,13 @@ public class CompressingPanelItemRenderer implements BuiltinItemRendererRegistry
             matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
             matrices.translate(0, -3 / 8f, -1 / 31f);
             matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
-            var amount = count.toString();
+            var cap = stack.get(CAPACITY).compareTo(BigInteger.valueOf(CHOWL_CONFIG.max_capacity_level_before_exponents())) > 0 ? "2^" + stack.get(CAPACITY).add(BigInteger.valueOf(11)) : compressingPanel.capacity(stack);
+            var amount = count + "/" + cap;
             var amountWidth = client.textRenderer.getWidth(amount);
             if (amountWidth > maxwidth) {
                 matrices.scale(maxwidth / amountWidth, maxwidth / amountWidth, maxwidth / amountWidth);
             }
-            client.textRenderer.draw(compressingPanel.styleText(stack, Text.literal(amount)), -amountWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
+            client.textRenderer.draw(compressingPanel.styleText(stack, Text.literal(amount)), -amountWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
             matrices.pop();
         }
     }
