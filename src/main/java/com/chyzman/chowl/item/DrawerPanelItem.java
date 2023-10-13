@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.chyzman.chowl.Chowl.*;
@@ -225,15 +226,27 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
                         var pos = blockEntity.getPos();
                         var upgrades = panelItem.upgrades(stack);
                         AtomicInteger power = new AtomicInteger();
-                        upgrades.forEach(upgrade -> {
+                        AtomicBoolean fiery = new AtomicBoolean(false);
+                        upgrades.stream()
+                                .forEach(upgrade -> {
                                     if (upgrade.isIn(EXPLOSIVE_UPGRADE_TAG)) {
                                         power.addAndGet(1);
                                         upgrade.decrement(1);
-                                        panelItem.setUpgrades(stack, upgrades);
-                                        world.createExplosion(null, pos.getX(), pos.getY(), pos.getZ(), power.get() + 1, false, World.ExplosionSourceType.BLOCK);
                                     }
-                                }
-                        );
+                                    if (upgrade.isIn(FIERY_UPGRADE_TAG)) {
+                                        fiery.set(true);
+                                        upgrade.decrement(1);
+                                    }
+                                    panelItem.setUpgrades(stack, upgrades);
+                                });
+                        world.createExplosion(
+                                null,
+                                pos.getX(),
+                                pos.getY(),
+                                pos.getZ(),
+                                power.get() + 1,
+                                fiery.get(),
+                                World.ExplosionSourceType.BLOCK);
                     }
                 }
             }

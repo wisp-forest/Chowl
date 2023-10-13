@@ -37,6 +37,7 @@ public class Chowl implements ModInitializer {
     public static final ChowlIndustriesConfig CHOWL_CONFIG = ChowlIndustriesConfig.createAndLoad();
 
     public static final TagKey<Item> EXPLOSIVE_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("explosive_panel_upgrade"));
+    public static final TagKey<Item> FIERY_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("fiery_panel_upgrade"));
     public static final TagKey<Item> HOPPER_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("hopper_panel_upgrade"));
     public static final TagKey<Item> LAVA_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("lava_voiding_panel_upgrade"));
     public static final TagKey<Item> NETHERITE_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("netherite_panel_upgrade"));
