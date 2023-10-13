@@ -3,6 +3,7 @@ package com.chyzman.chowl;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.classes.ChowlIndustriesConfig;
 import com.chyzman.chowl.commands.DebugCommands;
+import com.chyzman.chowl.recipe.ChowlRecipeSerializers;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.registry.ServerBoundPackets;
 import com.chyzman.chowl.registry.ServerEventListeners;
@@ -79,6 +80,7 @@ public class Chowl implements ModInitializer {
         ChowlRegistry.init();
         ServerBoundPackets.init();
         ServerEventListeners.init();
+        ChowlRecipeSerializers.init();
         Registry.register(Registries.SCREEN_HANDLER, id("panel_config"), PanelConfigSreenHandler.TYPE);
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {

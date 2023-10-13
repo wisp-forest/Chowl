@@ -153,7 +153,16 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
     }
 
     public static BigInteger getCapacity(ItemStack stack) {
-        return new BigInteger(CHOWL_CONFIG.base_panel_capacity()).multiply(POWER_CACHE.getUnchecked(stack.get(CAPACITY).min(BigInteger.valueOf(100000000))));
+        return new BigInteger(CHOWL_CONFIG.base_panel_capacity()).multiply(POWER_CACHE.getUnchecked(capacityTier(stack)));
+    }
+
+    public static BigInteger capacityTier(ItemStack stack) {
+        return stack.get(CAPACITY).min(BigInteger.valueOf(100000000));
+    }
+
+    public static ItemStack setCapacityTier(ItemStack stack, BigInteger tier) {
+        stack.put(CAPACITY, tier);
+        return stack;
     }
 
     @Override
