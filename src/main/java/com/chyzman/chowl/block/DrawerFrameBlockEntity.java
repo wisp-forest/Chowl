@@ -68,11 +68,11 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public @Nullable Storage<ItemVariant> getItemStorage(Direction fromSide) {
-        List<SlottedStorage<ItemVariant>> storages = new ArrayList<>();
+        var stack = stacks.get(fromSide.getId());
 
-        collectPanelStorages(storages::add);
+        if (!(stack.getLeft().getItem() instanceof PanelItem panelItem)) return null;
 
-        return new CombinedSlottedStorage<>(storages);
+        return panelItem.getStorage(stack.getLeft(), this, fromSide);
     }
 
     @Override
