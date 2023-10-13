@@ -1,5 +1,7 @@
 package com.chyzman.chowl.item.renderer;
 
+import com.chyzman.chowl.classes.FunniVertexConsumer;
+import com.chyzman.chowl.classes.FunniVertexConsumerProvider;
 import com.chyzman.chowl.item.DrawerPanelItem;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
@@ -7,6 +9,11 @@ import com.chyzman.chowl.util.BigIntUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
+import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
+import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MeshBuilderImpl;
+import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
+import net.fabricmc.fabric.impl.client.indigo.renderer.render.ItemRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.LightmapTextureManager;
@@ -17,9 +24,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Vec3d;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 
 import static com.chyzman.chowl.Chowl.*;
 import static com.chyzman.chowl.item.DrawerPanelItem.CAPACITY;
@@ -36,9 +46,9 @@ public class DrawerPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
         matrices.translate(0.5, 0.5, 0.5);
         matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
 
-        var model = MinecraftClient.getInstance().getBakedModelManager().getModel(id("item/drawer_panel_base"));
-        if (model != null) {
-            client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, model);
+        var baseModel = MinecraftClient.getInstance().getBakedModelManager().getModel(id("item/drawer_panel_base"));
+        if (baseModel != null) {
+            client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, baseModel);
         }
 
         if (!(stack.getItem() instanceof DrawerPanelItem drawerPanel)) return;
@@ -53,12 +63,34 @@ public class DrawerPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
             }
         }
 
+
         if (!displayStack.isEmpty()) {
+            matrices.push();
+            var provider = new FunniVertexConsumerProvider();
+            client.getItemRenderer().renderItem(displayStack, ModelTransformationMode.FIXED, false, new MatrixStack(), provider, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light, overlay, client.getItemRenderer().getModels().getModel(displayStack));
+            final Vec3d[] bounds = {new Vec3d(0, 0, 0), new Vec3d(0, 0, 0)};
+            FunniVertexConsumer consumer = (FunniVertexConsumer) provider.getBuffer(null);
+            consumer.vertices.forEach(vertex -> {
+                bounds[0] = new Vec3d(Math.min(bounds[0].x, vertex.x), Math.min(bounds[0].y, vertex.y), Math.min(bounds[0].z, vertex.z));
+                bounds[1] = new Vec3d(Math.max(bounds[1].x, vertex.x), Math.max(bounds[1].y, vertex.y), Math.max(bounds[1].z, vertex.z));
+            });
+            consumer.vertices.clear();
+            var size = bounds[1].subtract(bounds[0]);
+            if (mode == ModelTransformationMode.FIRST_PERSON_RIGHT_HAND) {
+                float precision = 100;
+                MinecraftClient.getInstance().player.sendMessage(Text.of("(" + ((int) (size.x * precision)) / precision + "," + ((int) (size.y * precision)) / precision + "," + ((int) (size.z * precision)) / precision + ")"), true);
+            }
+            float scale = (float) Math.min(3, (1/Math.min(size.x, size.y)));
+            matrices.pop();
+
             if (!customization.hideItem()) {
                 matrices.push();
+                matrices.translate(0, 0, -1 / 32f);
+                matrices.scale(scale, scale, scale);
                 matrices.scale(1 / 3f, 1 / 3f, 1 / 3f);
-                matrices.translate(0, 0, -3 / 32f);
+                matrices.push();
                 client.getItemRenderer().renderItem(displayStack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light, overlay, client.getItemRenderer().getModels().getModel(displayStack));
+                matrices.pop();
                 matrices.pop();
             }
             if (!customization.hideName()) {
@@ -75,21 +107,20 @@ public class DrawerPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
                 client.textRenderer.draw(drawerPanel.styleText(stack, title), -titleWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
                 matrices.pop();
             }
-        }
-
-        if (count.compareTo(BigInteger.ZERO) > 0 && !customization.hideCount()) {
-            matrices.push();
-            matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
-            matrices.translate(0, -3 / 8f, -1 / 31f);
-            matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
-            var cap = stack.get(CAPACITY).compareTo(BigInteger.valueOf(CHOWL_CONFIG.max_capacity_level_before_exponents())) > 0 ? "2^" + stack.get(CAPACITY).add(BigInteger.valueOf(11)) : DrawerPanelItem.getCapacity(stack);
-            var amount = count + "/" + cap;
-            var amountWidth = client.textRenderer.getWidth(amount);
-            if (amountWidth > maxwidth) {
-                matrices.scale(maxwidth / amountWidth, maxwidth / amountWidth, maxwidth / amountWidth);
+            if (count.compareTo(BigInteger.ZERO) > 0 && !customization.hideCount()) {
+                matrices.push();
+                matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
+                matrices.translate(0, -3 / 8f, -1 / 31f);
+                matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
+                var cap = stack.get(CAPACITY).compareTo(BigInteger.valueOf(CHOWL_CONFIG.max_capacity_level_before_exponents())) > 0 ? "2^" + stack.get(CAPACITY).add(BigInteger.valueOf(11)) : DrawerPanelItem.getCapacity(stack);
+                var amount = count + "/" + cap;
+                var amountWidth = client.textRenderer.getWidth(amount);
+                if (amountWidth > maxwidth) {
+                    matrices.scale(maxwidth / amountWidth, maxwidth / amountWidth, maxwidth / amountWidth);
+                }
+                client.textRenderer.draw(drawerPanel.styleText(stack, Text.literal(amount)), -amountWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
+                matrices.pop();
             }
-            client.textRenderer.draw(drawerPanel.styleText(stack, Text.literal(amount)), -amountWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
-            matrices.pop();
         }
     }
 }

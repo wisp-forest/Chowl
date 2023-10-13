@@ -9,7 +9,6 @@
     "ServerWorldMixin"
   ],
   "client": [
-    "client.DrawContextAccessor",
     "client.HeldItemRendererMixin",
     "client.MinecraftClientMixin"
   ],
