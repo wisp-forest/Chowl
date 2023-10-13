@@ -24,12 +24,11 @@ import org.jetbrains.annotations.Nullable;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.OptionalInt;
 
 import static com.chyzman.chowl.Chowl.*;
 
 @SuppressWarnings("UnstableApiUsage")
-public class CompressingPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem, CapacityLimitedPanelItem {
+public class CompressingPanelItem extends BasePanelItem implements FilteringPanelItem, LockablePanelItem, DisplayingPanelItem, CapacityLimitedPanelItem {
     public static final NbtKey<Item> ITEM = new NbtKey<>("Variant", NbtKey.Type.ofRegistry(Registries.ITEM));
     public static final NbtKey<BigInteger> COUNT = new NbtKey<>("Count", NbtKeyTypes.BIG_INTEGER);
     public static final NbtKey<Boolean> LOCKED = new NbtKey<>("Locked", NbtKey.Type.BOOLEAN);
@@ -44,7 +43,7 @@ public class CompressingPanelItem extends BasePanelItem implements PanelItem, Fi
     }
 
     @Override
-    public BigInteger displayedCount(ItemStack stack) {
+    public BigInteger displayedCount(ItemStack stack, @Nullable DrawerFrameBlockEntity drawerFrame) {
         // TODO: use proper step
         return stack.get(COUNT);
     }
@@ -97,6 +96,11 @@ public class CompressingPanelItem extends BasePanelItem implements PanelItem, Fi
         storages.add(base);
 
         return new CombinedSlottedStorage<>(storages);
+    }
+
+    @Override
+    public boolean hasConfig() {
+        return true;
     }
 
     @Override

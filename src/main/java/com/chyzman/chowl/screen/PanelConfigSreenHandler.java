@@ -12,6 +12,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Consumer;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PanelConfigSreenHandler extends ScreenHandler {
@@ -21,7 +24,7 @@ public class PanelConfigSreenHandler extends ScreenHandler {
 
     public static final ScreenHandlerType<PanelConfigSreenHandler> TYPE = new ExtendedScreenHandlerType<>(PanelConfigSreenHandler::new);
 
-    public PanelConfigSreenHandler(int syncId, PlayerInventory playerInventory, ItemStack stack) {
+    public PanelConfigSreenHandler(int syncId, PlayerInventory playerInventory, ItemStack stack, @Nullable Consumer<ItemStack> updater) {
         super(TYPE, syncId);
         this.inventory = playerInventory;
         this.stack = this.createProperty(ItemStack.class, stack);
@@ -58,10 +61,14 @@ public class PanelConfigSreenHandler extends ScreenHandler {
                         stack1 -> true,
                         stack1 -> !(stack1.equals(stack))))
             .playerInventory(playerInventory);
+
+        if (updater != null) {
+            this.stack.observe(updater);
+        }
     }
 
     public PanelConfigSreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
-        this(syncId, playerInventory, buf.readItemStack());
+        this(syncId, playerInventory, buf.readItemStack(), null);
     }
 
     @Override

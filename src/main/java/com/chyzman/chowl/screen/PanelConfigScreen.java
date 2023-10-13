@@ -21,6 +21,8 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
     private SmallCheckboxComponent showItemCheckBox;
     private SmallCheckboxComponent showNameCheckBox;
 
+    private boolean ignoreChanges = false;
+
     public PanelConfigScreen(PanelConfigSreenHandler screenHandler, PlayerInventory inventory, Text title) {
         super(screenHandler, inventory, title);
     }
@@ -143,20 +145,26 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
 
 
         handler.stack.observe(newStack -> {
-            if (newStack.getItem() instanceof FilteringPanelItem filtering) {
-                filterSlot.stack(filtering.currentFilter(newStack).toStack());
-            }
+            try {
+                ignoreChanges = true;
 
-            if (newStack.getItem() instanceof LockablePanelItem lockable) {
-                lockedCheckbox.checked(lockable.locked(newStack));
-            }
+                if (newStack.getItem() instanceof FilteringPanelItem filtering) {
+                    filterSlot.stack(filtering.currentFilter(newStack).toStack());
+                }
 
-            if (stack.getItem() instanceof DisplayingPanelItem) {
-                var newConfig = newStack.get(DisplayingPanelItem.CONFIG);
+                if (newStack.getItem() instanceof LockablePanelItem lockable) {
+                    lockedCheckbox.checked(lockable.locked(newStack));
+                }
 
-                showCountCheckBox.checked(!newConfig.hideCount());
-                showItemCheckBox.checked(!newConfig.hideItem());
-                showNameCheckBox.checked(!newConfig.hideName());
+                if (stack.getItem() instanceof DisplayingPanelItem) {
+                    var newConfig = newStack.get(DisplayingPanelItem.CONFIG);
+
+                    showCountCheckBox.checked(!newConfig.hideCount());
+                    showItemCheckBox.checked(!newConfig.hideItem());
+                    showNameCheckBox.checked(!newConfig.hideName());
+                }
+            } finally {
+                ignoreChanges = false;
             }
         });
 
@@ -170,6 +178,8 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
     }
 
     private void resendConfig() {
+        if (ignoreChanges) return;
+
         var displayConfig = new DisplayingPanelItem.Config();
         boolean locked = false;
 

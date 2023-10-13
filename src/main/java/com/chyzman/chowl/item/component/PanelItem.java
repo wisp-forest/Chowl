@@ -5,21 +5,16 @@ import com.chyzman.chowl.block.DrawerFrameBlock;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.screen.PanelConfigSreenHandler;
 import com.chyzman.chowl.transfer.TransferState;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -32,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.function.Consumer;
 
 @SuppressWarnings("UnstableApiUsage")
 public interface PanelItem {
@@ -125,29 +120,29 @@ public interface PanelItem {
         return true;
     }
 
-    default void tryOpenConfigScreen(World world, PlayerEntity user, Hand hand) {
-        if (!world.isClient) {
-            if (user.isSneaking()) {
-                var stack = user.getStackInHand(hand);
-                var factory = new ExtendedScreenHandlerFactory() {
-                    @Override
-                    public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-                        return new PanelConfigSreenHandler(syncId, playerInventory, stack);
-                    }
+    default boolean hasConfig() {
+        return false;
+    }
 
-                    @Override
-                    public Text getDisplayName() {
-                        return Text.translatable("container.chowl.panel_config.title");
-                    }
-
-                    @Override
-                    public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
-                        buf.writeItemStack(user.getStackInHand(hand));
-                    }
-                };
-                user.openHandledScreen(factory);
+    default void openConfig(ItemStack stack, PlayerEntity user, @Nullable Consumer<ItemStack> updater) {
+        var factory = new ExtendedScreenHandlerFactory() {
+            @Override
+            public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
+                return new PanelConfigSreenHandler(syncId, playerInventory, stack, updater);
             }
-        }
+
+            @Override
+            public Text getDisplayName() {
+                return Text.translatable("container.chowl.panel_config.title");
+            }
+
+            @Override
+            public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
+                buf.writeItemStack(stack);
+            }
+        };
+
+        user.openHandledScreen(factory);
     }
 
     record Button(float minX, float minY, float maxX, float maxY, UseFunction use,

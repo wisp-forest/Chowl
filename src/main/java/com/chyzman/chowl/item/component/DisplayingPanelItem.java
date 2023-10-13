@@ -1,5 +1,6 @@
 package com.chyzman.chowl.item.component;
 
+import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.util.NbtKeyTypes;
 import io.wispforest.owo.nbt.NbtKey;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -20,7 +21,7 @@ public interface DisplayingPanelItem extends PanelItem {
     NbtKey<Config> CONFIG = new NbtKey<>("Config", Config.KEY_TYPE);
 
     ItemVariant displayedVariant(ItemStack stack);
-    BigInteger displayedCount(ItemStack stack);
+    BigInteger displayedCount(ItemStack stack, @Nullable DrawerFrameBlockEntity drawerFrame);
 
     default @Nullable Text styleText(ItemStack stack, Text wrapped) {
         return Text.literal("").append(wrapped).setStyle(stack.get(CONFIG).textStyle());

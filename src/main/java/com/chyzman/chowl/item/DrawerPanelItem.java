@@ -108,9 +108,8 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        tryOpenConfigScreen(world, user, hand);
-        return super.use(world, user, hand);
+    public boolean hasConfig() {
+        return true;
     }
 
     @Override
@@ -147,7 +146,7 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
     }
 
     @Override
-    public BigInteger displayedCount(ItemStack stack) {
+    public BigInteger displayedCount(ItemStack stack, @Nullable DrawerFrameBlockEntity drawerFrame) {
         return stack.get(COUNT);
     }
 

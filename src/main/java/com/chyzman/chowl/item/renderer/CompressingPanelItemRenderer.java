@@ -43,7 +43,7 @@ public class CompressingPanelItemRenderer implements BuiltinItemRendererRegistry
         if (!(stack.getItem() instanceof CompressingPanelItem compressingPanel)) return;
 
         var displayStack = compressingPanel.displayedVariant(stack).toStack();
-        var count = compressingPanel.displayedCount(stack);
+        var count = compressingPanel.displayedCount(stack, null);
         var customization = stack.get(DisplayingPanelItem.CONFIG);
         var glowing = false;
         if (stack.getItem() instanceof UpgradeablePanelItem panel) {

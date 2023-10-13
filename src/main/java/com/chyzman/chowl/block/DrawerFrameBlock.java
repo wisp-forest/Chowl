@@ -7,8 +7,6 @@ import com.chyzman.chowl.registry.ChowlRegistry;
 import io.wispforest.owo.ops.ItemOps;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
@@ -114,20 +112,26 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 }
             })
             .build();
-    public static final BlockButtonProvider.Button CONFIG_BUTTON = new Button(12, 14, 14, 16, null,
-            (world, state, hitResult, player) -> {
+    public static final BlockButtonProvider.Button CONFIG_BUTTON = new Button(12, 14, 14, 16,
+            (state, world, pos, player, hand, hitResult) -> {
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
                     return ActionResult.PASS;
 
                 var side = getSide(hitResult);
                 var selected = blockEntity.stacks.get(side.getId()).getLeft();
 
-                player.getInventory().offerOrDrop(selected);
-                blockEntity.stacks.set(side.getId(), new Pair<>(ItemStack.EMPTY, 0));
-                blockEntity.markDirty();
+                if (!(selected.getItem() instanceof PanelItem panel)) return ActionResult.FAIL;
+                if (!panel.hasConfig()) return ActionResult.FAIL;
 
+                panel.openConfig(selected, player, newStack -> {
+                    var currentRotation = blockEntity.stacks.get(side.getId()).getRight();
+                    blockEntity.stacks.set(side.getId(), new Pair<>(newStack, currentRotation));
+
+                    blockEntity.markDirty();
+                });
                 return ActionResult.SUCCESS;
             },
+            null,
             null,
             (client, entity, hitResult, vertexConsumers, matrices, light, overlay, hovered) -> {
                 if (hovered) {
@@ -273,10 +277,12 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         if (selected.isEmpty()) return List.of();
 
         List<Button> buttons = new ArrayList<>();
-        buttons.add(CONFIG_BUTTON);
         buttons.add(REMOVE_BUTTON);
 
         if (selected.getItem() instanceof PanelItem panelItem) {
+            if (panelItem.hasConfig())
+                buttons.add(CONFIG_BUTTON);
+
             var panelButtons = panelItem.listButtons(blockEntity, side, blockEntity.stacks.get(side.getId()).getLeft());
 
             for (var panelButton : panelButtons) {

@@ -2,6 +2,7 @@ package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.graph.GraphStore;
+import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.FilteringPanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.registry.ChowlRegistry;
@@ -22,11 +23,12 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
-public class MirrorPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem {
+public class MirrorPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, DisplayingPanelItem {
     public static final NbtKey<ItemVariant> FILTER = new NbtKey<>("Filter", NbtKeyTypes.ITEM_VARIANT);
 
     public static final PanelItem.Button SET_FILTER_BUTTON = new PanelItem.Button(2, 2, 14, 14,
@@ -53,7 +55,7 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public @Nullable SlottedStorage<ItemVariant> getStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
+    public @Nullable SingleSlotStorage<ItemVariant> getStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
         World w = blockEntity.getWorld();
 
         if (TransferState.TRAVERSING.get()) return null;
@@ -104,9 +106,8 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        tryOpenConfigScreen(world, user, hand);
-        return super.use(world, user, hand);
+    public boolean hasConfig() {
+        return true;
     }
 
     @Override
@@ -122,5 +123,21 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
     @Override
     public void setFilter(ItemStack stack, ItemVariant newFilter) {
         stack.put(FILTER, newFilter);
+    }
+
+    @Override
+    public ItemVariant displayedVariant(ItemStack stack) {
+        return currentFilter(stack);
+    }
+
+    @Override
+    public BigInteger displayedCount(ItemStack stack, @Nullable DrawerFrameBlockEntity drawerFrame) {
+        if (drawerFrame == null) return BigInteger.ZERO;
+
+        var storage = this.getStorage(stack, drawerFrame, null);
+
+        if (storage == null) return BigInteger.ZERO;
+
+        return BigInteger.valueOf(storage.getAmount());
     }
 }

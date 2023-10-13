@@ -8,11 +8,6 @@ import com.chyzman.chowl.item.component.UpgradeablePanelItem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
-import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
-import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
-import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MeshBuilderImpl;
-import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
-import net.fabricmc.fabric.impl.client.indigo.renderer.render.ItemRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.LightmapTextureManager;
@@ -23,12 +18,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 
 import static com.chyzman.chowl.Chowl.*;
 import static com.chyzman.chowl.item.DrawerPanelItem.CAPACITY;
@@ -53,7 +46,7 @@ public class DrawerPanelItemRenderer implements BuiltinItemRendererRegistry.Dyna
         if (!(stack.getItem() instanceof DrawerPanelItem drawerPanel)) return;
 
         var displayStack = drawerPanel.displayedVariant(stack).toStack();
-        var count = drawerPanel.displayedCount(stack);
+        var count = drawerPanel.displayedCount(stack, null);
         var customization = stack.get(DisplayingPanelItem.CONFIG);
         var glowing = false;
         if (stack.getItem() instanceof UpgradeablePanelItem panel) {
