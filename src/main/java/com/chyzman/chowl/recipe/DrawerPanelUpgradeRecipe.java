@@ -39,7 +39,7 @@ public class DrawerPanelUpgradeRecipe extends SpecialCraftingRecipe {
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return null;
+        return ChowlRecipeSerializers.DRAWER_PANEL_UPGRADE_RECIPE;
     }
 
     public @Nullable ItemStack getOutput(RecipeInputInventory inventory) {
