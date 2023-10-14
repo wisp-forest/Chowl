@@ -7,6 +7,10 @@ import com.chyzman.chowl.registry.ChowlRegistry;
 import io.wispforest.owo.ops.ItemOps;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.client.render.LightmapTextureManager;
+import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
@@ -37,6 +41,7 @@ import java.util.*;
 public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver {
 
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
+    public static final BooleanProperty TICKING = BooleanProperty.of("ticking");
 
     public static final VoxelShape BASE = VoxelShapes.union(
             Block.createCuboidShape(0, 0, 0, 16, 2, 2),
@@ -76,7 +81,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 stacks.set(side.getId(), new Pair<>(temp, stacks.get(side.getId()).getRight()));
                 stackInHand.decrement(1);
                 drawerFrame.markDirty();
-                
+
                 return ActionResult.SUCCESS;
             },
             (world, drawerFrame, side, stack, player) -> {
@@ -142,7 +147,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
     public DrawerFrameBlock(Settings settings) {
         super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, Boolean.FALSE));
+        this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, Boolean.FALSE).with(TICKING, Boolean.FALSE));
     }
 
     @Override
@@ -166,6 +171,20 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         super.onStateReplaced(state, world, pos, newState, moved);
         if (newState.getBlock() != this && world instanceof ServerWorld sw) {
             ServerGraphStore.get(sw).tryRemove(pos);
+        }
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+        if (state.get(TICKING)) {
+            return (world1, pos, state1, blockEntity) -> {
+                if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
+                    drawerFrameBlockEntity.tick(world1, pos, state1);
+                }
+            };
+        } else {
+            return super.getTicker(world, state, type);
         }
     }
 
@@ -233,7 +252,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     }
 
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(WATERLOGGED);
+        builder.add(WATERLOGGED, TICKING);
     }
 
     @Override

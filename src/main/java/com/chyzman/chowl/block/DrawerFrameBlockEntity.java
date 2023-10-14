@@ -11,7 +11,9 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.HopperBlock;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.HopperBlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -25,10 +27,12 @@ import net.minecraft.util.Pair;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageBlockEntity, RenderAttachmentBlockEntity {
@@ -36,6 +40,8 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     public List<Pair<ItemStack, Integer>> stacks = new ArrayList<>(DefaultedList.ofSize(6, new Pair<>(ItemStack.EMPTY, 0)).stream().toList());
     public BlockState templateState = null;
     public BlockState prevTemplateState = null;
+    private int transferCooldown = -1;
+    private long lastTickTime;
 
     public DrawerFrameBlockEntity(BlockPos pos, BlockState state) {
         super(Chowl.DRAWER_FRAME_BLOCK_ENTITY_TYPE, pos, state);
@@ -119,5 +125,13 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     @Override
     public @Nullable Object getRenderAttachmentData() {
         return templateState;
+    }
+
+    public void tick(World world, BlockPos pos, BlockState state) {
+        if (world.isClient) return;
+        for (Pair<ItemStack, Integer> stored : stacks) {
+            if (stored.getLeft().isEmpty()) continue;
+
+        }
     }
 }

@@ -112,7 +112,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
             }
 
             if (!customization.hideItem()) {
-                float scale = (float) Math.min(2, (1 / (Math.max(size.x, Math.max(size.y, size.z)))));
+                float scale = (float) Math.min(1.5, (1 / (Math.max(size.x, Math.max(size.y, size.z)))));
                 matrices.push();
                 matrices.translate(0, 0, -1 / 32f);
                 matrices.scale(scale, scale, scale);
@@ -121,8 +121,8 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                 matrices.translate(0, ((top - bottom)/2), 0);
                 scale = 1 - ((top + bottom) * 3);
                 matrices.scale(scale, scale, scale);
-//                scale = 0.9f;
-//                matrices.scale(scale, scale, scale);
+                scale = 0.8f;
+                matrices.scale(scale, scale, scale);
                 matrices.push();
                 client.getItemRenderer().renderItem(displayStack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light, overlay, client.getItemRenderer().getModels().getModel(displayStack));
                 matrices.pop();
