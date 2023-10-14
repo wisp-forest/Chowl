@@ -2,6 +2,7 @@ package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.item.component.*;
+import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.CompressingStorage;
 import com.chyzman.chowl.transfer.PanelStorage;
 import com.chyzman.chowl.util.BigIntUtils;
@@ -109,7 +110,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    private class BaseStorage extends PanelStorage implements SingleSlotStorage<ItemVariant> {
+    private class BaseStorage extends PanelStorage implements SingleSlotStorage<ItemVariant>, BigStorageView<ItemVariant> {
         public BaseStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
             super(stack, blockEntity, side);
         }
@@ -178,14 +179,13 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
         }
 
         @Override
-        public long getAmount() {
-            return BigIntUtils.longValueSaturating(stack.get(COUNT));
+        public BigInteger bigAmount() {
+            return stack.get(COUNT);
         }
 
-        //todo make getamount return lower value so that getcapacity will allow you to insert (for when theres more then an entire long inside panel)
         @Override
-        public long getCapacity() {
-            return BigIntUtils.longValueSaturating(CompressingPanelItem.this.capacity(stack));
+        public BigInteger bigCapacity() {
+            return CompressingPanelItem.this.capacity(stack);
         }
     }
 }

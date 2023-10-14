@@ -1,12 +1,14 @@
 package com.chyzman.chowl.transfer;
 
+import com.google.common.math.BigIntegerMath;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 
+import java.math.BigInteger;
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
-public class CombinedSingleSlotStorage<T> implements SingleSlotStorage<T> {
+public class CombinedSingleSlotStorage<T> implements SingleSlotStorage<T>, BigStorageView<T> {
     private final List<SingleSlotStorage<T>> components;
 
     public CombinedSingleSlotStorage(List<SingleSlotStorage<T>> components) {
@@ -48,22 +50,28 @@ public class CombinedSingleSlotStorage<T> implements SingleSlotStorage<T> {
     }
 
     @Override
-    public long getAmount() {
-        long amount = 0;
+    public BigInteger bigAmount() {
+        BigInteger amount = BigInteger.ZERO;
 
         for (var component : components) {
-            amount += component.getAmount();
+            if (component instanceof BigStorageView<?> bigView)
+                amount = amount.add(bigView.bigAmount());
+            else
+                amount = amount.add(BigInteger.valueOf(component.getAmount()));
         }
 
         return amount;
     }
 
     @Override
-    public long getCapacity() {
-        long amount = 0;
+    public BigInteger bigCapacity() {
+        BigInteger amount = BigInteger.ZERO;
 
         for (var component : components) {
-            amount += component.getAmount();
+            if (component instanceof BigStorageView<?> bigView)
+                amount = amount.add(bigView.bigCapacity());
+            else
+                amount = amount.add(BigInteger.valueOf(component.getCapacity()));
         }
 
         return amount;
