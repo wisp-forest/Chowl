@@ -6,6 +6,7 @@ import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.FilteringPanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.CombinedSingleSlotStorage;
 import com.chyzman.chowl.transfer.TransferState;
 import com.chyzman.chowl.util.NbtKeyTypes;
@@ -131,8 +132,8 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
 
         var storage = this.getStorage(stack, drawerFrame, null);
 
-        if (storage == null) return BigInteger.ZERO;
+        if (!(storage instanceof BigStorageView<?> big)) return BigInteger.ZERO;
 
-        return BigInteger.valueOf(storage.getAmount());
+        return big.bigAmount();
     }
 }
