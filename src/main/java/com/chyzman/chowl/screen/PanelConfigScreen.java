@@ -18,6 +18,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
     private FakeSlotComponent filterSlot;
     private SmallCheckboxComponent lockedCheckbox;
     private SmallCheckboxComponent showCountCheckBox;
+    private SmallCheckboxComponent showCapacityCheckBox;
     private SmallCheckboxComponent showItemCheckBox;
     private SmallCheckboxComponent showNameCheckBox;
 
@@ -63,6 +64,10 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
             showCountCheckBox.checked(!config.hideCount());
             showCountCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
 
+            this.showCapacityCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_capacity"));
+            showCapacityCheckBox.checked(!config.hideCapacity());
+            showCapacityCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
+
             this.showItemCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_item"));
             showItemCheckBox.checked(!config.hideItem());
             showItemCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
@@ -91,53 +96,62 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                     if (filterSlot != null) {
                         var slotFlow = Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18));
                         slotFlow
-                            .margins(Insets.bottom(1))
-                            .verticalAlignment(VerticalAlignment.CENTER);
+                                .margins(Insets.bottom(1))
+                                .verticalAlignment(VerticalAlignment.CENTER);
 
                         slotFlow
-                            .child(filterSlot
-                                .margins(Insets.of(1).withRight(3)))
-                            .child(Components.texture(id("textures/gui/container/slot.png"), 0, 0, 18, 18, 18, 18)
-                                .positioning(Positioning.absolute(0, 0)))
-                            .child(Components.label(Text.translatable("ui.chowl-industries.config_panel.filter")));
+                                .child(filterSlot
+                                        .margins(Insets.of(1).withRight(3)))
+                                .child(Components.texture(id("textures/gui/container/slot.png"), 0, 0, 18, 18, 18, 18)
+                                        .positioning(Positioning.absolute(0, 0)))
+                                .child(Components.label(Text.translatable("ui.chowl-industries.config_panel.filter")));
 
                         flowLayout.child(slotFlow);
                     }
 
                     if (lockedCheckbox != null) {
                         flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
-                            .<FlowLayout>configure(flow -> {
-                                flow.margins(Insets.bottom(1));
-                                flow.verticalAlignment(VerticalAlignment.CENTER);
-                            })
-                            .child(lockedCheckbox));
+                                .<FlowLayout>configure(flow -> {
+                                    flow.margins(Insets.bottom(1));
+                                    flow.verticalAlignment(VerticalAlignment.CENTER);
+                                })
+                                .child(lockedCheckbox));
                     }
 
                     if (showCountCheckBox != null) {
                         flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
-                            .<FlowLayout>configure(flow -> {
-                                flow.margins(Insets.bottom(1));
-                                flow.verticalAlignment(VerticalAlignment.CENTER);
-                            })
-                            .child(showCountCheckBox));
+                                .<FlowLayout>configure(flow -> {
+                                    flow.margins(Insets.bottom(1));
+                                    flow.verticalAlignment(VerticalAlignment.CENTER);
+                                })
+                                .child(showCountCheckBox));
+                    }
+
+                    if (showCapacityCheckBox != null) {
+                        flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
+                                .<FlowLayout>configure(flow -> {
+                                    flow.margins(Insets.bottom(1));
+                                    flow.verticalAlignment(VerticalAlignment.CENTER);
+                                })
+                                .child(showCapacityCheckBox));
                     }
 
                     if (showItemCheckBox != null) {
                         flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
-                            .<FlowLayout>configure(flow -> {
-                                flow.margins(Insets.bottom(1));
-                                flow.verticalAlignment(VerticalAlignment.CENTER);
-                            })
-                            .child(showItemCheckBox));
+                                .<FlowLayout>configure(flow -> {
+                                    flow.margins(Insets.bottom(1));
+                                    flow.verticalAlignment(VerticalAlignment.CENTER);
+                                })
+                                .child(showItemCheckBox));
                     }
 
                     if (showNameCheckBox != null) {
                         flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
-                            .<FlowLayout>configure(flow -> {
-                                flow.margins(Insets.bottom(1));
-                                flow.verticalAlignment(VerticalAlignment.CENTER);
-                            })
-                            .child(showNameCheckBox));
+                                .<FlowLayout>configure(flow -> {
+                                    flow.margins(Insets.bottom(1));
+                                    flow.verticalAlignment(VerticalAlignment.CENTER);
+                                })
+                                .child(showNameCheckBox));
                     }
 
                     flowLayout.child(inventoryFlow);
@@ -160,6 +174,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                     var newConfig = newStack.get(DisplayingPanelItem.CONFIG);
 
                     showCountCheckBox.checked(!newConfig.hideCount());
+                    showCapacityCheckBox.checked(!newConfig.hideCapacity());
                     showItemCheckBox.checked(!newConfig.hideItem());
                     showNameCheckBox.checked(!newConfig.hideName());
                 }
@@ -184,9 +199,11 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
         boolean locked = false;
 
         if (lockedCheckbox != null) locked = lockedCheckbox.checked();
-        if (showNameCheckBox != null) displayConfig.hideName(!showNameCheckBox.checked());
-        if (showItemCheckBox != null) displayConfig.hideItem(!showItemCheckBox.checked());
         if (showCountCheckBox != null) displayConfig.hideCount(!showCountCheckBox.checked());
+        if (showCapacityCheckBox != null) displayConfig.hideCapacity(!showCapacityCheckBox.checked());
+        if (showItemCheckBox != null) displayConfig.hideItem(!showItemCheckBox.checked());
+        if (showNameCheckBox != null) displayConfig.hideName(!showNameCheckBox.checked());
+
 
         handler.sendMessage(new PanelConfigSreenHandler.ConfigConfig(displayConfig, locked));
     }

@@ -2,6 +2,7 @@ package com.chyzman.chowl.block;
 
 import com.chyzman.chowl.classes.AttackInteractionReceiver;
 import com.chyzman.chowl.graph.ServerGraphStore;
+import com.chyzman.chowl.item.component.LockablePanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import io.wispforest.owo.ops.ItemOps;
@@ -37,6 +38,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+
+import static com.chyzman.chowl.item.component.LockablePanelItem.LOCK_BUTTON;
 
 public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver {
 
@@ -144,6 +147,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                     client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));
                 }
             });
+
 
     public DrawerFrameBlock(Settings settings) {
         super(settings);
@@ -297,6 +301,10 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
         List<Button> buttons = new ArrayList<>();
         buttons.add(REMOVE_BUTTON);
+
+        if (selected.getItem() instanceof LockablePanelItem) {
+            buttons.add(LOCK_BUTTON);
+        }
 
         if (selected.getItem() instanceof PanelItem panelItem) {
             if (panelItem.hasConfig())

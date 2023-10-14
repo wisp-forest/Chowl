@@ -21,6 +21,7 @@ public interface DisplayingPanelItem extends PanelItem {
     NbtKey<Config> CONFIG = new NbtKey<>("Config", Config.KEY_TYPE);
 
     ItemVariant displayedVariant(ItemStack stack);
+
     BigInteger displayedCount(ItemStack stack, @Nullable DrawerFrameBlockEntity drawerFrame);
 
     default @Nullable Text styleText(ItemStack stack, Text wrapped) {
@@ -31,6 +32,7 @@ public interface DisplayingPanelItem extends PanelItem {
         public static final NbtKey.Type<Config> KEY_TYPE = NbtKeyTypes.fromFactory(Config::new, Config::readNbt, Config::writeNbt);
 
         private boolean hideCount = false;
+        private boolean hideCapacity = false;
         private boolean hideName = false;
         private boolean hideItem = false;
         private Style textStyle = Style.EMPTY.withColor(Formatting.WHITE);
@@ -44,6 +46,14 @@ public interface DisplayingPanelItem extends PanelItem {
 
         public void hideCount(boolean hideCount) {
             this.hideCount = hideCount;
+        }
+
+        public boolean hideCapacity() {
+            return hideCapacity;
+        }
+
+        public void hideCapacity(boolean hideCapacity) {
+            this.hideCapacity = hideCapacity;
         }
 
         public boolean hideName() {
@@ -72,21 +82,23 @@ public interface DisplayingPanelItem extends PanelItem {
 
         public void readNbt(NbtCompound nbt) {
             this.hideCount = nbt.getBoolean("HideCount");
+            this.hideCapacity = nbt.getBoolean("HideCapacity");
             this.hideName = nbt.getBoolean("HideName");
             this.hideItem = nbt.getBoolean("HideItem");
             this.textStyle = Style.CODEC.parse(NbtOps.INSTANCE, nbt.get("TextStyle"))
-                .get()
-                .left()
-                .orElse(Style.EMPTY.withColor(Formatting.WHITE));
+                    .get()
+                    .left()
+                    .orElse(Style.EMPTY.withColor(Formatting.WHITE));
         }
 
         public void writeNbt(NbtCompound nbt) {
             nbt.putBoolean("HideCount", hideCount);
+            nbt.putBoolean("HideCapacity", hideCapacity);
             nbt.putBoolean("HideName", hideName);
             nbt.putBoolean("HideItem", hideItem);
             nbt.put("TextStyle", Util.getResult(
-                Style.CODEC.encodeStart(NbtOps.INSTANCE, textStyle),
-                RuntimeException::new
+                    Style.CODEC.encodeStart(NbtOps.INSTANCE, textStyle),
+                    RuntimeException::new
             ));
         }
     }

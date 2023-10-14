@@ -22,6 +22,7 @@ public class ServerBoundPackets {
                 DisplayingPanelItem.Config.class,
                 (buf, config) -> {
                     buf.writeBoolean(config.hideCount());
+                    buf.writeBoolean(config.hideCapacity());
                     buf.writeBoolean(config.hideName());
                     buf.writeBoolean(config.hideItem());
                     buf.encode(NbtOps.INSTANCE, Style.CODEC, config.textStyle());
@@ -29,6 +30,7 @@ public class ServerBoundPackets {
                     var config = new DisplayingPanelItem.Config();
 
                     config.hideCount(buf.readBoolean());
+                    config.hideCapacity(buf.readBoolean());
                     config.hideName(buf.readBoolean());
                     config.hideItem(buf.readBoolean());
                     config.textStyle(buf.decode(NbtOps.INSTANCE, Style.CODEC));
