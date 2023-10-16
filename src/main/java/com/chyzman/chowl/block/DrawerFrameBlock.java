@@ -4,6 +4,7 @@ import com.chyzman.chowl.classes.AttackInteractionReceiver;
 import com.chyzman.chowl.graph.ServerGraphStore;
 import com.chyzman.chowl.item.component.LockablePanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
+import com.chyzman.chowl.item.renderer.button.ButtonRenderer;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import io.wispforest.owo.ops.ItemOps;
 import net.minecraft.block.*;
@@ -70,9 +71,8 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             Block.createCuboidShape(14, 2, 2, 16, 14, 14),
     };
 
-    public static final PanelItem.Button DEFAULT_PANEL_BUTTON = new PanelItem.Button(
-            2, 2, 14, 14,
-            (world, drawerFrame, side, stack, player, hand) -> {
+    public static final PanelItem.Button DEFAULT_PANEL_BUTTON = new PanelItem.ButtonBuilder(2, 2, 14, 14)
+            .onUse((world, drawerFrame, side, stack, player, hand) -> {
                 var stacks = drawerFrame.stacks;
                 var stackInHand = player.getStackInHand(hand);
 
@@ -86,8 +86,8 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 drawerFrame.markDirty();
 
                 return ActionResult.SUCCESS;
-            },
-            (world, drawerFrame, side, stack, player) -> {
+            })
+            .onAttack((world, drawerFrame, side, stack, player) -> {
                 var stacks = drawerFrame.stacks;
 
                 if (stack.isEmpty()) return ActionResult.PASS;
@@ -96,9 +96,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 stacks.set(side.getId(), new Pair<>(ItemStack.EMPTY, 0));
                 drawerFrame.markDirty();
                 return ActionResult.SUCCESS;
-            },
-            null,
-            null);
+            }).build();
     public static final BlockButtonProvider.Button REMOVE_BUTTON = new ButtonBuilder(14, 14, 16, 16)
             .onAttack((world, state, hitResult, player) -> {
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
@@ -113,15 +111,16 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
                 return ActionResult.SUCCESS;
             })
-            .onRender((client, entity, hitResult, vertexConsumers, matrices, light, overlay, hovered) -> {
-                if (hovered) {
+            .onRender((entity, hitResult, blockTargeted, panelTargeted, buttonTargeted) -> {
+                if (buttonTargeted) {
                     var stack = Items.BARRIER.getDefaultStack();
-                    client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));
+                    return new ButtonRenderer.StackButtonRenderer(stack);
                 }
+                return null;
             })
             .build();
-    public static final BlockButtonProvider.Button CONFIG_BUTTON = new Button(12, 14, 14, 16,
-            (state, world, pos, player, hand, hitResult) -> {
+    public static final BlockButtonProvider.Button CONFIG_BUTTON = new ButtonBuilder(12, 14, 14, 16)
+            .onUse((state, world, pos, player, hand, hitResult) -> {
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
                     return ActionResult.PASS;
 
@@ -138,16 +137,14 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                     blockEntity.markDirty();
                 });
                 return ActionResult.SUCCESS;
-            },
-            null,
-            null,
-            (client, entity, hitResult, vertexConsumers, matrices, light, overlay, hovered) -> {
-                if (hovered) {
+            })
+            .onRender((entity, hitResult, blockTargeted, panelTargeted, buttonTargeted) -> {
+                if (buttonTargeted) {
                     var stack = Items.STRUCTURE_VOID.getDefaultStack();
-                    client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));
+                    return new ButtonRenderer.StackButtonRenderer(stack);
                 }
-            });
-
+                return null;
+            }).build();
 
     public DrawerFrameBlock(Settings settings) {
         super(settings);

@@ -18,7 +18,7 @@ public class ChowlIndustriesConfigModel {
     public boolean has_chyz_been_reminded_to_add_more_config = false;
 
     @Sync(Option.SyncMode.NONE)
-    public long max_capacity_level_before_exponents = 64L;
+    public String max_digits_before_exponents = "64";
 
     @SectionHeader("Server")
 

@@ -1,15 +1,9 @@
 package com.chyzman.chowl.block;
 
 import com.chyzman.chowl.classes.AttackInteractionReceiver;
-import com.mojang.datafixers.util.Function3;
-import com.mojang.datafixers.util.Function4;
-import com.mojang.datafixers.util.Function6;
+import com.chyzman.chowl.item.renderer.button.ButtonRenderer;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -23,8 +17,6 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleClickableBlock {
     List<Button> listButtons(World world, BlockState state, BlockHitResult hitResult);
@@ -71,8 +63,13 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
         return button.doubleClick.apply(world, state, hitResult, player);
     }
 
-    record Button(float minX, float minY, float maxX, float maxY, UseFunction use, AttackFunction attack,
-                  DoubleClickFunction doubleClick, RenderConsumer render) {
+    record Button(
+            float minX, float minY,
+            float maxX, float maxY,
+            UseFunction use,
+            AttackFunction attack,
+            DoubleClickFunction doubleClick,
+            RenderConsumer render) {
         public boolean isIn(float x, float y) {
             return minX <= x * 16 && x * 16 <= maxX && minY <= y * 16 && y * 16 <= maxY;
         }
@@ -141,6 +138,6 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
 
     @FunctionalInterface
     interface RenderConsumer {
-        void consume(MinecraftClient client, DrawerFrameBlockEntity entity, BlockHitResult hitResult, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay, boolean hovered);
+        ButtonRenderer apply(DrawerFrameBlockEntity entity, BlockHitResult hitResult, boolean blockTargeted, boolean panelTargeted, boolean buttonTargeted);
     }
 }

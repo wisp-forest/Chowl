@@ -2,6 +2,7 @@ package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.item.component.*;
+import com.chyzman.chowl.item.renderer.button.ButtonRenderer;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.PanelStorage;
 import com.chyzman.chowl.transfer.TransferState;
@@ -54,14 +55,12 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
         returned.add(STORAGE_BUTTON);
         for (int i = 0; i < 8; i++) {
             int finalI = i;
-            returned.add(new Button(i * 2, 0, (i + 1) * 2, 2,
-                    (world, frame, useSide, useStack, player, hand) -> {
+            var upgrades = upgrades(stack);
+            returned.add(new ButtonBuilder(i * 2, 0, (i + 1) * 2, 2)
+                    .onUse((world, frame, useSide, useStack, player, hand) -> {
                         var stackInHand = player.getStackInHand(hand);
                         if (stackInHand.isEmpty()) return ActionResult.PASS;
                         if (!(useStack.getItem() instanceof PanelItem)) return ActionResult.PASS;
-
-                        var upgrades = upgrades(useStack);
-
                         if (upgrades.get(finalI).isEmpty()) {
                             var upgrade = ItemOps.singleCopy(stackInHand);
                             stackInHand.decrement(1);
@@ -76,10 +75,8 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
                         frame.markDirty();
 
                         return ActionResult.SUCCESS;
-                    },
-                    (world, attackedDrawerFrame, attackedSide, attackedStack, player) -> {
-                        var upgrades = upgrades(attackedStack);
-
+                    })
+                    .onAttack((world, attackedDrawerFrame, attackedSide, attackedStack, player) -> {
                         if (!upgrades.get(finalI).isEmpty()) {
                             var upgrade = upgrades.get(finalI);
                             if (world.isClient) return ActionResult.SUCCESS;
@@ -92,15 +89,10 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
                         attackedDrawerFrame.stacks.set(attackedSide.getId(), new Pair<>(attackedStack, attackedDrawerFrame.stacks.get(attackedSide.getId()).getRight()));
                         attackedDrawerFrame.markDirty();
                         return ActionResult.SUCCESS;
-                    },
-                    null,
-                    (client, entity, hitResult, vertexConsumers, matrices, light, overlay, hovered) -> {
-                        var upgrades = upgrades(stack);
-                        if (upgrades.get(finalI).isEmpty()) return;
-                        matrices.scale(1, 1, 1 / 8f);
-                        client.getItemRenderer().renderItem(upgrades.get(finalI), ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(upgrades.get(finalI)));
-                        matrices.scale(1, 1, 8);
-                    }));
+                    })
+                    .onRenderer((entity, hitResult, blockTargeted, panelTargeted, buttonTargeted) -> new ButtonRenderer.StackButtonRenderer(upgrades.get(finalI)))
+                    .build()
+            );
         }
         return returned;
     }
@@ -193,8 +185,8 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
             ItemVariant finalContained = contained;
 
             if (DrawerPanelItem.this.hasUpgrade(stack,
-                upgrade -> upgrade.isIn(VOID_UPGRADE_TAG)
-                 || (!finalContained.getItem().isFireproof() && upgrade.isIn(LAVA_UPGRADE_TAG))))
+                    upgrade -> upgrade.isIn(VOID_UPGRADE_TAG)
+                            || (!finalContained.getItem().isFireproof() && upgrade.isIn(LAVA_UPGRADE_TAG))))
                 return maxAmount;
 
             return BigIntUtils.longValueSaturating(inserted);

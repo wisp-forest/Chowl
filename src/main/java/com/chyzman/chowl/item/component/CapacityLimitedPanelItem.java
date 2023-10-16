@@ -1,13 +1,16 @@
 package com.chyzman.chowl.item.component;
 
 import com.chyzman.chowl.util.NbtKeyTypes;
+import com.google.common.math.BigIntegerMath;
 import io.wispforest.owo.nbt.NbtKey;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Pair;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 
-import static com.chyzman.chowl.Chowl.CHOWL_CONFIG;
-import static com.chyzman.chowl.Chowl.POWER_CACHE;
+import static com.chyzman.chowl.Chowl.*;
 
 public interface CapacityLimitedPanelItem extends PanelItem {
     NbtKey<BigInteger> CAPACITY = new NbtKey<>("Capacity", NbtKeyTypes.BIG_INTEGER);
@@ -15,18 +18,17 @@ public interface CapacityLimitedPanelItem extends PanelItem {
     BigInteger baseCapacity();
 
     default String formattedCapacity(ItemStack stack) {
-        BigInteger capacity = capacityTier(stack);
-        if (capacity.compareTo(BigInteger.valueOf(CHOWL_CONFIG.max_capacity_level_before_exponents())) > 0)
-            return "2^" + stack.get(CAPACITY).add(BigInteger.valueOf(11));
+        if (((capacityTier(stack).multiply(BigInteger.valueOf((long) Math.log10(2))).add(BigInteger.valueOf(1)))).compareTo(new BigInteger(CHOWL_CONFIG.max_digits_before_exponents())) > 0)
+            return "2^" + (capacityTier(stack).add(BigInteger.valueOf(BigIntegerMath.log2(baseCapacity(), RoundingMode.HALF_UP))));
         else
             return capacity(stack).toString();
     }
 
     default BigInteger capacity(ItemStack stack) {
-        return baseCapacity().multiply(POWER_CACHE.getUnchecked(capacityTier(stack)));
+        return CAPACITY_CACHE.getUnchecked(new Pair(capacityTier(stack), baseCapacity()));
     }
 
     static BigInteger capacityTier(ItemStack stack) {
-        return stack.get(CAPACITY).min(BigInteger.valueOf(100000000));
+            return stack.get(CAPACITY);
     }
 }
