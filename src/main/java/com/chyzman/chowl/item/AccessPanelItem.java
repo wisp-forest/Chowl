@@ -4,6 +4,7 @@ import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.block.button.BlockButton;
 import com.chyzman.chowl.graph.GraphStore;
 import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.transfer.PanelStorageContext;
 import com.chyzman.chowl.transfer.TransferState;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
@@ -26,18 +27,23 @@ public class AccessPanelItem extends BasePanelItem {
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public @Nullable SlottedStorage<ItemVariant> getStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
-        World w = blockEntity.getWorld();
+    public @Nullable SlottedStorage<ItemVariant> getStorage(PanelStorageContext ctx) {
+        if (ctx.drawerFrame() == null) return null;
+
+        World w = ctx.drawerFrame().getWorld();
 
         if (TransferState.TRAVERSING.get()) return null;
         if (w == null) return null;
 
         GraphStore store = GraphStore.get(w);
-        var graph = store.getGraphFor(blockEntity.getPos());
+        var graph = store.getGraphFor(ctx.drawerFrame().getPos());
 
         if (graph == null) return null;
 
         try {
+            if (TransferState.DOUBLE_CLICK_INSERT.get())
+                TransferState.NO_BLANK_DRAWERS.set(true);
+
             TransferState.TRAVERSING.set(true);
 
             List<SingleSlotStorage<ItemVariant>> storages = new ArrayList<>();
@@ -57,6 +63,7 @@ public class AccessPanelItem extends BasePanelItem {
             return new CombinedSlottedStorage<>(storages);
         } finally {
             TransferState.TRAVERSING.set(false);
+            TransferState.NO_BLANK_DRAWERS.set(false);
         }
     }
 

@@ -62,36 +62,39 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                 matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
                 matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(orientation * 90));
 
-                var buttonProvider = (BlockButtonProvider) entity.getCachedState().getBlock();
-                boolean panelFocused = blockFocused && BlockSideUtils.getSide(hitResult).equals(Direction.byId(i));
+                if (entity.getWorld() != null) {
+                    var buttonProvider = (BlockButtonProvider) entity.getCachedState().getBlock();
+                    boolean panelFocused = blockFocused && BlockSideUtils.getSide(hitResult).equals(Direction.byId(i));
 
-                matrices.push();
-                matrices.translate(0.5, -0.5, 0);
-                if (panelFocused) hoveredButton = buttonProvider.findButton(entity.getWorld(), entity.getCachedState(), hitResult, orientation);
-
-                for (BlockButton button : buttonProvider.listButtons(entity.getWorld(), entity.getCachedState(), hitResult)) {
                     matrices.push();
-                    matrices.translate(-button.maxX() / 16, button.maxY() / 16, 0);
-                    matrices.scale((button.maxX() - button.minX()) / 16, (button.maxY() - button.minY()) / 16, 1);
-
-                    if (button.equals(hoveredButton) && showOutlines) {
-                        var shape = Block.createCuboidShape(0, 0, 0, 16, 16, 1);
-                        WorldRenderer.drawShapeOutline(matrices, vertexConsumers.getBuffer(RenderLayer.LINES), shape, 0, -1, 0, 0.15f, 0.15f, 0.15f, 1, false);
-                    }
-
                     matrices.translate(0.5, -0.5, 0);
-                    if (button.renderWhen().shouldRender(
-                        entity,
-                        hitResult,
-                        blockFocused,
-                        panelFocused,
-                        hoveredButton == button
-                    )) {
-                        button.renderer().render(client, entity, hitResult, vertexConsumers, matrices, light, overlay);
+                    if (panelFocused)
+                        hoveredButton = buttonProvider.findButton(entity.getWorld(), entity.getCachedState(), hitResult, orientation);
+
+                    for (BlockButton button : buttonProvider.listButtons(entity.getWorld(), entity.getCachedState(), hitResult)) {
+                        matrices.push();
+                        matrices.translate(-button.maxX() / 16, button.maxY() / 16, 0);
+                        matrices.scale((button.maxX() - button.minX()) / 16, (button.maxY() - button.minY()) / 16, 1);
+
+                        if (button.equals(hoveredButton) && showOutlines) {
+                            var shape = Block.createCuboidShape(0, 0, 0, 16, 16, 1);
+                            WorldRenderer.drawShapeOutline(matrices, vertexConsumers.getBuffer(RenderLayer.LINES), shape, 0, -1, 0, 0.15f, 0.15f, 0.15f, 1, false);
+                        }
+
+                        matrices.translate(0.5, -0.5, 0);
+                        if (button.renderWhen().shouldRender(
+                            entity,
+                            hitResult,
+                            blockFocused,
+                            panelFocused,
+                            hoveredButton == button
+                        )) {
+                            button.renderer().render(client, entity, hitResult, vertexConsumers, matrices, light, overlay);
+                        }
+                        matrices.pop();
                     }
                     matrices.pop();
                 }
-                matrices.pop();
 
                 if (!(stack.getItem() instanceof PanelItem)) {
                     matrices.translate(0, 0, -1 / 32f);

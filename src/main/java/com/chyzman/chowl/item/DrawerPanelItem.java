@@ -7,6 +7,7 @@ import com.chyzman.chowl.item.component.*;
 import com.chyzman.chowl.block.button.ButtonRenderer;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.PanelStorage;
+import com.chyzman.chowl.transfer.PanelStorageContext;
 import com.chyzman.chowl.transfer.TransferState;
 import com.chyzman.chowl.util.BigIntUtils;
 import com.chyzman.chowl.util.NbtKeyTypes;
@@ -44,10 +45,10 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
         super(settings);
     }
 
-    public @Nullable SlottedStorage<ItemVariant> getStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
-        if (TransferState.NO_BLANK_DRAWERS.get() && stack.get(VARIANT).isBlank()) return null;
+    public @Nullable SlottedStorage<ItemVariant> getStorage(PanelStorageContext ctx) {
+        if (TransferState.NO_BLANK_DRAWERS.get() && ctx.stack().get(VARIANT).isBlank()) return null;
 
-        return new Storage(stack, blockEntity, side);
+        return new Storage(ctx);
     }
 
     @Override
@@ -139,7 +140,7 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
     }
 
     @Override
-    public BigInteger displayedCount(ItemStack stack, @Nullable DrawerFrameBlockEntity drawerFrame) {
+    public BigInteger displayedCount(ItemStack stack, @Nullable DrawerFrameBlockEntity drawerFrame, @Nullable Direction side) {
         return stack.get(COUNT);
     }
 
@@ -165,29 +166,29 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @SuppressWarnings("UnstableApiUsage")
     private class Storage extends PanelStorage implements SingleSlotStorage<ItemVariant>, BigStorageView<ItemVariant> {
-        public Storage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
-            super(stack, blockEntity, side);
+        public Storage(PanelStorageContext ctx) {
+            super(ctx);
         }
 
         @Override
         public long insert(ItemVariant resource, long maxAmount, TransactionContext transaction) {
-            var contained = stack.get(VARIANT);
+            var contained = ctx.stack().get(VARIANT);
 
             if (contained.isBlank()) contained = resource;
             if (!contained.equals(resource)) return 0;
 
-            var currentCount = stack.get(COUNT);
-            var capacity = DrawerPanelItem.this.capacity(stack);
+            var currentCount = ctx.stack().get(COUNT);
+            var capacity = DrawerPanelItem.this.capacity(ctx.stack());
             var spaceLeft = capacity.subtract(currentCount).max(BigInteger.ZERO);
             var inserted = spaceLeft.min(BigInteger.valueOf(maxAmount));
 
             updateSnapshots(transaction);
-            stack.put(VARIANT, contained);
-            stack.put(COUNT, currentCount.add(inserted));
+            ctx.stack().put(VARIANT, contained);
+            ctx.stack().put(COUNT, currentCount.add(inserted));
 
             ItemVariant finalContained = contained;
 
-            if (DrawerPanelItem.this.hasUpgrade(stack,
+            if (DrawerPanelItem.this.hasUpgrade(ctx.stack(),
                     upgrade -> upgrade.isIn(VOID_UPGRADE_TAG)
                             || (!finalContained.getItem().isFireproof() && upgrade.isIn(LAVA_UPGRADE_TAG))))
                 return maxAmount;
@@ -197,53 +198,53 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
         @Override
         public long extract(ItemVariant resource, long maxAmount, TransactionContext tx) {
-            var contained = stack.get(VARIANT);
+            var contained = ctx.stack().get(VARIANT);
 
             if (contained.isBlank()) return 0;
             if (!contained.equals(resource)) return 0;
 
-            var currentCount = stack.get(COUNT);
+            var currentCount = ctx.stack().get(COUNT);
 
             long removed = Math.min(BigIntUtils.longValueSaturating(currentCount), maxAmount);
             var newCount = currentCount.subtract(BigInteger.valueOf(removed));
 
             updateSnapshots(tx);
-            stack.put(COUNT, newCount);
+            ctx.stack().put(COUNT, newCount);
 
             if (newCount.compareTo(BigInteger.ZERO) <= 0) {
-                if (!stack.get(LOCKED)) {
-                    stack.put(VARIANT, ItemVariant.blank());
+                if (!ctx.stack().get(LOCKED)) {
+                    ctx.stack().put(VARIANT, ItemVariant.blank());
                 }
 
                 //TODO: make this only happen when empty
-                if (stack.getItem() instanceof UpgradeablePanelItem panelItem) {
-                    if (panelItem.hasUpgrade(stack, upgrade -> upgrade.isIn(EXPLOSIVE_UPGRADE_TAG))) {
-                        var world = blockEntity.getWorld();
-                        var pos = blockEntity.getPos();
-                        var upgrades = panelItem.upgrades(stack);
-                        AtomicInteger power = new AtomicInteger();
-                        AtomicBoolean fiery = new AtomicBoolean(false);
-                        upgrades.stream()
-                                .forEach(upgrade -> {
-                                    if (upgrade.isIn(EXPLOSIVE_UPGRADE_TAG)) {
-                                        power.addAndGet(1);
-                                        upgrade.decrement(1);
-                                    }
-                                    if (upgrade.isIn(FIERY_UPGRADE_TAG)) {
-                                        fiery.set(true);
-                                        upgrade.decrement(1);
-                                    }
-                                    panelItem.setUpgrades(stack, upgrades);
-                                });
-                        world.createExplosion(
-                                null,
-                                pos.getX(),
-                                pos.getY(),
-                                pos.getZ(),
-                                power.get() + 1,
-                                fiery.get(),
-                                World.ExplosionSourceType.BLOCK);
-                    }
+                if (ctx.drawerFrame() != null
+                    && ctx.stack().getItem() instanceof UpgradeablePanelItem panelItem
+                    && panelItem.hasUpgrade(ctx.stack(), upgrade -> upgrade.isIn(EXPLOSIVE_UPGRADE_TAG))) {
+                    var world = ctx.drawerFrame().getWorld();
+                    var pos = ctx.drawerFrame().getPos();
+                    var upgrades = panelItem.upgrades(ctx.stack());
+                    AtomicInteger power = new AtomicInteger();
+                    AtomicBoolean fiery = new AtomicBoolean(false);
+                    upgrades.stream()
+                        .forEach(upgrade -> {
+                            if (upgrade.isIn(EXPLOSIVE_UPGRADE_TAG)) {
+                                power.addAndGet(1);
+                                upgrade.decrement(1);
+                            }
+                            if (upgrade.isIn(FIERY_UPGRADE_TAG)) {
+                                fiery.set(true);
+                                upgrade.decrement(1);
+                            }
+                            panelItem.setUpgrades(ctx.stack(), upgrades);
+                        });
+                    world.createExplosion(
+                        null,
+                        pos.getX(),
+                        pos.getY(),
+                        pos.getZ(),
+                        power.get() + 1,
+                        fiery.get(),
+                        World.ExplosionSourceType.BLOCK);
                 }
             }
             return removed;
@@ -251,22 +252,22 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
         @Override
         public boolean isResourceBlank() {
-            return stack.get(VARIANT).isBlank();
+            return ctx.stack().get(VARIANT).isBlank();
         }
 
         @Override
         public ItemVariant getResource() {
-            return stack.get(VARIANT);
+            return ctx.stack().get(VARIANT);
         }
 
         @Override
         public BigInteger bigAmount() {
-            return stack.get(COUNT);
+            return ctx.stack().get(COUNT);
         }
 
         @Override
         public BigInteger bigCapacity() {
-            return DrawerPanelItem.this.capacity(stack);
+            return DrawerPanelItem.this.capacity(ctx.stack());
         }
     }
 }

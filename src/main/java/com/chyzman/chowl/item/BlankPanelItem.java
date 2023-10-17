@@ -1,10 +1,8 @@
 package com.chyzman.chowl.item;
 
-import com.chyzman.chowl.block.DrawerFrameBlockEntity;
+import com.chyzman.chowl.transfer.PanelStorageContext;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -14,7 +12,7 @@ public class BlankPanelItem extends BasePanelItem {
     }
 
     @Override
-    public @Nullable SlottedStorage<ItemVariant> getStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
+    public @Nullable SlottedStorage<ItemVariant> getStorage(PanelStorageContext ctx) {
         return null;
     }
 }

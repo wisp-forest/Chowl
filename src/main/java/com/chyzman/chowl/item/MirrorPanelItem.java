@@ -9,6 +9,7 @@ import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.CombinedSingleSlotStorage;
+import com.chyzman.chowl.transfer.PanelStorageContext;
 import com.chyzman.chowl.transfer.TransferState;
 import com.chyzman.chowl.util.NbtKeyTypes;
 import io.wispforest.owo.nbt.NbtKey;
@@ -50,17 +51,19 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public @Nullable SingleSlotStorage<ItemVariant> getStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side) {
-        World w = blockEntity.getWorld();
+    public @Nullable SingleSlotStorage<ItemVariant> getStorage(PanelStorageContext ctx) {
+        if (ctx.drawerFrame() == null) return null;
+
+        World w = ctx.drawerFrame().getWorld();
 
         if (TransferState.TRAVERSING.get()) return null;
         if (w == null) return null;
 
-        ItemVariant filter = stack.get(FILTER);
+        ItemVariant filter = ctx.stack().get(FILTER);
         if (filter.isBlank()) return null;
 
         GraphStore state = GraphStore.get(w);
-        var graph = state.getGraphFor(blockEntity.getPos());
+        var graph = state.getGraphFor(ctx.drawerFrame().getPos());
 
         if (graph == null) return null;
 
@@ -126,10 +129,10 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
     }
 
     @Override
-    public BigInteger displayedCount(ItemStack stack, @Nullable DrawerFrameBlockEntity drawerFrame) {
-        if (drawerFrame == null) return BigInteger.ZERO;
+    public BigInteger displayedCount(ItemStack stack, @Nullable DrawerFrameBlockEntity drawerFrame, @Nullable Direction side) {
+        if (drawerFrame == null || side == null) return BigInteger.ZERO;
 
-        var storage = this.getStorage(stack, drawerFrame, null);
+        var storage = this.getStorage(PanelStorageContext.from(drawerFrame, side));
 
         if (!(storage instanceof BigStorageView<?> big)) return BigInteger.ZERO;
 

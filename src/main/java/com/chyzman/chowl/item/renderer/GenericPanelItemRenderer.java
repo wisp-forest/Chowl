@@ -52,7 +52,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
         if (!(stack.getItem() instanceof DisplayingPanelItem panel)) return;
 
         var displayStack = panel.displayedVariant(stack).toStack();
-        var count = panel.displayedCount(stack, RenderGlobals.DRAWER_FRAME.get());
+        var count = panel.displayedCount(stack, RenderGlobals.DRAWER_FRAME.get(), RenderGlobals.FRAME_SIDE.get());
         var customization = stack.get(DisplayingPanelItem.CONFIG);
         var glowing = false;
 

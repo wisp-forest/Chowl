@@ -3,17 +3,15 @@ package com.chyzman.chowl.block;
 import com.chyzman.chowl.Chowl;
 import com.chyzman.chowl.client.ChowlClient;
 import com.chyzman.chowl.item.component.PanelItem;
+import com.chyzman.chowl.transfer.PanelStorageContext;
 import io.wispforest.owo.ops.WorldOps;
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachmentBlockEntity;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.HopperBlock;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.HopperBlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -32,7 +30,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageBlockEntity, RenderAttachmentBlockEntity {
@@ -61,11 +58,10 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     @SuppressWarnings("UnstableApiUsage")
     public void collectPanelStorages(Consumer<SlottedStorage<ItemVariant>> storageConsumer) {
         for (int sideId = 0; sideId < 6; sideId++) {
-            var stack = stacks.get(sideId);
+            var ctx = PanelStorageContext.from(this, Direction.byId(sideId));
+            if (!(ctx.stack().getItem() instanceof PanelItem panelItem)) continue;
 
-            if (!(stack.getLeft().getItem() instanceof PanelItem panelItem)) continue;
-
-            var storage = panelItem.getStorage(stack.getLeft(), this, Direction.byId(sideId));
+            var storage = panelItem.getStorage(ctx);
 
             if (storage != null) storageConsumer.accept(storage);
         }
@@ -74,11 +70,11 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public @Nullable Storage<ItemVariant> getItemStorage(Direction fromSide) {
-        var stack = stacks.get(fromSide.getId());
+        var ctx = PanelStorageContext.from(this, fromSide);
 
-        if (!(stack.getLeft().getItem() instanceof PanelItem panelItem)) return null;
+        if (!(ctx.stack().getItem() instanceof PanelItem panelItem)) return null;
 
-        return panelItem.getStorage(stack.getLeft(), this, fromSide);
+        return panelItem.getStorage(ctx);
     }
 
     @Override

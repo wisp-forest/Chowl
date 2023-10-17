@@ -3,6 +3,7 @@ package com.chyzman.chowl.item.component;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.block.button.*;
 import com.chyzman.chowl.screen.PanelConfigSreenHandler;
+import com.chyzman.chowl.transfer.PanelStorageContext;
 import com.chyzman.chowl.transfer.TransferState;
 import com.chyzman.chowl.util.BlockSideUtils;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
@@ -41,7 +42,7 @@ public interface PanelItem {
 
                 if (world.isClient) return ActionResult.SUCCESS;
 
-                var storage = panel.getStorage(stack, frame, side);
+                var storage = panel.getStorage(PanelStorageContext.from(frame, side));
 
                 try (var tx = Transaction.openOuter()) {
                     StorageUtil.move(
@@ -61,7 +62,7 @@ public interface PanelItem {
                 PanelItem panel = (PanelItem) stack.getItem();
 
                 if (panel.canExtractFromButton()) {
-                    var storage = panel.getStorage(stack, drawerFrame, side);
+                    var storage = panel.getStorage(PanelStorageContext.from(drawerFrame, side));
 
                     if (storage == null) return ActionResult.FAIL;
                     if (world.isClient) return ActionResult.SUCCESS;
@@ -88,10 +89,10 @@ public interface PanelItem {
             })
             .onDoubleClick((world, frame, side, stack, player) -> {
                 try {
-                    TransferState.NO_BLANK_DRAWERS.set(true);
+                    TransferState.DOUBLE_CLICK_INSERT.set(true);
 
                     var panel = (PanelItem) stack.getItem();
-                    var storage = panel.getStorage(stack, frame, side);
+                    var storage = panel.getStorage(PanelStorageContext.from(frame, side));
 
                     if (storage == null) return ActionResult.FAIL;
                     if (world.isClient) return ActionResult.SUCCESS;
@@ -104,12 +105,12 @@ public interface PanelItem {
                         return ActionResult.SUCCESS;
                     }
                 } finally {
-                    TransferState.NO_BLANK_DRAWERS.set(false);
+                    TransferState.DOUBLE_CLICK_INSERT.set(false);
                 }
             }).build();
 
     @SuppressWarnings("UnstableApiUsage")
-    @Nullable SlottedStorage<ItemVariant> getStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side);
+    @Nullable SlottedStorage<ItemVariant> getStorage(PanelStorageContext ctx);
 
     default List<BlockButton> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
         return Collections.emptyList();

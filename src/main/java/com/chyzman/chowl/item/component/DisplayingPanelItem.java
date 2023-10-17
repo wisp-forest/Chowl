@@ -11,6 +11,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigInteger;
@@ -22,7 +23,7 @@ public interface DisplayingPanelItem extends PanelItem {
 
     ItemVariant displayedVariant(ItemStack stack);
 
-    BigInteger displayedCount(ItemStack stack, @Nullable DrawerFrameBlockEntity drawerFrame);
+    BigInteger displayedCount(ItemStack stack, @Nullable DrawerFrameBlockEntity drawerFrame, @Nullable Direction side);
 
     default @Nullable Text styleText(ItemStack stack, Text wrapped) {
         return Text.literal("").append(wrapped).setStyle(stack.get(CONFIG).textStyle());

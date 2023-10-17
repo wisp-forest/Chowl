@@ -29,7 +29,7 @@ public class PanelTooltipComponent extends BaseOwoTooltipComponent<FlowLayout> {
                     currentFlow.verticalAlignment(VerticalAlignment.CENTER);
                     flow.child(currentFlow);
                 }
-                var currentCount = panel.displayedCount(stack, null);
+                var currentCount = panel.displayedCount(stack, null, null);
                 if (currentCount.compareTo(BigInteger.ZERO) > 0) {
                     var currentFlow = Containers.horizontalFlow(Sizing.content(), Sizing.content());
                     currentFlow.child(Components.label(Text.translatable("ui.chowl-industries.panel.tooltip.count.label", currentCount.toString())));
