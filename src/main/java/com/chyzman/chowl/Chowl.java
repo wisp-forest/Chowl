@@ -46,11 +46,6 @@ public class Chowl implements ModInitializer {
     public static final TagKey<Item> VOID_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("true_voiding_panel_upgrade"));
     public static final TagKey<Item> GLOWING_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("glowing_panel_upgrade"));
 
-    public static LoadingCache<Pair<BigInteger, BigInteger>, BigInteger> CAPACITY_CACHE = CacheBuilder.newBuilder()
-            .concurrencyLevel(1)
-            .maximumSize(200)
-            .build(CacheLoader.from(input ->  BigIntUtils.pow(BigInteger.TWO, input.getLeft()).multiply(input.getRight())));
-
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(id(FabricLoader.getInstance()
         .getModContainer("chowl-industries")
         .orElseThrow()

@@ -1,6 +1,7 @@
 package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
+import com.chyzman.chowl.block.button.BlockButton;
 import com.chyzman.chowl.graph.GraphStore;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.FilteringPanelItem;
@@ -27,8 +28,8 @@ import java.util.List;
 public class MirrorPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, DisplayingPanelItem {
     public static final NbtKey<ItemVariant> FILTER = new NbtKey<>("Filter", NbtKeyTypes.ITEM_VARIANT);
 
-    public static final PanelItem.Button SET_FILTER_BUTTON = new PanelItem.Button(2, 2, 14, 14,
-        (world, drawerFrame, side, stack, player, hand) -> {
+    public static final BlockButton SET_FILTER_BUTTON = PanelItem.buttonBuilder(2, 2, 14, 14)
+        .onUse((world, drawerFrame, side, stack, player, hand) -> {
             var stackInHand = player.getStackInHand(hand);
             if (!stackInHand.isEmpty()) {
                 if (!world.isClient) {
@@ -40,10 +41,8 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
             }
 
             return ActionResult.PASS;
-        },
-        (world, drawerFrame, side, stack, player) -> ActionResult.PASS,
-        null,
-        null);
+        })
+        .build();
 
     public MirrorPanelItem(Settings settings) {
         super(settings);
@@ -93,7 +92,7 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
     }
 
     @Override
-    public List<Button> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
+    public List<BlockButton> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
         if (stack.get(FILTER).isBlank()) {
             return List.of(SET_FILTER_BUTTON);
         } else {

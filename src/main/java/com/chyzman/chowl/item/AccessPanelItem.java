@@ -1,6 +1,7 @@
 package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
+import com.chyzman.chowl.block.button.BlockButton;
 import com.chyzman.chowl.graph.GraphStore;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.TransferState;
@@ -60,7 +61,7 @@ public class AccessPanelItem extends BasePanelItem {
     }
 
     @Override
-    public List<Button> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
+    public List<BlockButton> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
         return Collections.singletonList(STORAGE_BUTTON);
     }
 

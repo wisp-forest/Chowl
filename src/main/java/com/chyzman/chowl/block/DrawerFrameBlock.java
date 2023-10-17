@@ -1,19 +1,20 @@
 package com.chyzman.chowl.block;
 
+import com.chyzman.chowl.block.button.BlockButton;
+import com.chyzman.chowl.block.button.BlockButtonProvider;
+import com.chyzman.chowl.block.button.ButtonRenderCondition;
 import com.chyzman.chowl.classes.AttackInteractionReceiver;
 import com.chyzman.chowl.graph.ServerGraphStore;
 import com.chyzman.chowl.item.component.LockablePanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
-import com.chyzman.chowl.item.renderer.button.ButtonRenderer;
+import com.chyzman.chowl.block.button.ButtonRenderer;
 import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.util.BlockSideUtils;
 import io.wispforest.owo.ops.ItemOps;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
@@ -30,7 +31,6 @@ import net.minecraft.util.Pair;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
@@ -71,7 +71,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             Block.createCuboidShape(14, 2, 2, 16, 14, 14),
     };
 
-    public static final PanelItem.Button DEFAULT_PANEL_BUTTON = new PanelItem.ButtonBuilder(2, 2, 14, 14)
+    public static final BlockButton DEFAULT_PANEL_BUTTON = PanelItem.buttonBuilder(2, 2, 14, 14)
             .onUse((world, drawerFrame, side, stack, player, hand) -> {
                 var stacks = drawerFrame.stacks;
                 var stackInHand = player.getStackInHand(hand);
@@ -97,12 +97,12 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 drawerFrame.markDirty();
                 return ActionResult.SUCCESS;
             }).build();
-    public static final BlockButtonProvider.Button REMOVE_BUTTON = new ButtonBuilder(14, 14, 16, 16)
+    public static final BlockButton REMOVE_BUTTON = BlockButton.builder(14, 14, 16, 16)
             .onAttack((world, state, hitResult, player) -> {
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
                     return ActionResult.PASS;
 
-                var side = getSide(hitResult);
+                var side = BlockSideUtils.getSide(hitResult);
                 var selected = blockEntity.stacks.get(side.getId()).getLeft();
 
                 player.getInventory().offerOrDrop(selected);
@@ -111,20 +111,15 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
                 return ActionResult.SUCCESS;
             })
-            .onRender((entity, hitResult, blockTargeted, panelTargeted, buttonTargeted) -> {
-                if (buttonTargeted) {
-                    var stack = Items.BARRIER.getDefaultStack();
-                    return new ButtonRenderer.StackButtonRenderer(stack);
-                }
-                return null;
-            })
+            .renderWhen(ButtonRenderCondition.BUTTON_FOCUSED)
+            .renderer(ButtonRenderer.stack(Items.BARRIER.getDefaultStack()))
             .build();
-    public static final BlockButtonProvider.Button CONFIG_BUTTON = new ButtonBuilder(12, 14, 14, 16)
+    public static final BlockButton CONFIG_BUTTON = BlockButton.builder(12, 14, 14, 16)
             .onUse((state, world, pos, player, hand, hitResult) -> {
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
                     return ActionResult.PASS;
 
-                var side = getSide(hitResult);
+                var side = BlockSideUtils.getSide(hitResult);
                 var selected = blockEntity.stacks.get(side.getId()).getLeft();
 
                 if (!(selected.getItem() instanceof PanelItem panel)) return ActionResult.FAIL;
@@ -138,13 +133,9 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 });
                 return ActionResult.SUCCESS;
             })
-            .onRender((entity, hitResult, blockTargeted, panelTargeted, buttonTargeted) -> {
-                if (buttonTargeted) {
-                    var stack = Items.STRUCTURE_VOID.getDefaultStack();
-                    return new ButtonRenderer.StackButtonRenderer(stack);
-                }
-                return null;
-            }).build();
+            .renderWhen(ButtonRenderCondition.BUTTON_FOCUSED)
+            .renderer(ButtonRenderer.stack(Items.STRUCTURE_VOID.getDefaultStack()))
+            .build();
 
     public DrawerFrameBlock(Settings settings) {
         super(settings);
@@ -258,7 +249,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        var side = getSide(hit);
+        var side = BlockSideUtils.getSide(hit);
         var orientation = 0;
         if (side == Direction.UP || (side == Direction.DOWN && player.getHorizontalFacing().getAxis() == Direction.Axis.Z)) {
             orientation = (int) player.getHorizontalFacing().getOpposite().asRotation() / 90;
@@ -286,17 +277,17 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     }
 
     @Override
-    public List<Button> listButtons(World world, BlockState state, BlockHitResult hitResult) {
+    public List<BlockButton> listButtons(World world, BlockState state, BlockHitResult hitResult) {
         if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
             return List.of();
 
-        var side = getSide(hitResult);
+        var side = BlockSideUtils.getSide(hitResult);
 
         var selected = blockEntity.stacks.get(side.getId()).getLeft();
 
         if (selected.isEmpty()) return List.of();
 
-        List<Button> buttons = new ArrayList<>();
+        List<BlockButton> buttons = new ArrayList<>();
         buttons.add(REMOVE_BUTTON);
 
         if (selected.getItem() instanceof LockablePanelItem) {
@@ -307,13 +298,9 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             if (panelItem.hasConfig())
                 buttons.add(CONFIG_BUTTON);
 
-            var panelButtons = panelItem.listButtons(blockEntity, side, blockEntity.stacks.get(side.getId()).getLeft());
-
-            for (var panelButton : panelButtons) {
-                buttons.add(panelButton.toBlockButton());
-            }
+            buttons.addAll(panelItem.listButtons(blockEntity, side, blockEntity.stacks.get(side.getId()).getLeft()));
         } else {
-            buttons.add(DEFAULT_PANEL_BUTTON.toBlockButton());
+            buttons.add(DEFAULT_PANEL_BUTTON);
         }
 
         return buttons;
@@ -346,17 +333,10 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     }
 
 
-    public static Direction getSide(BlockHitResult hitResult) {
-        return Arrays.stream(DIRECTIONS).min(Comparator.comparingDouble(
-                i -> Vec3d.of(i.getVector()).squaredDistanceTo(
-                        hitResult.getPos().subtract(hitResult.getBlockPos().toCenterPos())
-                ))).orElse(hitResult.getSide());
-    }
-
     public static int getOrientation(World world, BlockHitResult hitResult) {
         var blockEntity = world.getBlockEntity(hitResult.getBlockPos());
         if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
-            var side = getSide(hitResult);
+            var side = BlockSideUtils.getSide(hitResult);
             return drawerFrameBlockEntity.stacks.get(side.getId()).getRight();
         }
         return 0;

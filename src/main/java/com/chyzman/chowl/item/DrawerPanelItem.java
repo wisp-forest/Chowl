@@ -1,8 +1,10 @@
 package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
+import com.chyzman.chowl.block.button.BlockButton;
+import com.chyzman.chowl.block.button.ButtonRenderCondition;
 import com.chyzman.chowl.item.component.*;
-import com.chyzman.chowl.item.renderer.button.ButtonRenderer;
+import com.chyzman.chowl.block.button.ButtonRenderer;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.PanelStorage;
 import com.chyzman.chowl.transfer.TransferState;
@@ -14,7 +16,6 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
@@ -50,48 +51,50 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
     }
 
     @Override
-    public List<Button> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
-        var returned = new ArrayList<Button>();
+    public List<BlockButton> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
+        var returned = new ArrayList<BlockButton>();
         returned.add(STORAGE_BUTTON);
         for (int i = 0; i < 8; i++) {
             int finalI = i;
             var upgrades = upgrades(stack);
-            returned.add(new ButtonBuilder(i * 2, 0, (i + 1) * 2, 2)
-                    .onUse((world, frame, useSide, useStack, player, hand) -> {
-                        var stackInHand = player.getStackInHand(hand);
-                        if (stackInHand.isEmpty()) return ActionResult.PASS;
-                        if (!(useStack.getItem() instanceof PanelItem)) return ActionResult.PASS;
-                        if (upgrades.get(finalI).isEmpty()) {
-                            var upgrade = ItemOps.singleCopy(stackInHand);
-                            stackInHand.decrement(1);
-                            if (world.isClient) return ActionResult.SUCCESS;
-                            upgrades.set(finalI, upgrade);
-                        } else {
-                            return ActionResult.FAIL;
-                        }
 
-                        setUpgrades(useStack, upgrades);
-                        frame.stacks.set(useSide.getId(), new Pair<>(useStack, frame.stacks.get(useSide.getId()).getRight()));
-                        frame.markDirty();
+            returned.add(PanelItem.buttonBuilder(i * 2, 0, (i + 1) * 2, 2)
+                .onUse((world, frame, useSide, useStack, player, hand) -> {
+                    var stackInHand = player.getStackInHand(hand);
+                    if (stackInHand.isEmpty()) return ActionResult.PASS;
+                    if (!(useStack.getItem() instanceof PanelItem)) return ActionResult.PASS;
+                    if (upgrades.get(finalI).isEmpty()) {
+                        var upgrade = ItemOps.singleCopy(stackInHand);
+                        stackInHand.decrement(1);
+                        if (world.isClient) return ActionResult.SUCCESS;
+                        upgrades.set(finalI, upgrade);
+                    } else {
+                        return ActionResult.FAIL;
+                    }
 
-                        return ActionResult.SUCCESS;
-                    })
-                    .onAttack((world, attackedDrawerFrame, attackedSide, attackedStack, player) -> {
-                        if (!upgrades.get(finalI).isEmpty()) {
-                            var upgrade = upgrades.get(finalI);
-                            if (world.isClient) return ActionResult.SUCCESS;
-                            upgrades.set(finalI, ItemStack.EMPTY);
-                            player.getInventory().offerOrDrop(upgrade);
-                        } else {
-                            return ActionResult.FAIL;
-                        }
-                        setUpgrades(attackedStack, upgrades);
-                        attackedDrawerFrame.stacks.set(attackedSide.getId(), new Pair<>(attackedStack, attackedDrawerFrame.stacks.get(attackedSide.getId()).getRight()));
-                        attackedDrawerFrame.markDirty();
-                        return ActionResult.SUCCESS;
-                    })
-                    .onRenderer((entity, hitResult, blockTargeted, panelTargeted, buttonTargeted) -> new ButtonRenderer.StackButtonRenderer(upgrades.get(finalI)))
-                    .build()
+                    setUpgrades(useStack, upgrades);
+                    frame.stacks.set(useSide.getId(), new Pair<>(useStack, frame.stacks.get(useSide.getId()).getRight()));
+                    frame.markDirty();
+
+                    return ActionResult.SUCCESS;
+                })
+                .onAttack((world, attackedDrawerFrame, attackedSide, attackedStack, player) -> {
+                    if (!upgrades.get(finalI).isEmpty()) {
+                        var upgrade = upgrades.get(finalI);
+                        if (world.isClient) return ActionResult.SUCCESS;
+                        upgrades.set(finalI, ItemStack.EMPTY);
+                        player.getInventory().offerOrDrop(upgrade);
+                    } else {
+                        return ActionResult.FAIL;
+                    }
+                    setUpgrades(attackedStack, upgrades);
+                    attackedDrawerFrame.stacks.set(attackedSide.getId(), new Pair<>(attackedStack, attackedDrawerFrame.stacks.get(attackedSide.getId()).getRight()));
+                    attackedDrawerFrame.markDirty();
+                    return ActionResult.SUCCESS;
+                })
+                .renderWhen(ButtonRenderCondition.PANEL_FOCUSED)
+                .renderer(ButtonRenderer.stack(upgrades.get(finalI)))
+                .build()
             );
         }
         return returned;

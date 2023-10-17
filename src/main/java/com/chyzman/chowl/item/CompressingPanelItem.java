@@ -1,6 +1,7 @@
 package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
+import com.chyzman.chowl.block.button.BlockButton;
 import com.chyzman.chowl.item.component.*;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.CompressingStorage;
@@ -84,7 +85,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
     }
 
     @Override
-    public List<Button> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
+    public List<BlockButton> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
         return List.of(STORAGE_BUTTON);
     }
 

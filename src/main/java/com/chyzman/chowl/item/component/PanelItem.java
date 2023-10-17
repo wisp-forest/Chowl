@@ -1,11 +1,10 @@
 package com.chyzman.chowl.item.component;
 
-import com.chyzman.chowl.block.BlockButtonProvider;
-import com.chyzman.chowl.block.DrawerFrameBlock;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
-import com.chyzman.chowl.item.renderer.button.ButtonRenderer;
+import com.chyzman.chowl.block.button.*;
 import com.chyzman.chowl.screen.PanelConfigSreenHandler;
 import com.chyzman.chowl.transfer.TransferState;
+import com.chyzman.chowl.util.BlockSideUtils;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
@@ -25,7 +24,6 @@ import net.minecraft.util.Pair;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2f;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +31,7 @@ import java.util.function.Consumer;
 
 @SuppressWarnings("UnstableApiUsage")
 public interface PanelItem {
-    Button STORAGE_BUTTON = new ButtonBuilder(2, 2, 14, 14)
+    BlockButton STORAGE_BUTTON = new ButtonBuilder(2, 2, 14, 14)
             .onUse((world, frame, side, stack, player, hand) -> {
                 var stackInHand = player.getStackInHand(hand);
                 if (stackInHand.isEmpty()) return ActionResult.PASS;
@@ -113,7 +111,7 @@ public interface PanelItem {
     @SuppressWarnings("UnstableApiUsage")
     @Nullable SlottedStorage<ItemVariant> getStorage(ItemStack stack, DrawerFrameBlockEntity blockEntity, Direction side);
 
-    default List<Button> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
+    default List<BlockButton> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
         return Collections.emptyList();
     }
 
@@ -146,99 +144,86 @@ public interface PanelItem {
         user.openHandledScreen(factory);
     }
 
-    record Button(
-            float minX, float minY,
-            float maxX, float maxY,
-            UseFunction use,
-            AttackFunction attack,
-            DoubleClickFunction doubleClick,
-            BlockButtonProvider.RenderConsumer render) {
-        public BlockButtonProvider.Button toBlockButton() {
-            return new BlockButtonProvider.Button(
-                    minX, minY, maxX, maxY,
-                    use != null ? (state, world, pos, player, hand, hit) -> {
-                        if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrame))
-                            return ActionResult.PASS;
-                        var side = DrawerFrameBlock.getSide(hit);
-
-                        return use.onUse(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).getLeft(), player, hand);
-                    } : null,
-                    attack != null ? (world, state, hit, player) -> {
-                        var pos = hit.getBlockPos();
-                        var side = DrawerFrameBlock.getSide(hit);
-
-                        if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrame))
-                            return ActionResult.PASS;
-
-                        return attack.onAttack(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).getLeft(), player);
-                    } : null,
-                    doubleClick != null ? (world, state, hit, player) -> {
-                        var pos = hit.getBlockPos();
-                        var side = DrawerFrameBlock.getSide(hit);
-
-                        if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrame))
-                            return ActionResult.PASS;
-
-                        return doubleClick.onDoubleClick(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).getLeft(), player);
-                    } : null,
-                    render
-            );
-        }
+    static ButtonBuilder buttonBuilder(float minX, float minY, float maxX, float maxY) {
+        return new ButtonBuilder(minX, minY, maxX, maxY);
     }
 
     class ButtonBuilder {
-        private Vector2f min = new Vector2f();
-        private Vector2f max = new Vector2f();
+        private final BlockButtonBuilder wrapped;
 
-        private UseFunction use;
-        private AttackFunction attack;
-        private DoubleClickFunction doubleClick;
-        private BlockButtonProvider.RenderConsumer render;
-
-        public ButtonBuilder(float minX, float minY, float maxX, float maxY) {
-            this.min.x = minX;
-            this.min.y = minY;
-            this.max.x = maxX;
-            this.max.y = maxY;
+        ButtonBuilder(float minX, float minY, float maxX, float maxY) {
+            this.wrapped = BlockButton.builder(minX, minY, maxX, maxY);
         }
 
         public ButtonBuilder onUse(UseFunction use) {
-            this.use = use;
+            this.wrapped.onUse((state, world, pos, player, hand, hit) -> {
+                if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrame))
+                    return ActionResult.PASS;
+                var side = BlockSideUtils.getSide(hit);
+
+                return use.onUse(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).getLeft(), player, hand);
+            });
+
             return this;
         }
 
         public ButtonBuilder onAttack(AttackFunction attack) {
-            this.attack = attack;
+            this.wrapped.onAttack((world, state, hit, player) -> {
+                var pos = hit.getBlockPos();
+                var side = BlockSideUtils.getSide(hit);
+
+                if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrame))
+                    return ActionResult.PASS;
+
+                return attack.onAttack(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).getLeft(), player);
+            });
+
             return this;
         }
 
         public ButtonBuilder onDoubleClick(DoubleClickFunction doubleClick) {
-            this.doubleClick = doubleClick;
+            this.wrapped.onDoubleClick((world, state, hit, player) -> {
+                var pos = hit.getBlockPos();
+                var side = BlockSideUtils.getSide(hit);
+
+                if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrame))
+                    return ActionResult.PASS;
+
+                return doubleClick.onDoubleClick(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).getLeft(), player);
+            });
+
             return this;
         }
 
-        public ButtonBuilder onRenderer(BlockButtonProvider.RenderConsumer render) {
-            this.render = render;
+        public ButtonBuilder renderWhen(ButtonRenderCondition condition) {
+            this.wrapped.renderWhen(condition);
+
             return this;
         }
 
-        public Button build() {
-            return new Button(min.x, min.y, max.x, max.y, use, attack, doubleClick, render);
+        public ButtonBuilder renderer(ButtonRenderer renderer) {
+            this.wrapped.renderer(renderer);
+
+            return this;
         }
-    }
 
-    @FunctionalInterface
-    interface UseFunction {
-        ActionResult onUse(World world, DrawerFrameBlockEntity frame, Direction side, ItemStack stack, PlayerEntity player, Hand hand);
-    }
+        public BlockButton build() {
+            return wrapped.build();
+        }
 
-    @FunctionalInterface
-    interface AttackFunction {
-        ActionResult onAttack(World world, DrawerFrameBlockEntity frame, Direction side, ItemStack stack, PlayerEntity player);
-    }
+        @FunctionalInterface
+        public interface UseFunction {
+            ActionResult onUse(World world, DrawerFrameBlockEntity frame, Direction side, ItemStack stack, PlayerEntity player, Hand hand);
+        }
 
-    @FunctionalInterface
-    interface DoubleClickFunction {
-        ActionResult onDoubleClick(World world, DrawerFrameBlockEntity frame, Direction side, ItemStack stack, PlayerEntity player);
+        @FunctionalInterface
+        public interface AttackFunction {
+            ActionResult onAttack(World world, DrawerFrameBlockEntity frame, Direction side, ItemStack stack, PlayerEntity player);
+        }
+
+        @FunctionalInterface
+        public interface DoubleClickFunction {
+            ActionResult onDoubleClick(World world, DrawerFrameBlockEntity frame, Direction side, ItemStack stack, PlayerEntity player);
+        }
     }
 }
