@@ -11,6 +11,7 @@ repositories {
     maven { url 'https://jitpack.io' }
     maven { url 'https://maven.wispforest.io' }
     maven { url 'https://maven.nucleoid.xyz/' }
+    maven { url 'https://api.modrinth.com/maven/' }
 }
 
 dependencies {
@@ -28,6 +29,8 @@ dependencies {
 
     annotationProcessor modImplementation("com.github.LlamaLad7:MixinExtras:${project.me_version}")
     include "com.github.LlamaLad7:MixinExtras:${project.me_version}"
+
+    modCompileOnly "maven.modrinth:sodium:${project.sodium_version}"
 
     modImplementation include("eu.pb4:common-protection-api:${project.cpa_version}")
 }

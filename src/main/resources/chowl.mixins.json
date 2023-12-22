@@ -2,6 +2,7 @@
     "required": true,
     "minVersion": "0.8",
     "package": "com.chyzman.chowl.mixin",
+    "plugin": "com.chyzman.chowl.asm.ChowlMixinPlugin",
     "compatibilityLevel": "JAVA_17",
     "mixins": [
         "DataPackContentsMixin",
@@ -11,7 +12,8 @@
     "client": [
         "client.ClientPlayNetworkHandlerMixin",
         "client.HeldItemRendererMixin",
-        "client.MinecraftClientMixin"
+        "client.MinecraftClientMixin",
+        "client.sodium.AABBConstructingVertexConsumerMixin"
     ],
     "injectors": {
         "defaultRequire": 1
