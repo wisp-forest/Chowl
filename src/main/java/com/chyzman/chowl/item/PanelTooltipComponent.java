@@ -3,6 +3,7 @@ package com.chyzman.chowl.item;
 import com.chyzman.chowl.item.component.CapacityLimitedPanelItem;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
+import com.chyzman.chowl.util.CompressionManager;
 import io.wispforest.owo.ui.base.BaseOwoTooltipComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
@@ -25,7 +26,15 @@ public class PanelTooltipComponent extends BaseOwoTooltipComponent<FlowLayout> {
                 if (!currentFilter.isBlank()) {
                     var currentFlow = Containers.horizontalFlow(Sizing.content(), Sizing.content());
                     currentFlow.child(Components.label(Text.translatable("ui.chowl-industries.panel.tooltip.filter.label")));
-                    currentFlow.child(Components.item(currentFilter.toStack()).sizing(Sizing.fixed(MinecraftClient.getInstance().textRenderer.fontHeight)));
+                    if (panel instanceof CompressingPanelItem compressingPanel) {
+                        var node = CompressionManager.getOrCreateNode(compressingPanel.currentFilter(stack).getItem());
+                        while (node != null) {
+                            currentFlow.child(Components.item(node.item.getDefaultStack()).sizing(Sizing.fixed(MinecraftClient.getInstance().textRenderer.fontHeight)));
+                            node = node.next;
+                        }
+                    } else {
+                        currentFlow.child(Components.item(currentFilter.toStack()).sizing(Sizing.fixed(MinecraftClient.getInstance().textRenderer.fontHeight)));
+                    }
                     currentFlow.verticalAlignment(VerticalAlignment.CENTER);
                     flow.child(currentFlow);
                 }

@@ -41,6 +41,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 import static com.chyzman.chowl.item.component.LockablePanelItem.LOCK_BUTTON;
+import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
 public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver {
 
@@ -111,7 +112,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
                 return ActionResult.SUCCESS;
             })
-            .renderWhen(ButtonRenderCondition.BUTTON_FOCUSED)
+            .renderWhen(ButtonRenderCondition.PANEL_FOCUSED)
             .renderer(ButtonRenderer.stack(Items.BARRIER.getDefaultStack()))
             .build();
     public static final BlockButton CONFIG_BUTTON = BlockButton.builder(12, 14, 14, 16)
@@ -133,8 +134,8 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 });
                 return ActionResult.SUCCESS;
             })
-            .renderWhen(ButtonRenderCondition.BUTTON_FOCUSED)
-            .renderer(ButtonRenderer.stack(Items.STRUCTURE_VOID.getDefaultStack()))
+            .renderWhen(ButtonRenderCondition.PANEL_FOCUSED)
+            .renderer(ButtonRenderer.model(id("item/cog")))
             .build();
 
     public DrawerFrameBlock(Settings settings) {

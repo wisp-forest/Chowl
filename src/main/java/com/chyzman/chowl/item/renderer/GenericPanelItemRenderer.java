@@ -2,10 +2,14 @@ package com.chyzman.chowl.item.renderer;
 
 import com.chyzman.chowl.classes.AABBConstructingVertexConsumer;
 import com.chyzman.chowl.client.RenderGlobals;
+import com.chyzman.chowl.item.CompressingPanelItem;
 import com.chyzman.chowl.item.component.CapacityLimitedPanelItem;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
 import com.chyzman.chowl.transfer.PanelStorageContext;
+import com.chyzman.chowl.util.CompressionManager;
+import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.core.Sizing;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
@@ -27,6 +31,7 @@ import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 
 import static com.chyzman.chowl.Chowl.GLOWING_UPGRADE_TAG;
 
@@ -53,93 +58,104 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
         }
 
         if (!(stack.getItem() instanceof DisplayingPanelItem panel)) return;
-        var storage = panel.getStorage(PanelStorageContext.from(RenderGlobals.DRAWER_FRAME.get(), RenderGlobals.FRAME_SIDE.get()));
-        if (storage != null) {
-            var index = 0;
-            var renderScale = Math.ceil(Math.sqrt(storage.getSlotCount()));
-            matrices.scale((float) (1/renderScale), (float) (1/renderScale), 1);
-            for (SingleSlotStorage<ItemVariant> slot : storage.getSlots()) {
-                matrices.translate(index % renderScale, index / renderScale, 0);
-
-                var displayStack = panel.displayedVariant(stack).toStack();
-                var count = panel.displayedCount(stack, RenderGlobals.DRAWER_FRAME.get(), RenderGlobals.FRAME_SIDE.get());
-                var customization = stack.get(DisplayingPanelItem.CONFIG);
-                var glowing = false;
-
-                if (stack.getItem() instanceof UpgradeablePanelItem upgradeable) {
-                    if (upgradeable.hasUpgrade(stack, upgrade -> upgrade.isIn(GLOWING_UPGRADE_TAG))) {
-                        glowing = true;
-                    }
-                }
-
-                if (!displayStack.isEmpty()) {
-                    var size = measureItemSize(displayStack, client, matrices);
-
-                    if (!customization.hideName()) {
-                        matrices.push();
-                        matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
-                        matrices.translate(0, 3 / 8f, -1 / 31f);
-                        matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
-                        MutableText title = (MutableText) displayStack.getName();
-                        var titleWidth = client.textRenderer.getWidth(title);
-                        if (titleWidth > maxwidth) {
-                            matrices.scale(maxwidth / titleWidth, maxwidth / titleWidth, maxwidth / titleWidth);
-                        }
-
-                        matrices.translate(0, -client.textRenderer.fontHeight + 1f, 0);
-                        client.textRenderer.draw(panel.styleText(stack, title), -titleWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
-                        matrices.pop();
-                    }
-
-                    if (count.compareTo(BigInteger.ZERO) > 0 && (!customization.hideCount() || !customization.hideCapacity())) {
-                        matrices.push();
-                        matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
-                        matrices.translate(0, -3 / 8f, -1 / 31f);
-                        matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
-                        StringBuilder countText = new StringBuilder();
-
-                        if (!customization.hideCount()) {
-                            countText.append(count);
-                        }
-                        if (panel instanceof CapacityLimitedPanelItem cap && cap.capacity(stack).signum() > 0) {
-                            if (!customization.hideCapacity()) {
-                                if (!customization.hideCount()) countText.append("/");
-                                countText.append(cap.formattedCapacity(stack));
-                            }
-                        }
-
-                        var amountWidth = client.textRenderer.getWidth(countText.toString());
-                        if (amountWidth > maxwidth) {
-                            matrices.scale(maxwidth / amountWidth, maxwidth / amountWidth, maxwidth / amountWidth);
-                        }
-
-                        client.textRenderer.draw(panel.styleText(stack, Text.literal(countText.toString())), -amountWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
-                        matrices.pop();
-                    }
-
-                    if (!customization.hideItem()) {
-                        float scale = (float) Math.min(2, (1 / (Math.max(size.x, Math.max(size.y, size.z)))));
-                        matrices.push();
-                        matrices.translate(0, 0, -1 / 32f);
-                        matrices.scale(scale, scale, scale);
-                        scale = (12 / 16f);
-                        matrices.scale(scale, scale, scale);
-                        if (!customization.hideName()) matrices.translate(0, 1 / 128f, 0);
-                        if (mode == ModelTransformationMode.GUI) {
-                            scale = 0.47f;
-                        } else {
-                            scale = 0.4f;
-                        }
-                        matrices.scale(scale, scale, scale);
-                        matrices.push();
-                        client.getItemRenderer().renderItem(displayStack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light, overlay, client.getItemRenderer().getModels().getModel(displayStack));
-                        matrices.pop();
-                        matrices.pop();
-                    }
-                }
-                matrices.translate(-(index % renderScale), -(index / renderScale), 0);
-                index++;
+        var stacks = new ArrayList<ItemStack>();
+        stacks.add(panel.displayedVariant(stack).toStack());
+        if (panel instanceof CompressingPanelItem compressingPanel) {
+            var node = CompressionManager.getOrCreateNode(compressingPanel.currentFilter(stack).getItem());
+            while (node.next != null) {
+                node = node.next;
+                stacks.add(node.item.getDefaultStack());
             }
+        }
+        var renderScale = 1/Math.ceil(Math.sqrt(stacks.size()));
+        if (renderScale < 1) {
+            matrices.translate(0.5, 0.5, 0);
+            matrices.translate(-renderScale/2, -renderScale/2, 0);
+        }
+        matrices.translate(-renderScale, -renderScale, 0);
+        matrices.scale((float) (renderScale), (float) (renderScale), 1);
+        for (int i = 0; i < stacks.size(); i++) {
+            matrices.push();
+            matrices.translate(1- i % (1/renderScale), 1- (float) (int) (i / (1/renderScale)), 0);
+            matrices.scale(4/3f, 4/3f, 1);
+
+            var displayStack = stacks.get(i);
+            var count = panel.displayedCount(stack, RenderGlobals.DRAWER_FRAME.get(), RenderGlobals.FRAME_SIDE.get());
+            var customization = stack.get(DisplayingPanelItem.CONFIG);
+            var glowing = false;
+
+            if (stack.getItem() instanceof UpgradeablePanelItem upgradeable) {
+                if (upgradeable.hasUpgrade(stack, upgrade -> upgrade.isIn(GLOWING_UPGRADE_TAG))) {
+                    glowing = true;
+                }
+            }
+
+            if (!displayStack.isEmpty()) {
+                var size = measureItemSize(displayStack, client, matrices);
+
+                if (!customization.hideName()) {
+                    matrices.push();
+                    matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
+                    matrices.translate(0, 3 / 8f, -1 / 31f);
+                    matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
+                    MutableText title = (MutableText) displayStack.getName();
+                    var titleWidth = client.textRenderer.getWidth(title);
+                    if (titleWidth > maxwidth) {
+                        matrices.scale(maxwidth / titleWidth, maxwidth / titleWidth, maxwidth / titleWidth);
+                    }
+
+                    matrices.translate(0, -client.textRenderer.fontHeight + 1f, 0);
+                    client.textRenderer.draw(panel.styleText(stack, title), -titleWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
+                    matrices.pop();
+                }
+
+                if (count.compareTo(BigInteger.ZERO) > 0 && (!customization.hideCount() || !customization.hideCapacity())) {
+                    matrices.push();
+                    matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
+                    matrices.translate(0, -3 / 8f, -1 / 31f);
+                    matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
+                    StringBuilder countText = new StringBuilder();
+
+                    if (!customization.hideCount()) {
+                        countText.append(count);
+                    }
+                    if (panel instanceof CapacityLimitedPanelItem cap && cap.capacity(stack).signum() > 0) {
+                        if (!customization.hideCapacity()) {
+                            if (!customization.hideCount()) countText.append("/");
+                            countText.append(cap.formattedCapacity(stack));
+                        }
+                    }
+
+                    var amountWidth = client.textRenderer.getWidth(countText.toString());
+                    if (amountWidth > maxwidth) {
+                        matrices.scale(maxwidth / amountWidth, maxwidth / amountWidth, maxwidth / amountWidth);
+                    }
+
+                    client.textRenderer.draw(panel.styleText(stack, Text.literal(countText.toString())), -amountWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
+                    matrices.pop();
+                }
+
+                if (!customization.hideItem()) {
+                    float scale = (float) Math.min(2, (1 / (Math.max(size.x, Math.max(size.y, size.z)))));
+                    matrices.push();
+                    matrices.translate(0, 0, -1 / 32f);
+                    matrices.scale(scale, scale, scale);
+                    scale = (12 / 16f);
+                    matrices.scale(scale, scale, scale);
+                    if (!customization.hideName()) matrices.translate(0, 1 / 128f, 0);
+                    if (mode == ModelTransformationMode.GUI) {
+                        scale = 0.47f;
+                    } else {
+                        scale = 0.4f;
+                    }
+                    matrices.scale(scale, scale, scale);
+                    matrices.push();
+                    client.getItemRenderer().renderItem(displayStack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light, overlay, client.getItemRenderer().getModels().getModel(displayStack));
+                    matrices.pop();
+                    matrices.pop();
+                }
+            }
+            matrices.pop();
         }
     }
 

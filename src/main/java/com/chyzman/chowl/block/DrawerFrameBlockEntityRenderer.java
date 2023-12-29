@@ -109,8 +109,8 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                     RenderGlobals.FRAME_WORLD.set(world);
 
                     if (stack.getItem() instanceof SkullItem) {
-                        matrices.scale(2f, 2f, 1 / 3f);
-                        matrices.translate(0, 0, -1 / 32f);
+                        matrices.scale(2f, 2f, 1/3f);
+                        matrices.translate(0, 0, 1/4f);
                     }
                     matrices.translate(0, 0, 1 / 32f);
                     client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));
