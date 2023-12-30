@@ -1,9 +1,10 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "building",
+  "category": "misc",
+  "group": "compressed_wool",
   "key": {
     "#": {
-      "item": "minecraft:black_wool"
+      "item": "minecraft:orange_wool"
     }
   },
   "pattern": [
@@ -12,7 +13,7 @@
     "###"
   ],
   "result": {
-    "item": "minecraft:brown_wool"
+    "item": "minecraft:yellow_wool"
   },
   "show_notification": true
 }

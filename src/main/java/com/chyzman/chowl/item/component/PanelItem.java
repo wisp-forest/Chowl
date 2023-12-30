@@ -36,9 +36,7 @@ public interface PanelItem {
             .onUse((world, frame, side, stack, player, hand) -> {
                 var stackInHand = player.getStackInHand(hand);
                 if (stackInHand.isEmpty()) return ActionResult.PASS;
-                if (!(stack.getItem() instanceof PanelItem)) return ActionResult.PASS;
-
-                PanelItem panel = (PanelItem) stack.getItem();
+                if (!(stack.getItem() instanceof PanelItem panel)) return ActionResult.PASS;
 
                 if (world.isClient) return ActionResult.SUCCESS;
 

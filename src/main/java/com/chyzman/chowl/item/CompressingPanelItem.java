@@ -2,6 +2,8 @@ package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.block.button.BlockButton;
+import com.chyzman.chowl.block.button.ButtonRenderCondition;
+import com.chyzman.chowl.block.button.ButtonRenderer;
 import com.chyzman.chowl.item.component.*;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.CompressingStorage;
@@ -12,10 +14,14 @@ import com.chyzman.chowl.util.CompressionManager;
 import com.chyzman.chowl.util.NbtKeyTypes;
 import com.chyzman.chowl.util.VariantUtils;
 import io.wispforest.owo.nbt.NbtKey;
+import io.wispforest.owo.ops.ItemOps;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -23,6 +29,8 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Pair;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -93,7 +101,78 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
     @Override
     public List<BlockButton> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
         var returned = new ArrayList<BlockButton>();
-        returned.add(STORAGE_BUTTON);
+        var stacks = new ArrayList<ItemStack>();
+        if (stack.getItem() instanceof CompressingPanelItem compressingPanel) {
+            stacks.add(compressingPanel.displayedVariant(stack).toStack());
+            var node = CompressionManager.getOrCreateNode(compressingPanel.currentFilter(stack).getItem());
+            while (node.next != null) {
+                node = node.next;
+                stacks.add(node.item.getDefaultStack());
+            }
+        }
+        var gridSize = Math.ceil(Math.sqrt(stacks.size()));
+        for (int i = 0; i < gridSize * gridSize; i++) {
+            var scale = 12 / gridSize;
+            float x = (float) (scale * (i % gridSize));
+            float y = (float) (scale * (gridSize - 1 - (float) (int) (i / gridSize)));
+            int finalI = i;
+            returned.add(PanelItem.buttonBuilder(2 + x, 2 + y, (float) (2 + x + scale), (float) (2 + y + scale))
+                    .onUse((world, frame, useSide, useStack, player, hand) -> {
+                        var stackInHand = player.getStackInHand(hand);
+                        if (stackInHand.isEmpty()) return ActionResult.PASS;
+                        if (!(stack.getItem() instanceof PanelItem panel)) return ActionResult.PASS;
+
+                        if (world.isClient) return ActionResult.SUCCESS;
+
+                        var storage = panel.getStorage(PanelStorageContext.from(frame, side));
+
+                        try (var tx = Transaction.openOuter()) {
+                            StorageUtil.move(
+                                    PlayerInventoryStorage.of(player).getHandSlot(hand),
+                                    storage,
+                                    variant -> true,
+                                    stackInHand.getCount(),
+                                    tx
+                            );
+
+                            tx.commit();
+                        }
+
+                        return ActionResult.SUCCESS;
+                    })
+                    .onAttack((world, attackedDrawerFrame, attackedSide, attackedStack, player) -> {
+                        if (stacks.size() <= finalI) return ActionResult.FAIL;
+                        if (canExtractFromButton()) {
+                            var storage = getStorage(PanelStorageContext.from(drawerFrame, side));
+
+                            if (storage == null) return ActionResult.FAIL;
+                            if (world.isClient) return ActionResult.SUCCESS;
+
+                            try (var tx = Transaction.openOuter()) {
+                                var resource = ItemVariant.of(stacks.get(finalI));
+
+                                if (resource != null) {
+                                    var extracted = storage.extract(resource, player.isSneaking() ? resource.toStack().getMaxCount() : 1, tx);
+
+                                    if (extracted > 0) {
+                                        PlayerInventoryStorage.of(player).offerOrDrop(resource, extracted, tx);
+                                        tx.commit();
+                                        return ActionResult.SUCCESS;
+                                    }
+                                }
+                            }
+                            if (stack.get(COUNT).compareTo(BigInteger.ZERO) > 0) return ActionResult.FAIL;
+                        }
+
+
+                        player.getInventory().offerOrDrop(stack);
+                        drawerFrame.stacks.set(side.getId(), new Pair<>(ItemStack.EMPTY, 0));
+                        drawerFrame.markDirty();
+                        return ActionResult.SUCCESS;
+                    })
+                    .build()
+            );
+        }
         return addUpgradeButtons(stack, returned);
     }
 

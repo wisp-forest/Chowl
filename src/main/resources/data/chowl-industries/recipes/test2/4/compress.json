@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "compressed_wool",
+  "key": {
+    "#": {
+      "item": "minecraft:lime_wool"
+    }
+  },
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "result": {
+    "item": "minecraft:green_wool"
+  },
+  "show_notification": true
+}

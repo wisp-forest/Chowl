@@ -1,14 +1,14 @@
 {
   "type": "minecraft:crafting_shapeless",
   "category": "misc",
-  "group": "iron_ingot",
+  "group": "compressed_wool",
   "ingredients": [
     {
-      "item": "minecraft:light_gray_wool"
+      "item": "minecraft:lime_wool"
     }
   ],
   "result": {
     "count": 9,
-    "item": "minecraft:white_wool"
+    "item": "minecraft:yellow_wool"
   }
 }
