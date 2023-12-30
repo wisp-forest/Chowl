@@ -50,13 +50,14 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
         boolean blockFocused = hitResult != null && hitResult.getBlockPos().equals(entity.getPos());
 
         for (int i = 0; i < entity.stacks.size(); i++) {
+            Direction side = Direction.byId(i);
             var stack = entity.stacks.get(i).getLeft();
             var orientation = entity.stacks.get(i).getRight();
 
             if (!stack.isEmpty()) {
                 matrices.push();
                 matrices.translate(0.5, 0.5, 0.5);
-                matrices.multiply(Direction.byId(i).getRotationQuaternion());
+                matrices.multiply(side.getRotationQuaternion());
                 matrices.translate(0, 0.5, 0);
                 matrices.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(90));
                 matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
@@ -64,14 +65,14 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
 
                 if (entity.getWorld() != null) {
                     var buttonProvider = (BlockButtonProvider) entity.getCachedState().getBlock();
-                    boolean panelFocused = blockFocused && BlockSideUtils.getSide(hitResult).equals(Direction.byId(i));
+                    boolean panelFocused = blockFocused && BlockSideUtils.getSide(hitResult).equals(side);
 
                     matrices.push();
                     matrices.translate(0.5, -0.5, 0);
                     if (panelFocused)
                         hoveredButton = buttonProvider.findButton(entity.getWorld(), entity.getCachedState(), hitResult, orientation);
 
-                    for (BlockButton button : buttonProvider.listButtons(entity.getWorld(), entity.getCachedState(), hitResult)) {
+                    for (BlockButton button : buttonProvider.listButtons(entity.getWorld(), entity.getCachedState(), entity.getPos(), side)) {
                         matrices.push();
                         matrices.translate(-button.maxX() / 16, button.maxY() / 16, 0);
                         matrices.scale((button.maxX() - button.minX()) / 16, (button.maxY() - button.minY()) / 16, 1);
@@ -84,10 +85,10 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                         matrices.translate(0.5, -0.5, 0);
                         if (button.renderWhen().shouldRender(
                             entity,
-                            hitResult,
+                            side,
                             blockFocused,
                             panelFocused,
-                            hoveredButton == button
+                            panelFocused && hoveredButton == button
                         )) {
                             button.renderer().render(client, entity, hitResult, vertexConsumers, matrices, light, overlay);
                         }
@@ -104,7 +105,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
 
                 try {
                     RenderGlobals.DRAWER_FRAME.set(entity);
-                    RenderGlobals.FRAME_SIDE.set(Direction.byId(i));
+                    RenderGlobals.FRAME_SIDE.set(side);
                     RenderGlobals.FRAME_POS.set(entity.getPos());
                     RenderGlobals.FRAME_WORLD.set(world);
 

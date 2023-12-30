@@ -3,7 +3,6 @@ package com.chyzman.chowl.block.button;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.model.BakedModelManagerHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
@@ -12,8 +11,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
-
-import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
 public interface ButtonRenderer {
     static ButtonRenderer empty() {
@@ -41,7 +38,7 @@ public interface ButtonRenderer {
     static ButtonRenderer model(Identifier id) {
         return (client, entity, hitResult, vertexConsumers, matrices, light, overlay) -> {
             matrices.scale(1, 1, 1 / 8f);
-            var model = BakedModelManagerHelper.getModel(MinecraftClient.getInstance().getBakedModelManager(), id);
+            var model = MinecraftClient.getInstance().getBakedModelManager().getModel(id);
             client.getItemRenderer().renderItem(
                     Items.STRUCTURE_VOID.getDefaultStack(),
                     ModelTransformationMode.FIXED,

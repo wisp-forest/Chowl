@@ -278,11 +278,9 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     }
 
     @Override
-    public List<BlockButton> listButtons(World world, BlockState state, BlockHitResult hitResult) {
-        if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
+    public List<BlockButton> listButtons(World world, BlockState state, BlockPos pos, Direction side) {
+        if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity blockEntity))
             return List.of();
-
-        var side = BlockSideUtils.getSide(hitResult);
 
         var selected = blockEntity.stacks.get(side.getId()).getLeft();
 

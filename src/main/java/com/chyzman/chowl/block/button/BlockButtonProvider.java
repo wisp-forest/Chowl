@@ -5,7 +5,6 @@ import com.chyzman.chowl.block.DrawerFrameBlock;
 import com.chyzman.chowl.classes.AttackInteractionReceiver;
 import com.chyzman.chowl.util.BlockSideUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -21,7 +20,7 @@ import org.joml.Vector3f;
 import java.util.List;
 
 public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleClickableBlock {
-    List<BlockButton> listButtons(World world, BlockState state, BlockHitResult hitResult);
+    List<BlockButton> listButtons(World world, BlockState state, BlockPos pos, Direction side);
 
     default @Nullable BlockButton findButton(World world, BlockState state, BlockHitResult hitResult, int orientation) {
         Vector3f vec = hitResult.getPos().subtract(hitResult.getBlockPos().toCenterPos()).toVector3f();
@@ -32,7 +31,7 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
 
         vec.add(0.5f, 0.5f, 0.5f);
 
-        for (var button : listButtons(world, state, hitResult)) {
+        for (var button : listButtons(world, state, hitResult.getBlockPos(), side)) {
             if (!button.isIn(vec.z, vec.y)) continue;
             return button;
         }
