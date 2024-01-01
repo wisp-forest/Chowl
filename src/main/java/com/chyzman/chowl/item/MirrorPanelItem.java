@@ -132,7 +132,7 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
     public BigInteger displayedCount(ItemStack stack, @Nullable DrawerFrameBlockEntity drawerFrame, @Nullable Direction side) {
         if (drawerFrame == null || side == null) return BigInteger.ZERO;
 
-        var storage = this.getStorage(PanelStorageContext.from(drawerFrame, side));
+        var storage = this.getStorage(PanelStorageContext.forRendering(stack));
 
         if (!(storage instanceof BigStorageView<?> big)) return BigInteger.ZERO;
 

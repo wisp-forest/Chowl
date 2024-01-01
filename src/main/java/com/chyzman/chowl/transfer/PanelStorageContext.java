@@ -1,6 +1,7 @@
 package com.chyzman.chowl.transfer;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
+import com.chyzman.chowl.client.RenderGlobals;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.Direction;
@@ -9,6 +10,10 @@ import org.jetbrains.annotations.Nullable;
 public interface PanelStorageContext {
     static PanelStorageContext from(DrawerFrameBlockEntity drawerFrame, Direction side) {
         return new DrawerFrameContext(drawerFrame, side);
+    }
+
+    static PanelStorageContext forRendering(ItemStack stack) {
+        return new RenderPanelContext(stack);
     }
 
     ItemStack stack();
@@ -72,5 +77,42 @@ class DrawerFrameContext implements PanelStorageContext {
         int result = drawerFrame.hashCode();
         result = 31 * result + side.hashCode();
         return result;
+    }
+}
+
+class RenderPanelContext implements PanelStorageContext {
+    private final ItemStack stack;
+    private final @Nullable DrawerFrameBlockEntity drawerFrame;
+    private final @Nullable Direction side;
+
+    public RenderPanelContext(ItemStack stack) {
+        this.stack = stack;
+        this.drawerFrame = RenderGlobals.DRAWER_FRAME.get();
+        this.side = RenderGlobals.FRAME_SIDE.get();
+    }
+
+    @Override
+    public ItemStack stack() {
+        return stack;
+    }
+
+    @Override
+    public void setStack(ItemStack stack) {
+        throw new IllegalStateException("Cannot modify panel during rendering");
+    }
+
+    @Override
+    public DrawerFrameBlockEntity drawerFrame() {
+        return drawerFrame;
+    }
+
+    @Override
+    public Direction frameSide() {
+        return side;
+    }
+
+    @Override
+    public void markDirty() {
+        throw new IllegalStateException("Cannot modify panel during rendering");
     }
 }

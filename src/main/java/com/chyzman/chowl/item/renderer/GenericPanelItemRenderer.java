@@ -1,20 +1,17 @@
 package com.chyzman.chowl.item.renderer;
 
 import com.chyzman.chowl.classes.AABBConstructingVertexConsumer;
-import com.chyzman.chowl.client.RenderGlobals;
-import com.chyzman.chowl.item.CompressingPanelItem;
 import com.chyzman.chowl.item.component.CapacityLimitedPanelItem;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
+import com.chyzman.chowl.transfer.BigStorageView;
+import com.chyzman.chowl.transfer.FakeStorageView;
 import com.chyzman.chowl.transfer.PanelStorageContext;
-import com.chyzman.chowl.util.CompressionManager;
-import io.wispforest.owo.ui.component.Components;
-import io.wispforest.owo.ui.core.Sizing;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.LightmapTextureManager;
@@ -23,17 +20,16 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.chyzman.chowl.Chowl.GLOWING_UPGRADE_TAG;
 
@@ -62,33 +58,37 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
         if (!(stack.getItem() instanceof DisplayingPanelItem panel)) return;
         matrices.translate(0, 0, -1 / 32f - 0.001);
 
-        var stacks = new ArrayList<Pair<ItemStack, Integer>>();
-        stacks.add(new Pair<>(panel.displayedVariant(stack).toStack(), 1));
-        if (panel instanceof CompressingPanelItem compressingPanel) {
-            var node = CompressionManager.getOrCreateNode(compressingPanel.currentFilter(stack).getItem());
-            while (node.next != null) {
-                node = node.next;
-                stacks.add(new Pair<>(new ItemStack(node.item), node.previousAmount));
-            }
-        }
+        var storage = panel.getStorage(PanelStorageContext.forRendering(stack));
+
+        if (storage == null) return;
+
+        List<StorageView<ItemVariant>> slots = new ArrayList<>(storage.getSlots());
+        slots.removeIf(x -> x instanceof FakeStorageView);
+
         matrices.scale(3 / 4f, 3 / 4f, 3 / 4f);
-        var renderScale = 1 / Math.ceil(Math.sqrt(stacks.size()));
+
+        var renderScale = 1 / Math.ceil(Math.sqrt(slots.size()));
+
         matrices.translate(0.5, 0.5, 0);
         matrices.translate(-renderScale * 1.5f, -renderScale * 1.5f, 0);
         matrices.scale((float) (renderScale), (float) (renderScale), (float) (renderScale));
-        BigInteger multiplier = BigInteger.ONE;
-        for (int i = 0; i < stacks.size(); i++) {
+
+        for (int i = 0; i < slots.size(); i++) {
+            StorageView<ItemVariant> slot = slots.get(i);
+
             matrices.push();
             matrices.translate(1 - i % (1 / renderScale), 1 - (float) (int) (i / (1 / renderScale)), 0);
-            if (stacks.size() <= 1) {
+
+            if (slots.size() <= 1) {
                 matrices.scale(4 / 3f, 4 / 3f, 4 / 3f);
             } else {
                 var number = 5/4f;
                 matrices.scale(number, number, number);
             }
 
-            var displayStack = stacks.get(i);
-            var count = panel.displayedCount(stack, RenderGlobals.DRAWER_FRAME.get(), RenderGlobals.FRAME_SIDE.get());
+//            var count = panel.displayedCount(stack, RenderGlobals.DRAWER_FRAME.get(), RenderGlobals.FRAME_SIDE.get());
+
+            BigInteger count = BigStorageView.bigAmount(slot);
             var customization = stack.get(DisplayingPanelItem.CONFIG);
             var glowing = false;
 
@@ -98,15 +98,16 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                 }
             }
 
-            if (!displayStack.getLeft().isEmpty()) {
-                var size = measureItemSize(displayStack.getLeft(), client, matrices);
+            if (!slot.isResourceBlank()) {
+                ItemStack displayStack = slot.getResource().toStack();
+                var size = measureItemSize(displayStack, client, matrices);
 
                 if (!customization.hideName()) {
                     matrices.push();
                     matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
                     matrices.translate(0, 3 / 8f, 0);
                     matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
-                    MutableText title = (MutableText) displayStack.getLeft().getName();
+                    MutableText title = (MutableText) displayStack.getName();
                     var titleWidth = client.textRenderer.getWidth(title);
                     if (titleWidth > maxwidth) {
                         matrices.scale(maxwidth / titleWidth, maxwidth / titleWidth, maxwidth / titleWidth);
@@ -118,19 +119,22 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                 }
 
                 if (count.compareTo(BigInteger.ZERO) > 0 && (!customization.hideCount() || !customization.hideCapacity())) {
-                    multiplier = multiplier.multiply(BigInteger.valueOf(displayStack.getRight()));
                     matrices.push();
                     matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
                     matrices.translate(0, -3 / 8f, 0);
                     matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
+
                     StringBuilder countText = new StringBuilder();
 
                     if (!customization.hideCount()) {
-                        countText.append(count.divide(multiplier));
+                        countText.append(count);
                     }
+
                     if (panel instanceof CapacityLimitedPanelItem cap && cap.capacity(stack).signum() > 0) {
                         if (!customization.hideCapacity()) {
                             if (!customization.hideCount()) countText.append("/");
+
+                            // TODO: make this good
                             countText.append(cap.formattedCapacity(stack));
                         }
                     }
@@ -158,7 +162,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                     }
                     matrices.scale(scale, scale, scale);
                     matrices.push();
-                    client.getItemRenderer().renderItem(displayStack.getLeft(), ModelTransformationMode.FIXED, false, matrices, vertexConsumers, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light, overlay, client.getItemRenderer().getModels().getModel(displayStack.getLeft()));
+                    client.getItemRenderer().renderItem(displayStack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light, overlay, client.getItemRenderer().getModels().getModel(displayStack));
                     matrices.pop();
                     matrices.pop();
                 }

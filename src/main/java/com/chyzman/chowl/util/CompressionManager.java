@@ -65,12 +65,16 @@ public class CompressionManager {
         return node;
     }
 
-    public static Item followDown(Item item) {
+    public static DescendResult followDown(Item item) {
         var node = getOrCreateNode(item);
+        int totalMultiplier = 1;
 
-        while (node.previous != null) node = node.previous;
+        while (node.previous != null) {
+            totalMultiplier *= node.previousAmount;
+            node = node.previous;
+        }
 
-        return node.item;
+        return new DescendResult(node.item, totalMultiplier);
     }
 
     public static @Nullable DescendResult downBy(Item item, int amount) {
@@ -97,6 +101,18 @@ public class CompressionManager {
         }
 
         return new DescendResult(node.item, totalMultiplier);
+    }
+
+    public static int stepsUp(Item item) {
+        var node = getOrCreateNode(item);
+        int steps = -1;
+
+        while (node != null) {
+            steps += 1;
+            node = node.next;
+        }
+
+        return steps;
     }
 
     public record DescendResult(Item item, int total) {}

@@ -11,6 +11,20 @@ public interface BigStorageView<T> extends StorageView<T> {
 
     BigInteger bigCapacity();
 
+    static BigInteger bigAmount(StorageView<?> view) {
+        if (view instanceof BigStorageView<?> big)
+            return big.bigAmount();
+        else
+            return BigInteger.valueOf(view.getAmount());
+    }
+
+    static BigInteger bigCapacity(StorageView<?> view) {
+        if (view instanceof BigStorageView<?> big)
+            return big.bigCapacity();
+        else
+            return BigInteger.valueOf(view.getCapacity());
+    }
+
     @Override
     default long getAmount() {
         return BigIntUtils.longValueSaturating(bigAmount());

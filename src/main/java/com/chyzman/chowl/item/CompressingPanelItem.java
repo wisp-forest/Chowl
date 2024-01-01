@@ -5,10 +5,7 @@ import com.chyzman.chowl.block.button.BlockButton;
 import com.chyzman.chowl.block.button.ButtonRenderCondition;
 import com.chyzman.chowl.block.button.ButtonRenderer;
 import com.chyzman.chowl.item.component.*;
-import com.chyzman.chowl.transfer.BigStorageView;
-import com.chyzman.chowl.transfer.CompressingStorage;
-import com.chyzman.chowl.transfer.PanelStorage;
-import com.chyzman.chowl.transfer.PanelStorageContext;
+import com.chyzman.chowl.transfer.*;
 import com.chyzman.chowl.util.BigIntUtils;
 import com.chyzman.chowl.util.CompressionManager;
 import com.chyzman.chowl.util.NbtKeyTypes;
@@ -73,7 +70,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
     public boolean canSetFilter(ItemStack stack, ItemVariant to) {
         if (to.getNbt() != null && !to.getNbt().isEmpty()) return false;
 
-        var baseTo = CompressionManager.followDown(to.getItem());
+        var baseTo = CompressionManager.followDown(to.getItem()).item();
 
         if (stack.get(ITEM).equals(baseTo)) return true;
 
@@ -82,7 +79,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
 
     @Override
     public void setFilter(ItemStack stack, ItemVariant newFilter) {
-        var baseNew = CompressionManager.followDown(newFilter.getItem());
+        var baseNew = CompressionManager.followDown(newFilter.getItem()).item();
 
         stack.put(ITEM, baseNew);
         stack.put(LOCKED, true);
@@ -95,7 +92,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
 
     @Override
     public void setLocked(ItemStack stack, boolean locked) {
-        stack.put(LOCKED, true);
+        stack.put(LOCKED, locked);
     }
 
     @Override
@@ -181,8 +178,16 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
         var storages = new ArrayList<SlottedStorage<ItemVariant>>();
         var base = new BaseStorage(ctx);
 
-        for (int i = 5; i >= 1; i--) storages.add(new CompressingStorage(base, i));
         storages.add(base);
+
+        int steps = CompressionManager.stepsUp(base.getResource().getItem());
+        for (int i = 0; i < steps; i++) {
+            storages.add(new CompressingStorage(base, i + 1));
+        }
+
+        if (steps == 0) {
+            storages.add(new InitialCompressingStorage(base));
+        }
 
         return new CombinedSlottedStorage<>(storages);
     }
