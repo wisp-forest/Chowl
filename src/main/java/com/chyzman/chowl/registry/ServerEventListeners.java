@@ -11,17 +11,21 @@ public class ServerEventListeners {
     public static void init() {
         UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
             if (!hitResult.isInsideBlock()) {
-                if (world.getBlockState(hitResult.getBlockPos().offset(hitResult.getSide())).getBlock() instanceof DrawerFrameBlock &&
-                        world.getBlockEntity(hitResult.getBlockPos().offset(hitResult.getSide())) instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
+                var pos = hitResult.getBlockPos().offset(hitResult.getSide());
+                var state = world.getBlockState(pos);
+                if (state.getBlock() instanceof DrawerFrameBlock &&
+                        world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
                     if (player.getStackInHand(hand).getItem() instanceof BlockItem blockItem && !player.isSneaking()) {
                         var targetState = blockItem.getBlock().getPlacementState(new ItemPlacementContext(player, hand, player.getStackInHand(hand), hitResult));
-                        if (drawerFrameBlockEntity.templateState != targetState) {
+                        if (drawerFrameBlockEntity.templateState != targetState && targetState != null) {
                             drawerFrameBlockEntity.templateState = targetState;
+                            world.setBlockState(pos, state.with(DrawerFrameBlock.LIGHT_LEVEL, targetState.getLuminance()));
                         } else {
                             return ActionResult.PASS;
                         }
                     } else if (drawerFrameBlockEntity.templateState != null && player.isSneaking()) {
                         drawerFrameBlockEntity.templateState = null;
+                        world.setBlockState(pos, state.with(DrawerFrameBlock.LIGHT_LEVEL, 0));
                     } else {
                         return ActionResult.PASS;
                     }

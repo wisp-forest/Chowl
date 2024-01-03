@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.ref.WeakReference;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,57 +66,65 @@ public class CompressionManager {
         return node;
     }
 
-    public static DescendResult followDown(Item item) {
+    public static ScendResult followDown(Item item) {
         var node = getOrCreateNode(item);
-        int totalMultiplier = 1;
+        BigInteger totalMultiplier = BigInteger.ONE;
+        int totalSteps = 0;
 
         while (node.previous != null) {
-            totalMultiplier *= node.previousAmount;
+            totalMultiplier = totalMultiplier.multiply(BigInteger.valueOf(node.previousAmount));
+            totalSteps++;
             node = node.previous;
         }
 
-        return new DescendResult(node.item, totalMultiplier);
+        return new ScendResult(node.item, totalMultiplier, totalSteps);
     }
 
-    public static @Nullable DescendResult downBy(Item item, int amount) {
+    public static @Nullable CompressionManager.ScendResult downBy(Item item, int amount) {
         var node = getOrCreateNode(item);
-        int totalMultiplier = 1;
+        BigInteger totalMultiplier = BigInteger.ONE;
+        int totalSteps = 0;
 
         for (int i = 0; i < amount; i++) {
             if (node.previous == null) return null;
-            totalMultiplier *= node.previousAmount;
+            totalMultiplier = totalMultiplier.multiply(BigInteger.valueOf(node.previousAmount));
+            totalSteps++;
             node = node.previous;
         }
 
-        return new DescendResult(node.item, totalMultiplier);
+        return new ScendResult(node.item, totalMultiplier, totalSteps);
     }
 
-    public static @Nullable DescendResult upBy(Item item, int amount) {
+    public static ScendResult followUp(Item item) {
         var node = getOrCreateNode(item);
-        int totalMultiplier = 1;
+        BigInteger totalMultiplier = BigInteger.ONE;
+        int totalSteps = 0;
+
+        while (node.next != null) {
+            totalMultiplier = totalMultiplier.multiply(BigInteger.valueOf(node.nextAmount));
+            totalSteps++;
+            node = node.next;
+        }
+
+        return new ScendResult(node.item, totalMultiplier, totalSteps);
+    }
+
+    public static @Nullable CompressionManager.ScendResult upBy(Item item, int amount) {
+        var node = getOrCreateNode(item);
+        BigInteger totalMultiplier = BigInteger.ONE;
+        int totalSteps = 0;
 
         for (int i = 0; i < amount; i++) {
             if (node.next == null) return null;
-            totalMultiplier *= node.nextAmount;
+            totalMultiplier = totalMultiplier.multiply(BigInteger.valueOf(node.nextAmount));
+            totalSteps++;
             node = node.next;
         }
 
-        return new DescendResult(node.item, totalMultiplier);
+        return new ScendResult(node.item, totalMultiplier, totalSteps);
     }
 
-    public static int stepsUp(Item item) {
-        var node = getOrCreateNode(item);
-        int steps = -1;
-
-        while (node != null) {
-            steps += 1;
-            node = node.next;
-        }
-
-        return steps;
-    }
-
-    public record DescendResult(Item item, int total) {}
+    public record ScendResult(Item item, BigInteger totalMultiplier, int totalSteps) {}
 
     public static class Node {
         public final Item item;

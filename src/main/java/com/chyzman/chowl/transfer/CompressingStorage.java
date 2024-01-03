@@ -26,12 +26,12 @@ public class CompressingStorage implements SingleSlotStorage<ItemVariant> {
 
         long insertable;
         try (var nested = transaction.openNested()) {
-            insertable = base.insert(ItemVariant.of(res.item()), maxAmount * res.total(), nested);
+            insertable = base.insert(ItemVariant.of(res.item()), maxAmount * res.totalMultiplier().longValueExact(), nested);
         }
 
-        insertable = insertable / res.total() * res.total();
+        insertable = insertable / res.totalMultiplier().longValueExact() * res.totalMultiplier().longValueExact();
 
-        return base.insert(ItemVariant.of(res.item()), insertable, transaction) / res.total();
+        return base.insert(ItemVariant.of(res.item()), insertable, transaction) / res.totalMultiplier().longValueExact();
     }
 
     @Override
@@ -45,12 +45,12 @@ public class CompressingStorage implements SingleSlotStorage<ItemVariant> {
 
         long extractable;
         try (var nested = transaction.openNested()) {
-            extractable = base.extract(ItemVariant.of(res.item()), maxAmount * res.total(), nested);
+            extractable = base.extract(ItemVariant.of(res.item()), maxAmount * res.totalMultiplier().longValueExact(), nested);
         }
 
-        extractable = extractable / res.total() * res.total();
+        extractable = extractable / res.totalMultiplier().longValueExact() * res.totalMultiplier().longValueExact();
 
-        return base.extract(ItemVariant.of(res.item()), extractable, transaction) / res.total();
+        return base.extract(ItemVariant.of(res.item()), extractable, transaction) / res.totalMultiplier().longValueExact();
     }
 
     @Override
@@ -73,7 +73,7 @@ public class CompressingStorage implements SingleSlotStorage<ItemVariant> {
 
         if (res == null) return 0;
 
-        return base.getAmount() / res.total();
+        return base.getAmount() / res.totalMultiplier().longValueExact();
     }
 
     @Override
@@ -82,7 +82,7 @@ public class CompressingStorage implements SingleSlotStorage<ItemVariant> {
 
         if (res == null) return 0;
 
-        return base.getCapacity() / res.total();
+        return base.getCapacity() / res.totalMultiplier().longValueExact();
     }
 
     @Override

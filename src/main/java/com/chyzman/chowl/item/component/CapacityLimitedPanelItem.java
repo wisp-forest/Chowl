@@ -4,6 +4,7 @@ import com.chyzman.chowl.util.BigIntUtils;
 import com.chyzman.chowl.util.NbtKeyTypes;
 import com.google.common.math.BigIntegerMath;
 import io.wispforest.owo.nbt.NbtKey;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.item.ItemStack;
 
 import java.math.BigInteger;
@@ -16,17 +17,8 @@ public interface CapacityLimitedPanelItem extends PanelItem {
 
     BigInteger baseCapacity();
 
-    default String formattedCapacity(ItemStack stack) {
-        var digits = BigIntUtils.decimalDigitsLog2(capacityTier(stack));
-
-        if (digits.compareTo(new BigInteger(CHOWL_CONFIG.max_digits_before_exponents())) > 0)
-            return "2^" + (capacityTier(stack).add(BigInteger.valueOf(BigIntegerMath.log2(baseCapacity(), RoundingMode.HALF_UP))));
-        else
-            return capacity(stack).toString();
-    }
-
-    default BigInteger capacity(ItemStack stack) {
-        return BigIntUtils.powOf2(baseCapacity(), capacityTier(stack));
+    default BigInteger capacity(ItemStack panel) {
+        return BigIntUtils.powOf2(baseCapacity(), capacityTier(panel));
     }
 
     static BigInteger capacityTier(ItemStack stack) {

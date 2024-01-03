@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.chyzman.chowl.Chowl.GLOWING_UPGRADE_TAG;
+import static com.chyzman.chowl.util.FormatUtil.formatCount;
 
 @Environment(EnvType.CLIENT)
 @SuppressWarnings("UnstableApiUsage")
@@ -134,8 +135,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                         if (!customization.hideCapacity()) {
                             if (!customization.hideCount()) countText.append("/");
 
-                            // TODO: make this good
-                            countText.append(cap.formattedCapacity(stack));
+                            countText.append(formatCount(BigStorageView.bigCapacity(slot)));
                         }
                     }
 

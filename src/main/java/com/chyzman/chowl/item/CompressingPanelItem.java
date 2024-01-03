@@ -180,7 +180,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
 
         storages.add(base);
 
-        int steps = CompressionManager.stepsUp(base.getResource().getItem());
+        int steps = CompressionManager.followUp(base.getResource().getItem()).totalSteps();
         for (int i = 0; i < steps; i++) {
             storages.add(new CompressingStorage(base, i + 1));
         }
@@ -217,6 +217,11 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
         stack.put(UPGRADES_LIST, nbtList);
     }
 
+    @Override
+    public BigInteger capacity(ItemStack panel) {
+        return CapacityLimitedPanelItem.super.capacity(panel);
+    }
+
     @SuppressWarnings("UnstableApiUsage")
     private class BaseStorage extends PanelStorage implements SingleSlotStorage<ItemVariant>, BigStorageView<ItemVariant> {
         public BaseStorage(PanelStorageContext ctx) {
@@ -234,7 +239,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
             if (contained != resource.getItem()) return 0;
 
             var currentCount = ctx.stack().get(COUNT);
-            var capacity = CompressingPanelItem.this.capacity(ctx.stack());
+            var capacity = bigCapacity();
             var spaceLeft = capacity.subtract(currentCount).max(BigInteger.ZERO);
             var inserted = spaceLeft.min(BigInteger.valueOf(maxAmount));
 
@@ -298,7 +303,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
 
         @Override
         public BigInteger bigCapacity() {
-            return CompressingPanelItem.this.capacity(ctx.stack());
+            return CompressingPanelItem.this.capacity(ctx.stack()).multiply(CompressionManager.followUp(ctx.stack().get(ITEM)).totalMultiplier());
         }
     }
 }

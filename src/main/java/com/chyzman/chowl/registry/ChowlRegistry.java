@@ -5,6 +5,7 @@ import com.chyzman.chowl.item.*;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.LightBlock;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -36,10 +37,12 @@ public class ChowlRegistry {
             new DrawerFrameBlock(
                     AbstractBlock.Settings.copy(Blocks.OAK_PLANKS)
                             .nonOpaque()
+                            .dynamicBounds()
                             .allowsSpawning(Blocks::never)
                             .solidBlock(Blocks::never)
                             .suffocates(Blocks::never)
                             .blockVision(Blocks::never)
+                            .luminance(DrawerFrameBlock.STATE_TO_LUMINANCE)
             )
     );
     public static final Item DRAWER_FRAME_ITEM = registerItem("drawer_frame", new DrawerFrameBlockItem(DRAWER_FRAME_BLOCK, new Item.Settings()));

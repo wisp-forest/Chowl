@@ -23,12 +23,12 @@ public class InitialCompressingStorage implements SingleSlotStorage<ItemVariant>
 
         long insertable;
         try (var nested = transaction.openNested()) {
-            insertable = base.insert(ItemVariant.of(res.item()), maxAmount * res.total(), nested);
+            insertable = base.insert(ItemVariant.of(res.item()), maxAmount * res.totalMultiplier().longValueExact(), nested);
         }
 
-        insertable = insertable / res.total() * res.total();
+        insertable = insertable / res.totalMultiplier().longValueExact() * res.totalMultiplier().longValueExact();
 
-        return base.insert(ItemVariant.of(res.item()), insertable, transaction) / res.total();
+        return base.insert(ItemVariant.of(res.item()), insertable, transaction) / res.totalMultiplier().longValueExact();
     }
 
     @Override

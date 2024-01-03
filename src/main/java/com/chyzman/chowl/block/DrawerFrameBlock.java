@@ -18,11 +18,13 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.IntProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -35,10 +37,12 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.ToIntFunction;
 
 import static com.chyzman.chowl.item.component.LockablePanelItem.LOCK_BUTTON;
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
@@ -46,7 +50,10 @@ import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver {
 
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
+    public static final IntProperty LIGHT_LEVEL = Properties.LEVEL_15;
     public static final BooleanProperty TICKING = BooleanProperty.of("ticking");
+
+    public static final ToIntFunction<BlockState> STATE_TO_LUMINANCE = state -> state.get(LIGHT_LEVEL);
 
     public static final VoxelShape BASE = VoxelShapes.union(
             Block.createCuboidShape(0, 0, 0, 16, 2, 2),
@@ -140,7 +147,18 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
     public DrawerFrameBlock(Settings settings) {
         super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, Boolean.FALSE).with(TICKING, Boolean.FALSE));
+        this.setDefaultState(this.stateManager.getDefaultState()
+                .with(WATERLOGGED, Boolean.FALSE)
+                .with(LIGHT_LEVEL, 0)
+                .with(TICKING, Boolean.FALSE));
+    }
+
+    @Nullable
+    @Override
+    public BlockState getPlacementState(ItemPlacementContext ctx) {
+        BlockPos blockPos = ctx.getBlockPos();
+        FluidState fluidState = ctx.getWorld().getFluidState(blockPos);
+        return super.getPlacementState(ctx).with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER);
     }
 
     @Override
@@ -165,6 +183,12 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         if (newState.getBlock() != this && world instanceof ServerWorld sw) {
             ServerGraphStore.get(sw).tryRemove(pos);
         }
+    }
+
+    @Override
+    public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos) {
+        scheduleFluidTick(world, pos, state);
+        return super.getStateForNeighborUpdate(state, direction, neighborState, world, pos, neighborPos);
     }
 
     @Nullable
@@ -245,7 +269,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     }
 
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(WATERLOGGED, TICKING);
+        builder.add(WATERLOGGED, LIGHT_LEVEL, TICKING);
     }
 
     @Override
@@ -259,7 +283,10 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
         }
         var res = BlockButtonProvider.super.onUse(state, world, pos, player, hand, hit);
-        if (res != ActionResult.PASS) return res;
+        if (res != ActionResult.PASS) {
+            scheduleFluidTick(world, pos, state);
+            return res;
+        }
         var blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
             var stacks = drawerFrameBlockEntity.stacks;
@@ -270,6 +297,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                     stacks.set(side.getId(), new Pair<>(ItemOps.singleCopy(temp), orientation));
                     stackInHand.decrement(1);
                     drawerFrameBlockEntity.markDirty();
+                    world.updateNeighbors(pos, this);
                     return ActionResult.SUCCESS;
                 }
             }
@@ -307,11 +335,13 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
     @Override
     public @NotNull ActionResult onAttack(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player) {
+        scheduleFluidTick(world, hitResult.getBlockPos(), state);
         return BlockButtonProvider.super.onAttack(world, state, hitResult, player);
     }
 
     @Override
     public @NotNull ActionResult onDoubleClick(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player) {
+        scheduleFluidTick(world, hitResult.getBlockPos(), state);
         return BlockButtonProvider.super.onDoubleClick(world, state, hitResult, player);
     }
 
@@ -339,5 +369,11 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             return drawerFrameBlockEntity.stacks.get(side.getId()).getRight();
         }
         return 0;
+    }
+
+    private void scheduleFluidTick(WorldAccess world, BlockPos pos, BlockState state){
+        if (state.get(WATERLOGGED)) {
+            world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+        }
     }
 }
