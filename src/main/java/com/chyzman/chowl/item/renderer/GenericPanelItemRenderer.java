@@ -30,8 +30,10 @@ import net.minecraft.util.math.Vec3d;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.chyzman.chowl.Chowl.GLOWING_UPGRADE_TAG;
+import static com.chyzman.chowl.Chowl.NAMING_UPGRADE_TAG;
 import static com.chyzman.chowl.util.FormatUtil.formatCount;
 
 @Environment(EnvType.CLIENT)
@@ -108,14 +110,20 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                     matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
                     matrices.translate(0, 3 / 8f, 0);
                     matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
-                    MutableText title = (MutableText) displayStack.getName();
-                    var titleWidth = client.textRenderer.getWidth(title);
+
+                    AtomicReference<MutableText> title = new AtomicReference<>((MutableText) displayStack.getName());
+                    if (stack.getItem() instanceof UpgradeablePanelItem upgradeable) {
+                        if (upgradeable.hasUpgrade(stack, upgrade -> upgrade.isIn(NAMING_UPGRADE_TAG))) {
+                            upgradeable.upgrades(stack).stream().filter(upgradeStack -> upgradeStack.isIn(NAMING_UPGRADE_TAG) && upgradeStack.hasCustomName()).findFirst().ifPresent(upgradeStack -> title.set((MutableText) upgradeStack.getName()));
+                        }
+                    }
+                    var titleWidth = client.textRenderer.getWidth(title.get());
                     if (titleWidth > maxwidth) {
                         matrices.scale(maxwidth / titleWidth, maxwidth / titleWidth, maxwidth / titleWidth);
                     }
 
                     matrices.translate(0, -client.textRenderer.fontHeight + 1f, 0);
-                    client.textRenderer.draw(panel.styleText(stack, title), -titleWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
+                    client.textRenderer.draw(panel.styleText(stack, title.get()), -titleWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
                     matrices.pop();
                 }
 
