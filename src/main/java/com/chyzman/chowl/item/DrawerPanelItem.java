@@ -2,6 +2,7 @@ package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.block.button.BlockButton;
+import com.chyzman.chowl.event.PanelEmptiedEvent;
 import com.chyzman.chowl.item.component.*;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.PanelStorage;
@@ -168,7 +169,7 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
                 if (!ctx.stack().get(LOCKED)) {
                     ctx.stack().put(VARIANT, ItemVariant.blank());
                 }
-                triggerExplosionUpgrade(ctx);
+                PanelEmptiedEvent.EVENT.invoker().onPanelEmptied(ctx);
             }
             return removed;
         }

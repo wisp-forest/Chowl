@@ -4,6 +4,7 @@ import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.block.button.BlockButton;
 import com.chyzman.chowl.block.button.ButtonRenderCondition;
 import com.chyzman.chowl.block.button.ButtonRenderer;
+import com.chyzman.chowl.event.PanelEmptiedEvent;
 import com.chyzman.chowl.item.component.*;
 import com.chyzman.chowl.transfer.*;
 import com.chyzman.chowl.util.BigIntUtils;
@@ -280,7 +281,8 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
                 if (!ctx.stack().get(LOCKED)) {
                     ctx.stack().put(ITEM, Items.AIR);
                 }
-                triggerExplosionUpgrade(ctx);
+
+                PanelEmptiedEvent.EVENT.invoker().onPanelEmptied(ctx);
             }
 
             return removed;

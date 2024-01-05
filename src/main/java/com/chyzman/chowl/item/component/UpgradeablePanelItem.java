@@ -82,38 +82,4 @@ public interface UpgradeablePanelItem extends PanelItem {
         }
         return buttonList;
     }
-
-    //TODO: make this only happen when empty
-    default void triggerExplosionUpgrade(PanelStorageContext ctx) {
-        if (ctx.drawerFrame() != null
-                && ctx.stack().getItem() instanceof UpgradeablePanelItem panelItem
-                && panelItem.hasUpgrade(ctx.stack(), upgrade -> upgrade.isIn(EXPLOSIVE_UPGRADE_TAG))) {
-            var world = ctx.drawerFrame().getWorld();
-            var pos = ctx.drawerFrame().getPos();
-            var upgrades = panelItem.upgrades(ctx.stack());
-            AtomicInteger power = new AtomicInteger();
-            AtomicBoolean fiery = new AtomicBoolean(false);
-            upgrades.stream()
-                    .forEach(upgrade -> {
-                        if (upgrade.isIn(EXPLOSIVE_UPGRADE_TAG)) {
-                            power.addAndGet(1);
-                            upgrade.decrement(1);
-                        }
-                        if (upgrade.isIn(FIERY_UPGRADE_TAG)) {
-                            fiery.set(true);
-                            upgrade.decrement(1);
-                        }
-                        panelItem.setUpgrades(ctx.stack(), upgrades);
-                    });
-            world.createExplosion(
-                    null,
-                    pos.getX(),
-                    pos.getY(),
-                    pos.getZ(),
-                    power.get() + 1,
-                    fiery.get(),
-                    World.ExplosionSourceType.BLOCK
-            );
-        }
-    }
 }

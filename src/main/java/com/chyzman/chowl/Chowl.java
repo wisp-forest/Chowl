@@ -8,10 +8,8 @@ import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.registry.ServerBoundPackets;
 import com.chyzman.chowl.registry.ServerEventListeners;
 import com.chyzman.chowl.screen.PanelConfigSreenHandler;
-import com.chyzman.chowl.util.BigIntUtils;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.chyzman.chowl.upgrade.ExplosiveUpgrade;
+import com.chyzman.chowl.upgrade.NukeCoreUpgrade;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
@@ -27,9 +25,6 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.Pair;
-
-import java.math.BigInteger;
 
 import static com.chyzman.chowl.registry.ChowlRegistry.*;
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
@@ -77,6 +72,11 @@ public class Chowl implements ModInitializer {
         ServerEventListeners.init();
         ChowlRecipeSerializers.init();
         Registry.register(Registries.SCREEN_HANDLER, id("panel_config"), PanelConfigSreenHandler.TYPE);
+
+        ExplosiveUpgrade.init();
+
+        if (FabricLoader.getInstance().isModLoaded("mythicmetals"))
+            NukeCoreUpgrade.init();
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             if (Owo.DEBUG) DebugCommands.register(dispatcher, registryAccess);
