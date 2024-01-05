@@ -63,7 +63,13 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                 matrices.translate(0, 0.5, 0);
                 matrices.multiply(RotationAxis.NEGATIVE_X.rotationDegrees(90));
                 matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
-                matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(orientation * 90));
+                float rotation = 0;
+                if (orientation > 0 && orientation < 4) {
+                    rotation = orientation * 90;
+                } else if (orientation < 0 && orientation > -721) {
+                    rotation = client.world.getTime() % 360 * (-orientation + 360);
+                }
+                matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(rotation));
 
                 matrices.push();
                 if (!(stack.getItem() instanceof PanelItem)) {

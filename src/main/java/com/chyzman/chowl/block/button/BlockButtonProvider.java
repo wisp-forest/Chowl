@@ -27,7 +27,7 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
         var side = BlockSideUtils.getSide(hitResult);
         vec.rotate(side.getRotationQuaternion().invert())
                 .rotate(Direction.WEST.getRotationQuaternion())
-                .rotate(RotationAxis.NEGATIVE_X.rotationDegrees(orientation * 90));
+                .rotate(RotationAxis.NEGATIVE_X.rotationDegrees((orientation > 0 && orientation < 4) ? orientation * 90 : 0));
 
         vec.add(0.5f, 0.5f, 0.5f);
 
