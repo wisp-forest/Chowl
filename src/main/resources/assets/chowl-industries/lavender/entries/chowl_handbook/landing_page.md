@@ -6,9 +6,8 @@
 
 Greetings, recruit!
 
-
-Welcome to {green}Chowl Industries{}, the leading item storage company!
-Begin your first day with a [Drawer Frame](^chowl-industries:drawer_frame) and a [Drawer Panel](^chowl-industries:drawer_panel).
+Welcome to {green}Chowl Industries{}, the (among other things) leading item storage company!
+Begin your first day with a [Drawer Frame](^chowl-industries:drawer_frame) and a [Drawer Panel](^chowl-industries:panels/drawer_panel).
 
 
 To contact management, join the

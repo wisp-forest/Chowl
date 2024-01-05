@@ -10,7 +10,7 @@
 ```
 
 Though many Storage Engineers prefer to stock their frames with drawers, putting
-in some {blue}Blank Panels{} can spice up your warehouse.
+in some [Blank Panels](^chowl-industries:panels/blank_panel) can spice up your warehouse.
 
 ;;;;;
 

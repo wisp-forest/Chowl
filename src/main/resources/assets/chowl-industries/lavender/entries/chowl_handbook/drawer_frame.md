@@ -9,7 +9,7 @@
 ```
 
 Any aspiring item storage system needs a solid support, and in {green}Chowl Industries{},
-the {blue}Drawer Frame{} is the perfect framework for your storage needs.
+the [Drawer Frame](^chowl-industries:drawer_frame) is the perfect framework for your storage needs.
 
 <recipe;chowl-industries:drawer_frame>
 
@@ -19,3 +19,4 @@ Just right-click on one of the sides of the frame with any item or [panel](^chow
 and this sturdy scaffold will hold it tight!
 
 TODO: photo of frame with panels.
+<block;chowl-industries:drawer_frame>
