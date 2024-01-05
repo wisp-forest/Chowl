@@ -2,6 +2,7 @@ package com.chyzman.chowl.registry;
 
 import com.chyzman.chowl.block.DrawerFrameBlock;
 import com.chyzman.chowl.item.*;
+import io.wispforest.lavender.book.LavenderBookItem;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -20,6 +21,8 @@ public class ChowlRegistry {
     private static Block registerBlock(String name, Block block) {
         return Registry.register(Registries.BLOCK, id(name), block);
     }
+
+    public static final Item CHOWL_HANDBOOK = LavenderBookItem.registerForBook(id("chowl_handbook"), new Item.Settings().maxCount(1));
 
     public static final Item DRAWER_PANEL_ITEM = registerItem("drawer_panel", new DrawerPanelItem(new Item.Settings().maxCount(1)));
 

@@ -34,6 +34,8 @@ dependencies {
 
     modCompileOnly "maven.modrinth:mythicmetals:${project.mythicmetals_version}"
 
+    modImplementation include("io.wispforest:lavender:${project.lavender_version}")
+
     modImplementation include("eu.pb4:common-protection-api:${project.cpa_version}")
 }
 
