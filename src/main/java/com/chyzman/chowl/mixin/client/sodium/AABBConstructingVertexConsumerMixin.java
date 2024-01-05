@@ -1,7 +1,7 @@
 package com.chyzman.chowl.mixin.client.sodium;
 
 import com.chyzman.chowl.asm.OnlyWithMod;
-import com.chyzman.chowl.classes.AABBConstructingVertexConsumer;
+import com.chyzman.chowl.classes.AABBConstructingVertexConsumerProvider;
 import net.caffeinemc.mods.sodium.api.vertex.attributes.CommonVertexAttribute;
 import net.caffeinemc.mods.sodium.api.vertex.attributes.common.PositionAttribute;
 import net.caffeinemc.mods.sodium.api.vertex.buffer.VertexBufferWriter;
@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @OnlyWithMod(modid = "sodium")
-@Mixin(AABBConstructingVertexConsumer.class)
+@Mixin(AABBConstructingVertexConsumerProvider.VertexConsumerImpl.class)
 public abstract class AABBConstructingVertexConsumerMixin implements VertexBufferWriter {
     @Shadow
     public abstract VertexConsumer vertex(double x, double y, double z);

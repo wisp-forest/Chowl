@@ -2,9 +2,13 @@ package com.chyzman.chowl.upgrade;
 
 import com.chyzman.chowl.event.PanelEmptiedEvent;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
+import com.chyzman.chowl.registry.ChowlRegistry;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.Box;
 import nourl.mythicmetals.data.MythicTags;
 import nourl.mythicmetals.misc.EpicExplosion;
 
@@ -34,6 +38,15 @@ public class NukeCoreUpgrade {
                 if (power == 0) return;
 
                 panelItem.setUpgrades(ctx.stack(), upgrades);
+
+                Box affected = Box.of(pos.toCenterPos(), 10, 10, 10);
+
+                for (PlayerEntity player : world.getPlayers()) {
+                    if (!player.isPartOfGame()) continue;
+                    if (!affected.contains(player.getPos())) continue;
+
+                    ChowlRegistry.WITNESSED_BLASTING_CRITERIA.trigger((ServerPlayerEntity) player);
+                }
 
                 EpicExplosion.explode(
                     (ServerWorld) world,

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " p ",
+    "pcp",
+    " p "
+  ],
+  "key": {
+    "p": {
+      "item": "minecraft:piston"
+    },
+    "c": {
+      "item": "minecraft:chest"
+    }
+  },
+  "result": {
+    "item": "chowl-industries:compressing_panel"
+  }
+}

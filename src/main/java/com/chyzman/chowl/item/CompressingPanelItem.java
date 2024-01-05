@@ -2,9 +2,6 @@ package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.block.button.BlockButton;
-import com.chyzman.chowl.block.button.ButtonRenderCondition;
-import com.chyzman.chowl.block.button.ButtonRenderer;
-import com.chyzman.chowl.event.PanelEmptiedEvent;
 import com.chyzman.chowl.item.component.*;
 import com.chyzman.chowl.transfer.*;
 import com.chyzman.chowl.util.BigIntUtils;
@@ -12,7 +9,6 @@ import com.chyzman.chowl.util.CompressionManager;
 import com.chyzman.chowl.util.NbtKeyTypes;
 import com.chyzman.chowl.util.VariantUtils;
 import io.wispforest.owo.nbt.NbtKey;
-import io.wispforest.owo.ops.ItemOps;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
@@ -30,14 +26,11 @@ import net.minecraft.registry.Registries;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.chyzman.chowl.Chowl.*;
 
@@ -282,7 +275,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
                     ctx.stack().put(ITEM, Items.AIR);
                 }
 
-                PanelEmptiedEvent.EVENT.invoker().onPanelEmptied(ctx);
+                needsEmptiedEvent = true;
             }
 
             return removed;

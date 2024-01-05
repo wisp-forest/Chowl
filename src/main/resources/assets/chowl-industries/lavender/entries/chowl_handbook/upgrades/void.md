@@ -2,12 +2,16 @@
 {
   "icon": "minecraft:cactus",
   "title": "Voiding Upgrade",
-  "category": "chowl-industries:upgrades",
-  "associated_items": [
-    "minecraft:cactus",
-    "minecraft:lava_bucket"
-  ]
+  "category": "chowl-industries:upgrades"
 }
 ```
 
-*talk about [Voiding Upgrade](^chowl-industries:upgrades/void) here, make sure to specify the difference between cactus and lava bucket*
+Many a farm have been clogged up with excess loot. By upgrading your storage panel with a {blue}Cactus{}
+or {blue}Lava Bucket{}, you can void all excess items and rest assured that your pipes won't clog up for the umpteenth
+time.
+
+;;;;;
+
+*TODO: picture of frame with voiding upgrade*
+
+*{gray}something witty.{}*

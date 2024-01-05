@@ -2,7 +2,6 @@ package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.block.button.BlockButton;
-import com.chyzman.chowl.event.PanelEmptiedEvent;
 import com.chyzman.chowl.item.component.*;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.PanelStorage;
@@ -19,14 +18,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.chyzman.chowl.Chowl.*;
 
@@ -169,7 +165,8 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
                 if (!ctx.stack().get(LOCKED)) {
                     ctx.stack().put(VARIANT, ItemVariant.blank());
                 }
-                PanelEmptiedEvent.EVENT.invoker().onPanelEmptied(ctx);
+
+                needsEmptiedEvent = true;
             }
             return removed;
         }

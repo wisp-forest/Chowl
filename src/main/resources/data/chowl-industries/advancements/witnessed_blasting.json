@@ -1,0 +1,13 @@
+{
+    "parent": "minecraft:recipes/root",
+    "criteria": {
+        "witnessed_blasting": {
+            "trigger": "chowl-industries:witnessed_blasting"
+        }
+    },
+    "requirements": [
+        [
+            "witnessed_blasting"
+        ]
+    ]
+}

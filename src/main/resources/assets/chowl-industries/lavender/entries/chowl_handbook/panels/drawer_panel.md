@@ -9,7 +9,7 @@
 }
 ```
 
-*talk about [Drawer Panels](^chowl-industries:panels/drawer_panel) here*.
+The {blue}Drawer Panel{} is the most basic Chowl® panel. It stores
 
 ;;;;;
 

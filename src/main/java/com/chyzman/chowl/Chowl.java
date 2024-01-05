@@ -64,6 +64,7 @@ public class Chowl implements ModInitializer {
                     entries.add(new ItemStack(BLANK_PANEL_ITEM));
                     entries.add(new ItemStack(PHANTOM_PANEL_ITEM));
                     entries.add(new ItemStack(COMPRESSING_PANEL_ITEM));
+                    entries.add(new ItemStack(CHOWL_HANDBOOK));
                 }, true);
             })
             .build();

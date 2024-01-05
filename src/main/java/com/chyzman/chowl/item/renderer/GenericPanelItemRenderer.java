@@ -1,6 +1,6 @@
 package com.chyzman.chowl.item.renderer;
 
-import com.chyzman.chowl.classes.AABBConstructingVertexConsumer;
+import com.chyzman.chowl.classes.AABBConstructingVertexConsumerProvider;
 import com.chyzman.chowl.item.component.CapacityLimitedPanelItem;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
@@ -183,14 +183,14 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
         matrices.push();
         matrices.loadIdentity();
 
-        var consumer = new AABBConstructingVertexConsumer();
+        var provider = new AABBConstructingVertexConsumerProvider();
 
         client.getItemRenderer().renderItem(
                 stack,
                 ModelTransformationMode.FIXED,
                 false,
                 matrices,
-                layer -> consumer,
+                provider,
                 LightmapTextureManager.MAX_LIGHT_COORDINATE,
                 OverlayTexture.DEFAULT_UV,
                 client.getItemRenderer().getModels().getModel(stack)
@@ -199,9 +199,9 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
         matrices.pop();
 
         return new Vec3d(
-                consumer.maxX - consumer.minX,
-                consumer.maxY - consumer.minY,
-                consumer.maxZ - consumer.minZ
+            provider.maxX - provider.minX,
+            provider.maxY - provider.minY,
+            provider.maxZ - provider.minZ
         );
     }
 }

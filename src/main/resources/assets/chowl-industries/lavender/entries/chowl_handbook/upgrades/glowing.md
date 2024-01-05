@@ -2,12 +2,18 @@
 {
   "icon": "minecraft:glow_ink_sac",
   "title": "Glowing Upgrade",
-  "category": "chowl-industries:upgrades",
-  "associated_items": [
-    "minecraft:glow_ink_sac",
-    "minecraft:glow_berries"
-  ]
+  "category": "chowl-industries:upgrades"
 }
 ```
 
-*talk about [Glowing Upgrade](^chowl-industries:upgrades/glowing) here.*
+The typical warehouse can be very dark, making it very hard to see what is contained inside your panels.
+
+
+Fortunately, adding in some {blue}Glow Ink Sacs{} or {blue}Glow Berries{} will make your panels' displays glow in the
+dark, letting you continue to put off putting down proper lighting.
+
+;;;;;
+
+*TODO: image of glowing panel in darkness*
+
+*{gray}something witty{}*
