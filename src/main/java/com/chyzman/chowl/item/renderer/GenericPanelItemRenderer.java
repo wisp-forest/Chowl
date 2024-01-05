@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.chyzman.chowl.Chowl.GLOWING_UPGRADE_TAG;
-import static com.chyzman.chowl.Chowl.NAMING_UPGRADE_TAG;
+import static com.chyzman.chowl.Chowl.LABELING_UPGRADE_TAG;
 import static com.chyzman.chowl.util.FormatUtil.formatCount;
 
 @Environment(EnvType.CLIENT)
@@ -113,8 +113,8 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
 
                     AtomicReference<MutableText> title = new AtomicReference<>((MutableText) displayStack.getName());
                     if (stack.getItem() instanceof UpgradeablePanelItem upgradeable) {
-                        if (upgradeable.hasUpgrade(stack, upgrade -> upgrade.isIn(NAMING_UPGRADE_TAG))) {
-                            upgradeable.upgrades(stack).stream().filter(upgradeStack -> upgradeStack.isIn(NAMING_UPGRADE_TAG) && upgradeStack.hasCustomName()).findFirst().ifPresent(upgradeStack -> title.set((MutableText) upgradeStack.getName()));
+                        if (upgradeable.hasUpgrade(stack, upgrade -> upgrade.isIn(LABELING_UPGRADE_TAG))) {
+                            upgradeable.upgrades(stack).stream().filter(upgradeStack -> upgradeStack.isIn(LABELING_UPGRADE_TAG) && upgradeStack.hasCustomName()).findFirst().ifPresent(upgradeStack -> title.set((MutableText) upgradeStack.getName()));
                         }
                     }
                     var titleWidth = client.textRenderer.getWidth(title.get());
