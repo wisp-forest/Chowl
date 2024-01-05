@@ -32,6 +32,8 @@ dependencies {
 
     modCompileOnly "maven.modrinth:sodium:${project.sodium_version}"
 
+    modCompileOnly "maven.modrinth:mythicmetals:${project.mythicmetals_version}"
+
     modImplementation include("eu.pb4:common-protection-api:${project.cpa_version}")
 }
 
