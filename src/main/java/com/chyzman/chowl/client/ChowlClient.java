@@ -4,7 +4,8 @@ import com.chyzman.chowl.block.DrawerFrameBlockEntityRenderer;
 import com.chyzman.chowl.block.DrawerFrameBlockModel;
 import com.chyzman.chowl.graph.ClientGraphStore;
 import com.chyzman.chowl.item.model.BlankPanelItemModel;
-import com.chyzman.chowl.item.renderer.*;
+import com.chyzman.chowl.item.renderer.DrawerFrameItemRenderer;
+import com.chyzman.chowl.item.renderer.GenericPanelItemRenderer;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.registry.client.ClientBoundPackets;
 import com.chyzman.chowl.registry.client.ClientEventListeners;
@@ -29,6 +30,7 @@ import static com.chyzman.chowl.Chowl.DRAWER_FRAME_BLOCK_ENTITY_TYPE;
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
 public class ChowlClient implements ClientModInitializer {
+
     @Override
     public void onInitializeClient() {
         ClientEventListeners.init();

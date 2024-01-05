@@ -8,12 +8,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 
 public class ClientEventListeners {
     public static void init() {
-        WorldRenderEvents.BLOCK_OUTLINE.register((worldRenderContext, blockOutlineContext) -> {
-            if (worldRenderContext.world().getBlockEntity(blockOutlineContext.blockPos()) instanceof DrawerFrameBlockEntity) {
-                return false;
-            }
-            return true;
-        });
+        WorldRenderEvents.BLOCK_OUTLINE.register((worldRenderContext, blockOutlineContext) -> !(worldRenderContext.world().getBlockEntity(blockOutlineContext.blockPos()) instanceof DrawerFrameBlockEntity));
 
         TooltipComponentCallback.EVENT.register(
                 data -> data instanceof BasePanelItem.TooltipData tooltipData

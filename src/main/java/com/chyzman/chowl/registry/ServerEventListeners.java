@@ -35,5 +35,16 @@ public class ServerEventListeners {
             }
             return ActionResult.PASS;
         });
+//        UseEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
+//            if (hitResult != null &&
+//                    (hitResult.getPos().distanceTo(entity.getEyePos()) < entity.getWidth()) &&
+//                    (Math.abs(hitResult.getPos().getY() - entity.getEyePos().getY()) < (entity.getHeight() - entity.getEyeHeight(entity.getPose()))) &&
+//                    (Math.abs(entity.getHeadYaw() - (180 + player.getHeadYaw())) < 70)) {
+//                player.sendMessage(Text.literal("you just punched a " + entity.getName().getString() + " in the fucking face"), true);
+//                return ActionResult.SUCCESS;
+//            }
+//            player.sendMessage(Text.empty(), true);
+//            return ActionResult.PASS;
+//        });
     }
 }
