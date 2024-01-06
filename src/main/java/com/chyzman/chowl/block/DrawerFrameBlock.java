@@ -233,12 +233,14 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+        if (context.isHolding(asItem())) return VoxelShapes.fullCube();
+
         var shape = BASE;
         var blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
             for (int i = 0; i < drawerFrameBlockEntity.stacks.size(); i++) {
                 var stack = drawerFrameBlockEntity.stacks.get(i).getLeft();
-                if (!stack.isEmpty() && stack.getItem() != ChowlRegistry.PHANTOM_PANEL_ITEM) {
+                if (!stack.isEmpty()) {
                     shape = VoxelShapes.union(shape, SIDES[i]);
                 }
             }
@@ -274,6 +276,8 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        if (player.getStackInHand(hand).isOf(asItem())) return ActionResult.PASS;
+
         var side = BlockSideUtils.getSide(hit);
         var orientation = 0;
         if (side == Direction.UP || (side == Direction.DOWN && player.getHorizontalFacing().getAxis() == Direction.Axis.Z)) {

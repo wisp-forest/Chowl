@@ -40,7 +40,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
     public static void renderPanels(DrawerFrameBlockEntity entity, MinecraftClient client, World world, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         BlockButton hoveredButton = null;
         BlockHitResult hitResult = null;
-        if (client.crosshairTarget instanceof BlockHitResult blockHitResult) {
+        if (client.crosshairTarget instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK) {
             hitResult = blockHitResult;
         }
         boolean showOutlines =

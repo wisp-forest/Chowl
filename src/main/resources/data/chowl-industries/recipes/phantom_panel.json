@@ -1,16 +1,13 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " w ",
-    "wew",
-    " w "
+    " c ",
+    "c c",
+    " c "
   ],
   "key": {
-    "w": {
-      "tag": "minecraft:planks"
-    },
-    "e": {
-      "item": "minecraft:ender_pearl"
+    "c": {
+      "item": "minecraft:popped_chorus_fruit"
     }
   },
   "result": {
