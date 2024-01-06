@@ -8,6 +8,7 @@ import com.chyzman.chowl.item.component.UpgradeablePanelItem;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.FakeStorageView;
 import com.chyzman.chowl.transfer.PanelStorageContext;
+import com.chyzman.chowl.util.ItemScalingUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
@@ -30,7 +31,6 @@ import net.minecraft.util.math.Vec3d;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
@@ -111,7 +111,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
 
             if (!slot.isResourceBlank()) {
                 ItemStack displayStack = slot.getResource().toStack();
-                var size = measureItemSize(displayStack, client, matrices);
+                var properties = ItemScalingUtil.getItemModelProperties(displayStack, client, matrices);
 
                 if (!customization.hideName()) {
                     matrices.push();
@@ -165,7 +165,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                 }
 
                 if (!customization.hideItem()) {
-                    float scale = (float) Math.min(2, (1 / (Math.max(size.x, Math.max(size.y, size.z)))));
+                    float scale = (float) Math.min(2, (1 / (Math.max(properties.size().x, Math.max(properties.size().y, properties.size().z)))));
                     matrices.push();
                     matrices.scale(scale, scale, scale);
                     scale = (12 / 16f);
@@ -177,6 +177,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                         scale = 0.4f;
                     }
                     matrices.scale(scale, scale, scale);
+                    matrices.translate(-properties.offset().x, -properties.offset().y, Math.abs(properties.offset().z) > 0.5 ? -properties.offset().z : 0);
                     matrices.push();
                     var framed = RenderGlobals.IN_FRAME;
                     RenderGlobals.IN_FRAME = false;
@@ -209,31 +210,5 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
             client.textRenderer.draw(panel.styleText(stack, Text.literal(percent)), -percentWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
             matrices.pop();
         }
-    }
-
-    private Vec3d measureItemSize(ItemStack stack, MinecraftClient client, MatrixStack matrices) {
-        matrices.push();
-        matrices.loadIdentity();
-
-        var provider = new AABBConstructingVertexConsumerProvider();
-
-        client.getItemRenderer().renderItem(
-                stack,
-                ModelTransformationMode.FIXED,
-                false,
-                matrices,
-                provider,
-                LightmapTextureManager.MAX_LIGHT_COORDINATE,
-                OverlayTexture.DEFAULT_UV,
-                client.getItemRenderer().getModels().getModel(stack)
-        );
-
-        matrices.pop();
-
-        return new Vec3d(
-                provider.maxX - provider.minX,
-                provider.maxY - provider.minY,
-                provider.maxZ - provider.minZ
-        );
     }
 }

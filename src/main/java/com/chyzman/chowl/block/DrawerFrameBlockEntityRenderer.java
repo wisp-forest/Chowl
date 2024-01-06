@@ -6,6 +6,7 @@ import com.chyzman.chowl.client.RenderGlobals;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.util.BlockSideUtils;
+import com.chyzman.chowl.util.ItemScalingUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.Block;
@@ -43,13 +44,13 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
             hitResult = blockHitResult;
         }
         boolean showOutlines =
-            hitResult != null
-            && !client.player.isBlockBreakingRestricted(
-                client.world,
-                hitResult.getBlockPos(),
-                client.interactionManager.getCurrentGameMode()
-            )
-            && !client.options.hudHidden;
+                hitResult != null
+                        && !client.player.isBlockBreakingRestricted(
+                        client.world,
+                        hitResult.getBlockPos(),
+                        client.interactionManager.getCurrentGameMode()
+                )
+                        && !client.options.hudHidden;
         boolean blockFocused = hitResult != null && hitResult.getBlockPos().equals(entity.getPos());
         boolean frameOutline = true;
 
@@ -75,9 +76,24 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
 
                 matrices.push();
                 if (!(stack.getItem() instanceof PanelItem)) {
-                    matrices.translate(0, 0, -1 / 32f);
-                    matrices.scale(3 / 4f, 3 / 4f, 3 / 4f);
-                    matrices.translate(0, 0, 1 / 32f);
+                    var properties = ItemScalingUtil.getItemModelProperties(stack, client, matrices);
+                    float scale = 1;
+                    if (properties.size().x > 1 || properties.size().y > 1 || properties.size().z > 1) {
+                        scale = (float) Math.min(2, (1 / (Math.max(properties.size().x, Math.max(properties.size().y, properties.size().z)))));
+                        scale *= 0.6f;
+                    }
+                    if (stack.getItem() instanceof SkullItem) {
+                        matrices.translate(0, 0, 1 / 32f);
+                        matrices.scale(6 / 4f, 6 / 4f, 1 / 4f);
+                        matrices.translate(0, 0, 1 / 8f);
+                        matrices.translate(0, 0, -1 / 32f);
+                    } else {
+                        matrices.scale(3 / 4f, 3 / 4f, 3 / 4f);
+                    }
+
+                    matrices.scale(scale, scale, scale);
+                    matrices.translate(-properties.offset().x, -properties.offset().y, (Math.abs(properties.offset().z) > 0.5f) ? -properties.offset().z : 0);
+
                 }
 
                 try {
@@ -86,10 +102,6 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                     RenderGlobals.FRAME_POS.set(entity.getPos());
                     RenderGlobals.FRAME_WORLD.set(world);
                     matrices.push();
-                    if (stack.getItem() instanceof SkullItem) {
-                        matrices.scale(2f, 2f, 1/3f);
-                        matrices.translate(0, 0, 1/4f);
-                    }
                     matrices.translate(0, 0, 1 / 32f);
                     RenderGlobals.IN_FRAME = true;
                     client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));
@@ -128,11 +140,11 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
 
                         matrices.translate(0.5, -0.5, 0);
                         if (button.renderWhen().shouldRender(
-                            entity,
-                            side,
-                            blockFocused,
-                            panelFocused,
-                            panelFocused && hoveredButton == button
+                                entity,
+                                side,
+                                blockFocused,
+                                panelFocused,
+                                panelFocused && hoveredButton == button
                         )) {
                             button.renderer().render(client, entity, hitResult, vertexConsumers, matrices, light, overlay);
                         }
