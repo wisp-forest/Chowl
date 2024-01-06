@@ -15,7 +15,7 @@ the [Drawer Frame](^chowl-industries:drawer_frame) is the perfect framework for 
 
 ;;;;;
 
-Just right-click on one of the sides of the frame with any item or [panel](^chowl-industries:panels),
+Just right-click one of the sides of the frame with any item or [panel](^chowl-industries:panels),
 and this sturdy scaffold will hold it tight!
 
 

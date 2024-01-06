@@ -13,14 +13,14 @@ Though we'd prefer that you only use Chowl® products in your builds, sometimes 
 machines.
 
 
-To help with that, the {blue}Access Panel{} provides access to all the network's storage, allowing you to
-connect the mob farm of your choosing.
+To help with that, the [Access Panel](^chowl-industries:panels/access_panel) provides access to the entire network's storage, allowing you to
+insert and extract from it using hoppers, pipes or any other Chowl® certified item transfer methods
 
 ;;;;;
 
 <recipe;chowl-industries:access_panel>
 
-Additionally, it can also be used by players to insert items in bulk to any available storages in the network.
+Additionally, it can be used by players to insert items into any available storages in the network.
 
 
-*{gray}fuck you - chyzman{}*
+*{gray}witty comment here{}*

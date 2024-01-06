@@ -10,10 +10,10 @@
 ```
 
 Though many Storage Engineers prefer to stock their frames with [Drawer Panels](^chowl-industries:panels/drawer_panel),
-putting in some {blue}Blank Panels{} can spice up your warehouse.
+putting in some [Blank Panels](^chowl-industries:panels/blank_panel) can spice up your warehouse.
 
 ;;;;;
 
 <recipe;chowl-industries:blank_panel>
 
-*Comes with built-in ChowlTech™ Morphing support!*
+*{gray}Comes with built-in ChowlTech™ Morphing technology!{}*
