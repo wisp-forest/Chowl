@@ -25,6 +25,9 @@ public class ServerBoundPackets {
                     buf.writeBoolean(config.hideCapacity());
                     buf.writeBoolean(config.hideName());
                     buf.writeBoolean(config.hideItem());
+                    buf.writeBoolean(config.showPercentage());
+                    buf.writeBoolean(config.hideUpgrades());
+                    buf.writeBoolean(config.hideButtons());
                     buf.encode(NbtOps.INSTANCE, Style.CODEC, config.textStyle());
                 }, buf -> {
                     var config = new DisplayingPanelItem.Config();
@@ -33,15 +36,21 @@ public class ServerBoundPackets {
                     config.hideCapacity(buf.readBoolean());
                     config.hideName(buf.readBoolean());
                     config.hideItem(buf.readBoolean());
+                    config.showPercentage(buf.readBoolean());
+                    config.hideUpgrades(buf.readBoolean());
+                    config.hideButtons(buf.readBoolean());
                     config.textStyle(buf.decode(NbtOps.INSTANCE, Style.CODEC));
 
                     return config;
-                });
+                }
+        );
 
 
-        PacketBufSerializer.register(BlockState.class,
-            (buf, state) -> buf.writeRegistryValue(Block.STATE_IDS, state),
-            buf -> buf.readRegistryValue(Block.STATE_IDS));
+        PacketBufSerializer.register(
+                BlockState.class,
+                (buf, state) -> buf.writeRegistryValue(Block.STATE_IDS, state),
+                buf -> buf.readRegistryValue(Block.STATE_IDS)
+        );
 
         CHANNEL.registerServerbound(AttackInteractionReceiver.InteractionPacket.class, (message, access) -> {
             var player = access.player();

@@ -1,6 +1,7 @@
 package com.chyzman.chowl.item.renderer;
 
 import com.chyzman.chowl.classes.AABBConstructingVertexConsumerProvider;
+import com.chyzman.chowl.client.RenderGlobals;
 import com.chyzman.chowl.item.component.CapacityLimitedPanelItem;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
@@ -27,7 +28,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -58,12 +62,15 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
             client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, baseModel);
         }
 
+
         if (!(stack.getItem() instanceof DisplayingPanelItem panel)) return;
         matrices.translate(0, 0, -1 / 32f - 0.001);
 
         var storage = panel.getStorage(PanelStorageContext.forRendering(stack));
 
         if (storage == null) return;
+
+        matrices.push();
 
         List<StorageView<ItemVariant>> slots = new ArrayList<>(storage.getSlots());
         slots.removeIf(x -> x instanceof FakeStorageView);
@@ -76,6 +83,15 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
         matrices.translate(-renderScale * 1.5f, -renderScale * 1.5f, 0);
         matrices.scale((float) (renderScale), (float) (renderScale), (float) (renderScale));
 
+        var customization = stack.get(DisplayingPanelItem.CONFIG);
+        var glowing = false;
+
+        if (stack.getItem() instanceof UpgradeablePanelItem upgradeable) {
+            if (upgradeable.hasUpgrade(stack, upgrade -> upgrade.isIn(GLOWING_UPGRADE_TAG))) {
+                glowing = true;
+            }
+        }
+
         for (int i = 0; i < slots.size(); i++) {
             StorageView<ItemVariant> slot = slots.get(i);
 
@@ -85,21 +101,13 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
             if (slots.size() <= 1) {
                 matrices.scale(4 / 3f, 4 / 3f, 4 / 3f);
             } else {
-                var number = 5/4f;
+                var number = 5 / 4f;
                 matrices.scale(number, number, number);
             }
 
 //            var count = panel.displayedCount(stack, RenderGlobals.DRAWER_FRAME.get(), RenderGlobals.FRAME_SIDE.get());
 
             BigInteger count = BigStorageView.bigAmount(slot);
-            var customization = stack.get(DisplayingPanelItem.CONFIG);
-            var glowing = false;
-
-            if (stack.getItem() instanceof UpgradeablePanelItem upgradeable) {
-                if (upgradeable.hasUpgrade(stack, upgrade -> upgrade.isIn(GLOWING_UPGRADE_TAG))) {
-                    glowing = true;
-                }
-            }
 
             if (!slot.isResourceBlank()) {
                 ItemStack displayStack = slot.getResource().toStack();
@@ -170,11 +178,35 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                     }
                     matrices.scale(scale, scale, scale);
                     matrices.push();
+                    var framed = RenderGlobals.IN_FRAME;
+                    RenderGlobals.IN_FRAME = false;
                     client.getItemRenderer().renderItem(displayStack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light, overlay, client.getItemRenderer().getModels().getModel(displayStack));
+                    RenderGlobals.IN_FRAME = framed;
                     matrices.pop();
                     matrices.pop();
                 }
             }
+            matrices.pop();
+        }
+        matrices.pop();
+
+        if (customization.showPercentage() && RenderGlobals.IN_FRAME) {
+            matrices.push();
+            matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
+            matrices.translate(0, -4 / 8f, 0);
+            matrices.scale(1 / 48f, 1 / 48f, 1 / 48f);
+            matrices.scale(1 / 2f, 1 / 2f, 1 / 2f);
+
+            //TODO figure out how to do efficient semi accurate division
+
+            var fullPercent = new BigDecimal(BigStorageView.bigAmount(slots.get(0))).divide(new BigDecimal(BigStorageView.bigCapacity(slots.get(0))), 2, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)).doubleValue();
+            Double roundedPercent = ((double) ((int) (fullPercent * 100)) / 100);
+            var percent = roundedPercent + "%";
+
+            var percentWidth = client.textRenderer.getWidth(percent);
+
+            matrices.translate(0, client.textRenderer.fontHeight * 0.25f, 0);
+            client.textRenderer.draw(panel.styleText(stack, Text.literal(percent)), -percentWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
             matrices.pop();
         }
     }
@@ -199,9 +231,9 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
         matrices.pop();
 
         return new Vec3d(
-            provider.maxX - provider.minX,
-            provider.maxY - provider.minY,
-            provider.maxZ - provider.minZ
+                provider.maxX - provider.minX,
+                provider.maxY - provider.minY,
+                provider.maxZ - provider.minZ
         );
     }
 }

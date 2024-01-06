@@ -36,6 +36,9 @@ public interface DisplayingPanelItem extends PanelItem {
         private boolean hideCapacity = false;
         private boolean hideName = false;
         private boolean hideItem = false;
+        private boolean hideUpgrades = false;
+        private boolean hideButtons = false;
+        private boolean showPercentage = false;
         private Style textStyle = Style.EMPTY.withColor(Formatting.WHITE);
 
         public Config() {
@@ -73,6 +76,30 @@ public interface DisplayingPanelItem extends PanelItem {
             this.hideItem = hideItem;
         }
 
+        public boolean hideUpgrades() {
+            return hideUpgrades;
+        }
+
+        public void hideUpgrades(boolean hideUpgrades) {
+            this.hideUpgrades = hideUpgrades;
+        }
+
+        public boolean hideButtons() {
+            return hideButtons;
+        }
+
+        public void hideButtons(boolean hideButtons) {
+            this.hideButtons = hideButtons;
+        }
+
+        public boolean showPercentage() {
+            return showPercentage;
+        }
+
+        public void showPercentage(boolean showPercentage) {
+            this.showPercentage = showPercentage;
+        }
+
         public Style textStyle() {
             return textStyle;
         }
@@ -86,6 +113,9 @@ public interface DisplayingPanelItem extends PanelItem {
             this.hideCapacity = nbt.getBoolean("HideCapacity");
             this.hideName = nbt.getBoolean("HideName");
             this.hideItem = nbt.getBoolean("HideItem");
+            this.hideUpgrades = nbt.getBoolean("HideUpgrades");
+            this.hideButtons = nbt.getBoolean("HideButtons");
+            this.showPercentage = nbt.getBoolean("ShowPercentage");
             this.textStyle = Style.CODEC.parse(NbtOps.INSTANCE, nbt.get("TextStyle"))
                     .get()
                     .left()
@@ -97,6 +127,9 @@ public interface DisplayingPanelItem extends PanelItem {
             nbt.putBoolean("HideCapacity", hideCapacity);
             nbt.putBoolean("HideName", hideName);
             nbt.putBoolean("HideItem", hideItem);
+            nbt.putBoolean("HideUpgrades", hideUpgrades);
+            nbt.putBoolean("HideButtons", hideButtons);
+            nbt.putBoolean("ShowPercentage", showPercentage);
             nbt.put("TextStyle", Util.getResult(
                     Style.CODEC.encodeStart(NbtOps.INSTANCE, textStyle),
                     RuntimeException::new

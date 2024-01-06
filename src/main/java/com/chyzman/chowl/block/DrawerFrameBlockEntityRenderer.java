@@ -3,6 +3,7 @@ package com.chyzman.chowl.block;
 import com.chyzman.chowl.block.button.BlockButton;
 import com.chyzman.chowl.block.button.BlockButtonProvider;
 import com.chyzman.chowl.client.RenderGlobals;
+import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.util.BlockSideUtils;
 import net.fabricmc.api.EnvType;
@@ -50,6 +51,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
             )
             && !client.options.hudHidden;
         boolean blockFocused = hitResult != null && hitResult.getBlockPos().equals(entity.getPos());
+        boolean frameOutline = true;
 
         for (int i = 0; i < entity.stacks.size(); i++) {
             Direction side = Direction.byId(i);
@@ -89,7 +91,9 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                         matrices.translate(0, 0, 1/4f);
                     }
                     matrices.translate(0, 0, 1 / 32f);
+                    RenderGlobals.IN_FRAME = true;
                     client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));
+                    RenderGlobals.IN_FRAME = false;
                     if (vertexConsumers instanceof VertexConsumerProvider.Immediate immediate) immediate.draw();
                     matrices.translate(0, 0, -1 / 32f);
                     matrices.pop();
@@ -101,9 +105,11 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                 }
                 matrices.pop();
 
-                if (entity.getWorld() != null) {
+                var customization = stack.get(DisplayingPanelItem.CONFIG);
+                boolean panelFocused = blockFocused && BlockSideUtils.getSide(hitResult).equals(side);
+
+                if (entity.getWorld() != null && (customization == null || !customization.hideButtons())) {
                     var buttonProvider = (BlockButtonProvider) entity.getCachedState().getBlock();
-                    boolean panelFocused = blockFocused && BlockSideUtils.getSide(hitResult).equals(side);
 
                     matrices.push();
                     matrices.translate(0.5, -0.5, 0);
@@ -135,10 +141,15 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                     matrices.pop();
                 }
                 matrices.pop();
+                if (panelFocused && customization != null && customization.hideButtons()) {
+                    frameOutline = false;
+                    var shape = Block.createCuboidShape(0, 16, 0, 16, 32, 16);
+                    WorldRenderer.drawShapeOutline(matrices, client.getBufferBuilders().getOutlineVertexConsumers().getBuffer(RenderLayer.LINES), shape, 0, -1, 0, 0f, 0f, 0f, 0.4f, false);
+                }
             }
         }
 
-        if (showOutlines && blockFocused && hoveredButton == null) {
+        if (showOutlines && blockFocused && hoveredButton == null && frameOutline) {
             WorldRenderer.drawCuboidShapeOutline(matrices, vertexConsumers.getBuffer(RenderLayer.getLines()), DrawerFrameBlock.BASE, 0, 0, 0, 0f, 0f, 0f, 0.4f);
         }
     }
