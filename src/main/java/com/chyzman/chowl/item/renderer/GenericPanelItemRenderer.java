@@ -199,8 +199,8 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
 
             //TODO figure out how to do efficient semi accurate division
 
-            var fullPercent = new BigDecimal(BigStorageView.bigAmount(slots.get(0))).divide(new BigDecimal(BigStorageView.bigCapacity(slots.get(0))), 2, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)).doubleValue();
-            Double roundedPercent = ((double) ((int) (fullPercent * 100)) / 100);
+            var fullPercent = new BigDecimal(BigStorageView.bigAmount(slots.get(0))).divide(new BigDecimal(BigStorageView.bigCapacity(slots.get(0))), MathContext.DECIMAL32).multiply(BigDecimal.valueOf(100)).doubleValue();
+            Double roundedPercent = (double) Math.round(fullPercent * 100) / 100;
             var percent = roundedPercent + "%";
 
             var percentWidth = client.textRenderer.getWidth(percent);
