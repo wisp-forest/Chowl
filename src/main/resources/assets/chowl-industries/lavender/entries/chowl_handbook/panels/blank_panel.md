@@ -16,4 +16,4 @@ putting in some [Blank Panels](^chowl-industries:panels/blank_panel) can spice u
 
 <recipe;chowl-industries:blank_panel>
 
-*{gray}Comes with built-in ChowlTech™ Morphing technology!{}*
+[*Comes with built-in ChowlTech Morphing™ support!*](^chowl-industries:templating)

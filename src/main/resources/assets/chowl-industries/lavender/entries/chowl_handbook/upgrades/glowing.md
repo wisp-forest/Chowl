@@ -16,4 +16,4 @@ dark, letting you continue to put off putting down proper lighting.
 
 *TODO: image of glowing panel in darkness*
 
-*{gray}something witty{}*
+*{gray}Unfortunately, this doesn't make the frame a light source{}*

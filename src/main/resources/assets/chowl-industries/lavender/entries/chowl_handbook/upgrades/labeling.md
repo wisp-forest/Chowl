@@ -6,10 +6,13 @@
 }
 ```
 
-*talk about labeling*
+Many experienced architects have been asking for a way to give panels custom names.
+
+
+Renaming a {blue}Name Tag{} and putting it in a panel upgrade slot will change the item name text to the chosen name. 
 
 ;;;;;
 
 *image or something?*
 
-*{gray}witty comment here{}*
+*{gray}Employees that rename coworkers' panels to 'e' will be punished.{}*

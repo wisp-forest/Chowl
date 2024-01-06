@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " w ",
+    "wew",
+    " w "
+  ],
+  "key": {
+    "w": {
+      "tag": "minecraft:planks"
+    },
+    "e": {
+      "item": "minecraft:ender_pearl"
+    }
+  },
+  "result": {
+    "item": "chowl-industries:phantom_panel"
+  }
+}

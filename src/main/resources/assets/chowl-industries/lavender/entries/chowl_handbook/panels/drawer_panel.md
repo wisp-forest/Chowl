@@ -9,8 +9,11 @@
 }
 ```
 
-The {blue}Drawer Panel{} is the most basic Chowl® panel. It stores
+The {blue}Drawer Panel{} is the most basic and essential Chowl® panel. It stores 2048 of an item variant. 
 
 ;;;;;
 
 <recipe;chowl-industries:drawer_panel>
+
+
+*{gray}Not much more to say, really{}*
