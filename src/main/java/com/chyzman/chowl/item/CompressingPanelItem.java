@@ -161,7 +161,28 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
                         drawerFrame.markDirty();
                         return ActionResult.SUCCESS;
                     })
-                    .build()
+                    .onDoubleClick((world, clickedFrame, clickedSide, clickedStack, player) -> {
+                        try {
+                            TransferState.DOUBLE_CLICK_INSERT.set(true);
+
+                            var panel = (PanelItem) stack.getItem();
+                            var storage = panel.getStorage(PanelStorageContext.from(clickedFrame, side));
+
+                            if (storage == null) return ActionResult.FAIL;
+                            if (panel instanceof FilteringPanelItem filteringPanel && filteringPanel.currentFilter(stack).isBlank()) return ActionResult.FAIL;
+                            if (world.isClient) return ActionResult.SUCCESS;
+
+                            try (var tx = Transaction.openOuter()) {
+                                StorageUtil.move(PlayerInventoryStorage.of(player), storage, variant -> true, Long.MAX_VALUE, tx);
+
+                                tx.commit();
+
+                                return ActionResult.SUCCESS;
+                            }
+                        } finally {
+                            TransferState.DOUBLE_CLICK_INSERT.set(false);
+                        }
+                    }).build()
             );
         }
         return addUpgradeButtons(stack, returned);

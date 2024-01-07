@@ -3,6 +3,7 @@ package com.chyzman.chowl.block;
 import com.chyzman.chowl.Chowl;
 import com.chyzman.chowl.client.ChowlClient;
 import com.chyzman.chowl.item.component.PanelItem;
+import com.chyzman.chowl.mixin.client.MinecraftClientMixin;
 import com.chyzman.chowl.transfer.PanelStorageContext;
 import io.wispforest.owo.ops.WorldOps;
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachmentBlockEntity;
@@ -103,19 +104,22 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt) {
+    public void writeNbt(NbtCompound nbt) {
         super.writeNbt(nbt);
+        writePanelsToNbt(stacks, nbt);
+        if (templateState != null)
+            nbt.put("TemplateState", NbtHelper.fromBlockState(templateState));
+    }
+
+    public static void writePanelsToNbt(List<Pair<ItemStack, Integer>> panels, NbtCompound nbt) {
         var nbtList = new NbtList();
-        for (var stack : stacks) {
+        for (var stack : panels) {
             var compound = new NbtCompound();
             compound.put("Stack", stack.getLeft().writeNbt(new NbtCompound()));
             compound.putInt("Orientation", stack.getRight());
             nbtList.add(compound);
         }
         nbt.put("Inventory", nbtList);
-
-        if (templateState != null)
-            nbt.put("TemplateState", NbtHelper.fromBlockState(templateState));
     }
 
     @Override
