@@ -1,6 +1,5 @@
 package com.chyzman.chowl.client;
 
-import com.chyzman.chowl.block.DrawerFrameBlock;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.block.DrawerFrameBlockEntityRenderer;
 import com.chyzman.chowl.block.DrawerFrameBlockModel;
@@ -14,34 +13,22 @@ import com.chyzman.chowl.registry.client.ClientEventListeners;
 import com.chyzman.chowl.screen.PanelConfigScreen;
 import com.chyzman.chowl.screen.PanelConfigSreenHandler;
 import com.chyzman.chowl.util.BlockSideUtils;
-import io.wispforest.owo.Owo;
-import me.jellysquid.mods.sodium.client.util.DirectionUtil;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
-import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Pair;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.Function;
 
 import static com.chyzman.chowl.Chowl.DRAWER_FRAME_BLOCK_ENTITY_TYPE;
@@ -63,6 +50,8 @@ public class ChowlClient implements ClientModInitializer {
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.COMPRESSING_PANEL_ITEM, new GenericPanelItemRenderer(id("item/compressing_panel_base")));
         HandledScreens.register(PanelConfigSreenHandler.TYPE, PanelConfigScreen::new);
 
+        SetIngredientComponent.init();
+
         ModelLoadingPlugin.register(ctx -> {
             ctx.addModels(id("item/drawer_panel_base"), id("item/mirror_panel_base"),
                     id("block/drawer_frame_base"), id("item/compressing_panel_base"),
@@ -80,14 +69,6 @@ public class ChowlClient implements ClientModInitializer {
                 }
             });
         });
-
-        if (Owo.DEBUG) {
-            ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
-                if (stack.getNbt() != null && stack.getNbt().isEmpty()) {
-                    lines.add(Text.literal("Contains non-null, but empty NBT").formatted(Formatting.RED));
-                }
-            });
-        }
     }
 
     public static void reloadPos(World world, BlockPos pos) {
