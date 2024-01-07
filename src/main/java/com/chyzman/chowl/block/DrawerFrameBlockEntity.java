@@ -22,6 +22,7 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Pair;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
@@ -33,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageBlockEntity, RenderAttachmentBlockEntity {
+public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageBlockEntity, RenderAttachmentBlockEntity, FillingNbtBlockEntity {
 
     public List<Pair<ItemStack, Integer>> stacks = new ArrayList<>(DefaultedList.ofSize(6, new Pair<>(ItemStack.EMPTY, 0)).stream().toList());
     public BlockState templateState = null;
@@ -132,6 +133,25 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
         for (Pair<ItemStack, Integer> stored : stacks) {
             if (stored.getLeft().isEmpty()) continue;
 
+        }
+    }
+
+    @Override
+    public void fillNbt(ItemStack stack, ServerPlayerEntity player) {
+        super.setStackNbt(stack);
+
+        var sides = Direction.getEntityFacingOrder(player);
+        var newPanels = new ArrayList<>(stacks);
+        if (sides[0].getAxis().isHorizontal()) {
+            for (int i = 2; i < 6; i++) {
+                newPanels.set(i, stacks.get(Direction.fromRotation(sides[0].asRotation()).getId()));
+            }
+
+            newPanels.set(0, stacks.get(0));
+            newPanels.set(1, stacks.get(1));
+
+            var subNbt = stack.getOrCreateSubNbt("BlockEntityTag");
+            writePanelsToNbt(newPanels, subNbt);
         }
     }
 }
