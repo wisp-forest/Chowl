@@ -1,6 +1,5 @@
 package com.chyzman.chowl.item.renderer;
 
-import com.chyzman.chowl.classes.AABBConstructingVertexConsumerProvider;
 import com.chyzman.chowl.client.RenderGlobals;
 import com.chyzman.chowl.item.component.CapacityLimitedPanelItem;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
@@ -17,7 +16,6 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
@@ -27,12 +25,10 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
