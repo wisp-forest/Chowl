@@ -1,6 +1,6 @@
 ```json
 {
-    "icon": "chowl-industries:drawer_panel",
+    "icon": "chowl-industries:drawer_panel{Variant:{item:\"chowl-industries:drawer_panel\"},Capacity:\"2\"}",
     "title": "Combining Panels",
     "category": "chowl-industries:panels"
 }
