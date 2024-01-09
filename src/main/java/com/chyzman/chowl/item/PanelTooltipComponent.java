@@ -33,26 +33,27 @@ public class PanelTooltipComponent extends BaseOwoTooltipComponent<FlowLayout> {
             var flow = Containers.verticalFlow(Sizing.content(), Sizing.content());
             if (stack.getItem() instanceof DisplayingPanelItem panel) {
                 var storage = panel.getStorage(PanelStorageContext.forRendering(stack));
-                if (storage != null && !storage.getSlots().isEmpty()) {
+                if (storage != null && !storage.getSlots().isEmpty() && !storage.getSlot(0).isResourceBlank()) {
                     var filterFlow = Containers.verticalFlow(Sizing.content(), Sizing.content());
                     filterFlow.margins(Insets.bottom(2));
                     filterFlow.child(Components.label(Text.translatable("ui.chowl-industries.panel.tooltip.contained.label")));
                     List<StorageView<ItemVariant>> slots = new ArrayList<>(storage.getSlots());
                     slots.removeIf(x -> x instanceof FakeStorageView);
-                    for (int i = 0; i < slots.size(); i++) {
-                        var slot = slots.get(i);
-                        var item = slot.getResource().getItem();
+                    for (StorageView<ItemVariant> slot : slots) {
+                        var item = slot.getResource();
                         var currentFilter = Containers.horizontalFlow(Sizing.content(), Sizing.content());
-                        currentFilter.child(Components.item(item.getDefaultStack())
+                        currentFilter.child(Components.item(item.toStack())
                                 .margins(Insets.right(2))
                                 .sizing(Sizing.fixed(MinecraftClient.getInstance().textRenderer.fontHeight)));
                         BigInteger count = BigStorageView.bigAmount(slot);
-                        StringBuilder countText = new StringBuilder();
-                        countText.append(formatCount(count));
-                        if (panel instanceof CapacityLimitedPanelItem cap && cap.capacity(stack).signum() > 0) {
-                            countText.append("/").append(formatCount(BigStorageView.bigCapacity(slot)));
+                        if (count.compareTo(BigInteger.ZERO) > 0) {
+                            StringBuilder countText = new StringBuilder();
+                            countText.append(formatCount(count));
+                            if (panel instanceof CapacityLimitedPanelItem cap && cap.capacity(stack).signum() > 0) {
+                                countText.append("/").append(formatCount(BigStorageView.bigCapacity(slot)));
+                            }
+                            currentFilter.child(Components.label(Text.of(countText.toString())));
                         }
-                        currentFilter.child(Components.label(Text.of(countText.toString())));
                         filterFlow.child(currentFilter);
                     }
                     flow.child(filterFlow);
