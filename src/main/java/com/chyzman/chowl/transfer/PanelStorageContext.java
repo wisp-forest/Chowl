@@ -2,11 +2,20 @@ package com.chyzman.chowl.transfer;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.client.RenderGlobals;
+import com.chyzman.chowl.graph.GraphStore;
+import com.chyzman.chowl.item.component.PanelItem;
+import com.chyzman.chowl.registry.ChowlRegistry;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Consumer;
+
+@SuppressWarnings("UnstableApiUsage")
 public interface PanelStorageContext {
     static PanelStorageContext from(DrawerFrameBlockEntity drawerFrame, Direction side) {
         return new DrawerFrameContext(drawerFrame, side);
@@ -23,6 +32,37 @@ public interface PanelStorageContext {
     Direction frameSide();
 
     void markDirty();
+
+    default boolean traverseNetwork(Consumer<SlottedStorage<ItemVariant>> consumer) {
+        if (drawerFrame() == null) return false;
+
+        World w = drawerFrame().getWorld();
+
+        if (w == null) return false;
+
+        GraphStore store = GraphStore.get(w);
+        var graph = store.getGraphFor(drawerFrame().getPos());
+
+        if (graph == null) return false;
+
+        for (var node : graph.nodes()) {
+            if (!node.state().isOf(ChowlRegistry.DRAWER_FRAME_BLOCK)) continue;
+
+            var otherBE = w.getBlockEntity(node.pos());
+            if (!(otherBE instanceof DrawerFrameBlockEntity otherFrame)) continue;
+
+            for (int sideId = 0; sideId < 6; sideId++) {
+                var ctx = PanelStorageContext.from(otherFrame, Direction.byId(sideId));
+                if (!(ctx.stack().getItem() instanceof PanelItem panelItem)) continue;
+
+                var storage = panelItem.getNetworkStorage(ctx);
+
+                if (storage != null) consumer.accept(storage);
+            }
+        }
+
+        return true;
+    }
 }
 
 class DrawerFrameContext implements PanelStorageContext {

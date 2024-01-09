@@ -2,23 +2,20 @@ package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.block.button.BlockButton;
-import com.chyzman.chowl.graph.GraphStore;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.FilteringPanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
-import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.CombinedSingleSlotStorage;
 import com.chyzman.chowl.transfer.PanelStorageContext;
-import com.chyzman.chowl.transfer.TransferState;
 import com.chyzman.chowl.util.NbtKeyTypes;
 import io.wispforest.owo.nbt.NbtKey;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigInteger;
@@ -49,49 +46,29 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
         super(settings);
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     @Override
     public @Nullable SingleSlotStorage<ItemVariant> getStorage(PanelStorageContext ctx) {
-        if (ctx.drawerFrame() == null) return null;
-
-        World w = ctx.drawerFrame().getWorld();
-
-        if (TransferState.TRAVERSING.get()) return null;
-        if (w == null) return null;
-
         ItemVariant filter = ctx.stack().get(FILTER);
         if (filter.isBlank()) return null;
 
-        GraphStore state = GraphStore.get(w);
-        var graph = state.getGraphFor(ctx.drawerFrame().getPos());
+        List<SingleSlotStorage<ItemVariant>> slots = new ArrayList<>();
+        if (!ctx.traverseNetwork(storage -> {
+            for (var slot : storage.getSlots()) {
+                if (!slot.getResource().equals(filter)) continue;
 
-        if (graph == null) return null;
-
-        try {
-            TransferState.TRAVERSING.set(true);
-
-            List<SingleSlotStorage<ItemVariant>> slots = new ArrayList<>();
-            for (var node : graph.nodes()) {
-                if (!node.state().isOf(ChowlRegistry.DRAWER_FRAME_BLOCK)) continue;
-
-                var otherBE = w.getBlockEntity(node.pos());
-                if (!(otherBE instanceof DrawerFrameBlockEntity otherFrame)) continue;
-
-                otherFrame.collectPanelStorages(storage -> {
-                    for (var slot : storage.getSlots()) {
-                        if (!slot.getResource().equals(filter)) continue;
-
-                        slots.add(slot);
-                    }
-                });
+                slots.add(slot);
             }
+        }))
+            return null;
 
-            if (slots.isEmpty()) return null;
+        if (slots.isEmpty()) return null;
 
-            return new CombinedSingleSlotStorage<>(slots);
-        } finally {
-            TransferState.TRAVERSING.set(false);
-        }
+        return new CombinedSingleSlotStorage<>(slots);
+    }
+
+    @Override
+    public @Nullable SlottedStorage<ItemVariant> getNetworkStorage(PanelStorageContext ctx) {
+        return null;
     }
 
     @Override

@@ -112,6 +112,10 @@ public interface PanelItem {
     @SuppressWarnings("UnstableApiUsage")
     @Nullable SlottedStorage<ItemVariant> getStorage(PanelStorageContext ctx);
 
+    default @Nullable SlottedStorage<ItemVariant> getNetworkStorage(PanelStorageContext ctx) {
+        return getStorage(ctx);
+    }
+
     default List<BlockButton> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
         return Collections.emptyList();
     }
