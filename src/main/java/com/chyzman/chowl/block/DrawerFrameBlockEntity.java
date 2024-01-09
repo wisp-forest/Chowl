@@ -3,7 +3,7 @@ package com.chyzman.chowl.block;
 import com.chyzman.chowl.Chowl;
 import com.chyzman.chowl.client.ChowlClient;
 import com.chyzman.chowl.item.component.PanelItem;
-import com.chyzman.chowl.mixin.client.MinecraftClientMixin;
+import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.PanelStorageContext;
 import io.wispforest.owo.ops.WorldOps;
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachmentBlockEntity;
@@ -13,7 +13,6 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -24,7 +23,6 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
@@ -33,7 +31,6 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -82,6 +79,10 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
         return panelItem.getStorage(ctx);
     }
 
+    public boolean isSideBaked(int sideId) {
+        return (templateState != null && !stacks.get(sideId).getLeft().isEmpty()) || stacks.get(sideId).getLeft().isOf(ChowlRegistry.BLANK_PANEL_ITEM);
+    }
+
     @Override
     public void markDirty() {
         super.markDirty();
@@ -101,9 +102,8 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
             templateState = NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), nbt.getCompound("TemplateState"));
         }
 
-        if (prevTemplateState != templateState && world != null && world.isClient) {
+        if (world != null && world.isClient) {
             ChowlClient.reloadPos(world, pos);
-            this.prevTemplateState = templateState;
         }
     }
 

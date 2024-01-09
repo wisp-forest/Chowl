@@ -1,7 +1,6 @@
 package com.chyzman.chowl.item.renderer;
 
 import com.chyzman.chowl.client.RenderGlobals;
-import com.chyzman.chowl.item.component.CapacityLimitedPanelItem;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
 import com.chyzman.chowl.transfer.BigStorageView;
@@ -55,7 +54,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
         matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
 
         var baseModel = client.getBakedModelManager().getModel(baseModelId);
-        if (baseModel != null) {
+        if (baseModel != null && RenderGlobals.BAKED.get() != Boolean.TRUE) {
             client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, baseModel);
         }
 

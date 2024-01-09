@@ -31,7 +31,10 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class DrawerFrameBlockModel extends ForwardingBakedModel {
-    private DrawerFrameBlockModel(BakedModel wrapped) {
+    private final BakedModel panels;
+
+    private DrawerFrameBlockModel(BakedModel wrapped, BakedModel panels) {
+        this.panels = panels;
         this.wrapped = wrapped;
     }
 
@@ -49,6 +52,22 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
             context.pushTransform(new RetextureTransform(info, blockView, pos));
         }
         super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
+
+        var be = blockView.getBlockEntity(pos);
+
+        if (be instanceof DrawerFrameBlockEntity frame) {
+            context.pushTransform(quad -> {
+                Direction face = quad.cullFace();
+                if (face == null) return true;
+
+                return frame.isSideBaked(face.getId());
+            });
+
+            panels.emitBlockQuads(blockView, state, pos, randomSupplier, context);
+
+            context.popTransform();
+        }
+
         if (template != null) context.popTransform();
     }
 
@@ -61,7 +80,22 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
             var info = RetextureInfo.get(template);
             context.pushTransform(new RetextureTransform(info, null, null));
         }
+
         super.emitItemQuads(stack, randomSupplier, context);
+
+        if (frame != null) {
+            context.pushTransform(quad -> {
+                Direction face = quad.cullFace();
+                if (face == null) return true;
+
+                return frame.isSideBaked(face.getId());
+            });
+
+            panels.emitItemQuads(stack, randomSupplier, context);
+
+            context.popTransform();
+        }
+
         if (template != null) context.popTransform();
     }
 
@@ -89,10 +123,10 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
         }
     }
 
-    public record Unbaked(Identifier baseModel) implements UnbakedModel {
+    public record Unbaked(Identifier baseModel, Identifier panelsModel) implements UnbakedModel {
         @Override
         public Collection<Identifier> getModelDependencies() {
-            return List.of(baseModel);
+            return List.of(baseModel, panelsModel);
         }
 
         @Override
@@ -102,7 +136,7 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
 
         @Override
         public @NotNull BakedModel bake(Baker baker, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer, Identifier modelId) {
-            return new DrawerFrameBlockModel(baker.bake(baseModel, rotationContainer));
+            return new DrawerFrameBlockModel(baker.bake(baseModel, rotationContainer), baker.bake(panelsModel, rotationContainer));
         }
     }
 

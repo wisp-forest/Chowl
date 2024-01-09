@@ -102,12 +102,17 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                     RenderGlobals.FRAME_SIDE.set(side);
                     RenderGlobals.FRAME_POS.set(entity.getPos());
                     RenderGlobals.FRAME_WORLD.set(world);
+                    RenderGlobals.BAKED.set(entity.isSideBaked(i));
+
                     matrices.push();
                     matrices.translate(0, 0, 1 / 32f);
+
                     RenderGlobals.IN_FRAME = true;
                     client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, client.getItemRenderer().getModels().getModel(stack));
                     RenderGlobals.IN_FRAME = false;
+
                     if (vertexConsumers instanceof VertexConsumerProvider.Immediate immediate) immediate.draw();
+
                     matrices.translate(0, 0, -1 / 32f);
                     matrices.pop();
                 } finally {
@@ -115,6 +120,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                     RenderGlobals.FRAME_SIDE.remove();
                     RenderGlobals.FRAME_POS.remove();
                     RenderGlobals.FRAME_WORLD.remove();
+                    RenderGlobals.BAKED.remove();
                 }
                 matrices.pop();
 
