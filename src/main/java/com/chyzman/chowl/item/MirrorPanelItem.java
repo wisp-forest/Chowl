@@ -53,14 +53,14 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
         if (filter.isBlank()) return null;
 
         List<SingleSlotStorage<ItemVariant>> slots = new ArrayList<>();
-        if (!ctx.traverseNetwork(storage -> {
+
+        ctx.traverseNetwork(storage -> {
             for (var slot : storage.getSlots()) {
                 if (!slot.getResource().equals(filter)) continue;
 
                 slots.add(slot);
             }
-        }))
-            return null;
+        });
 
         return new CombinedSingleSlotStorage<>(slots, filter);
     }
