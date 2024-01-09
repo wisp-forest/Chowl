@@ -39,6 +39,7 @@ public interface DisplayingPanelItem extends PanelItem {
         private boolean hideUpgrades = false;
         private boolean hideButtons = false;
         private boolean showPercentage = false;
+        private boolean ignoreTemplating = false;
         private Style textStyle = Style.EMPTY.withColor(Formatting.WHITE);
 
         public Config() {
@@ -100,6 +101,14 @@ public interface DisplayingPanelItem extends PanelItem {
             this.showPercentage = showPercentage;
         }
 
+        public boolean ignoreTemplating() {
+            return ignoreTemplating;
+        }
+
+        public void ignoreTemplating(boolean ignoreTemplating) {
+            this.ignoreTemplating = ignoreTemplating;
+        }
+
         public Style textStyle() {
             return textStyle;
         }
@@ -116,6 +125,7 @@ public interface DisplayingPanelItem extends PanelItem {
             this.hideUpgrades = nbt.getBoolean("HideUpgrades");
             this.hideButtons = nbt.getBoolean("HideButtons");
             this.showPercentage = nbt.getBoolean("ShowPercentage");
+            this.ignoreTemplating = nbt.getBoolean("IgnoreTemplating");
             this.textStyle = Style.CODEC.parse(NbtOps.INSTANCE, nbt.get("TextStyle"))
                     .get()
                     .left()
@@ -130,6 +140,7 @@ public interface DisplayingPanelItem extends PanelItem {
             nbt.putBoolean("HideUpgrades", hideUpgrades);
             nbt.putBoolean("HideButtons", hideButtons);
             nbt.putBoolean("ShowPercentage", showPercentage);
+            nbt.putBoolean("IgnoreTemplating", ignoreTemplating);
             nbt.put("TextStyle", Util.getResult(
                     Style.CODEC.encodeStart(NbtOps.INSTANCE, textStyle),
                     RuntimeException::new

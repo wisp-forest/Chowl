@@ -18,6 +18,7 @@
   "ui.chowl-industries.config_panel.show_percentage": "Show Percentage",
   "ui.chowl-industries.config_panel.hide_upgrades": "Hide Upgrades",
   "ui.chowl-industries.config_panel.hide_buttons": "Hide Buttons",
+  "ui.chowl-industries.config_panel.ignore_templating": "Ignore Templating",
   "ui.chowl-industries.panel.tooltip.contained.label": "Contained:",
   "ui.chowl-industries.panel.tooltip.filter.upgrades.label": "Upgrades:"
 }

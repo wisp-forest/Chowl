@@ -28,6 +28,7 @@ public class ServerBoundPackets {
                     buf.writeBoolean(config.showPercentage());
                     buf.writeBoolean(config.hideUpgrades());
                     buf.writeBoolean(config.hideButtons());
+                    buf.writeBoolean(config.ignoreTemplating());
                     buf.encode(NbtOps.INSTANCE, Style.CODEC, config.textStyle());
                 }, buf -> {
                     var config = new DisplayingPanelItem.Config();
@@ -39,6 +40,7 @@ public class ServerBoundPackets {
                     config.showPercentage(buf.readBoolean());
                     config.hideUpgrades(buf.readBoolean());
                     config.hideButtons(buf.readBoolean());
+                    config.ignoreTemplating(buf.readBoolean());
                     config.textStyle(buf.decode(NbtOps.INSTANCE, Style.CODEC));
 
                     return config;

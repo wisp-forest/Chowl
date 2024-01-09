@@ -3,6 +3,8 @@ package com.chyzman.chowl.item.model;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.client.RenderGlobals;
 import com.chyzman.chowl.client.RetextureInfo;
+import com.chyzman.chowl.item.component.DisplayingPanelItem;
+import com.chyzman.chowl.item.component.PanelItem;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;

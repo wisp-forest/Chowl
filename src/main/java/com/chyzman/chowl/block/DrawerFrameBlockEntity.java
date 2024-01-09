@@ -2,6 +2,7 @@ package com.chyzman.chowl.block;
 
 import com.chyzman.chowl.Chowl;
 import com.chyzman.chowl.client.ChowlClient;
+import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.PanelStorageContext;
@@ -80,7 +81,7 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     }
 
     public boolean isSideBaked(int sideId) {
-        return (templateState != null && !stacks.get(sideId).getLeft().isEmpty()) || stacks.get(sideId).getLeft().isOf(ChowlRegistry.BLANK_PANEL_ITEM);
+        return (templateState != null && stacks.get(sideId).getLeft().getItem() instanceof PanelItem && !stacks.get(sideId).getLeft().get(DisplayingPanelItem.CONFIG).ignoreTemplating()) || stacks.get(sideId).getLeft().isOf(ChowlRegistry.BLANK_PANEL_ITEM);
     }
 
     @Override

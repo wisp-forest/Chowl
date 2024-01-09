@@ -25,6 +25,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
     private SmallCheckboxComponent showPercentageCheckBox;
     private SmallCheckboxComponent hideUpgradesCheckBox;
     private SmallCheckboxComponent hideButtonsCheckBox;
+    private SmallCheckboxComponent ignoreTemplatingCheckBox;
 
     private boolean ignoreChanges = false;
 
@@ -92,6 +93,10 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
             this.hideButtonsCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.hide_buttons"));
             hideButtonsCheckBox.checked(config.hideButtons());
             hideButtonsCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
+
+            this.ignoreTemplatingCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.ignore_templating"));
+            ignoreTemplatingCheckBox.checked(config.ignoreTemplating());
+            ignoreTemplatingCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
         }
 
         var inventoryFlow = Containers.grid(Sizing.content(), Sizing.content(), 4, 9)
@@ -198,6 +203,15 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                                 .child(hideButtonsCheckBox));
                     }
 
+                    if (ignoreTemplatingCheckBox != null) {
+                        flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
+                                .<FlowLayout>configure(flow -> {
+                                    flow.margins(Insets.bottom(1));
+                                    flow.verticalAlignment(VerticalAlignment.CENTER);
+                                })
+                                .child(ignoreTemplatingCheckBox));
+                    }
+
                     flowLayout.child(inventoryFlow);
                 });
 
@@ -225,6 +239,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                     showPercentageCheckBox.checked(newConfig.showPercentage());
                     hideUpgradesCheckBox.checked(newConfig.hideUpgrades());
                     hideButtonsCheckBox.checked(newConfig.hideButtons());
+                    ignoreTemplatingCheckBox.checked(newConfig.ignoreTemplating());
                 }
             } finally {
                 ignoreChanges = false;
@@ -254,6 +269,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
         if (showPercentageCheckBox != null) displayConfig.showPercentage(showPercentageCheckBox.checked());
         if (hideUpgradesCheckBox != null) displayConfig.hideUpgrades(hideUpgradesCheckBox.checked());
         if (hideButtonsCheckBox != null) displayConfig.hideButtons(hideButtonsCheckBox.checked());
+        if (ignoreTemplatingCheckBox != null) displayConfig.ignoreTemplating(ignoreTemplatingCheckBox.checked());
 
 
         handler.sendMessage(new PanelConfigSreenHandler.ConfigConfig(displayConfig, locked));
