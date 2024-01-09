@@ -90,11 +90,13 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 if (stackInHand.isEmpty()) return ActionResult.PASS;
                 if (!stack.isEmpty()) return ActionResult.PASS;
 
-                var temp = stackInHand.copy();
-                temp.setCount(1);
-                stacks.set(side.getId(), new Pair<>(temp, stacks.get(side.getId()).getRight()));
-                stackInHand.decrement(1);
-                drawerFrame.markDirty();
+                if (!world.isClient) {
+                    var temp = stackInHand.copy();
+                    temp.setCount(1);
+                    stacks.set(side.getId(), new Pair<>(temp, stacks.get(side.getId()).getRight()));
+                    stackInHand.decrement(1);
+                    drawerFrame.markDirty();
+                }
 
                 return ActionResult.SUCCESS;
             })
@@ -103,9 +105,12 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
                 if (stack.isEmpty()) return ActionResult.PASS;
 
-                player.getInventory().offerOrDrop(stack);
-                stacks.set(side.getId(), new Pair<>(ItemStack.EMPTY, 0));
-                drawerFrame.markDirty();
+                if (!world.isClient) {
+                    player.getInventory().offerOrDrop(stack);
+                    stacks.set(side.getId(), new Pair<>(ItemStack.EMPTY, 0));
+                    drawerFrame.markDirty();
+                }
+
                 return ActionResult.SUCCESS;
             }).build();
     public static final BlockButton REMOVE_BUTTON = BlockButton.builder(14, 14, 16, 16)
@@ -116,9 +121,11 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 var side = BlockSideUtils.getSide(hitResult);
                 var selected = blockEntity.stacks.get(side.getId()).getLeft();
 
-                player.getInventory().offerOrDrop(selected);
-                blockEntity.stacks.set(side.getId(), new Pair<>(ItemStack.EMPTY, 0));
-                blockEntity.markDirty();
+                if (!world.isClient) {
+                    player.getInventory().offerOrDrop(selected);
+                    blockEntity.stacks.set(side.getId(), new Pair<>(ItemStack.EMPTY, 0));
+                    blockEntity.markDirty();
+                }
 
                 return ActionResult.SUCCESS;
             })
@@ -300,11 +307,14 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             var stackInHand = player.getStackInHand(hand);
             if (!stackInHand.isEmpty()) {
                 if (stacks.get(side.getId()).getLeft().isEmpty()) {
-                    var temp = ItemOps.singleCopy(stackInHand);
-                    stacks.set(side.getId(), new Pair<>(ItemOps.singleCopy(temp), orientation));
-                    stackInHand.decrement(1);
-                    drawerFrameBlockEntity.markDirty();
-                    world.updateNeighbors(pos, this);
+                    if (!world.isClient) {
+                        var temp = ItemOps.singleCopy(stackInHand);
+                        stacks.set(side.getId(), new Pair<>(ItemOps.singleCopy(temp), orientation));
+                        stackInHand.decrement(1);
+                        drawerFrameBlockEntity.markDirty();
+                        world.updateNeighbors(pos, this);
+                    }
+
                     return ActionResult.SUCCESS;
                 }
             }

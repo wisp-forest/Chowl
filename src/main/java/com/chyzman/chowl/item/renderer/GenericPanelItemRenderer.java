@@ -144,12 +144,10 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                         countText.append(count);
                     }
 
-                    if (panel instanceof CapacityLimitedPanelItem cap && cap.capacity(stack).signum() > 0) {
-                        if (!customization.hideCapacity()) {
-                            if (!customization.hideCount()) countText.append("/");
+                    if (!customization.hideCapacity()) {
+                        if (!customization.hideCount()) countText.append("/");
 
-                            countText.append(formatCount(BigStorageView.bigCapacity(slot)));
-                        }
+                        countText.append(formatCount(BigStorageView.bigCapacity(slot)));
                     }
 
                     var amountWidth = client.textRenderer.getWidth(countText.toString());

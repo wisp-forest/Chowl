@@ -74,7 +74,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
         var baseNew = CompressionManager.followDown(newFilter.getItem()).item();
 
         stack.put(ITEM, baseNew);
-        stack.put(LOCKED, true);
+        stack.put(LOCKED, baseNew != Items.AIR);
     }
 
     @Override
@@ -85,6 +85,10 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
     @Override
     public void setLocked(ItemStack stack, boolean locked) {
         stack.put(LOCKED, locked);
+
+        if (!locked && stack.get(COUNT).equals(BigInteger.ZERO)) {
+            stack.put(ITEM, Items.AIR);
+        }
     }
 
     @Override
@@ -216,21 +220,6 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
     }
 
     @Override
-    public List<ItemStack> upgrades(ItemStack stack) {
-        var returned = new ArrayList<ItemStack>();
-        stack.get(UPGRADES_LIST).forEach(nbtElement -> returned.add(ItemStack.fromNbt((NbtCompound) nbtElement)));
-        while (returned.size() < 8) returned.add(ItemStack.EMPTY);
-        return returned;
-    }
-
-    @Override
-    public void setUpgrades(ItemStack stack, List<ItemStack> upgrades) {
-        var nbtList = new NbtList();
-        upgrades.forEach(itemStack -> nbtList.add(itemStack.writeNbt(new NbtCompound())));
-        stack.put(UPGRADES_LIST, nbtList);
-    }
-
-    @Override
     public BigInteger capacity(ItemStack panel) {
         return CapacityLimitedPanelItem.super.capacity(panel);
     }
@@ -251,13 +240,14 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
             if (contained == Items.AIR) contained = resource.getItem();
             if (contained != resource.getItem()) return BigInteger.ZERO;
 
+            updateSnapshots(transaction);
+            ctx.stack().put(ITEM, contained);
+
             var currentCount = ctx.stack().get(COUNT);
             var capacity = bigCapacity();
             var spaceLeft = capacity.subtract(currentCount).max(BigInteger.ZERO);
             var inserted = spaceLeft.min(maxAmount);
 
-            updateSnapshots(transaction);
-            ctx.stack().put(ITEM, contained);
             ctx.stack().put(COUNT, currentCount.add(inserted));
 
             Item finalContained = contained;

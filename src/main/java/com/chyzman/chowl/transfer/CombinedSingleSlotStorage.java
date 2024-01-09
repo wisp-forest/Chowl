@@ -1,5 +1,6 @@
 package com.chyzman.chowl.transfer;
 
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 
@@ -9,9 +10,11 @@ import java.util.List;
 @SuppressWarnings("UnstableApiUsage")
 public class CombinedSingleSlotStorage<T> implements BigSingleSlotStorage<T> {
     private final List<SingleSlotStorage<T>> components;
+    private final T ofVariant;
 
-    public CombinedSingleSlotStorage(List<SingleSlotStorage<T>> components) {
+    public CombinedSingleSlotStorage(List<SingleSlotStorage<T>> components, T ofVariant) {
         this.components = components;
+        this.ofVariant = ofVariant;
     }
 
     @Override
@@ -66,12 +69,12 @@ public class CombinedSingleSlotStorage<T> implements BigSingleSlotStorage<T> {
 
     @Override
     public boolean isResourceBlank() {
-        return components.get(0).isResourceBlank();
+        return getResource().equals(ItemVariant.blank());
     }
 
     @Override
     public T getResource() {
-        return components.get(0).getResource();
+        return ofVariant;
     }
 
     @Override

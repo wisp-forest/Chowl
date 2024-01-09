@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.util.math.Direction;
@@ -64,7 +65,7 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
     @Override
     public void setFilter(ItemStack stack, ItemVariant newFilter) {
         stack.put(VARIANT, newFilter);
-        stack.put(LOCKED, true);
+        stack.put(LOCKED, !newFilter.equals(ItemVariant.blank()));
     }
 
     @Override
@@ -75,6 +76,10 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
     @Override
     public void setLocked(ItemStack stack, boolean locked) {
         stack.put(LOCKED, locked);
+
+        if (!locked && stack.get(COUNT).equals(BigInteger.ZERO)) {
+            stack.put(VARIANT, ItemVariant.blank());
+        }
     }
 
     @Override
@@ -85,21 +90,6 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
     @Override
     public BigInteger displayedCount(ItemStack stack, @Nullable DrawerFrameBlockEntity drawerFrame, @Nullable Direction side) {
         return stack.get(COUNT);
-    }
-
-    @Override
-    public List<ItemStack> upgrades(ItemStack stack) {
-        var returned = new ArrayList<ItemStack>();
-        stack.get(UPGRADES_LIST).forEach(nbtElement -> returned.add(ItemStack.fromNbt((NbtCompound) nbtElement)));
-        while (returned.size() < 8) returned.add(ItemStack.EMPTY);
-        return returned;
-    }
-
-    @Override
-    public void setUpgrades(ItemStack stack, List<ItemStack> upgrades) {
-        var nbtList = new NbtList();
-        upgrades.forEach(itemStack -> nbtList.add(itemStack.writeNbt(new NbtCompound())));
-        stack.put(UPGRADES_LIST, nbtList);
     }
 
     @Override

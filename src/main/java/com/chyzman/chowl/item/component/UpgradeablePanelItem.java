@@ -7,6 +7,8 @@ import com.chyzman.chowl.transfer.PanelStorageContext;
 import io.wispforest.owo.nbt.NbtKey;
 import io.wispforest.owo.ops.ItemOps;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Pair;
 import net.minecraft.world.World;
@@ -23,9 +25,18 @@ import static com.chyzman.chowl.Chowl.FIERY_UPGRADE_TAG;
 public interface UpgradeablePanelItem extends PanelItem {
     NbtKey.ListKey<ItemStack> UPGRADES_LIST = new NbtKey.ListKey<>("Upgrades", NbtKey.Type.ITEM_STACK);
 
-    List<ItemStack> upgrades(ItemStack stack);
+    default List<ItemStack> upgrades(ItemStack stack) {
+        var returned = new ArrayList<ItemStack>();
+        stack.get(UPGRADES_LIST).forEach(nbtElement -> returned.add(ItemStack.fromNbt((NbtCompound) nbtElement)));
+        while (returned.size() < 8) returned.add(ItemStack.EMPTY);
+        return returned;
+    }
 
-    void setUpgrades(ItemStack stack, List<ItemStack> upgrades);
+    default void setUpgrades(ItemStack stack, List<ItemStack> upgrades) {
+        var nbtList = new NbtList();
+        upgrades.forEach(itemStack -> nbtList.add(itemStack.writeNbt(new NbtCompound())));
+        stack.put(UPGRADES_LIST, nbtList);
+    }
 
     default boolean hasUpgrade(ItemStack stack, Predicate<ItemStack> upgrade) {
         for (var upgradeStack : upgrades(stack)) {

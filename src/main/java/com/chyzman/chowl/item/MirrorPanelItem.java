@@ -5,6 +5,7 @@ import com.chyzman.chowl.block.button.BlockButton;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.FilteringPanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
+import com.chyzman.chowl.item.component.UpgradeablePanelItem;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.CombinedSingleSlotStorage;
 import com.chyzman.chowl.transfer.PanelStorageContext;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
-public class MirrorPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, DisplayingPanelItem {
+public class MirrorPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, DisplayingPanelItem, UpgradeablePanelItem {
     public static final NbtKey<ItemVariant> FILTER = new NbtKey<>("Filter", NbtKeyTypes.ITEM_VARIANT);
 
     public static final BlockButton SET_FILTER_BUTTON = PanelItem.buttonBuilder(2, 2, 14, 14)
@@ -61,9 +62,7 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
         }))
             return null;
 
-        if (slots.isEmpty()) return null;
-
-        return new CombinedSingleSlotStorage<>(slots);
+        return new CombinedSingleSlotStorage<>(slots, filter);
     }
 
     @Override
@@ -73,11 +72,15 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public List<BlockButton> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
+        var liste = new ArrayList<BlockButton>();
+
         if (stack.get(FILTER).isBlank()) {
-            return List.of(SET_FILTER_BUTTON);
+            liste.add(SET_FILTER_BUTTON);
         } else {
-            return List.of(STORAGE_BUTTON);
+            liste.add(STORAGE_BUTTON);
         }
+
+        return addUpgradeButtons(stack, liste);
     }
 
     @Override

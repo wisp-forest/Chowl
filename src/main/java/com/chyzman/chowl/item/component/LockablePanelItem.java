@@ -6,7 +6,7 @@ import com.chyzman.chowl.block.button.ButtonRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
-public interface LockablePanelItem extends PanelItem {
+public interface LockablePanelItem extends FilteringPanelItem {
     BlockButton LOCK_BUTTON = BlockButton.builder(0, 14, 2, 16)
             .renderWhen((blockEntity, side, blockTargeted, panelTargeted, buttonTargeted) -> {
                 var panel = ((DrawerFrameBlockEntity) blockEntity).stacks.get(side.getId()).getLeft();

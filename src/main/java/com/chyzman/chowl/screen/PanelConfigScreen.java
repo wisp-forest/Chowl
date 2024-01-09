@@ -1,5 +1,6 @@
 package com.chyzman.chowl.screen;
 
+import com.chyzman.chowl.client.DisableableCheckboxComponent;
 import com.chyzman.chowl.item.component.*;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.component.*;
@@ -16,7 +17,7 @@ import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
 public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelConfigSreenHandler> {
     private FakeSlotComponent filterSlot;
-    private SmallCheckboxComponent lockedCheckbox;
+    private DisableableCheckboxComponent lockedCheckbox;
     private SmallCheckboxComponent showCountCheckBox;
     private SmallCheckboxComponent showCapacityCheckBox;
     private SmallCheckboxComponent showItemCheckBox;
@@ -51,13 +52,14 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
             });
             filterSlot.setTooltipFromStack(true);
             filterSlot.id("filter-slot");
-        }
 
-        if (stack.getItem() instanceof LockablePanelItem lockable) {
-            this.lockedCheckbox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.locked"));
+            if (stack.getItem() instanceof LockablePanelItem lockable) {
+                this.lockedCheckbox = new DisableableCheckboxComponent(Text.translatable("ui.chowl-industries.config_panel.locked"));
 
-            lockedCheckbox.checked(lockable.locked(stack));
-            lockedCheckbox.onChanged().subscribe(nowChecked -> resendConfig());
+                lockedCheckbox.checked(lockable.locked(stack));
+                lockedCheckbox.onChanged().subscribe(nowChecked -> resendConfig());
+                lockedCheckbox.disabled(filtering.currentFilter(stack).isBlank());
+            }
         }
 
         if (stack.getItem() instanceof DisplayingPanelItem) {
@@ -206,10 +208,11 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
 
                 if (newStack.getItem() instanceof FilteringPanelItem filtering) {
                     filterSlot.stack(filtering.currentFilter(newStack).toStack());
-                }
 
-                if (newStack.getItem() instanceof LockablePanelItem lockable) {
-                    lockedCheckbox.checked(lockable.locked(newStack));
+                    if (newStack.getItem() instanceof LockablePanelItem lockable) {
+                        lockedCheckbox.checked(lockable.locked(newStack));
+                        lockedCheckbox.disabled(filtering.currentFilter(newStack).isBlank());
+                    }
                 }
 
                 if (stack.getItem() instanceof DisplayingPanelItem) {
