@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -23,6 +24,7 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
@@ -31,6 +33,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -144,11 +147,20 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
         var newPanels = new ArrayList<>(stacks);
         if (sides[0].getAxis().isHorizontal()) {
             for (int i = 2; i < 6; i++) {
-                newPanels.set(i, stacks.get(Direction.fromRotation(sides[0].asRotation()).getId()));
+                var direction = Direction.fromRotation(360 - Direction.byId(i).asRotation() - sides[0].asRotation());
+                newPanels.set(i, stacks.get(((direction == Direction.EAST || direction == Direction.WEST) ? direction: direction.getOpposite()).getId()));
             }
 
-            newPanels.set(0, stacks.get(0));
-            newPanels.set(1, stacks.get(1));
+            var newBottom = stacks.get(0);
+            if (newBottom.getRight() < 4 && newBottom.getRight() >= 0) {
+                newBottom.setRight(Math.floorMod(stacks.get(0).getRight() - ((int) (sides[0].asRotation() / 90) - 1), 4));
+                newPanels.set(0, newBottom);
+            }
+            var newTop = stacks.get(1);
+            if (newTop.getRight() < 4 && newTop.getRight() >= 0) {
+                newTop.setRight(Math.floorMod(stacks.get(1).getRight() - ((int) (sides[0].asRotation() / 90) - 1), 4));
+                newPanels.set(1, newTop);
+            }
 
             var subNbt = stack.getOrCreateSubNbt("BlockEntityTag");
             writePanelsToNbt(newPanels, subNbt);
