@@ -48,7 +48,7 @@ public class PanelTooltipComponent extends BaseOwoTooltipComponent<FlowLayout> {
                         BigInteger count = BigStorageView.bigAmount(slot);
                         if (count.compareTo(BigInteger.ZERO) > 0) {
                             StringBuilder countText = new StringBuilder();
-                            countText.append(formatCount(count));
+                            countText.append(count);
                             if (panel instanceof CapacityLimitedPanelItem cap && cap.capacity(stack).signum() > 0) {
                                 countText.append("/").append(formatCount(BigStorageView.bigCapacity(slot)));
                             }
