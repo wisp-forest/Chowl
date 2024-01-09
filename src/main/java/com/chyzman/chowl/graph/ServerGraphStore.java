@@ -5,8 +5,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
@@ -29,6 +28,7 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
     private final ServerWorld world;
     private final Map<UUID, GraphEntry> graphs = new HashMap<>();
     private final Long2ObjectMap<UUID> blockToGraph = new Long2ObjectOpenHashMap<>();
+    private final List<UUID> syncRemoves = new ArrayList<>();
 
     private ServerGraphStore(ServerWorld world) {
         this.world = world;
@@ -46,6 +46,12 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
         }
     }
 
+    static {
+        ServerTickEvents.END_WORLD_TICK.register(world -> {
+            ServerGraphStore.get(world).runTasks();
+        });
+    }
+
     public static ServerGraphStore get(ServerWorld world) {
         return world.getPersistentStateManager().getOrCreate(
             tag -> new ServerGraphStore(world, tag),
@@ -61,6 +67,21 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
     public void syncAllWith(ServerPlayerEntity player) {
         for (var graph : graphs.values()) {
             Chowl.CHANNEL.serverHandle(player).send(graph.toPacket());
+        }
+    }
+
+    private void runTasks() {
+        for (var id : syncRemoves) {
+            Chowl.CHANNEL.serverHandle(world.getPlayers()).send(new DestroyGraphPacket(id));
+        }
+
+        syncRemoves.clear();
+
+        for (var graph : graphs.values()) {
+            if (!graph.needsSync) continue;
+
+            graph.needsSync = false;
+            Chowl.CHANNEL.serverHandle(world.getPlayers()).send(graph.toPacket());
         }
     }
 
@@ -134,6 +155,7 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
     public class GraphEntry implements GraphStore.Graph {
         public final UUID graphId;
         public final Long2ObjectOpenHashMap<GraphNodeEntry> nodes;
+        private boolean needsSync = false;
 
         public GraphEntry(UUID graphId, Long2ObjectOpenHashMap<GraphNodeEntry> nodes) {
             this.graphId = graphId;
@@ -169,28 +191,12 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
             return tag;
         }
 
-        public Set<ServerPlayerEntity> trackingPlayers() {
-            Set<ChunkPos> chunkTargets = new HashSet<>();
-
-            for (var node : nodes.values()) {
-                chunkTargets.add(new ChunkPos(node.pos()));
-            }
-
-            Set<ServerPlayerEntity> targetPlayers = new HashSet<>();
-
-            for (var chunkPos : chunkTargets) {
-                targetPlayers.addAll(PlayerLookup.tracking(ServerGraphStore.this.world, chunkPos));
-            }
-
-            return targetPlayers;
-        }
-
         public void sync() {
-            Chowl.CHANNEL.serverHandle(trackingPlayers()).send(toPacket());
+            needsSync = true;
         }
 
         public void syncRemove() {
-            Chowl.CHANNEL.serverHandle(trackingPlayers()).send(new DestroyGraphPacket(graphId));
+            syncRemoves.add(graphId);
         }
 
         public SyncGraphPacket toPacket() {
