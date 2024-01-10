@@ -18,8 +18,6 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Pair;
@@ -43,19 +41,8 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
     }
 
     @Override
-    public ItemVariant displayedVariant(ItemStack stack) {
-        return ItemVariant.of(stack.get(ITEM));
-    }
-
-    @Override
-    public BigInteger displayedCount(ItemStack stack, @Nullable DrawerFrameBlockEntity drawerFrame, @Nullable Direction side) {
-        // TODO: use proper step
-        return stack.get(COUNT);
-    }
-
-    @Override
     public ItemVariant currentFilter(ItemStack stack) {
-        return ItemVariant.of(stack.get(ITEM));
+        return ItemVariant.of(stack.getOr(ITEM, Items.AIR));
     }
 
     @Override
@@ -64,9 +51,9 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
 
         var baseTo = CompressionManager.followDown(to.getItem()).item();
 
-        if (stack.get(ITEM).equals(baseTo)) return true;
+        if (stack.getOr(ITEM, Items.AIR).equals(baseTo)) return true;
 
-        return stack.get(COUNT).signum() == 0;
+        return stack.getOr(COUNT, BigInteger.ZERO).signum() == 0;
     }
 
     @Override
@@ -79,14 +66,14 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
 
     @Override
     public boolean locked(ItemStack stack) {
-        return stack.get(LOCKED);
+        return stack.getOr(LOCKED, false);
     }
 
     @Override
     public void setLocked(ItemStack stack, boolean locked) {
         stack.put(LOCKED, locked);
 
-        if (!locked && stack.get(COUNT).equals(BigInteger.ZERO)) {
+        if (!locked && stack.getOr(COUNT, BigInteger.ZERO).equals(BigInteger.ZERO)) {
             stack.put(ITEM, Items.AIR);
         }
     }
@@ -95,14 +82,14 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
     public List<BlockButton> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
         var returned = new ArrayList<BlockButton>();
         var stacks = new ArrayList<ItemStack>();
-        if (stack.getItem() instanceof CompressingPanelItem compressingPanel) {
-            stacks.add(compressingPanel.displayedVariant(stack).toStack());
-            var node = CompressionManager.getOrCreateNode(compressingPanel.currentFilter(stack).getItem());
-            while (node.next != null) {
-                node = node.next;
-                stacks.add(node.item.getDefaultStack());
-            }
+
+        stacks.add(new ItemStack(stack.getOr(ITEM, Items.AIR)));
+        var node = CompressionManager.getOrCreateNode(stack.getOr(ITEM, Items.AIR));
+        while (node.next != null) {
+            node = node.next;
+            stacks.add(node.item.getDefaultStack());
         }
+
         var gridSize = Math.ceil(Math.sqrt(stacks.size()));
         for (int i = 0; i < gridSize * gridSize; i++) {
             var scale = 12 / gridSize;
@@ -154,7 +141,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
                                     }
                                 }
                             }
-                            if (stack.get(COUNT).compareTo(BigInteger.ZERO) > 0) return ActionResult.FAIL;
+                            if (stack.getOr(COUNT, BigInteger.ZERO).compareTo(BigInteger.ZERO) > 0) return ActionResult.FAIL;
                         }
 
 
@@ -235,7 +222,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
             if (VariantUtils.hasNbt(resource)) return BigInteger.ZERO;
             if (CompressionManager.getOrCreateNode(resource.getItem()).previous != null) return BigInteger.ZERO;
 
-            var contained = ctx.stack().get(ITEM);
+            var contained = ctx.stack().getOr(ITEM, Items.AIR);
 
             if (contained == Items.AIR) contained = resource.getItem();
             if (contained != resource.getItem()) return BigInteger.ZERO;
@@ -243,7 +230,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
             updateSnapshots(transaction);
             ctx.stack().put(ITEM, contained);
 
-            var currentCount = ctx.stack().get(COUNT);
+            var currentCount = ctx.stack().getOr(COUNT, BigInteger.ZERO);
             var capacity = bigCapacity();
             var spaceLeft = capacity.subtract(currentCount).max(BigInteger.ZERO);
             var inserted = spaceLeft.min(maxAmount);
@@ -266,12 +253,12 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
         public BigInteger bigExtract(ItemVariant resource, BigInteger maxAmount, TransactionContext tx) {
             if (VariantUtils.hasNbt(resource)) return BigInteger.ZERO;
 
-            var contained = ctx.stack().get(ITEM);
+            var contained = ctx.stack().getOr(ITEM, Items.AIR);
 
             if (contained == Items.AIR) return BigInteger.ZERO;
             if (contained != resource.getItem()) return BigInteger.ZERO;
 
-            var currentCount = ctx.stack().get(COUNT);
+            var currentCount = ctx.stack().getOr(COUNT, BigInteger.ZERO);
 
             BigInteger removed = currentCount.min(maxAmount);
             var newCount = currentCount.subtract(removed);
@@ -280,7 +267,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
             ctx.stack().put(COUNT, newCount);
 
             if (newCount.equals(BigInteger.ZERO)) {
-                if (!ctx.stack().get(LOCKED)) {
+                if (!ctx.stack().getOr(LOCKED, false)) {
                     ctx.stack().put(ITEM, Items.AIR);
                 }
 
@@ -297,17 +284,17 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
 
         @Override
         public ItemVariant getResource() {
-            return ItemVariant.of(ctx.stack().get(ITEM));
+            return ItemVariant.of(ctx.stack().getOr(ITEM, Items.AIR));
         }
 
         @Override
         public BigInteger bigAmount() {
-            return ctx.stack().get(COUNT);
+            return ctx.stack().getOr(COUNT, BigInteger.ZERO);
         }
 
         @Override
         public BigInteger bigCapacity() {
-            return CompressingPanelItem.this.capacity(ctx.stack()).multiply(CompressionManager.followUp(ctx.stack().get(ITEM)).totalMultiplier());
+            return CompressingPanelItem.this.capacity(ctx.stack()).multiply(CompressionManager.followUp(ctx.stack().getOr(ITEM, Items.AIR)).totalMultiplier());
         }
     }
 }

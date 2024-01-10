@@ -3,7 +3,6 @@ package com.chyzman.chowl.item.component;
 import com.chyzman.chowl.block.button.BlockButton;
 import com.chyzman.chowl.block.button.ButtonRenderCondition;
 import com.chyzman.chowl.block.button.ButtonRenderer;
-import com.chyzman.chowl.transfer.PanelStorageContext;
 import io.wispforest.owo.nbt.NbtKey;
 import io.wispforest.owo.ops.ItemOps;
 import net.minecraft.item.ItemStack;
@@ -11,23 +10,20 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Pair;
-import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
-
-import static com.chyzman.chowl.Chowl.EXPLOSIVE_UPGRADE_TAG;
-import static com.chyzman.chowl.Chowl.FIERY_UPGRADE_TAG;
 
 public interface UpgradeablePanelItem extends PanelItem {
     NbtKey.ListKey<ItemStack> UPGRADES_LIST = new NbtKey.ListKey<>("Upgrades", NbtKey.Type.ITEM_STACK);
 
     default List<ItemStack> upgrades(ItemStack stack) {
         var returned = new ArrayList<ItemStack>();
-        stack.get(UPGRADES_LIST).forEach(nbtElement -> returned.add(ItemStack.fromNbt((NbtCompound) nbtElement)));
+
+        if (stack.has(UPGRADES_LIST))
+            stack.get(UPGRADES_LIST).forEach(nbtElement -> returned.add(ItemStack.fromNbt((NbtCompound) nbtElement)));
+
         while (returned.size() < 8) returned.add(ItemStack.EMPTY);
         return returned;
     }

@@ -63,7 +63,14 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     }
 
     public boolean isSideBaked(int sideId) {
-        return (templateState != null && stacks.get(sideId).getLeft().getItem() instanceof PanelItem && !stacks.get(sideId).getLeft().get(DisplayingPanelItem.CONFIG).ignoreTemplating()) || stacks.get(sideId).getLeft().isOf(ChowlRegistry.BLANK_PANEL_ITEM);
+        var sideStack = stacks.get(sideId).getLeft();
+
+        if (templateState != null
+            && sideStack.getItem() instanceof PanelItem
+            && !DisplayingPanelItem.getConfig(sideStack).ignoreTemplating())
+            return true;
+
+        return sideStack.isOf(ChowlRegistry.BLANK_PANEL_ITEM);
     }
 
     @Override

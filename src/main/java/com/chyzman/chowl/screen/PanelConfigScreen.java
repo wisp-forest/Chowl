@@ -2,9 +2,13 @@ package com.chyzman.chowl.screen;
 
 import com.chyzman.chowl.client.AutoGridLayout;
 import com.chyzman.chowl.client.DisableableCheckboxComponent;
-import com.chyzman.chowl.item.component.*;
+import com.chyzman.chowl.item.component.DisplayingPanelItem;
+import com.chyzman.chowl.item.component.FilteringPanelItem;
+import com.chyzman.chowl.item.component.LockablePanelItem;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
-import io.wispforest.owo.ui.component.*;
+import io.wispforest.owo.ui.component.Components;
+import io.wispforest.owo.ui.component.ItemComponent;
+import io.wispforest.owo.ui.component.SmallCheckboxComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.GridLayout;
@@ -65,7 +69,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
         }
 
         if (stack.getItem() instanceof DisplayingPanelItem) {
-            var config = stack.get(DisplayingPanelItem.CONFIG);
+            var config = DisplayingPanelItem.getConfig(stack);
 
             this.showCountCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_count"));
             showCountCheckBox.checked(!config.hideCount());
@@ -236,7 +240,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                 }
 
                 if (stack.getItem() instanceof DisplayingPanelItem) {
-                    var newConfig = newStack.get(DisplayingPanelItem.CONFIG);
+                    var newConfig = DisplayingPanelItem.getConfig(newStack);
 
                     showCountCheckBox.checked(!newConfig.hideCount());
                     showCapacityCheckBox.checked(!newConfig.hideCapacity());

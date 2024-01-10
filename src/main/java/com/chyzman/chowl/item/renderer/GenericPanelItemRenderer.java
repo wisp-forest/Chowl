@@ -79,7 +79,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
         matrices.translate(-renderScale * 1.5f, -renderScale * 1.5f, 0);
         matrices.scale((float) (renderScale), (float) (renderScale), (float) (renderScale));
 
-        var customization = stack.get(DisplayingPanelItem.CONFIG);
+        var customization = DisplayingPanelItem.getConfig(stack);
         var glowing = false;
 
         if (stack.getItem() instanceof UpgradeablePanelItem upgradeable) {

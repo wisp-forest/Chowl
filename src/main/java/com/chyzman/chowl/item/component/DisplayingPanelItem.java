@@ -1,9 +1,7 @@
 package com.chyzman.chowl.item.component;
 
-import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.util.NbtKeyTypes;
 import io.wispforest.owo.nbt.NbtKey;
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtOps;
@@ -11,22 +9,17 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
-import java.math.BigInteger;
-
-// Represents a panel that can display some variant and a count/capacity
-@SuppressWarnings("UnstableApiUsage")
 public interface DisplayingPanelItem extends PanelItem {
     NbtKey<Config> CONFIG = new NbtKey<>("Config", Config.KEY_TYPE);
 
-    ItemVariant displayedVariant(ItemStack stack);
-
-    BigInteger displayedCount(ItemStack stack, @Nullable DrawerFrameBlockEntity drawerFrame, @Nullable Direction side);
-
     default @Nullable Text styleText(ItemStack stack, Text wrapped) {
-        return Text.literal("").append(wrapped).setStyle(stack.get(CONFIG).textStyle());
+        return Text.literal("").append(wrapped).setStyle(getConfig(stack).textStyle());
+    }
+
+    static Config getConfig(ItemStack stack) {
+        return stack.getOr(CONFIG, new Config());
     }
 
     class Config {

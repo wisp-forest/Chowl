@@ -124,7 +124,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                 }
                 matrices.pop();
 
-                var customization = stack.get(DisplayingPanelItem.CONFIG);
+                var customization = DisplayingPanelItem.getConfig(stack);
                 boolean panelFocused = blockFocused && BlockSideUtils.getSide(hitResult).equals(side);
 
                 if (entity.getWorld() != null && (customization == null || !customization.hideButtons())) {

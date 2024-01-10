@@ -38,6 +38,7 @@ public class PanelUpgradeRecipeSerializer implements RecipeSerializer<PanelUpgra
         buf.writeIdentifier(Registries.ITEM.getId(recipe.item));
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends Item & CapacityLimitedPanelItem & FilteringPanelItem & UpgradeablePanelItem> T tryCast(Item item, Identifier id) {
         StringBuilder projectileFront = new StringBuilder(item.getName().getString()).append("isn't ");
         String projectileEnd = ". Recipe: \"" + id + "\"";

@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Mixin(LavenderBookScreen.LandingPageSupplier.class)
+@Mixin(value = LavenderBookScreen.LandingPageSupplier.class, remap = false)
 public abstract class LandingPageSupplierMixin extends LavenderBookScreen.PageSupplier {
     protected LandingPageSupplierMixin(LavenderBookScreen context) {
         super(context);

@@ -6,7 +6,6 @@ import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.FilteringPanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
-import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.CombinedSingleSlotStorage;
 import com.chyzman.chowl.transfer.PanelStorageContext;
 import com.chyzman.chowl.util.NbtKeyTypes;
@@ -19,7 +18,6 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +47,7 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public @Nullable SingleSlotStorage<ItemVariant> getStorage(PanelStorageContext ctx) {
-        ItemVariant filter = ctx.stack().get(FILTER);
+        ItemVariant filter = ctx.stack().getOr(FILTER, ItemVariant.blank());
         if (filter.isBlank()) return null;
 
         List<SingleSlotStorage<ItemVariant>> slots = new ArrayList<>();
@@ -74,7 +72,7 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
     public List<BlockButton> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
         var liste = new ArrayList<BlockButton>();
 
-        if (stack.get(FILTER).isBlank()) {
+        if (stack.getOr(FILTER, ItemVariant.blank()).isBlank()) {
             liste.add(SET_FILTER_BUTTON);
         } else {
             liste.add(STORAGE_BUTTON);
@@ -90,7 +88,7 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public ItemVariant currentFilter(ItemStack stack) {
-        return stack.get(FILTER);
+        return stack.getOr(FILTER, ItemVariant.blank());
     }
 
     @Override
@@ -101,21 +99,5 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
     @Override
     public void setFilter(ItemStack stack, ItemVariant newFilter) {
         stack.put(FILTER, newFilter);
-    }
-
-    @Override
-    public ItemVariant displayedVariant(ItemStack stack) {
-        return currentFilter(stack);
-    }
-
-    @Override
-    public BigInteger displayedCount(ItemStack stack, @Nullable DrawerFrameBlockEntity drawerFrame, @Nullable Direction side) {
-        if (drawerFrame == null || side == null) return BigInteger.ZERO;
-
-        var storage = this.getStorage(PanelStorageContext.forRendering(stack));
-
-        if (!(storage instanceof BigStorageView<?> big)) return BigInteger.ZERO;
-
-        return big.bigAmount();
     }
 }
