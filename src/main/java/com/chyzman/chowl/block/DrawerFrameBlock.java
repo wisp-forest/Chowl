@@ -3,17 +3,16 @@ package com.chyzman.chowl.block;
 import com.chyzman.chowl.block.button.BlockButton;
 import com.chyzman.chowl.block.button.BlockButtonProvider;
 import com.chyzman.chowl.block.button.ButtonRenderCondition;
+import com.chyzman.chowl.block.button.ButtonRenderer;
 import com.chyzman.chowl.classes.AttackInteractionReceiver;
-import com.chyzman.chowl.client.ChowlClient;
 import com.chyzman.chowl.graph.ServerGraphStore;
 import com.chyzman.chowl.item.component.LockablePanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
-import com.chyzman.chowl.block.button.ButtonRenderer;
 import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.transfer.BigStorageView;
+import com.chyzman.chowl.transfer.PanelStorageContext;
 import com.chyzman.chowl.util.BlockSideUtils;
 import io.wispforest.owo.ops.ItemOps;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -44,13 +43,17 @@ import net.minecraft.world.WorldAccess;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.ToIntFunction;
 
 import static com.chyzman.chowl.item.component.LockablePanelItem.LOCK_BUTTON;
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
-public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver {
+public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver, SidedComparatorOutput {
 
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
     public static final IntProperty LIGHT_LEVEL = Properties.LEVEL_15;
@@ -372,6 +375,56 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 //        }
 //        return list;
 //    }
+
+
+    @Override
+    public boolean hasComparatorOutput(BlockState state) {
+        return true;
+    }
+
+    @Override
+    public int getComparatorOutput(BlockState state, World world, BlockPos pos) {
+        if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame)) return 0;
+
+        for (int i = 0; i < 6; i++) {
+            var panelStack = frame.stacks.get(i);
+
+            if (!(panelStack.getLeft().getItem() instanceof PanelItem panel)) continue;
+
+            var storage = panel.getStorage(PanelStorageContext.from(frame, Direction.byId(i)));
+
+            if (storage.getSlotCount() == 0) continue;
+
+            var slot = storage.getSlot(0);
+
+            return BigStorageView.bigAmount(slot)
+                .multiply(BigInteger.valueOf(15))
+                .divide(BigStorageView.bigCapacity(slot))
+                .intValue();
+        }
+
+        return 0;
+    }
+
+    @Override
+    public int getSidedComparatorOutput(BlockState state, World world, BlockPos pos, Direction side) {
+        if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame)) return 0;
+
+        var panelStack = frame.stacks.get(side.getOpposite().getId());
+
+        if (!(panelStack.getLeft().getItem() instanceof PanelItem panel)) return 0;
+
+        var storage = panel.getStorage(PanelStorageContext.from(frame, side.getOpposite()));
+
+        if (storage.getSlotCount() == 0) return 0;
+
+        var slot = storage.getSlot(0);
+
+        return BigStorageView.bigAmount(slot)
+            .multiply(BigInteger.valueOf(15))
+            .divide(BigStorageView.bigCapacity(slot))
+            .intValue();
+    }
 
     public static int getOrientation(World world, BlockHitResult hitResult) {
         var blockEntity = world.getBlockEntity(hitResult.getBlockPos());

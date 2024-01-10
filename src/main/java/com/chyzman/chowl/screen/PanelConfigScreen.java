@@ -1,5 +1,6 @@
 package com.chyzman.chowl.screen;
 
+import com.chyzman.chowl.client.AutoGridLayout;
 import com.chyzman.chowl.client.DisableableCheckboxComponent;
 import com.chyzman.chowl.item.component.*;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
@@ -110,10 +111,13 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                         gridLayout.surface(Surface.tiled(id("textures/gui/container/inventory.png"), 162, 76));
                     }
                 });
-        var verticalFlow = (FlowLayout) Containers.verticalFlow(Sizing.fixed(176), Sizing.content())
+        var verticalFlow = (FlowLayout) Containers.verticalFlow(Sizing.fixed(225), Sizing.content())
                 .<FlowLayout>configure(flowLayout -> {
                     flowLayout.surface(Surface.PANEL);
                     flowLayout.padding(Insets.of(7));
+
+                    var grid = new AutoGridLayout(Sizing.fill(100), Sizing.content(), 5, 2);
+                    flowLayout.child(grid);
 
                     if (filterSlot != null) {
                         var slotFlow = Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18));
@@ -128,11 +132,11 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                                         .positioning(Positioning.absolute(0, 0)))
                                 .child(Components.label(Text.translatable("ui.chowl-industries.config_panel.filter")));
 
-                        flowLayout.child(slotFlow);
+                        grid.child(slotFlow);
                     }
 
                     if (lockedCheckbox != null) {
-                        flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
+                        grid.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
                                 .<FlowLayout>configure(flow -> {
                                     flow.margins(Insets.bottom(1));
                                     flow.verticalAlignment(VerticalAlignment.CENTER);
@@ -141,7 +145,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                     }
 
                     if (showCountCheckBox != null) {
-                        flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
+                        grid.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
                                 .<FlowLayout>configure(flow -> {
                                     flow.margins(Insets.bottom(1));
                                     flow.verticalAlignment(VerticalAlignment.CENTER);
@@ -150,7 +154,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                     }
 
                     if (showCapacityCheckBox != null) {
-                        flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
+                        grid.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
                                 .<FlowLayout>configure(flow -> {
                                     flow.margins(Insets.bottom(1));
                                     flow.verticalAlignment(VerticalAlignment.CENTER);
@@ -159,7 +163,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                     }
 
                     if (showItemCheckBox != null) {
-                        flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
+                        grid.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
                                 .<FlowLayout>configure(flow -> {
                                     flow.margins(Insets.bottom(1));
                                     flow.verticalAlignment(VerticalAlignment.CENTER);
@@ -168,7 +172,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                     }
 
                     if (showNameCheckBox != null) {
-                        flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
+                        grid.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
                                 .<FlowLayout>configure(flow -> {
                                     flow.margins(Insets.bottom(1));
                                     flow.verticalAlignment(VerticalAlignment.CENTER);
@@ -177,7 +181,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                     }
 
                     if (showPercentageCheckBox != null) {
-                        flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
+                        grid.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
                                 .<FlowLayout>configure(flow -> {
                                     flow.margins(Insets.bottom(1));
                                     flow.verticalAlignment(VerticalAlignment.CENTER);
@@ -186,7 +190,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                     }
 
                     if (hideUpgradesCheckBox != null) {
-                        flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
+                        grid.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
                                 .<FlowLayout>configure(flow -> {
                                     flow.margins(Insets.bottom(1));
                                     flow.verticalAlignment(VerticalAlignment.CENTER);
@@ -195,7 +199,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                     }
 
                     if (hideButtonsCheckBox != null) {
-                        flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
+                        grid.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
                                 .<FlowLayout>configure(flow -> {
                                     flow.margins(Insets.bottom(1));
                                     flow.verticalAlignment(VerticalAlignment.CENTER);
@@ -204,7 +208,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                     }
 
                     if (ignoreTemplatingCheckBox != null) {
-                        flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
+                        grid.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.fixed(18))
                                 .<FlowLayout>configure(flow -> {
                                     flow.margins(Insets.bottom(1));
                                     flow.verticalAlignment(VerticalAlignment.CENTER);
@@ -212,7 +216,9 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                                 .child(ignoreTemplatingCheckBox));
                     }
 
-                    flowLayout.child(inventoryFlow);
+                    flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.content())
+                        .child(inventoryFlow)
+                        .horizontalAlignment(HorizontalAlignment.CENTER));
                 });
 
 

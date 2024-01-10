@@ -7,9 +7,7 @@ import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.PanelStorageContext;
 import io.wispforest.owo.ops.WorldOps;
-import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachmentBlockEntity;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.block.BlockState;
@@ -33,15 +31,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
-public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageBlockEntity, RenderAttachmentBlockEntity, FillingNbtBlockEntity {
+public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageBlockEntity, FillingNbtBlockEntity {
 
     public List<Pair<ItemStack, Integer>> stacks = new ArrayList<>(DefaultedList.ofSize(6, new Pair<>(ItemStack.EMPTY, 0)).stream().toList());
     public BlockState templateState = null;
-    public BlockState prevTemplateState = null;
-    private int transferCooldown = -1;
-    private long lastTickTime;
 
     public DrawerFrameBlockEntity(BlockPos pos, BlockState state) {
         super(Chowl.DRAWER_FRAME_BLOCK_ENTITY_TYPE, pos, state);
@@ -56,18 +50,6 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     @Override
     public Packet<ClientPlayPacketListener> toUpdatePacket() {
         return BlockEntityUpdateS2CPacket.create(this);
-    }
-
-    @SuppressWarnings("UnstableApiUsage")
-    public void collectPanelStorages(Consumer<SlottedStorage<ItemVariant>> storageConsumer) {
-        for (int sideId = 0; sideId < 6; sideId++) {
-            var ctx = PanelStorageContext.from(this, Direction.byId(sideId));
-            if (!(ctx.stack().getItem() instanceof PanelItem panelItem)) continue;
-
-            var storage = panelItem.getStorage(ctx);
-
-            if (storage != null) storageConsumer.accept(storage);
-        }
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -128,7 +110,7 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     }
 
     @Override
-    public @Nullable Object getRenderAttachmentData() {
+    public @Nullable Object getRenderData() {
         return templateState;
     }
 

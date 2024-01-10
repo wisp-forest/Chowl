@@ -8,7 +8,6 @@ import com.chyzman.chowl.client.RetextureInfo;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
-import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.Baker;
@@ -45,7 +44,7 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
 
     @Override
     public void emitBlockQuads(BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context) {
-        var template = (BlockState) ((RenderAttachedBlockView) blockView).getBlockEntityRenderAttachment(pos);
+        var template = (BlockState) blockView.getBlockEntityRenderData(pos);
 
         if (template != null) {
             var info = RetextureInfo.get(template);

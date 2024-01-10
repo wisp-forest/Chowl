@@ -5,6 +5,7 @@
     "plugin": "com.chyzman.chowl.asm.ChowlMixinPlugin",
     "compatibilityLevel": "JAVA_17",
     "mixins": [
+        "ComparatorBlockMixin",
         "DataPackContentsMixin",
         "ItemEntityMixin",
         "ServerPlayNetworkHandlerMixin",
