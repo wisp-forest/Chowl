@@ -4,7 +4,6 @@ import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.block.button.BlockButton;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.transfer.PanelStorageContext;
-import com.chyzman.chowl.transfer.TransferState;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
@@ -28,14 +27,8 @@ public class AccessPanelItem extends BasePanelItem implements DisplayingPanelIte
     public @Nullable SlottedStorage<ItemVariant> getStorage(PanelStorageContext ctx) {
         List<SingleSlotStorage<ItemVariant>> storages = new ArrayList<>();
 
-        try {
-            if (TransferState.DOUBLE_CLICK_INSERT.get())
-                TransferState.NO_BLANK_DRAWERS.set(true);
-            if (!ctx.traverseNetwork(storage -> storages.addAll(storage.getSlots())))
-                return null;
-        } finally {
-            TransferState.NO_BLANK_DRAWERS.set(false);
-        }
+        if (!ctx.traverseNetwork(storage -> storages.addAll(storage.getSlots())))
+            return null;
 
         storages.sort(Comparator.comparing(x -> -x.getAmount()));
 

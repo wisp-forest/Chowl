@@ -151,25 +151,18 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
                         return ActionResult.SUCCESS;
                     })
                     .onDoubleClick((world, clickedFrame, clickedSide, clickedStack, player) -> {
-                        try {
-                            TransferState.DOUBLE_CLICK_INSERT.set(true);
+                        var storage = getStorage(PanelStorageContext.from(clickedFrame, side));
 
-                            var panel = (PanelItem) stack.getItem();
-                            var storage = panel.getStorage(PanelStorageContext.from(clickedFrame, side));
+                        if (storage == null) return ActionResult.FAIL;
+                        if (currentFilter(stack).isBlank()) return ActionResult.FAIL;
+                        if (world.isClient) return ActionResult.SUCCESS;
 
-                            if (storage == null) return ActionResult.FAIL;
-                            if (panel instanceof FilteringPanelItem filteringPanel && filteringPanel.currentFilter(stack).isBlank()) return ActionResult.FAIL;
-                            if (world.isClient) return ActionResult.SUCCESS;
+                        try (var tx = Transaction.openOuter()) {
+                            StorageUtil.move(PlayerInventoryStorage.of(player), storage, variant -> true, Long.MAX_VALUE, tx);
 
-                            try (var tx = Transaction.openOuter()) {
-                                StorageUtil.move(PlayerInventoryStorage.of(player), storage, variant -> true, Long.MAX_VALUE, tx);
+                            tx.commit();
 
-                                tx.commit();
-
-                                return ActionResult.SUCCESS;
-                            }
-                        } finally {
-                            TransferState.DOUBLE_CLICK_INSERT.set(false);
+                            return ActionResult.SUCCESS;
                         }
                     }).build()
             );

@@ -6,7 +6,6 @@ import com.chyzman.chowl.item.component.*;
 import com.chyzman.chowl.transfer.BigSingleSlotStorage;
 import com.chyzman.chowl.transfer.PanelStorage;
 import com.chyzman.chowl.transfer.PanelStorageContext;
-import com.chyzman.chowl.transfer.TransferState;
 import com.chyzman.chowl.util.NbtKeyTypes;
 import io.wispforest.owo.nbt.NbtKey;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -33,8 +32,6 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
     }
 
     public @Nullable SlottedStorage<ItemVariant> getStorage(PanelStorageContext ctx) {
-        if (TransferState.NO_BLANK_DRAWERS.get() && ctx.stack().getOr(VARIANT, ItemVariant.blank()).isBlank()) return null;
-
         return new Storage(ctx);
     }
 

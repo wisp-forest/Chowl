@@ -4,13 +4,15 @@ import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.block.button.*;
 import com.chyzman.chowl.screen.PanelConfigSreenHandler;
 import com.chyzman.chowl.transfer.PanelStorageContext;
-import com.chyzman.chowl.transfer.TransferState;
 import com.chyzman.chowl.util.BlockSideUtils;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -26,6 +28,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -86,26 +89,23 @@ public interface PanelItem {
                 return ActionResult.SUCCESS;
             })
             .onDoubleClick((world, frame, side, stack, player) -> {
-                try {
-                    TransferState.DOUBLE_CLICK_INSERT.set(true);
+                var panel = (PanelItem) stack.getItem();
+                var storage = panel.getStorage(PanelStorageContext.from(frame, side));
 
-                    var panel = (PanelItem) stack.getItem();
-                    var storage = panel.getStorage(PanelStorageContext.from(frame, side));
+                if (storage == null) return ActionResult.FAIL;
 
+                List<SingleSlotStorage<ItemVariant>> slots = new ArrayList<>(storage.getSlots());
+                slots.removeIf(StorageView::isResourceBlank);
 
-                    if (storage == null) return ActionResult.FAIL;
-                    if (panel instanceof FilteringPanelItem filteringPanel && filteringPanel.currentFilter(stack).isBlank()) return ActionResult.FAIL;
-                    if (world.isClient) return ActionResult.SUCCESS;
+                if (slots.isEmpty()) return ActionResult.FAIL;
+                if (world.isClient) return ActionResult.SUCCESS;
 
-                    try (var tx = Transaction.openOuter()) {
-                        StorageUtil.move(PlayerInventoryStorage.of(player), storage, variant -> true, Long.MAX_VALUE, tx);
+                try (var tx = Transaction.openOuter()) {
+                    StorageUtil.move(PlayerInventoryStorage.of(player), new CombinedSlottedStorage<>(slots), variant -> true, Long.MAX_VALUE, tx);
 
-                        tx.commit();
+                    tx.commit();
 
-                        return ActionResult.SUCCESS;
-                    }
-                } finally {
-                    TransferState.DOUBLE_CLICK_INSERT.set(false);
+                    return ActionResult.SUCCESS;
                 }
             }).build();
 
