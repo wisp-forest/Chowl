@@ -221,10 +221,9 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     private Set<BlockPos> findLinks(World world, BlockPos pos) {
         Set<BlockPos> links = new HashSet<>();
 
-        for (BlockPos possible : BlockPos.iterate(
-                pos.getX() - 1, pos.getY() - 1, pos.getZ() - 1,
-                pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1
-        )) {
+        for (int i = 0; i < 6; i++) {
+            var possible = pos.offset(Direction.byId(i));
+
             if (pos.equals(possible) || world.getBlockState(possible).getBlock() != this) continue;
 
             links.add(possible.toImmutable());

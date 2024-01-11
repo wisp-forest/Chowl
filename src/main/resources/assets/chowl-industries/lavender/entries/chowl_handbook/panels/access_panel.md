@@ -23,4 +23,4 @@ insert and extract from it using hoppers, pipes or any other Chowl® certified i
 Additionally, it can be used by players to insert items into any available storages in the network.
 
 
-*{gray}witty comment here{}*
+*{gray}Accessible!{}*

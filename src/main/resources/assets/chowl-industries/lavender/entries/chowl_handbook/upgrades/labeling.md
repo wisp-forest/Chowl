@@ -13,6 +13,6 @@ Renaming a {blue}Name Tag{} and putting it in a panel upgrade slot will change t
 
 ;;;;;
 
-*image or something?*
+![The CTO's most secret drawer](chowl-industries:textures/gui/labeling_example.png,fit)
 
 *{gray}Employees that rename coworkers' panels to 'e' will be punished.{}*

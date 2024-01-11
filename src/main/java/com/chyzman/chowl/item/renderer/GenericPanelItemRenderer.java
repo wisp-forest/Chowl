@@ -60,6 +60,8 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
 
 
         if (!(stack.getItem() instanceof DisplayingPanelItem panel)) return;
+        if (!panel.hasDisplay()) return;
+
         matrices.translate(0, 0, -1 / 32f - 0.001);
 
         var storage = panel.getStorage(PanelStorageContext.forRendering(stack));

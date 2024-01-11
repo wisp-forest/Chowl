@@ -27,8 +27,7 @@
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
     "minecraft": "${minecraft_version}",
-    "lavender": "*",
-    "noindium": "*"
+    "lavender": "*"
   },
   "custom": {
     "modmenu": {

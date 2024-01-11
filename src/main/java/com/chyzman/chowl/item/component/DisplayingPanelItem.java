@@ -14,6 +14,10 @@ import org.jetbrains.annotations.Nullable;
 public interface DisplayingPanelItem extends PanelItem {
     NbtKey<Config> CONFIG = new NbtKey<>("Config", Config.KEY_TYPE);
 
+    default boolean hasDisplay() {
+        return true;
+    }
+
     default @Nullable Text styleText(ItemStack stack, Text wrapped) {
         return Text.literal("").append(wrapped).setStyle(getConfig(stack).textStyle());
     }

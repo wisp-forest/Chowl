@@ -14,6 +14,6 @@ making it immune to fire and lava.
 
 ;;;;;
 
-*TODO: picture of panel floating in lava*
+![](chowl-industries:textures/gui/fireproof_panel_example.png,fit)
 
 *{gray}Cactus-proof panels are still a work in progress.{}*

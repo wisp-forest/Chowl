@@ -12,6 +12,6 @@ time.
 
 ;;;;;
 
-*TODO: picture of frame with voiding upgrade*
+![](chowl-industries:textures/gui/void_example.png,fit)
 
-*{gray}something witty.{}*
+*{gray}Warranty void if added.{}*
