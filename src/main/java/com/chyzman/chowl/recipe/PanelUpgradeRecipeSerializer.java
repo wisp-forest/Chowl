@@ -35,7 +35,7 @@ public class PanelUpgradeRecipeSerializer implements RecipeSerializer<PanelUpgra
     @Override
     public void write(PacketByteBuf buf, PanelUpgradeRecipe recipe) {
         buf.writeString(recipe.getCategory().toString());
-        buf.writeIdentifier(Registries.ITEM.getId(recipe.item));
+        buf.writeRegistryValue(Registries.ITEM, recipe.item);
     }
 
     @SuppressWarnings("unchecked")

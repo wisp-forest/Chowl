@@ -42,6 +42,8 @@ dependencies {
     modImplementation include("me.luligabi:NoIndium:${project.no_indium_version}")
 }
 
+
+
 processResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.minecraft_version
@@ -74,6 +76,16 @@ java {
 
 loom {
     accessWidenerPath = file("src/main/resources/chowl.accesswidener")
+
+    runs {
+        chyz {
+            client()
+            ideConfigGenerated true
+            name "Minecraft Client (chyz impersonation)"
+            programArgs("--username", "chyzman")
+            programArgs("--uuid", "09de8a6d86bf4c15bb93ce3384ce4e96")
+        }
+    }
 }
 
 jar {
