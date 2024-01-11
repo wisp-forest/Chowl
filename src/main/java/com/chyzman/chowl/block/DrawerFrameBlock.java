@@ -246,35 +246,16 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         if (context.isHolding(asItem())) return VoxelShapes.fullCube();
+        if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame)) return BASE;
 
-        var shape = BASE;
-        var blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
-            for (int i = 0; i < drawerFrameBlockEntity.stacks.size(); i++) {
-                var stack = drawerFrameBlockEntity.stacks.get(i).getLeft();
-                if (!stack.isEmpty()) {
-                    shape = VoxelShapes.union(shape, SIDES[i]);
-                }
-            }
-
-        }
-        return shape;
+        return frame.outlineShape;
     }
 
     @Override
     public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        var shape = BASE;
-        var blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
-            for (int i = 0; i < drawerFrameBlockEntity.stacks.size(); i++) {
-                var stack = drawerFrameBlockEntity.stacks.get(i).getLeft();
-                if (!stack.isEmpty() && stack.getItem() != ChowlRegistry.PHANTOM_PANEL_ITEM) {
-                    shape = VoxelShapes.union(shape, SIDES[i]);
-                }
-            }
+        if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame)) return BASE;
 
-        }
-        return shape;
+        return frame.collisionShape;
     }
 
     @Override

@@ -26,6 +26,8 @@ import net.minecraft.util.Pair;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,6 +38,8 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
 
     public List<Pair<ItemStack, Integer>> stacks = new ArrayList<>(DefaultedList.ofSize(6, new Pair<>(ItemStack.EMPTY, 0)).stream().toList());
     public BlockState templateState = null;
+    public VoxelShape outlineShape = DrawerFrameBlock.BASE;
+    public VoxelShape collisionShape = DrawerFrameBlock.BASE;
 
     public DrawerFrameBlockEntity(BlockPos pos, BlockState state) {
         super(Chowl.DRAWER_FRAME_BLOCK_ENTITY_TYPE, pos, state);
@@ -73,10 +77,33 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
         return sideStack.isOf(ChowlRegistry.BLANK_PANEL_ITEM);
     }
 
+    private void updateShapes() {
+        this.collisionShape = DrawerFrameBlock.BASE;
+
+        for (int i = 0; i < stacks.size(); i++) {
+            var stack = stacks.get(i).getLeft();
+
+            if (stack.isEmpty() || stack.getItem() == ChowlRegistry.PHANTOM_PANEL_ITEM) continue;
+
+            this.collisionShape = VoxelShapes.union(this.collisionShape, DrawerFrameBlock.SIDES[i]);
+        }
+
+        this.outlineShape = DrawerFrameBlock.BASE;
+
+        for (int i = 0; i < stacks.size(); i++) {
+            var stack = stacks.get(i).getLeft();
+
+            if (stack.isEmpty()) continue;
+
+            this.outlineShape = VoxelShapes.union(this.outlineShape, DrawerFrameBlock.SIDES[i]);
+        }
+    }
+
     @Override
     public void markDirty() {
         super.markDirty();
         WorldOps.updateIfOnServer(world, pos);
+        updateShapes();
     }
 
     public void readNbt(NbtCompound nbt) {
@@ -95,6 +122,8 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
         if (world != null && world.isClient) {
             ChowlClient.reloadPos(world, pos);
         }
+
+        updateShapes();
     }
 
     @Override
