@@ -128,6 +128,10 @@ public interface PanelItem {
         return false;
     }
 
+    default boolean hasComparatorOutput() {
+        return false;
+    }
+
     default void openConfig(ItemStack stack, PlayerEntity user, @Nullable Consumer<ItemStack> updater) {
         var factory = new ExtendedScreenHandlerFactory() {
             @Override

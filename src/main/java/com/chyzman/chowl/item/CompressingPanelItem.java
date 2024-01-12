@@ -195,6 +195,11 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
     }
 
     @Override
+    public boolean hasComparatorOutput() {
+        return true;
+    }
+
+    @Override
     public BigInteger baseCapacity() {
         return new BigInteger(CHOWL_CONFIG.base_compressing_panel_capacity());
     }

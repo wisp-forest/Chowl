@@ -407,6 +407,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             var panelStack = frame.stacks.get(i);
 
             if (!(panelStack.stack.getItem() instanceof PanelItem panel)) continue;
+            if (!panel.hasComparatorOutput()) continue;
 
             var storage = panel.getStorage(PanelStorageContext.from(frame, Direction.byId(i)));
 
@@ -430,6 +431,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         var panelStack = frame.stacks.get(side.getOpposite().getId());
 
         if (!(panelStack.stack.getItem() instanceof PanelItem panel)) return 0;
+        if (!panel.hasComparatorOutput()) return 0;
 
         var storage = panel.getStorage(PanelStorageContext.from(frame, side.getOpposite()));
 

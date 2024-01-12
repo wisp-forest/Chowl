@@ -77,6 +77,11 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
     }
 
     @Override
+    public boolean hasComparatorOutput() {
+        return true;
+    }
+
+    @Override
     public BigInteger baseCapacity() {
         return new BigInteger(CHOWL_CONFIG.base_panel_capacity());
     }
