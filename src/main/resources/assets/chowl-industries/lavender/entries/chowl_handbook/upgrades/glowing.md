@@ -14,6 +14,6 @@ dark, letting you continue to put off putting down proper lighting.
 
 ;;;;;
 
-*TODO: image of glowing panel in darkness*
+![a panel in a very dark room](chowl-industries:textures/gui/glowing_example.png,fit)
 
 *{gray}Unfortunately, this doesn't make the frame a light source{}*
