@@ -20,5 +20,14 @@
   "ui.chowl-industries.config_panel.hide_buttons": "Hide Buttons",
   "ui.chowl-industries.config_panel.ignore_templating": "Ignore Templating",
   "ui.chowl-industries.panel.tooltip.contained.label": "Contained:",
-  "ui.chowl-industries.panel.tooltip.filter.upgrades.label": "Upgrades:"
+  "ui.chowl-industries.panel.tooltip.filter.upgrades.label": "Upgrades:",
+  "text.config.chowl-industries.title": "Chowl Industries",
+  "text.config.chowl-industries.section.Client": "Client",
+  "text.config.chowl-industries.section.Server": "Server",
+  "text.config.chowl-industries.option.max_digits_before_exponents": "Maximum digits to display before using exponents",
+  "text.config.chowl-industries.option.max_digits_before_exponents.tooltip": "The maximum number of digits that will be displayed as a capacity before using exponents",
+  "text.config.chowl-industries.option.base_panel_capacity": "Base panel capacity",
+  "text.config.chowl-industries.option.base_panel_capacity.tooltip": "The base capacity of drawer panels",
+  "text.config.chowl-industries.option.base_compressing_panel_capacity": "Base panel capacity",
+  "text.config.chowl-industries.option.base_compressing_panel_capacity.tooltip": "The base capacity of compressing panels"
 }

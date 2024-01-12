@@ -14,11 +14,8 @@ public class ChowlIndustriesConfigModel {
 
     @SectionHeader("Client")
 
-    @Sync(Option.SyncMode.OVERRIDE_CLIENT)
-    public boolean has_chyz_been_reminded_to_add_more_config = false;
-
     @Sync(Option.SyncMode.NONE)
-    public String max_digits_before_exponents = "64";
+    public String max_digits_before_exponents = "16";
 
     @SectionHeader("Server")
 
