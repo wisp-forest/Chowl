@@ -59,6 +59,9 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
                 Direction face = quad.cullFace();
                 if (face == null) return true;
 
+                quad.cullFace(null);
+                quad.nominalFace(face);
+
                 return frame.isSideBaked(face.getId());
             });
 
