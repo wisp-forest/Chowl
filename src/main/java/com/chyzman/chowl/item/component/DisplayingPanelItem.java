@@ -14,16 +14,24 @@ import org.jetbrains.annotations.Nullable;
 public interface DisplayingPanelItem extends PanelItem {
     NbtKey<Config> CONFIG = new NbtKey<>("Config", Config.KEY_TYPE);
 
-    default boolean hasDisplay() {
-        return true;
-    }
-
     default @Nullable Text styleText(ItemStack stack, Text wrapped) {
         return Text.literal("").append(wrapped).setStyle(getConfig(stack).textStyle());
     }
 
+    default Config defaultConfig() {
+        return new Config();
+    }
+
     static Config getConfig(ItemStack stack) {
-        return stack.getOr(CONFIG, new Config());
+        if (!stack.has(CONFIG)) {
+            if (stack.getItem() instanceof DisplayingPanelItem displaying) {
+                return displaying.defaultConfig();
+            } else {
+                return new Config();
+            }
+        }
+
+        return stack.get(CONFIG);
     }
 
     class Config {

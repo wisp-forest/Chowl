@@ -39,6 +39,8 @@ import static com.chyzman.chowl.util.FormatUtil.formatCount;
 @Environment(EnvType.CLIENT)
 @SuppressWarnings("UnstableApiUsage")
 public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.DynamicItemRenderer {
+    public static final float MAX_WIDTH = 30;
+
     private final Identifier baseModelId;
 
     public GenericPanelItemRenderer(Identifier baseModelId) {
@@ -48,7 +50,6 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
     @Override
     public void render(ItemStack stack, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         var client = MinecraftClient.getInstance();
-        float maxwidth = 30;
 
         matrices.translate(0.5, 0.5, 0.5);
         matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
@@ -58,16 +59,19 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
             client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, baseModel);
         }
 
+        drawDisplay(stack, mode, matrices, vertexConsumers, light, overlay);
+    }
+
+    protected void drawDisplay(ItemStack stack, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+        var client = MinecraftClient.getInstance();
 
         if (!(stack.getItem() instanceof DisplayingPanelItem panel)) return;
-        if (!panel.hasDisplay()) return;
-
-        matrices.translate(0, 0, -1 / 32f - 0.001);
 
         var storage = panel.getStorage(PanelStorageContext.forRendering(stack));
 
         if (storage == null) return;
 
+        matrices.translate(0, 0, -1 / 32f - 0.001);
         matrices.push();
 
         List<StorageView<ItemVariant>> slots = new ArrayList<>(storage.getSlots());
@@ -124,8 +128,8 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                         }
                     }
                     var titleWidth = client.textRenderer.getWidth(title.get());
-                    if (titleWidth > maxwidth) {
-                        matrices.scale(maxwidth / titleWidth, maxwidth / titleWidth, maxwidth / titleWidth);
+                    if (titleWidth > MAX_WIDTH) {
+                        matrices.scale(MAX_WIDTH / titleWidth, MAX_WIDTH / titleWidth, MAX_WIDTH / titleWidth);
                     }
 
                     matrices.translate(0, -client.textRenderer.fontHeight + 1f, 0);
@@ -152,8 +156,8 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                     }
 
                     var amountWidth = client.textRenderer.getWidth(countText.toString());
-                    if (amountWidth > maxwidth) {
-                        matrices.scale(maxwidth / amountWidth, maxwidth / amountWidth, maxwidth / amountWidth);
+                    if (amountWidth > MAX_WIDTH) {
+                        matrices.scale(MAX_WIDTH / amountWidth, MAX_WIDTH / amountWidth, MAX_WIDTH / amountWidth);
                     }
 
                     client.textRenderer.draw(panel.styleText(stack, Text.literal(countText.toString())), -amountWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
@@ -188,23 +192,25 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
         matrices.pop();
 
         if (customization.showPercentage() && RenderGlobals.IN_FRAME) {
-            matrices.push();
-            matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
-            matrices.translate(0, -4 / 8f, 0);
-            matrices.scale(1 / 48f, 1 / 48f, 1 / 48f);
-            matrices.scale(1 / 2f, 1 / 2f, 1 / 2f);
-
-            //TODO figure out how to do efficient semi accurate division
-
             var fullPercent = new BigDecimal(BigStorageView.bigAmount(slots.get(0))).divide(new BigDecimal(BigStorageView.bigCapacity(slots.get(0))), MathContext.DECIMAL32).multiply(BigDecimal.valueOf(100)).doubleValue();
             Double roundedPercent = (double) Math.round(fullPercent * 100) / 100;
             var percent = roundedPercent + "%";
 
-            var percentWidth = client.textRenderer.getWidth(percent);
-
-            matrices.translate(0, client.textRenderer.fontHeight * 0.25f, 0);
-            client.textRenderer.draw(panel.styleText(stack, Text.literal(percent)), -percentWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
-            matrices.pop();
+            drawPercent(stack, panel, matrices, vertexConsumers, client, percent, glowing, light, overlay);
         }
+    }
+
+    protected void drawPercent(ItemStack stack, DisplayingPanelItem panel, MatrixStack matrices, VertexConsumerProvider vertexConsumers, MinecraftClient client, String percent, boolean glowing, int light, int overlay) {
+        matrices.push();
+        matrices.multiply(RotationAxis.NEGATIVE_Z.rotationDegrees(180));
+        matrices.translate(0, -4 / 8f, 0);
+        matrices.scale(1 / 48f, 1 / 48f, 1 / 48f);
+        matrices.scale(1 / 2f, 1 / 2f, 1 / 2f);
+
+        var percentWidth = client.textRenderer.getWidth(percent);
+
+        matrices.translate(0, client.textRenderer.fontHeight * 0.25f, 0);
+        client.textRenderer.draw(panel.styleText(stack, Text.literal(percent)), -percentWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
+        matrices.pop();
     }
 }

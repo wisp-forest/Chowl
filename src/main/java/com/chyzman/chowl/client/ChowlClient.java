@@ -5,6 +5,7 @@ import com.chyzman.chowl.block.DrawerFrameBlockEntityRenderer;
 import com.chyzman.chowl.block.DrawerFrameBlockModel;
 import com.chyzman.chowl.graph.ClientGraphStore;
 import com.chyzman.chowl.item.model.BlankPanelItemModel;
+import com.chyzman.chowl.item.renderer.AccessPanelItemRenderer;
 import com.chyzman.chowl.item.renderer.DrawerFrameItemRenderer;
 import com.chyzman.chowl.item.renderer.GenericPanelItemRenderer;
 import com.chyzman.chowl.registry.ChowlRegistry;
@@ -48,7 +49,7 @@ public class ChowlClient implements ClientModInitializer {
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.DRAWER_PANEL_ITEM, new GenericPanelItemRenderer(id("item/drawer_panel_base")));
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.MIRROR_PANEL_ITEM, new GenericPanelItemRenderer(id("item/mirror_panel_base")));
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.COMPRESSING_PANEL_ITEM, new GenericPanelItemRenderer(id("item/compressing_panel_base")));
-        BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.ACCESS_PANEL_ITEM, new GenericPanelItemRenderer(id("item/access_panel_base")));
+        BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.ACCESS_PANEL_ITEM, new AccessPanelItemRenderer(id("item/access_panel_base")));
         HandledScreens.register(PanelConfigSreenHandler.TYPE, PanelConfigScreen::new);
 
         SetIngredientComponent.init();
