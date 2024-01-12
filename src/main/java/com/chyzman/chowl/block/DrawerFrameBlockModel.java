@@ -45,16 +45,20 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
     @Override
     public void emitBlockQuads(BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context) {
         var template = (BlockState) blockView.getBlockEntityRenderData(pos);
+        RetextureTransform retexture = null;
 
         if (template != null) {
             var info = RetextureInfo.get(template);
-            context.pushTransform(new RetextureTransform(info, blockView, pos));
+            retexture = new RetextureTransform(info, blockView, pos);
+            context.pushTransform(retexture);
         }
         super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
 
         var be = blockView.getBlockEntity(pos);
 
         if (be instanceof DrawerFrameBlockEntity frame) {
+            if (retexture != null) retexture.dropNominalFace = true;
+
             context.pushTransform(quad -> {
                 Direction face = quad.cullFace();
                 if (face == null) return true;
@@ -105,6 +109,7 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
         private final RetextureInfo info;
         private final @Nullable BlockRenderView world;
         private final @Nullable BlockPos pos;
+        private boolean dropNominalFace;
 
         private RetextureTransform(RetextureInfo info, @Nullable BlockRenderView world, @Nullable BlockPos pos) {
             this.info = info;
@@ -120,6 +125,8 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
             if (!info.changeSprite(quad, face)) return false;
 
             if (world != null && pos != null) info.changeColor(quad, face, world, pos);
+
+            if (dropNominalFace) quad.nominalFace(null);
 
             return true;
         }
