@@ -3,9 +3,13 @@ package com.chyzman.chowl.client;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
+import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
+import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.BlockPos;
@@ -23,6 +27,7 @@ public class RetextureInfo {
 
     private final BlockState template;
     private final DirectionInfo[] directions = new DirectionInfo[6];
+    private final RenderMaterial material;
 
     private RetextureInfo(BlockState template) {
         this.template = template;
@@ -42,6 +47,11 @@ public class RetextureInfo {
 
             directions[dirId] = new DirectionInfo(quad.getSprite(), quad.hasColor(), quad.getColorIndex());
         }
+
+        this.material = RendererAccess.INSTANCE.getRenderer()
+            .materialFinder()
+            .blendMode(BlendMode.fromRenderLayer(RenderLayers.getBlockLayer(template)))
+            .find();
     }
 
     public static RetextureInfo get(BlockState template) {
@@ -53,6 +63,7 @@ public class RetextureInfo {
         if (info == null) return false;
 
         quad.spriteBake(info.sprite, MutableQuadView.BAKE_LOCK_UV);
+        quad.material(material);
         return true;
     }
 
