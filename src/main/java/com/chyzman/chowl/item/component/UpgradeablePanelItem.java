@@ -51,7 +51,7 @@ public interface UpgradeablePanelItem extends PanelItem {
             buttonList.add(PanelItem.buttonBuilder(i * 2, 0, (i + 1) * 2, 2)
                     .onUse((world, frame, useSide, useStack, player, hand) -> {
                         var stackInHand = player.getStackInHand(hand);
-                        if (stackInHand.isEmpty()) return ActionResult.PASS;
+                        if (stackInHand.isEmpty() || !stackInHand.getItem().canBeNested()) return ActionResult.PASS;
                         if (!(useStack.getItem() instanceof PanelItem)) return ActionResult.PASS;
                         if (upgrades.get(finalI).isEmpty()) {
                             var upgrade = ItemOps.singleCopy(stackInHand);
