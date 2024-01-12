@@ -6,9 +6,10 @@ import com.chyzman.chowl.block.button.ButtonRenderCondition;
 import com.chyzman.chowl.block.button.ButtonRenderer;
 import com.chyzman.chowl.classes.AttackInteractionReceiver;
 import com.chyzman.chowl.graph.ServerGraphStore;
+import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.LockablePanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
-import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.item.component.UpgradeablePanelItem;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.PanelStorageContext;
 import com.chyzman.chowl.util.BlockSideUtils;
@@ -324,6 +325,11 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         if (selected.getItem() instanceof PanelItem panelItem) {
             if (panelItem.hasConfig())
                 buttons.add(CONFIG_BUTTON);
+
+            if (selected.getItem() instanceof UpgradeablePanelItem upgradeable
+                && !DisplayingPanelItem.getConfig(selected).hideUpgrades()) {
+                upgradeable.addUpgradeButtons(selected, buttons);
+            }
 
             buttons.addAll(panelItem.listButtons(blockEntity, side, blockEntity.stacks.get(side.getId()).getLeft()));
         } else {

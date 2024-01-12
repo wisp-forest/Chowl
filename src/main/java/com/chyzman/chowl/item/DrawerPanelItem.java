@@ -16,7 +16,6 @@ import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.chyzman.chowl.Chowl.*;
@@ -37,9 +36,7 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public List<BlockButton> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
-        var returned = new ArrayList<BlockButton>();
-        returned.add(STORAGE_BUTTON);
-        return addUpgradeButtons(stack, returned);
+        return List.of(STORAGE_BUTTON);
     }
 
     @Override

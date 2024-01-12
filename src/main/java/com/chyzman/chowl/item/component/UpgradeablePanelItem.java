@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-public interface UpgradeablePanelItem extends PanelItem {
+public interface UpgradeablePanelItem extends DisplayingPanelItem {
     NbtKey.ListKey<ItemStack> UPGRADES_LIST = new NbtKey.ListKey<>("Upgrades", NbtKey.Type.ITEM_STACK);
 
     default List<ItemStack> upgrades(ItemStack stack) {
@@ -43,7 +43,7 @@ public interface UpgradeablePanelItem extends PanelItem {
         return false;
     }
 
-    default List<BlockButton> addUpgradeButtons(ItemStack stack, ArrayList<BlockButton> buttonList) {
+    default void addUpgradeButtons(ItemStack stack, List<BlockButton> buttonList) {
         for (int i = 0; i < 8; i++) {
             int finalI = i;
             var upgrades = upgrades(stack);
@@ -87,6 +87,5 @@ public interface UpgradeablePanelItem extends PanelItem {
                     .build()
             );
         }
-        return buttonList;
     }
 }

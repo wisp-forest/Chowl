@@ -70,15 +70,11 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public List<BlockButton> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
-        var liste = new ArrayList<BlockButton>();
-
         if (stack.getOr(FILTER, ItemVariant.blank()).isBlank()) {
-            liste.add(SET_FILTER_BUTTON);
+            return List.of(SET_FILTER_BUTTON);
         } else {
-            liste.add(STORAGE_BUTTON);
+            return List.of(STORAGE_BUTTON);
         }
-
-        return addUpgradeButtons(stack, liste);
     }
 
     @Override

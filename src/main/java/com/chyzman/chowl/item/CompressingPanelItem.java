@@ -167,7 +167,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
                     }).build()
             );
         }
-        return addUpgradeButtons(stack, returned);
+        return returned;
     }
 
     @Override
