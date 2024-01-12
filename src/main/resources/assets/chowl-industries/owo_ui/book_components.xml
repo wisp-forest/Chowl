@@ -108,5 +108,23 @@
                 </sizing>
             </flow-layout>
         </template>
+
+        <template name="blasting-photo">
+            <flow-layout direction="horizontal">
+                <children>
+                    <texture texture="chowl-industries:textures/gui/blasting.png" region-width="256" region-height="256">
+                        <tooltip-text>an unfortunate incident</tooltip-text>
+                        <sizing>
+                            <horizontal method="fixed">80</horizontal>
+                            <vertical method="fixed">80</vertical>
+                        </sizing>
+                    </texture>
+                </children>
+                <horizontal-alignment>center</horizontal-alignment>
+                <sizing>
+                    <horizontal method="fill">100</horizontal>
+                </sizing>
+            </flow-layout>
+        </template>
     </templates>
 </owo-ui>

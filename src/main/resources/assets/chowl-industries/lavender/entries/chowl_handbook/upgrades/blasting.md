@@ -18,8 +18,9 @@ Additionally, adding in {blue}Flint and Steel{} or a {blue}Fire Charge{} can add
 
 ;;;;;
 
-![an unfortunate incident](chowl-industries:textures/gui/blasting.png,fit)
+<|blasting-photo@chowl-industries:book_components|>
 
-*{gray}CHOWL® AND ALL SUBSIDIARIES ARE NOT LIABLE FOR ANY UNAUTHORIZED PROPERTY DAMAGE DIRECTLY OR INDIRECTLY CAUSED BY THE [BLASTING UPGRADE](^chowl-industries:upgrades/blasting).{}**
+
+*{gray}CHOWL® AND ALL SUBSIDIARIES ARE NOT LIABLE FOR ANY UNAUTHORIZED PROPERTY DAMAGE DIRECTLY OR INDIRECTLY CAUSED BY THE [BLASTING UPGRADE](^chowl-industries:upgrades/blasting).{}*
 
 *{gray}USE AT YOUR OWN RISK{}*
