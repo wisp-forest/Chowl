@@ -63,8 +63,6 @@ public class ChowlClient implements ClientModInitializer {
             ctx.resolveModel().register(context -> {
                 if (context.id().equals(id("block/drawer_frame"))) {
                     return new DrawerFrameBlockModel.Unbaked(id("block/drawer_frame_base"), id("block/drawer_frame_panels"));
-                } else if (context.id().equals(id("item/blank_panel"))) {
-                    return new BlankPanelItemModel.Unbaked(id("item/blank_panel_base"));
                 } else if (context.id().equals(id("item/phantom_panel"))) {
                     return new BlankPanelItemModel.Unbaked(id("item/phantom_panel_base"));
                 } else {
@@ -92,7 +90,7 @@ public class ChowlClient implements ClientModInitializer {
 
                 } else if (client.crosshairTarget instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK) {
                     var side = BlockSideUtils.getSide(blockHitResult);
-                    var selected = frame.stacks.get(side.getId()).getLeft();
+                    var selected = frame.stacks.get(side.getId()).stack;
                     if (!selected.isEmpty()) {
                         return selected.copy();
                     }

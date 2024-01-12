@@ -63,12 +63,12 @@ public interface UpgradeablePanelItem extends DisplayingPanelItem {
                         }
 
                         setUpgrades(useStack, upgrades);
-                        frame.stacks.set(useSide.getId(), new Pair<>(useStack, frame.stacks.get(useSide.getId()).getRight()));
+                        frame.stacks.set(useSide.getId(), frame.stacks.get(useSide.getId()).withStack(useStack));
                         frame.markDirty();
 
                         return ActionResult.SUCCESS;
                     })
-                    .onAttack((world, attackedDrawerFrame, attackedSide, attackedStack, player) -> {
+                    .onAttack((world, frame, attackedSide, attackedStack, player) -> {
                         if (!upgrades.get(finalI).isEmpty()) {
                             var upgrade = upgrades.get(finalI);
                             if (world.isClient) return ActionResult.SUCCESS;
@@ -78,8 +78,8 @@ public interface UpgradeablePanelItem extends DisplayingPanelItem {
                             return ActionResult.FAIL;
                         }
                         setUpgrades(attackedStack, upgrades);
-                        attackedDrawerFrame.stacks.set(attackedSide.getId(), new Pair<>(attackedStack, attackedDrawerFrame.stacks.get(attackedSide.getId()).getRight()));
-                        attackedDrawerFrame.markDirty();
+                        frame.stacks.set(attackedSide.getId(), frame.stacks.get(attackedSide.getId()).withStack(attackedStack));
+                        frame.markDirty();
                         return ActionResult.SUCCESS;
                     })
                     .renderWhen(ButtonRenderCondition.PANEL_FOCUSED)

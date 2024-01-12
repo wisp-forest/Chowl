@@ -84,7 +84,7 @@ public interface PanelItem {
                 }
 
                 player.getInventory().offerOrDrop(stack);
-                drawerFrame.stacks.set(side.getId(), new Pair<>(ItemStack.EMPTY, 0));
+                drawerFrame.stacks.set(side.getId(), DrawerFrameBlockEntity.SideState.empty());
                 drawerFrame.markDirty();
                 return ActionResult.SUCCESS;
             })
@@ -166,7 +166,7 @@ public interface PanelItem {
                     return ActionResult.PASS;
                 var side = BlockSideUtils.getSide(hit);
 
-                return use.onUse(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).getLeft(), player, hand);
+                return use.onUse(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).stack, player, hand);
             });
 
             return this;
@@ -180,7 +180,7 @@ public interface PanelItem {
                 if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrame))
                     return ActionResult.PASS;
 
-                return attack.onAttack(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).getLeft(), player);
+                return attack.onAttack(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).stack, player);
             });
 
             return this;
@@ -194,7 +194,7 @@ public interface PanelItem {
                 if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrame))
                     return ActionResult.PASS;
 
-                return doubleClick.onDoubleClick(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).getLeft(), player);
+                return doubleClick.onDoubleClick(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).stack, player);
             });
 
             return this;

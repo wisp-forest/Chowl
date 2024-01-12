@@ -57,8 +57,8 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
 
         for (int i = 0; i < entity.stacks.size(); i++) {
             Direction side = Direction.byId(i);
-            var stack = entity.stacks.get(i).getLeft();
-            var orientation = entity.stacks.get(i).getRight();
+            var stack = entity.stacks.get(i).stack;
+            var orientation = entity.stacks.get(i).orientation;
 
             if (!stack.isEmpty()) {
                 matrices.push();

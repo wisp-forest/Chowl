@@ -146,7 +146,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
 
 
                         player.getInventory().offerOrDrop(stack);
-                        drawerFrame.stacks.set(side.getId(), new Pair<>(ItemStack.EMPTY, 0));
+                        drawerFrame.stacks.set(side.getId(), DrawerFrameBlockEntity.SideState.empty());
                         drawerFrame.markDirty();
                         return ActionResult.SUCCESS;
                     })

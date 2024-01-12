@@ -1,7 +1,0 @@
-{
-	"credit": "Made by chyzman",
-	"parent": "chowl-industries:item/panel_base",
-	"textures": {
-		"0": "chowl-industries:item/blank_panel"
-	}
-}

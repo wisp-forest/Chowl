@@ -22,7 +22,6 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Pair;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -36,7 +35,7 @@ import java.util.List;
 
 public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageBlockEntity, FillingNbtBlockEntity {
 
-    public List<Pair<ItemStack, Integer>> stacks = new ArrayList<>(DefaultedList.ofSize(6, new Pair<>(ItemStack.EMPTY, 0)).stream().toList());
+    public List<SideState> stacks = new ArrayList<>(DefaultedList.ofSize(6, new SideState(ItemStack.EMPTY, 0, false)).stream().toList());
     public BlockState templateState = null;
     public VoxelShape outlineShape = DrawerFrameBlock.BASE;
     public VoxelShape collisionShape = DrawerFrameBlock.BASE;
@@ -67,23 +66,22 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     }
 
     public boolean isSideBaked(int sideId) {
-        var sideStack = stacks.get(sideId).getLeft();
+        var side = stacks.get(sideId);
 
-        if (templateState != null
-            && sideStack.getItem() instanceof PanelItem
-            && !DisplayingPanelItem.getConfig(sideStack).ignoreTemplating())
-            return true;
+        if (templateState != null && side.stack.getItem() instanceof PanelItem) {
+            if (!DisplayingPanelItem.getConfig(side.stack).ignoreTemplating()) return true;
+        }
 
-        return sideStack.isOf(ChowlRegistry.BLANK_PANEL_ITEM);
+        return side.isBlank;
     }
 
     private void updateShapes() {
         this.collisionShape = DrawerFrameBlock.BASE;
 
         for (int i = 0; i < stacks.size(); i++) {
-            var stack = stacks.get(i).getLeft();
+            var side = stacks.get(i);
 
-            if (stack.isEmpty() || stack.getItem() == ChowlRegistry.PHANTOM_PANEL_ITEM) continue;
+            if (side.isEmpty() || side.stack.getItem() == ChowlRegistry.PHANTOM_PANEL_ITEM) continue;
 
             this.collisionShape = VoxelShapes.union(this.collisionShape, DrawerFrameBlock.SIDES[i]);
         }
@@ -91,9 +89,9 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
         this.outlineShape = DrawerFrameBlock.BASE;
 
         for (int i = 0; i < stacks.size(); i++) {
-            var stack = stacks.get(i).getLeft();
+            var side = stacks.get(i);
 
-            if (stack.isEmpty()) continue;
+            if (side.isEmpty()) continue;
 
             this.outlineShape = VoxelShapes.union(this.outlineShape, DrawerFrameBlock.SIDES[i]);
         }
@@ -112,7 +110,11 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
         var nbtList = nbt.getList("Inventory", NbtElement.COMPOUND_TYPE);
         for (int i = 0; i < nbtList.size(); i++) {
             NbtCompound compound = (NbtCompound) nbtList.get(i);
-            stacks.set(i, new Pair<>(ItemStack.fromNbt(compound.getCompound("Stack")), compound.getInt("Orientation")));
+            stacks.set(i, new SideState(
+                ItemStack.fromNbt(compound.getCompound("Stack")),
+                compound.getInt("Orientation"),
+                compound.getBoolean("IsBlank")
+            ));
         }
 
         if (nbt.contains("TemplateState", NbtElement.COMPOUND_TYPE)) {
@@ -134,12 +136,15 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
             nbt.put("TemplateState", NbtHelper.fromBlockState(templateState));
     }
 
-    public static void writePanelsToNbt(List<Pair<ItemStack, Integer>> panels, NbtCompound nbt) {
+    public static void writePanelsToNbt(List<SideState> panels, NbtCompound nbt) {
         var nbtList = new NbtList();
         for (var stack : panels) {
             var compound = new NbtCompound();
-            compound.put("Stack", stack.getLeft().writeNbt(new NbtCompound()));
-            compound.putInt("Orientation", stack.getRight());
+
+            compound.put("Stack", stack.stack.writeNbt(new NbtCompound()));
+            compound.putInt("Orientation", stack.orientation);
+            compound.putBoolean("IsBlank", stack.isBlank);
+
             nbtList.add(compound);
         }
         nbt.put("Inventory", nbtList);
@@ -152,8 +157,8 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
 
     public void tick(World world, BlockPos pos, BlockState state) {
         if (world.isClient) return;
-        for (Pair<ItemStack, Integer> stored : stacks) {
-            if (stored.getLeft().isEmpty()) continue;
+        for (SideState stored : stacks) {
+            if (stored.stack.isEmpty()) continue;
 
         }
     }
@@ -171,18 +176,44 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
             }
 
             var newBottom = stacks.get(0);
-            if (newBottom.getRight() < 4 && newBottom.getRight() >= 0) {
-                newBottom.setRight(Math.floorMod(stacks.get(0).getRight() - ((int) (sides[0].asRotation() / 90) - 1), 4));
-                newPanels.set(0, newBottom);
+            if (newBottom.orientation < 4) {
+                if (newBottom.orientation >= 0) {
+                    newBottom.orientation = Math.floorMod(stacks.get(0).orientation - ((int) (sides[0].asRotation() / 90) - 1), 4);
+                    newPanels.set(0, newBottom);
+                }
             }
             var newTop = stacks.get(1);
-            if (newTop.getRight() < 4 && newTop.getRight() >= 0) {
-                newTop.setRight(Math.floorMod(stacks.get(1).getRight() - ((int) (sides[0].asRotation() / 90) - 1), 4));
+            if (newTop.orientation < 4 && newTop.orientation >= 0) {
+                newTop.orientation = Math.floorMod(stacks.get(1).orientation - ((int) (sides[0].asRotation() / 90) - 1), 4);
                 newPanels.set(1, newTop);
             }
 
             var subNbt = stack.getOrCreateSubNbt("BlockEntityTag");
             writePanelsToNbt(newPanels, subNbt);
+        }
+    }
+
+    public static final class SideState {
+        public ItemStack stack;
+        public int orientation;
+        public boolean isBlank;
+
+        public SideState(ItemStack stack, int orientation, boolean isBlank) {
+            this.stack = stack;
+            this.orientation = orientation;
+            this.isBlank = isBlank;
+        }
+
+        public static SideState empty() {
+            return new SideState(ItemStack.EMPTY, 0, false);
+        }
+
+        public SideState withStack(ItemStack stack) {
+            return new SideState(stack, orientation, isBlank);
+        }
+
+        public boolean isEmpty() {
+            return stack.isEmpty() && !isBlank;
         }
     }
 }

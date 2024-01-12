@@ -1,7 +1,7 @@
 ```json
 {
   "title": "Panels",
-  "icon": "chowl-industries:blank_panel"
+  "icon": "chowl-industries:drawer_panel"
 }
 ```
 

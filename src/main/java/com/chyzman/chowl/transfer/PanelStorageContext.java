@@ -76,14 +76,14 @@ class DrawerFrameContext implements PanelStorageContext {
 
     @Override
     public ItemStack stack() {
-        return drawerFrame.stacks.get(side.getId()).getLeft();
+        return drawerFrame.stacks.get(side.getId()).stack;
     }
 
     @Override
     public void setStack(ItemStack stack) {
-        var orientation = drawerFrame.stacks.get(side.getId()).getRight();
+        var old = drawerFrame.stacks.get(side.getId());
 
-        drawerFrame.stacks.set(side.getId(), new Pair<>(stack, orientation));
+        drawerFrame.stacks.set(side.getId(), old.withStack(stack));
     }
 
     @Override

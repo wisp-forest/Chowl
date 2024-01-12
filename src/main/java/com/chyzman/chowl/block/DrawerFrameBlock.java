@@ -10,6 +10,7 @@ import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.LockablePanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
+import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.PanelStorageContext;
 import com.chyzman.chowl.util.BlockSideUtils;
@@ -32,7 +33,6 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.Pair;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -97,7 +97,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 if (!world.isClient) {
                     var temp = stackInHand.copy();
                     temp.setCount(1);
-                    stacks.set(side.getId(), new Pair<>(temp, stacks.get(side.getId()).getRight()));
+                    stacks.set(side.getId(), stacks.get(side.getId()).withStack(temp));
                     stackInHand.decrement(1);
                     drawerFrame.markDirty();
                 }
@@ -111,7 +111,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
                 if (!world.isClient) {
                     player.getInventory().offerOrDrop(stack);
-                    stacks.set(side.getId(), new Pair<>(ItemStack.EMPTY, 0));
+                    stacks.set(side.getId(), DrawerFrameBlockEntity.SideState.empty());
                     drawerFrame.markDirty();
                 }
 
@@ -123,11 +123,11 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                     return ActionResult.PASS;
 
                 var side = BlockSideUtils.getSide(hitResult);
-                var selected = blockEntity.stacks.get(side.getId()).getLeft();
+                var selected = blockEntity.stacks.get(side.getId()).stack;
 
                 if (!world.isClient) {
                     player.getInventory().offerOrDrop(selected);
-                    blockEntity.stacks.set(side.getId(), new Pair<>(ItemStack.EMPTY, 0));
+                    blockEntity.stacks.set(side.getId(), DrawerFrameBlockEntity.SideState.empty());
                     blockEntity.markDirty();
                 }
 
@@ -136,20 +136,37 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             .renderWhen(ButtonRenderCondition.PANEL_FOCUSED)
             .renderer(ButtonRenderer.stack(Items.BARRIER.getDefaultStack()))
             .build();
+
+    public static final BlockButton FULL_REMOVE_BUTTON = BlockButton.builder(0, 0, 16, 16)
+        .onAttack((world, state, hitResult, player) -> {
+            if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
+                return ActionResult.PASS;
+
+            var side = BlockSideUtils.getSide(hitResult);
+            var selected = blockEntity.stacks.get(side.getId());
+
+            if (!world.isClient) {
+                player.getInventory().offerOrDrop(selected.stack);
+                blockEntity.stacks.set(side.getId(), DrawerFrameBlockEntity.SideState.empty());
+                blockEntity.markDirty();
+            }
+
+            return ActionResult.SUCCESS;
+        })
+        .build();
     public static final BlockButton CONFIG_BUTTON = BlockButton.builder(12, 14, 14, 16)
             .onUse((state, world, pos, player, hand, hitResult) -> {
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
                     return ActionResult.PASS;
 
                 var side = BlockSideUtils.getSide(hitResult);
-                var selected = blockEntity.stacks.get(side.getId()).getLeft();
+                var selected = blockEntity.stacks.get(side.getId()).stack;
 
                 if (!(selected.getItem() instanceof PanelItem panel)) return ActionResult.FAIL;
                 if (!panel.hasConfig()) return ActionResult.FAIL;
 
                 panel.openConfig(selected, player, newStack -> {
-                    var currentRotation = blockEntity.stacks.get(side.getId()).getRight();
-                    blockEntity.stacks.set(side.getId(), new Pair<>(newStack, currentRotation));
+                    blockEntity.stacks.set(side.getId(), blockEntity.stacks.get(side.getId()).withStack(newStack));
 
                     blockEntity.markDirty();
                 });
@@ -188,8 +205,8 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         if (!state.isOf(newState.getBlock())) {
             BlockEntity blockEntity = world.getBlockEntity(pos);
             if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
-                for (Pair<ItemStack, Integer> stack : drawerFrameBlockEntity.stacks) {
-                    ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), stack.getLeft());
+                for (DrawerFrameBlockEntity.SideState stack : drawerFrameBlockEntity.stacks) {
+                    ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), stack.stack);
                 }
             }
         }
@@ -286,16 +303,25 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             return res;
         }
         var blockEntity = world.getBlockEntity(pos);
-        if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
-            var stacks = drawerFrameBlockEntity.stacks;
+        if (blockEntity instanceof DrawerFrameBlockEntity frame) {
+            var stacks = frame.stacks;
             var stackInHand = player.getStackInHand(hand);
-            if (!stackInHand.isEmpty()) {
-                if (stacks.get(side.getId()).getLeft().isEmpty()) {
+            var sideStack = stacks.get(side.getId());
+            if (sideStack.isEmpty()) {
+                if (!stackInHand.isEmpty()) {
                     if (!world.isClient) {
                         var temp = ItemOps.singleCopy(stackInHand);
-                        stacks.set(side.getId(), new Pair<>(ItemOps.singleCopy(temp), orientation));
+                        stacks.set(side.getId(), new DrawerFrameBlockEntity.SideState(ItemOps.singleCopy(temp), orientation, false));
                         stackInHand.decrement(1);
-                        drawerFrameBlockEntity.markDirty();
+                        frame.markDirty();
+                        world.updateNeighbors(pos, this);
+                    }
+
+                    return ActionResult.SUCCESS;
+                } else {
+                    if (!world.isClient) {
+                        stacks.set(side.getId(), new DrawerFrameBlockEntity.SideState(ItemStack.EMPTY, orientation, true));
+                        frame.markDirty();
                         world.updateNeighbors(pos, this);
                     }
 
@@ -311,27 +337,32 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity blockEntity))
             return List.of();
 
-        var selected = blockEntity.stacks.get(side.getId()).getLeft();
+        var selected = blockEntity.stacks.get(side.getId());
 
         if (selected.isEmpty()) return List.of();
 
         List<BlockButton> buttons = new ArrayList<>();
-        buttons.add(REMOVE_BUTTON);
 
-        if (selected.getItem() instanceof LockablePanelItem) {
+        if (selected.isBlank || selected.stack.isOf(ChowlRegistry.PHANTOM_PANEL_ITEM)) {
+            buttons.add(FULL_REMOVE_BUTTON);
+        } else {
+            buttons.add(REMOVE_BUTTON);
+        }
+
+        if (selected.stack.getItem() instanceof LockablePanelItem) {
             buttons.add(LOCK_BUTTON);
         }
 
-        if (selected.getItem() instanceof PanelItem panelItem) {
+        if (selected.stack.getItem() instanceof PanelItem panelItem) {
             if (panelItem.hasConfig())
                 buttons.add(CONFIG_BUTTON);
 
-            if (selected.getItem() instanceof UpgradeablePanelItem upgradeable
-                && !DisplayingPanelItem.getConfig(selected).hideUpgrades()) {
-                upgradeable.addUpgradeButtons(selected, buttons);
+            if (selected.stack.getItem() instanceof UpgradeablePanelItem upgradeable
+                && !DisplayingPanelItem.getConfig(selected.stack).hideUpgrades()) {
+                upgradeable.addUpgradeButtons(selected.stack, buttons);
             }
 
-            buttons.addAll(panelItem.listButtons(blockEntity, side, blockEntity.stacks.get(side.getId()).getLeft()));
+            buttons.addAll(panelItem.listButtons(blockEntity, side, selected.stack));
         } else {
             buttons.add(DEFAULT_PANEL_BUTTON);
         }
@@ -375,7 +406,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         for (int i = 0; i < 6; i++) {
             var panelStack = frame.stacks.get(i);
 
-            if (!(panelStack.getLeft().getItem() instanceof PanelItem panel)) continue;
+            if (!(panelStack.stack.getItem() instanceof PanelItem panel)) continue;
 
             var storage = panel.getStorage(PanelStorageContext.from(frame, Direction.byId(i)));
 
@@ -398,7 +429,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
         var panelStack = frame.stacks.get(side.getOpposite().getId());
 
-        if (!(panelStack.getLeft().getItem() instanceof PanelItem panel)) return 0;
+        if (!(panelStack.stack.getItem() instanceof PanelItem panel)) return 0;
 
         var storage = panel.getStorage(PanelStorageContext.from(frame, side.getOpposite()));
 
@@ -416,7 +447,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         var blockEntity = world.getBlockEntity(hitResult.getBlockPos());
         if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
             var side = BlockSideUtils.getSide(hitResult);
-            return drawerFrameBlockEntity.stacks.get(side.getId()).getRight();
+            return drawerFrameBlockEntity.stacks.get(side.getId()).orientation;
         }
         return 0;
     }
