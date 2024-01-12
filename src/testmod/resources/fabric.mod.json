@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "chowl-industries-testmod",
+  "version": "${version}",
+  "name": "Chowl Industries TestMod",
+  "description": "The (self-proclaimed) test mod for the (self-proclaimed) best drawer mod",
+  "authors": [
+    "chyzman"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+    ],
+    "main": [
+    ]
+  },
+  "mixins": [
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

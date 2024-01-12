@@ -15,6 +15,13 @@ repositories {
     maven { url 'https://maven.cafeteria.dev/releases/' }
 }
 
+sourceSets {
+    testmod {
+        runtimeClasspath += main.runtimeClasspath
+        compileClasspath += main.compileClasspath
+    }
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
@@ -40,11 +47,26 @@ dependencies {
     modImplementation include("eu.pb4:common-protection-api:${project.cpa_version}")
 
     modImplementation include("me.luligabi:NoIndium:${project.no_indium_version}")
+
+    testmodImplementation sourceSets.main.output
 }
 
 
 
 processResources {
+    inputs.property "version", project.version
+    inputs.property "minecraft_version", project.minecraft_version
+    inputs.property "loader_version", project.loader_version
+    filteringCharset "UTF-8"
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version,
+                "minecraft_version": project.minecraft_version,
+                "loader_version": project.loader_version
+    }
+}
+
+processTestmodResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.minecraft_version
     inputs.property "loader_version", project.loader_version
@@ -75,6 +97,21 @@ java {
 }
 
 loom {
+    runs {
+        testmodClient {
+            client()
+            ideConfigGenerated project.rootProject == project
+            name = "Testmod Client"
+            source sourceSets.testmod
+        }
+        testmodServer {
+            server()
+            ideConfigGenerated project.rootProject == project
+            name = "Testmod Server"
+            source sourceSets.testmod
+        }
+    }
+
     accessWidenerPath = file("src/main/resources/chowl.accesswidener")
 
     runs {
