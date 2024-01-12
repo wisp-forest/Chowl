@@ -6,7 +6,7 @@
 }
 ```
 
-The storage panels' default limit of 2048 items can be freakishly low for your {blue}Cobblestone{} storage needs.
+The storage panels' default storage limit can be freakishly low for your {blue}Cobblestone{} storage needs.
 
 Putting two panels with equivalent items and capacities in a {blue}Crafting Table{} will merge them into a panel with
 twice the storage, keeping all your upgrades and items!
