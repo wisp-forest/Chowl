@@ -62,6 +62,16 @@ public class AccessPanelItem extends BasePanelItem implements UpgradeablePanelIt
     }
 
     @Override
+    public boolean supportsHideItem() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsHideName() {
+        return false;
+    }
+
+    @Override
     public boolean canExtractFromButton() {
         return false;
     }

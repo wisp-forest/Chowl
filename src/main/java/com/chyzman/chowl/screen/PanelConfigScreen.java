@@ -5,6 +5,7 @@ import com.chyzman.chowl.client.DisableableCheckboxComponent;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.FilteringPanelItem;
 import com.chyzman.chowl.item.component.LockablePanelItem;
+import com.chyzman.chowl.item.component.UpgradeablePanelItem;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.ItemComponent;
@@ -68,7 +69,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
             }
         }
 
-        if (stack.getItem() instanceof DisplayingPanelItem) {
+        if (stack.getItem() instanceof DisplayingPanelItem displaying) {
             var config = DisplayingPanelItem.getConfig(stack);
 
             this.showCountCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_count"));
@@ -79,21 +80,27 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
             showCapacityCheckBox.checked(!config.hideCapacity());
             showCapacityCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
 
-            this.showItemCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_item"));
-            showItemCheckBox.checked(!config.hideItem());
-            showItemCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
+            if (displaying.supportsHideItem()) {
+                this.showItemCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_item"));
+                showItemCheckBox.checked(!config.hideItem());
+                showItemCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
+            }
 
-            this.showNameCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_name"));
-            showNameCheckBox.checked(!config.hideName());
-            showNameCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
+            if (displaying.supportsHideName()) {
+                this.showNameCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_name"));
+                showNameCheckBox.checked(!config.hideName());
+                showNameCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
+            }
 
             this.showPercentageCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_percentage"));
             showPercentageCheckBox.checked(config.showPercentage());
             showPercentageCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
 
-            this.hideUpgradesCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.hide_upgrades"));
-            hideUpgradesCheckBox.checked(config.hideUpgrades());
-            hideUpgradesCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
+            if (stack.getItem() instanceof UpgradeablePanelItem) {
+                this.hideUpgradesCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.hide_upgrades"));
+                hideUpgradesCheckBox.checked(config.hideUpgrades());
+                hideUpgradesCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
+            }
 
             this.hideButtonsCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.hide_buttons"));
             hideButtonsCheckBox.checked(config.hideButtons());

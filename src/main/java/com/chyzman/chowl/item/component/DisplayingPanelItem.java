@@ -22,6 +22,14 @@ public interface DisplayingPanelItem extends PanelItem {
         return new Config();
     }
 
+    default boolean supportsHideItem() {
+        return true;
+    }
+
+    default boolean supportsHideName() {
+        return true;
+    }
+
     static Config getConfig(ItemStack stack) {
         if (!stack.has(CONFIG)) {
             if (stack.getItem() instanceof DisplayingPanelItem displaying) {
