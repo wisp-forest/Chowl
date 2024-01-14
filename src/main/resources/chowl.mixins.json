@@ -5,17 +5,20 @@
     "plugin": "com.chyzman.chowl.asm.ChowlMixinPlugin",
     "compatibilityLevel": "JAVA_17",
     "mixins": [
+        "BlockItemMixin",
         "ComparatorBlockMixin",
         "DataPackContentsMixin",
         "EntityMixin",
         "ItemEntityMixin",
         "LivingEntityMixin",
+        "PlayerEntityMixin",
         "ServerPlayNetworkHandlerMixin",
         "ServerWorldMixin",
         "lavender.EntryMixin",
         "lavender.LavenderBookScreenAccessor"
     ],
     "client": [
+        "client.ClientPlayerInteractionManagerMixin",
         "client.ClientPlayNetworkHandlerMixin",
         "client.HeldItemRendererMixin",
         "client.MinecraftClientMixin",

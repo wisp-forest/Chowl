@@ -26,6 +26,7 @@ import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.IntProperty;
@@ -54,7 +55,7 @@ import java.util.function.ToIntFunction;
 import static com.chyzman.chowl.item.component.LockablePanelItem.LOCK_BUTTON;
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
-public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver, SidedComparatorOutput, ExtendedParticleSpriteBlock {
+public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver, SidedComparatorOutput, ExtendedParticleSpriteBlock, ExtendedSoundGroupBlock {
 
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
     public static final IntProperty LIGHT_LEVEL = Properties.LEVEL_15;
@@ -468,5 +469,13 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         if (frame.templateState == null) return state;
 
         return frame.templateState;
+    }
+
+    @Override
+    public BlockSoundGroup getSoundGroup(World world, BlockPos pos, BlockState state) {
+        if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame)) return getSoundGroup(state);
+        if (frame.templateState == null) return getSoundGroup(state);
+
+        return frame.templateState.getSoundGroup();
     }
 }
