@@ -54,7 +54,7 @@ import java.util.function.ToIntFunction;
 import static com.chyzman.chowl.item.component.LockablePanelItem.LOCK_BUTTON;
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
-public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver, SidedComparatorOutput {
+public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver, SidedComparatorOutput, ExtendedParticleSpriteBlock {
 
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
     public static final IntProperty LIGHT_LEVEL = Properties.LEVEL_15;
@@ -141,6 +141,8 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         .onAttack((world, state, hitResult, player) -> {
             if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
                 return ActionResult.PASS;
+
+            if (!player.isSneaking()) return ActionResult.PASS;
 
             var side = BlockSideUtils.getSide(hitResult);
             var selected = blockEntity.stacks.get(side.getId());
@@ -458,5 +460,13 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         if (state.get(WATERLOGGED)) {
             world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
         }
+    }
+
+    @Override
+    public BlockState getParticleState(World world, BlockPos pos, BlockState state) {
+        if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame)) return state;
+        if (frame.templateState == null) return state;
+
+        return frame.templateState;
     }
 }

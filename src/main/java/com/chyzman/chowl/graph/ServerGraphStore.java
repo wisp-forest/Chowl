@@ -6,7 +6,6 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -16,7 +15,6 @@ import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.PersistentState;
 import org.jetbrains.annotations.Nullable;
 
@@ -102,9 +100,11 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
 
         graph.removeAndSplitBy(node);
 
-        if (graph.nodes.size() == 0) {
+        if (graph.nodes.isEmpty()) {
             graphs.remove(graphId);
             graph.syncRemove();
+        } else {
+            graph.sync();
         }
     }
 
@@ -114,6 +114,7 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
             UUID linkGraphId = blockToGraph.get(link.asLong());
 
             if (linkGraphId == null) continue;
+            if (!graphs.containsKey(linkGraphId)) continue;
 
             graphId = linkGraphId;
             break;
@@ -154,7 +155,7 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
 
     public class GraphEntry implements GraphStore.Graph {
         public final UUID graphId;
-        public final Long2ObjectOpenHashMap<GraphNodeEntry> nodes;
+        public Long2ObjectOpenHashMap<GraphNodeEntry> nodes;
         private boolean needsSync = false;
 
         public GraphEntry(UUID graphId, Long2ObjectOpenHashMap<GraphNodeEntry> nodes) {
@@ -249,19 +250,51 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
                 other.links().remove(node.pos().asLong());
             }
 
-            if (nodes.size() == 0) return;
+            if (nodes.isEmpty()) return;
 
-            while (nodes.size() > 0) {
-                var graphEntries = new Long2ObjectOpenHashMap<GraphNodeEntry>();
-                nodes.long2ObjectEntrySet().iterator().next().getValue().dfs(graphEntries, nodes);
+            Queue<GraphNodeEntry> queue = new ArrayDeque<>();
+
+            var first = bfs(nodes.values().iterator().next(), queue);
+
+            while (!nodes.isEmpty()) {
+                var graphEntries = bfs(nodes.values().iterator().next(), queue);
 
                 var graph = new GraphEntry(UUID.randomUUID(), graphEntries);
                 for (var subEntry : graphEntries.values()) {
                     ServerGraphStore.this.blockToGraph.put(subEntry.pos.asLong(), graph.graphId);
                 }
+
                 graph.sync();
                 ServerGraphStore.this.graphs.put(graph.graphId, graph);
             }
+
+            this.nodes = first;
+        }
+
+        private Long2ObjectOpenHashMap<GraphNodeEntry> bfs(GraphNodeEntry from, Queue<GraphNodeEntry> queue) {
+            queue.clear();
+            queue.add(from);
+            var collected = new Long2ObjectOpenHashMap<GraphNodeEntry>();
+
+            collected.put(from.pos.asLong(), from);
+            nodes.remove(from.pos.asLong());
+
+            while (!queue.isEmpty()) {
+                var entry = queue.remove();
+
+                for (var link : entry.links) {
+                    if (collected.containsKey(link.longValue())) continue;
+
+                    var linked = nodes.get(link.longValue());
+                    if (linked == null) continue;
+
+                    queue.add(linked);
+                    collected.put(entry.pos.asLong(), entry);
+                    nodes.remove(entry.pos.asLong());
+                }
+            }
+
+            return collected;
         }
 
         @Override
@@ -271,7 +304,6 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
     }
 
     public record GraphNodeEntry(BlockPos pos, BlockState state, LongSet links) implements GraphStore.GraphNode {
-
         public static GraphNodeEntry read(NbtCompound tag) {
             BlockPos pos = BlockPos.fromLong(tag.getLong("Pos"));
             BlockState state = NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), tag.getCompound("State"));
@@ -285,20 +317,6 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
             tag.put("State", NbtHelper.fromBlockState(state));
             tag.putLongArray("Links", links.toLongArray());
             return tag;
-        }
-
-        private void dfs(Long2ObjectMap<GraphNodeEntry> visited, Long2ObjectMap<GraphNodeEntry> removeFrom) {
-            visited.put(pos.asLong(), this);
-            removeFrom.remove(pos.asLong());
-
-            for (var link : links) {
-                if (visited.containsKey(link.longValue())) continue;
-
-                var linked = removeFrom.get(link.longValue());
-                if (linked == null) continue;
-
-                linked.dfs(visited, removeFrom);
-            }
         }
     }
 }

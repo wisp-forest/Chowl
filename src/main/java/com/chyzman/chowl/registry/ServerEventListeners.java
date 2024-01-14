@@ -15,8 +15,12 @@ public class ServerEventListeners {
                 var state = world.getBlockState(pos);
                 if (state.getBlock() instanceof DrawerFrameBlock &&
                         world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
-                    if (player.getStackInHand(hand).getItem() instanceof BlockItem blockItem && !player.isSneaking()) {
-                        var targetState = blockItem.getBlock().getPlacementState(new ItemPlacementContext(player, hand, player.getStackInHand(hand), hitResult));
+                    var handStack = player.getStackInHand(hand);
+
+                    if (handStack.getItem() instanceof BlockItem blockItem
+                        && !handStack.isOf(ChowlRegistry.DRAWER_FRAME_ITEM)
+                        && !player.isSneaking()) {
+                        var targetState = blockItem.getBlock().getPlacementState(new ItemPlacementContext(player, hand, handStack, hitResult));
                         if (drawerFrameBlockEntity.templateState != targetState && targetState != null) {
                             drawerFrameBlockEntity.templateState = targetState;
                             world.setBlockState(pos, state.with(DrawerFrameBlock.LIGHT_LEVEL, targetState.getLuminance()));

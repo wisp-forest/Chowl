@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
 import net.fabricmc.fabric.api.renderer.v1.material.RenderMaterial;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
+import net.fabricmc.fabric.api.util.TriState;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayers;
@@ -51,6 +52,7 @@ public class RetextureInfo {
         this.material = RendererAccess.INSTANCE.getRenderer()
             .materialFinder()
             .blendMode(BlendMode.fromRenderLayer(RenderLayers.getBlockLayer(template)))
+            .ambientOcclusion(templateModel.useAmbientOcclusion() && template.getLuminance() == 0 ? TriState.TRUE : TriState.FALSE)
             .find();
     }
 

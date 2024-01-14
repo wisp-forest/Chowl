@@ -7,7 +7,9 @@
     "mixins": [
         "ComparatorBlockMixin",
         "DataPackContentsMixin",
+        "EntityMixin",
         "ItemEntityMixin",
+        "LivingEntityMixin",
         "ServerPlayNetworkHandlerMixin",
         "ServerWorldMixin",
         "lavender.EntryMixin",
@@ -17,6 +19,7 @@
         "client.ClientPlayNetworkHandlerMixin",
         "client.HeldItemRendererMixin",
         "client.MinecraftClientMixin",
+        "client.ParticleManagerMixin",
         "client.sodium.AABBConstructingVertexConsumerMixin",
         "lavender.LandingPageSupplierMixin",
         "lavender.PageSupplierMixin"

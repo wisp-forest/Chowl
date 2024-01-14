@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.2-SNAPSHOT'
+    id 'fabric-loom' version '1.5-SNAPSHOT'
     id 'maven-publish'
     id 'io.github.juuxel.loom-quiltflower' version '1.7.1'
 }
@@ -34,9 +34,6 @@ dependencies {
     }
 
     include("io.wispforest:owo-sentinel:${project.owo_version}")
-
-    annotationProcessor modImplementation("com.github.LlamaLad7:MixinExtras:${project.me_version}")
-    include "com.github.LlamaLad7:MixinExtras:${project.me_version}"
 
     modCompileOnly "maven.modrinth:sodium:${project.sodium_version}"
 

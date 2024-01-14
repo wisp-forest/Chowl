@@ -60,6 +60,15 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
             var stack = entity.stacks.get(i).stack;
             var orientation = entity.stacks.get(i).orientation;
 
+            boolean panelFocused = blockFocused && BlockSideUtils.getSide(hitResult).equals(side);
+
+            if (entity.stacks.get(i).isBlank && panelFocused) {
+                frameOutline = false;
+                var shape = Block.createCuboidShape(0, 16, 0, 16, 32, 16);
+                WorldRenderer.drawShapeOutline(matrices, client.getBufferBuilders().getOutlineVertexConsumers().getBuffer(RenderLayer.LINES), shape, 0, -1, 0, 0f, 0f, 0f, 0.4f, false);
+                continue;
+            }
+
             if (!stack.isEmpty()) {
                 matrices.push();
                 matrices.translate(0.5, 0.5, 0.5);
@@ -125,7 +134,6 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                 matrices.pop();
 
                 var customization = DisplayingPanelItem.getConfig(stack);
-                boolean panelFocused = blockFocused && BlockSideUtils.getSide(hitResult).equals(side);
 
                 if (entity.getWorld() != null && (customization == null || !customization.hideButtons())) {
                     var buttonProvider = (BlockButtonProvider) entity.getCachedState().getBlock();
