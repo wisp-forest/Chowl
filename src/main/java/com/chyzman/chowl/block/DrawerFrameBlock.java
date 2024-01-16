@@ -22,9 +22,14 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.state.StateManager;
@@ -477,5 +482,15 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         if (frame.templateState == null) return getSoundGroup(state);
 
         return frame.templateState.getSoundGroup();
+    }
+
+    @Override
+    public BlockSoundGroup getSoundGroup(World world, BlockPos pos, BlockState state, ItemStack stack) {
+        NbtCompound tag = BlockItem.getBlockEntityNbt(stack);
+        
+        if (tag == null) return getSoundGroup(state);
+        if (!tag.contains("TemplateState", NbtElement.COMPOUND_TYPE)) return getSoundGroup(state);
+
+        return NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), tag.getCompound("TemplateState")).getSoundGroup();
     }
 }

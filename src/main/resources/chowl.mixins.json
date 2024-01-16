@@ -23,6 +23,7 @@
         "client.HeldItemRendererMixin",
         "client.MinecraftClientMixin",
         "client.ParticleManagerMixin",
+        "client.WorldRendererMixin",
         "client.sodium.AABBConstructingVertexConsumerMixin",
         "lavender.LandingPageSupplierMixin",
         "lavender.PageSupplierMixin"
