@@ -221,7 +221,9 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
 
                 var linkGraphId = ServerGraphStore.this.blockToGraph.get(linkPos.asLong());
                 if (linkGraphId != null && linkGraphId != graphId) {
-                    mergeIn(ServerGraphStore.this.graphs.get(linkGraphId));
+                    GraphEntry linkGraph = ServerGraphStore.this.graphs.get(linkGraphId);
+
+                    if (linkGraph != null) mergeIn(linkGraph);
                 }
 
                 var other = nodes.get(linkPos.asLong());
@@ -289,8 +291,8 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
                     if (linked == null) continue;
 
                     queue.add(linked);
-                    collected.put(entry.pos.asLong(), entry);
-                    nodes.remove(entry.pos.asLong());
+                    collected.put(link.longValue(), linked);
+                    nodes.remove(link.longValue());
                 }
             }
 
