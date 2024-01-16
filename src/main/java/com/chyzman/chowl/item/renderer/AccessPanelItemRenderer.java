@@ -94,7 +94,7 @@ public class AccessPanelItemRenderer extends GenericPanelItemRenderer {
 
         matrices.pop();
 
-        if (customization.showPercentage() && RenderGlobals.IN_FRAME) {
+        if (customization.showPercentage() && RenderGlobals.IN_FRAME && !capacity.equals(BigInteger.ZERO)) {
             var fullPercent = new BigDecimal(count).divide(new BigDecimal(capacity), MathContext.DECIMAL32).multiply(BigDecimal.valueOf(100)).doubleValue();
             Double roundedPercent = (double) Math.round(fullPercent * 100) / 100;
             var percent = roundedPercent + "%";
