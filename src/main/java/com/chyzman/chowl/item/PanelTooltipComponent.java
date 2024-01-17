@@ -6,11 +6,11 @@ import com.chyzman.chowl.item.component.UpgradeablePanelItem;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.FakeStorageView;
 import com.chyzman.chowl.transfer.PanelStorageContext;
-import com.chyzman.chowl.util.CompressionManager;
 import io.wispforest.owo.ui.base.BaseOwoTooltipComponent;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
+import io.wispforest.owo.ui.core.Component;
 import io.wispforest.owo.ui.core.Insets;
 import io.wispforest.owo.ui.core.Sizing;
 import io.wispforest.owo.ui.core.VerticalAlignment;
@@ -33,34 +33,48 @@ public class PanelTooltipComponent extends BaseOwoTooltipComponent<FlowLayout> {
             var flow = Containers.verticalFlow(Sizing.content(), Sizing.content());
             if (stack.getItem() instanceof DisplayingPanelItem panel) {
                 var storage = panel.getStorage(PanelStorageContext.forRendering(stack));
-                if (storage != null && !storage.getSlots().isEmpty() && !storage.getSlot(0).isResourceBlank()) {
+                if (storage != null && !storage.getSlots().isEmpty()) {
                     var filterFlow = Containers.verticalFlow(Sizing.content(), Sizing.content());
+
                     filterFlow.margins(Insets.bottom(2));
                     filterFlow.child(Components.label(Text.translatable("ui.chowl-industries.panel.tooltip.contained.label")));
+
                     List<StorageView<ItemVariant>> slots = new ArrayList<>(storage.getSlots());
+
                     slots.removeIf(x -> x instanceof FakeStorageView);
+
                     for (StorageView<ItemVariant> slot : slots) {
                         var item = slot.getResource();
                         var currentFilter = Containers.horizontalFlow(Sizing.content(), Sizing.content());
-                        currentFilter.child(Components.item(item.toStack())
+
+                        Component filterComponent = item.isBlank()
+                            ? Components.label(Text.literal("?"))
+                            : Components.item(item.toStack());
+
+                        currentFilter.child(filterComponent
                                 .margins(Insets.right(2))
                                 .sizing(Sizing.fixed(MinecraftClient.getInstance().textRenderer.fontHeight)));
                         BigInteger count = BigStorageView.bigAmount(slot);
-                        if (count.compareTo(BigInteger.ZERO) > 0) {
-                            StringBuilder countText = new StringBuilder();
-                            countText.append(count);
-                            if (panel instanceof CapacityLimitedPanelItem cap && cap.capacity(stack).signum() > 0) {
-                                countText.append("/").append(formatCount(BigStorageView.bigCapacity(slot)));
-                            }
-                            currentFilter.child(Components.label(Text.of(countText.toString())));
+
+                        StringBuilder countText = new StringBuilder();
+                        countText.append(count);
+                        if (panel instanceof CapacityLimitedPanelItem cap && cap.capacity(stack).signum() > 0) {
+                            countText.append("/").append(formatCount(BigStorageView.bigCapacity(slot)));
                         }
+                        currentFilter.child(Components.label(Text.of(countText.toString())));
+
                         filterFlow.child(currentFilter);
                     }
+
                     flow.child(filterFlow);
                 }
             }
+
             if (stack.getItem() instanceof UpgradeablePanelItem panel) {
-                var upgrades = panel.upgrades(stack).stream().filter(stack1 -> !stack1.isEmpty()).toList();
+                var upgrades = panel.upgrades(stack);
+
+                upgrades.removeIf(ItemStack::isEmpty);
+
                 if (!upgrades.isEmpty()) {
                     var upgradesFlow = Containers.verticalFlow(Sizing.content(), Sizing.content());
                     upgradesFlow.margins(Insets.bottom(2));
@@ -72,6 +86,7 @@ public class PanelTooltipComponent extends BaseOwoTooltipComponent<FlowLayout> {
                     flow.child(upgradesFlow);
                 }
             }
+
             return flow;
         });
     }

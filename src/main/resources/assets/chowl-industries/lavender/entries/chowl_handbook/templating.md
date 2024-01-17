@@ -10,7 +10,7 @@ forgo the classic Oak Log grain in favor of a different block.
 
 
 With the power of the patented ChowlTech Morphing™ technology, swapping out the texture is as easy as trying to place
-a block where your frame is. Any attached [Blank Panels](^chowl-industries:panels/blank_panel) are also retextured.
+a block where your frame is. Any attached [panels](^chowl-industries:panels) are also retextured.
 
 ;;;;;
 
