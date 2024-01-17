@@ -33,7 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageBlockEntity, FillingNbtBlockEntity {
+public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageBlockEntity {
 
     public List<SideState> stacks = new ArrayList<>(DefaultedList.ofSize(6, new SideState(ItemStack.EMPTY, 0, false)).stream().toList());
     public BlockState templateState = null;
@@ -163,35 +163,35 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
         }
     }
 
-    @Override
-    public void fillNbt(ItemStack stack, ServerPlayerEntity player) {
-        super.setStackNbt(stack);
-
-        var sides = Direction.getEntityFacingOrder(player);
-        var newPanels = new ArrayList<>(stacks);
-        if (sides[0].getAxis().isHorizontal()) {
-            for (int i = 2; i < 6; i++) {
-                var direction = Direction.fromRotation(360 - Direction.byId(i).asRotation() - sides[0].asRotation());
-                newPanels.set(i, stacks.get(((direction == Direction.EAST || direction == Direction.WEST) ? direction: direction.getOpposite()).getId()));
-            }
-
-            var newBottom = stacks.get(0);
-            if (newBottom.orientation < 4) {
-                if (newBottom.orientation >= 0) {
-                    newBottom.orientation = Math.floorMod(stacks.get(0).orientation - ((int) (sides[0].asRotation() / 90) - 1), 4);
-                    newPanels.set(0, newBottom);
-                }
-            }
-            var newTop = stacks.get(1);
-            if (newTop.orientation < 4 && newTop.orientation >= 0) {
-                newTop.orientation = Math.floorMod(stacks.get(1).orientation - ((int) (sides[0].asRotation() / 90) - 1), 4);
-                newPanels.set(1, newTop);
-            }
-
-            var subNbt = stack.getOrCreateSubNbt("BlockEntityTag");
-            writePanelsToNbt(newPanels, subNbt);
-        }
-    }
+//    @Override
+//    public void fillNbt(ItemStack stack, ServerPlayerEntity player) {
+//        super.setStackNbt(stack);
+//
+//        var sides = Direction.getEntityFacingOrder(player);
+//        var newPanels = new ArrayList<>(stacks);
+//        if (sides[0].getAxis().isHorizontal()) {
+//            for (int i = 2; i < 6; i++) {
+//                var direction = Direction.fromRotation(360 - Direction.byId(i).asRotation() - sides[0].asRotation());
+//                newPanels.set(i, stacks.get(((direction == Direction.EAST || direction == Direction.WEST) ? direction: direction.getOpposite()).getId()));
+//            }
+//
+//            var newBottom = stacks.get(0);
+//            if (newBottom.orientation < 4) {
+//                if (newBottom.orientation >= 0) {
+//                    newBottom.orientation = Math.floorMod(stacks.get(0).orientation - ((int) (sides[0].asRotation() / 90) - 1), 4);
+//                    newPanels.set(0, newBottom);
+//                }
+//            }
+//            var newTop = stacks.get(1);
+//            if (newTop.orientation < 4 && newTop.orientation >= 0) {
+//                newTop.orientation = Math.floorMod(stacks.get(1).orientation - ((int) (sides[0].asRotation() / 90) - 1), 4);
+//                newPanels.set(1, newTop);
+//            }
+//
+//            var subNbt = stack.getOrCreateSubNbt("BlockEntityTag");
+//            writePanelsToNbt(newPanels, subNbt);
+//        }
+//    }
 
     public static final class SideState {
         public ItemStack stack;

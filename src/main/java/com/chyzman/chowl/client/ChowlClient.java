@@ -58,7 +58,7 @@ public class ChowlClient implements ClientModInitializer {
             ctx.addModels(id("item/drawer_panel_base"), id("item/mirror_panel_base"),
                     id("block/drawer_frame_base"), id("item/compressing_panel_base"),
                     id("item/access_panel_base"), id("block/drawer_frame"),
-                    id("item/cog"));
+                    id("item/cog"), id("item/lock"));
 
             ctx.resolveModel().register(context -> {
                 if (context.id().equals(id("block/drawer_frame"))) {
