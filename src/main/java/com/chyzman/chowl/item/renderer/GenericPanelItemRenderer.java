@@ -75,7 +75,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
         matrices.push();
 
         List<StorageView<ItemVariant>> slots = new ArrayList<>(storage.getSlots());
-        slots.removeIf(x -> x instanceof FakeStorageView);
+        slots.removeIf(x -> (x instanceof FakeStorageView fake && !fake.countInDisplay()));
 
         matrices.scale(3 / 4f, 3 / 4f, 3 / 4f);
 

@@ -4,6 +4,7 @@ import com.chyzman.chowl.client.RenderGlobals;
 import com.chyzman.chowl.item.AccessPanelItem;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.transfer.BigStorageView;
+import com.chyzman.chowl.transfer.FakeStorageView;
 import com.chyzman.chowl.transfer.PanelStorageContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -47,6 +48,8 @@ public class AccessPanelItemRenderer extends GenericPanelItemRenderer {
 
         for (int i = 0; i < storage.getSlotCount(); i++) {
             var slot = storage.getSlot(i);
+
+            if (slot instanceof FakeStorageView fake && !fake.countInTotalStorage()) continue;
 
             count = count.add(BigStorageView.bigAmount(slot));
             capacity = capacity.add(BigStorageView.bigCapacity(slot));

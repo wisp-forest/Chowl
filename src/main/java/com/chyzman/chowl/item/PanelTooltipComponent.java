@@ -41,7 +41,7 @@ public class PanelTooltipComponent extends BaseOwoTooltipComponent<FlowLayout> {
 
                     List<StorageView<ItemVariant>> slots = new ArrayList<>(storage.getSlots());
 
-                    slots.removeIf(x -> x instanceof FakeStorageView);
+                    slots.removeIf(x -> x instanceof FakeStorageView fake && !fake.countInDisplay());
 
                     for (StorageView<ItemVariant> slot : slots) {
                         var item = slot.getResource();
