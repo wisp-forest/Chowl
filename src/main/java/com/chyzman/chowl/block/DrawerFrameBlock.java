@@ -10,6 +10,7 @@ import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.LockablePanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
+import com.chyzman.chowl.pond.ShapeContextExtended;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.PanelStorageContext;
@@ -272,6 +273,8 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         if (context.isHolding(asItem())) return VoxelShapes.fullCube();
+        if (((ShapeContextExtended) context).isHolding(stack -> stack.getItem() instanceof PanelItem)) return VoxelShapes.fullCube();
+
         if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame)) return BASE;
 
         return frame.outlineShape;
