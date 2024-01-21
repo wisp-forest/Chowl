@@ -162,6 +162,27 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
             return ActionResult.SUCCESS;
         })
+        .onDoubleClick((world, state, hitResult, player) -> {
+            if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
+                return ActionResult.PASS;
+
+            boolean changed = false;
+            for (int i = 0; i < 6; i++) {
+                if (!blockEntity.stacks.get(i).isEmpty()) continue;
+
+                if (world.isClient) return ActionResult.SUCCESS;
+
+                changed = true;
+                blockEntity.stacks.set(i, new DrawerFrameBlockEntity.SideState(ItemStack.EMPTY, 0, true));
+            }
+
+            if (changed) {
+                blockEntity.markDirty();
+                return ActionResult.SUCCESS;
+            } else {
+                return ActionResult.PASS;
+            }
+        })
         .build();
     public static final BlockButton CONFIG_BUTTON = BlockButton.builder(12, 14, 14, 16)
             .onUse((state, world, pos, player, hand, hitResult) -> {
