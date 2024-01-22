@@ -51,8 +51,6 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public boolean canSetFilter(ItemStack stack, ItemVariant to) {
-        if (stack.getOr(VARIANT, ItemVariant.blank()).equals(to)) return true;
-
         return stack.getOr(COUNT, BigInteger.ZERO).signum() == 0;
     }
 

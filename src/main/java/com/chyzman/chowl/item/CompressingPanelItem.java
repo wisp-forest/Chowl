@@ -49,10 +49,6 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
     public boolean canSetFilter(ItemStack stack, ItemVariant to) {
         if (to.getNbt() != null && !to.getNbt().isEmpty()) return false;
 
-        var baseTo = CompressionManager.followDown(to.getItem()).item();
-
-        if (stack.getOr(ITEM, Items.AIR).equals(baseTo)) return true;
-
         return stack.getOr(COUNT, BigInteger.ZERO).signum() == 0;
     }
 
