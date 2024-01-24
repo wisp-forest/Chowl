@@ -37,6 +37,8 @@ import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
 public class ChowlClient implements ClientModInitializer {
 
+    public static float breakingProgressWorkaround = 0;
+
     @Override
     public void onInitializeClient() {
         ClientEventListeners.init();

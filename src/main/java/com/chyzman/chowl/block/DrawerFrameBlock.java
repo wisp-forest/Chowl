@@ -43,6 +43,7 @@ import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
@@ -145,45 +146,45 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             .build();
 
     public static final BlockButton FULL_REMOVE_BUTTON = BlockButton.builder(0, 0, 16, 16)
-        .onAttack((world, state, hitResult, player) -> {
-            if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
-                return ActionResult.PASS;
+            .onAttack((world, state, hitResult, player) -> {
+                if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
+                    return ActionResult.PASS;
 
-            if (!player.isSneaking()) return ActionResult.PASS;
+                if (!player.isSneaking()) return ActionResult.PASS;
 
-            var side = BlockSideUtils.getSide(hitResult);
-            var selected = blockEntity.stacks.get(side.getId());
+                var side = BlockSideUtils.getSide(hitResult);
+                var selected = blockEntity.stacks.get(side.getId());
 
-            if (!world.isClient) {
-                player.getInventory().offerOrDrop(selected.stack);
-                blockEntity.stacks.set(side.getId(), DrawerFrameBlockEntity.SideState.empty());
-                blockEntity.markDirty();
-            }
+                if (!world.isClient) {
+                    player.getInventory().offerOrDrop(selected.stack);
+                    blockEntity.stacks.set(side.getId(), DrawerFrameBlockEntity.SideState.empty());
+                    blockEntity.markDirty();
+                }
 
-            return ActionResult.SUCCESS;
-        })
-        .onDoubleClick((world, state, hitResult, player) -> {
-            if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
-                return ActionResult.PASS;
-
-            boolean changed = false;
-            for (int i = 0; i < 6; i++) {
-                if (!blockEntity.stacks.get(i).isEmpty()) continue;
-
-                if (world.isClient) return ActionResult.SUCCESS;
-
-                changed = true;
-                blockEntity.stacks.set(i, new DrawerFrameBlockEntity.SideState(ItemStack.EMPTY, 0, true));
-            }
-
-            if (changed) {
-                blockEntity.markDirty();
                 return ActionResult.SUCCESS;
-            } else {
-                return ActionResult.PASS;
-            }
-        })
-        .build();
+            })
+            .onDoubleClick((world, state, hitResult, player) -> {
+                if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
+                    return ActionResult.PASS;
+
+                boolean changed = false;
+                for (int i = 0; i < 6; i++) {
+                    if (!blockEntity.stacks.get(i).isEmpty()) continue;
+
+                    if (world.isClient) return ActionResult.SUCCESS;
+
+                    changed = true;
+                    blockEntity.stacks.set(i, new DrawerFrameBlockEntity.SideState(ItemStack.EMPTY, 0, true));
+                }
+
+                if (changed) {
+                    blockEntity.markDirty();
+                    return ActionResult.SUCCESS;
+                } else {
+                    return ActionResult.PASS;
+                }
+            })
+            .build();
     public static final BlockButton CONFIG_BUTTON = BlockButton.builder(12, 14, 14, 16)
             .onUse((state, world, pos, player, hand, hitResult) -> {
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
@@ -295,7 +296,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         if (context.isHolding(asItem())) return VoxelShapes.fullCube();
         if (((ShapeContextExtended) context).isHolding(stack -> stack.getItem() instanceof PanelItem)
-         && !context.isDescending()) return VoxelShapes.fullCube();
+                && !context.isDescending()) return VoxelShapes.fullCube();
 
         if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame)) return BASE;
 
@@ -391,7 +392,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 buttons.add(CONFIG_BUTTON);
 
             if (selected.stack.getItem() instanceof UpgradeablePanelItem upgradeable
-                && !DisplayingPanelItem.getConfig(selected.stack).hideUpgrades()) {
+                    && !DisplayingPanelItem.getConfig(selected.stack).hideUpgrades()) {
                 upgradeable.addUpgradeButtons(selected.stack, buttons);
             }
 
@@ -449,9 +450,9 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             var slot = storage.getSlot(0);
 
             return BigStorageView.bigAmount(slot)
-                .multiply(BigInteger.valueOf(15))
-                .divide(BigStorageView.bigCapacity(slot))
-                .intValue();
+                    .multiply(BigInteger.valueOf(15))
+                    .divide(BigStorageView.bigCapacity(slot))
+                    .intValue();
         }
 
         return 0;
@@ -473,9 +474,9 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         var slot = storage.getSlot(0);
 
         return BigStorageView.bigAmount(slot)
-            .multiply(BigInteger.valueOf(15))
-            .divide(BigStorageView.bigCapacity(slot))
-            .intValue();
+                .multiply(BigInteger.valueOf(15))
+                .divide(BigStorageView.bigCapacity(slot))
+                .intValue();
     }
 
     public static int getOrientation(World world, BlockHitResult hitResult) {
@@ -487,7 +488,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         return 0;
     }
 
-    private void scheduleFluidTick(WorldAccess world, BlockPos pos, BlockState state){
+    private void scheduleFluidTick(WorldAccess world, BlockPos pos, BlockState state) {
         if (state.get(WATERLOGGED)) {
             world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
         }
@@ -512,10 +513,35 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     @Override
     public BlockSoundGroup getSoundGroup(World world, BlockPos pos, BlockState state, ItemStack stack) {
         NbtCompound tag = BlockItem.getBlockEntityNbt(stack);
-        
+
         if (tag == null) return getSoundGroup(state);
         if (!tag.contains("TemplateState", NbtElement.COMPOUND_TYPE)) return getSoundGroup(state);
 
         return NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), tag.getCompound("TemplateState")).getSoundGroup();
     }
+
+    @Override
+    public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
+        if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame && !(frame.templateState == null)) {
+            frame.templateState.getBlock().randomDisplayTick(frame.templateState, world, pos, random);
+        } else {
+            super.randomDisplayTick(state, world, pos, random);
+        }
+    }
+
+    @Override
+    public boolean isTransparent(BlockState state, BlockView world, BlockPos pos) {
+        if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame && !(frame.templateState == null)) {
+            return frame.templateState.getBlock().isTransparent(frame.templateState, world, pos);
+        }
+        return super.isTransparent(state, world, pos);
+    }
+
+//    @Override
+//    public float calcBlockBreakingDelta(BlockState state, PlayerEntity player, BlockView world, BlockPos pos) {
+//        if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame && !(frame.templateState == null) && world instanceof World world1 && world1.isClient) {
+//            return frame.templateState.getBlock().calcBlockBreakingDelta(frame.templateState, player, world, pos);
+//        }
+//        return super.calcBlockBreakingDelta(state, player, world, pos);
+//    }
 }

@@ -21,6 +21,7 @@
   ],
   "client": [
     "client.ClientPlayerInteractionManagerMixin",
+    "client.ClientPlayInteractionManagerMixin",
     "client.ClientPlayNetworkHandlerMixin",
     "client.HeldItemRendererMixin",
     "client.MinecraftClientMixin",
