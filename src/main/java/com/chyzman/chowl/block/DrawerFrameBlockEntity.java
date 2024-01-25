@@ -8,7 +8,9 @@ import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.PanelStorageContext;
 import io.wispforest.owo.ops.WorldOps;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -21,7 +23,6 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -57,7 +58,23 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public @Nullable Storage<ItemVariant> getItemStorage(Direction fromSide) {
+    public @Nullable Storage<ItemVariant> getItemStorage(@Nullable Direction fromSide) {
+        if (fromSide == null) {
+            List<SlottedStorage<ItemVariant>> storages = new ArrayList<>();
+
+            for (int i = 0; i < 6; i++) {
+                var ctx = PanelStorageContext.from(this, Direction.byId(i));
+
+                if (!(ctx.stack().getItem() instanceof PanelItem panelItem)) continue;
+
+                var storage = panelItem.getStorage(ctx);
+
+                if (storage != null) storages.add(storage);
+            }
+
+            return new CombinedSlottedStorage<>(storages);
+        }
+
         var ctx = PanelStorageContext.from(this, fromSide);
 
         if (!(ctx.stack().getItem() instanceof PanelItem panelItem)) return null;
