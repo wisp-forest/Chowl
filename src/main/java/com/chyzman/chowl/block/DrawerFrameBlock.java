@@ -62,7 +62,7 @@ import java.util.function.ToIntFunction;
 import static com.chyzman.chowl.item.component.LockablePanelItem.LOCK_BUTTON;
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
-public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver, SidedComparatorOutput, ExtendedParticleSpriteBlock, ExtendedSoundGroupBlock {
+public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver, SidedComparatorOutput, ExtendedParticleSpriteBlock, ExtendedSoundGroupBlock, BreakProgressMaskingBlock {
 
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
     public static final IntProperty LIGHT_LEVEL = Properties.LEVEL_15;
@@ -522,7 +522,9 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
     @Override
     public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
-        if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame && !(frame.templateState == null)) {
+        if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame
+            && !(frame.templateState == null)
+            && frame.templateState != state) {
             frame.templateState.getBlock().randomDisplayTick(frame.templateState, world, pos, random);
         } else {
             super.randomDisplayTick(state, world, pos, random);
@@ -535,6 +537,15 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             return frame.templateState.getBlock().isTransparent(frame.templateState, world, pos);
         }
         return super.isTransparent(state, world, pos);
+    }
+
+    @Override
+    public float calcMaskedBlockBreakingDelta(BlockState state, PlayerEntity player, BlockView world, BlockPos pos) {
+        if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame && frame.templateState != null) {
+            return frame.templateState.calcBlockBreakingDelta(player, world, pos);
+        }
+
+        return calcBlockBreakingDelta(state, player, world, pos);
     }
 
 //    @Override
