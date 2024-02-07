@@ -315,6 +315,13 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
     }
 
+    @Override
+    public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+        if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame) {
+            frame.spreadTemplate();
+        }
+    }
+
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
         builder.add(WATERLOGGED, LIGHT_LEVEL, TICKING);
     }

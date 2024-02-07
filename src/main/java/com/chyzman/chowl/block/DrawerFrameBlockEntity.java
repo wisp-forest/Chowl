@@ -128,6 +128,26 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
         this.outlineShape = SHAPE_CACHE.getUnchecked(outline);
     }
 
+    public void scheduleSpreadTemplate() {
+        world.scheduleBlockTick(pos, getCachedState().getBlock(), 1);
+    }
+
+    public void spreadTemplate() {
+        for (int i = 0; i < 6; i++) {
+            var possible = pos.offset(Direction.byId(i));
+
+            if (!(world.getBlockEntity(possible) instanceof DrawerFrameBlockEntity other)) continue;
+            if (other.templateState == templateState) continue;
+
+            other.templateState = templateState;
+
+            world.setBlockState(possible, world.getBlockState(possible)
+                .with(DrawerFrameBlock.LIGHT_LEVEL, templateState != null ? templateState.getLuminance() : 0));
+            other.markDirty();
+            other.scheduleSpreadTemplate();
+        }
+    }
+
     @Override
     public void markDirty() {
         super.markDirty();
@@ -150,6 +170,8 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
 
         if (nbt.contains("TemplateState", NbtElement.COMPOUND_TYPE)) {
             templateState = NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), nbt.getCompound("TemplateState"));
+        } else {
+            templateState = null;
         }
 
         if (world != null && world.isClient) {
