@@ -3,6 +3,7 @@ package com.chyzman.chowl.upgrade;
 import com.chyzman.chowl.event.PanelEmptiedEvent;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
 import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.util.ServerTickHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -39,24 +40,28 @@ public class ExplosiveUpgrade {
 
                 panelItem.setUpgrades(ctx.stack(), upgrades);
 
-                Box affected = Box.of(pos.toCenterPos(), 10, 10, 10);
+                boolean finalFiery = fiery;
+                int finalPower = power;
+                ServerTickHelper.schedule(() -> {
+                    Box affected = Box.of(pos.toCenterPos(), 10, 10, 10);
 
-                for (PlayerEntity player : world.getPlayers()) {
-                    if (!player.isPartOfGame()) continue;
-                    if (!affected.contains(player.getPos())) continue;
+                    for (PlayerEntity player : world.getPlayers()) {
+                        if (!player.isPartOfGame()) continue;
+                        if (!affected.contains(player.getPos())) continue;
 
-                    ChowlRegistry.WITNESSED_BLASTING_CRITERIA.trigger((ServerPlayerEntity) player);
-                }
+                        ChowlRegistry.WITNESSED_BLASTING_CRITERIA.trigger((ServerPlayerEntity) player);
+                    }
 
-                world.createExplosion(
-                    null,
-                    pos.getX(),
-                    pos.getY(),
-                    pos.getZ(),
-                    power + 1,
-                    fiery,
-                    World.ExplosionSourceType.BLOCK
-                );
+                    world.createExplosion(
+                        null,
+                        pos.getX(),
+                        pos.getY(),
+                        pos.getZ(),
+                        finalPower + 1,
+                        finalFiery,
+                        World.ExplosionSourceType.BLOCK
+                    );
+                });
             }
         });
     }
