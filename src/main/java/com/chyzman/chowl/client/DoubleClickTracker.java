@@ -17,7 +17,7 @@ public class DoubleClickTracker {
 
             long duration = world.getTime() - lastClickTime;
 
-            if (hitResult.getBlockPos().equals(lastBlockPos) && duration > 0 && duration <= 5) {
+            if (hitResult.getBlockPos().equals(lastBlockPos) && duration > 0 && duration <= Chowl.CHOWL_CONFIG.max_ticks_for_double_click()) {
                 var pos = hitResult.getBlockPos();
                 var state = world.getBlockState(pos);
                 if (state.getBlock() instanceof DoubleClickableBlock receiver) {
