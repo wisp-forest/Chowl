@@ -1,6 +1,7 @@
 package com.chyzman.chowl.registry;
 
 import com.chyzman.chowl.block.DrawerFrameBlock;
+import com.chyzman.chowl.criteria.LabeledPanelCriteria;
 import com.chyzman.chowl.criteria.WitnessedBlastingCriteria;
 import com.chyzman.chowl.item.*;
 import io.wispforest.lavender.book.LavenderBookItem;
@@ -8,7 +9,6 @@ import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.LightBlock;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -51,6 +51,7 @@ public class ChowlRegistry {
     public static final Item DRAWER_FRAME_ITEM = registerItem("drawer_frame", new DrawerFrameBlockItem(DRAWER_FRAME_BLOCK, new Item.Settings()));
 
     public static final WitnessedBlastingCriteria WITNESSED_BLASTING_CRITERIA = Criteria.register(new WitnessedBlastingCriteria());
+    public static final LabeledPanelCriteria LABELED_PANEL_CRITERIA = Criteria.register(new LabeledPanelCriteria());
 
     public static void init() {
     }

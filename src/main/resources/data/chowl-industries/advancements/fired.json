@@ -1,0 +1,32 @@
+{
+    "parent": "minecraft:story/root",
+    "display": {
+        "icon": {
+            "item": "minecraft:name_tag"
+        },
+        "title": {
+            "translate": "advancements.chowl-industries.fired.title"
+        },
+        "description": {
+            "translate": "advancements.chowl-industries.fired.description"
+        },
+
+        "frame": "task",
+        "announce_to_chat": true,
+        "hidden": true,
+        "show_toast": true
+    },
+    "criteria": {
+        "labeled_panel": {
+            "trigger": "chowl-industries:labeled_panel",
+            "conditions": {
+                "name": "e"
+            }
+        }
+    },
+    "requirements": [
+        [
+            "labeled_panel"
+        ]
+    ]
+}

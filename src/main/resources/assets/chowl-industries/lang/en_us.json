@@ -30,5 +30,7 @@
   "text.config.chowl-industries.option.base_panel_capacity": "Base panel capacity",
   "text.config.chowl-industries.option.base_panel_capacity.tooltip": "The base capacity of drawer panels",
   "text.config.chowl-industries.option.base_compressing_panel_capacity": "Base panel capacity",
-  "text.config.chowl-industries.option.base_compressing_panel_capacity.tooltip": "The base capacity of compressing panels"
+  "text.config.chowl-industries.option.base_compressing_panel_capacity.tooltip": "The base capacity of compressing panels",
+  "advancements.chowl-industries.fired.title": "Fired!",
+  "advancements.chowl-industries.fired.description": "Finally found the perpetrator..."
 }

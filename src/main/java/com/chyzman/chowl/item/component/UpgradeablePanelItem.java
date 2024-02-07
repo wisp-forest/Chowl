@@ -3,11 +3,13 @@ package com.chyzman.chowl.item.component;
 import com.chyzman.chowl.block.button.BlockButton;
 import com.chyzman.chowl.block.button.ButtonRenderCondition;
 import com.chyzman.chowl.block.button.ButtonRenderer;
+import com.chyzman.chowl.event.UpgradeInsertedEvent;
 import io.wispforest.owo.nbt.NbtKey;
 import io.wispforest.owo.ops.ItemOps;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Pair;
 
@@ -58,6 +60,8 @@ public interface UpgradeablePanelItem extends DisplayingPanelItem {
                             stackInHand.decrement(1);
                             if (world.isClient) return ActionResult.SUCCESS;
                             upgrades.set(finalI, upgrade);
+
+                            UpgradeInsertedEvent.EVENT.invoker().onUpgradeInserted((ServerPlayerEntity) player, frame, useSide, useStack, upgrade);
                         } else {
                             return ActionResult.FAIL;
                         }
