@@ -32,7 +32,7 @@ public class ChowlRegistry {
 
     public static final Item MIRROR_PANEL_ITEM = registerItem("mirror_panel", new MirrorPanelItem(new Item.Settings().maxCount(1)));
 
-    public static final Item PHANTOM_PANEL_ITEM = registerItem("phantom_panel", new BlankPanelItem(new Item.Settings().maxCount(1)));
+    public static final Item PHANTOM_PANEL_ITEM = registerItem("phantom_panel", new BlankPanelItem(new Item.Settings()));
 
     public static final Item COMPRESSING_PANEL_ITEM = registerItem("compressing_panel", new CompressingPanelItem(new Item.Settings().maxCount(1)));
 
