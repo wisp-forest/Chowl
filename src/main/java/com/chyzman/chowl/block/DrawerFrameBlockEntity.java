@@ -6,6 +6,9 @@ import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.PanelStorageContext;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import io.wispforest.owo.ops.WorldOps;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
@@ -33,6 +36,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageBlockEntity {
 
@@ -40,6 +44,19 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     public BlockState templateState = null;
     public VoxelShape outlineShape = DrawerFrameBlock.BASE;
     public VoxelShape collisionShape = DrawerFrameBlock.BASE;
+
+    private static final LoadingCache<Integer, VoxelShape> SHAPE_CACHE = CacheBuilder.newBuilder()
+        .build(CacheLoader.from(sides -> {
+            var shape = DrawerFrameBlock.BASE;
+
+            for (int i = 0; i < 6; i++) {
+                if ((sides & (1 << i)) == 0) continue;
+
+                shape = VoxelShapes.union(shape, DrawerFrameBlock.SIDES[i]);
+            }
+
+            return shape;
+        }));
 
     public DrawerFrameBlockEntity(BlockPos pos, BlockState state) {
         super(Chowl.DRAWER_FRAME_BLOCK_ENTITY_TYPE, pos, state);
@@ -93,25 +110,22 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     }
 
     private void updateShapes() {
-        this.collisionShape = DrawerFrameBlock.BASE;
+        int collision = 0;
+        int outline = 0;
 
         for (int i = 0; i < stacks.size(); i++) {
             var side = stacks.get(i);
 
-            if (side.isEmpty() || side.stack.getItem() == ChowlRegistry.PHANTOM_PANEL_ITEM) continue;
+            if (!side.isEmpty()) {
+                outline |= (1 << i);
 
-            this.collisionShape = VoxelShapes.union(this.collisionShape, DrawerFrameBlock.SIDES[i]);
+                if (side.stack.getItem() != ChowlRegistry.PHANTOM_PANEL_ITEM)
+                    collision |= (1 << i);
+            }
         }
 
-        this.outlineShape = DrawerFrameBlock.BASE;
-
-        for (int i = 0; i < stacks.size(); i++) {
-            var side = stacks.get(i);
-
-            if (side.isEmpty()) continue;
-
-            this.outlineShape = VoxelShapes.union(this.outlineShape, DrawerFrameBlock.SIDES[i]);
-        }
+        this.collisionShape = SHAPE_CACHE.getUnchecked(collision);
+        this.outlineShape = SHAPE_CACHE.getUnchecked(outline);
     }
 
     @Override
