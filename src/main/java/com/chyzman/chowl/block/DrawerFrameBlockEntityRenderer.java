@@ -86,7 +86,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
 
                 matrices.push();
                 if (!(stack.getItem() instanceof PanelItem)) {
-                    var properties = ItemScalingUtil.getItemModelProperties(stack, client, matrices);
+                    var properties = ItemScalingUtil.getItemModelProperties(stack);
                     float scale = 1;
                     if (properties.size().x > 1 || properties.size().y > 1 || properties.size().z > 1) {
                         scale = (float) Math.min(2, (1 / (Math.max(properties.size().x, Math.max(properties.size().y, properties.size().z)))));
