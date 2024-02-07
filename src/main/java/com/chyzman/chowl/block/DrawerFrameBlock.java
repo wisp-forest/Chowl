@@ -126,7 +126,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 return ActionResult.SUCCESS;
             }).build();
     public static final BlockButton REMOVE_BUTTON = BlockButton.builder(14, 14, 16, 16)
-            .onAttack((world, state, hitResult, player) -> {
+            .onAttackOrUse((world, state, hitResult, player) -> {
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
                     return ActionResult.PASS;
 
@@ -186,7 +186,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             })
             .build();
     public static final BlockButton CONFIG_BUTTON = BlockButton.builder(12, 14, 14, 16)
-            .onUse((state, world, pos, player, hand, hitResult) -> {
+            .onAttackOrUse((world, state, hitResult, player) -> {
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
                     return ActionResult.PASS;
 

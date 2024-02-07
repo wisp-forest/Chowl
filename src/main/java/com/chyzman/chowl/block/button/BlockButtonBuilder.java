@@ -29,6 +29,13 @@ public class BlockButtonBuilder {
         return this;
     }
 
+    public BlockButtonBuilder onAttackOrUse(BlockButtonProvider.AttackFunction attack) {
+        onAttack(attack);
+        onUse((state, world, pos, player, hand, hit) -> attack.apply(world, state, hit, player));
+
+        return this;
+    }
+
     public BlockButtonBuilder onDoubleClick(BlockButtonProvider.DoubleClickFunction doubleClick) {
         this.doubleClick = doubleClick;
         return this;
