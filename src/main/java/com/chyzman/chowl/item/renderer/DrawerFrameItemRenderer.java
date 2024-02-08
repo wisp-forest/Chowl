@@ -20,24 +20,28 @@ import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 public class DrawerFrameItemRenderer implements BuiltinItemRendererRegistry.DynamicItemRenderer {
     @Override
     public void render(ItemStack stack, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        var state = ((BlockItem)stack.getItem()).getBlock().getDefaultState();
-        var blockEntity = new DrawerFrameBlockEntity(BlockPos.ORIGIN, state);
-        blockEntity.readNbt(stack.getSubNbt("BlockEntityTag"));
+        if (!RenderGlobals.shouldRender()) return;
 
-        try {
-            RenderGlobals.DRAWER_FRAME.set(blockEntity);
+        try (var ignored = RenderGlobals.enterRender()) {
+            var state = ((BlockItem) stack.getItem()).getBlock().getDefaultState();
+            var blockEntity = new DrawerFrameBlockEntity(BlockPos.ORIGIN, state);
+            blockEntity.readNbt(stack.getSubNbt("BlockEntityTag"));
 
-            var model = MinecraftClient.getInstance().getBakedModelManager().getModel(id("block/drawer_frame"));
-            if (model != null) {
-                matrices.push();
-                matrices.translate(0.5F, 0.5F, 0.5F);
-                MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformationMode.NONE, false, matrices, vertexConsumers, light, overlay, model);
-                matrices.pop();
+            try {
+                RenderGlobals.DRAWER_FRAME.set(blockEntity);
+
+                var model = MinecraftClient.getInstance().getBakedModelManager().getModel(id("block/drawer_frame"));
+                if (model != null) {
+                    matrices.push();
+                    matrices.translate(0.5F, 0.5F, 0.5F);
+                    MinecraftClient.getInstance().getItemRenderer().renderItem(stack, ModelTransformationMode.NONE, false, matrices, vertexConsumers, light, overlay, model);
+                    matrices.pop();
+                }
+
+                DrawerFrameBlockEntityRenderer.renderPanels(blockEntity, MinecraftClient.getInstance(), null, 0, matrices, vertexConsumers, light, overlay);
+            } finally {
+                RenderGlobals.DRAWER_FRAME.remove();
             }
-
-            DrawerFrameBlockEntityRenderer.renderPanels(blockEntity, MinecraftClient.getInstance(), null, 0, matrices, vertexConsumers, light, overlay);
-        } finally {
-            RenderGlobals.DRAWER_FRAME.remove();
         }
     }
 }

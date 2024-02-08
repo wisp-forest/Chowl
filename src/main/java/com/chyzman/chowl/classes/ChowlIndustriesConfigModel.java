@@ -20,6 +20,9 @@ public class ChowlIndustriesConfigModel {
     @Sync(Option.SyncMode.NONE)
     public int max_ticks_for_double_click = 5;
 
+    @Sync(Option.SyncMode.NONE)
+    public int recursive_rendering_limit = 3;
+
     @SectionHeader("Server")
 
     @Sync(Option.SyncMode.OVERRIDE_CLIENT)

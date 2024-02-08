@@ -49,17 +49,21 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
 
     @Override
     public void render(ItemStack stack, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        var client = MinecraftClient.getInstance();
+        if (!RenderGlobals.shouldRender()) return;
 
-        matrices.translate(0.5, 0.5, 0.5);
-        matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
+        try (var ignored = RenderGlobals.enterRender()) {
+            var client = MinecraftClient.getInstance();
 
-        var baseModel = client.getBakedModelManager().getModel(baseModelId);
-        if (baseModel != null && RenderGlobals.BAKED.get() != Boolean.TRUE) {
-            client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, baseModel);
+            matrices.translate(0.5, 0.5, 0.5);
+            matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
+
+            var baseModel = client.getBakedModelManager().getModel(baseModelId);
+            if (baseModel != null && RenderGlobals.BAKED.get() != Boolean.TRUE) {
+                client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, baseModel);
+            }
+
+            drawDisplay(stack, mode, matrices, vertexConsumers, light, overlay);
         }
-
-        drawDisplay(stack, mode, matrices, vertexConsumers, light, overlay);
     }
 
     protected void drawDisplay(ItemStack stack, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
