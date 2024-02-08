@@ -17,6 +17,9 @@ public class ChowlIndustriesConfigModel {
     @Sync(Option.SyncMode.NONE)
     public String max_digits_before_exponents = "16";
 
+    @Sync(Option.SyncMode.NONE)
+    public int max_ticks_for_double_click = 5;
+
     @SectionHeader("Server")
 
     @Sync(Option.SyncMode.OVERRIDE_CLIENT)

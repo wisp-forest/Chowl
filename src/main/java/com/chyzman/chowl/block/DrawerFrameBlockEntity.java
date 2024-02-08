@@ -6,9 +6,14 @@ import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.PanelStorageContext;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import io.wispforest.owo.ops.WorldOps;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -21,7 +26,6 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -32,6 +36,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageBlockEntity {
 
@@ -39,6 +44,19 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     public BlockState templateState = null;
     public VoxelShape outlineShape = DrawerFrameBlock.BASE;
     public VoxelShape collisionShape = DrawerFrameBlock.BASE;
+
+    private static final LoadingCache<Integer, VoxelShape> SHAPE_CACHE = CacheBuilder.newBuilder()
+        .build(CacheLoader.from(sides -> {
+            var shape = DrawerFrameBlock.BASE;
+
+            for (int i = 0; i < 6; i++) {
+                if ((sides & (1 << i)) == 0) continue;
+
+                shape = VoxelShapes.union(shape, DrawerFrameBlock.SIDES[i]);
+            }
+
+            return shape;
+        }));
 
     public DrawerFrameBlockEntity(BlockPos pos, BlockState state) {
         super(Chowl.DRAWER_FRAME_BLOCK_ENTITY_TYPE, pos, state);
@@ -57,7 +75,23 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public @Nullable Storage<ItemVariant> getItemStorage(Direction fromSide) {
+    public @Nullable Storage<ItemVariant> getItemStorage(@Nullable Direction fromSide) {
+        if (fromSide == null) {
+            List<SlottedStorage<ItemVariant>> storages = new ArrayList<>();
+
+            for (int i = 0; i < 6; i++) {
+                var ctx = PanelStorageContext.from(this, Direction.byId(i));
+
+                if (!(ctx.stack().getItem() instanceof PanelItem panelItem)) continue;
+
+                var storage = panelItem.getStorage(ctx);
+
+                if (storage != null) storages.add(storage);
+            }
+
+            return new CombinedSlottedStorage<>(storages);
+        }
+
         var ctx = PanelStorageContext.from(this, fromSide);
 
         if (!(ctx.stack().getItem() instanceof PanelItem panelItem)) return null;
@@ -76,24 +110,41 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     }
 
     private void updateShapes() {
-        this.collisionShape = DrawerFrameBlock.BASE;
+        int collision = 0;
+        int outline = 0;
 
         for (int i = 0; i < stacks.size(); i++) {
             var side = stacks.get(i);
 
-            if (side.isEmpty() || side.stack.getItem() == ChowlRegistry.PHANTOM_PANEL_ITEM) continue;
+            if (!side.isEmpty()) {
+                outline |= (1 << i);
 
-            this.collisionShape = VoxelShapes.union(this.collisionShape, DrawerFrameBlock.SIDES[i]);
+                if (side.stack.getItem() != ChowlRegistry.PHANTOM_PANEL_ITEM)
+                    collision |= (1 << i);
+            }
         }
 
-        this.outlineShape = DrawerFrameBlock.BASE;
+        this.collisionShape = SHAPE_CACHE.getUnchecked(collision);
+        this.outlineShape = SHAPE_CACHE.getUnchecked(outline);
+    }
 
-        for (int i = 0; i < stacks.size(); i++) {
-            var side = stacks.get(i);
+    public void scheduleSpreadTemplate() {
+        world.scheduleBlockTick(pos, getCachedState().getBlock(), 1);
+    }
 
-            if (side.isEmpty()) continue;
+    public void spreadTemplate() {
+        for (int i = 0; i < 6; i++) {
+            var possible = pos.offset(Direction.byId(i));
 
-            this.outlineShape = VoxelShapes.union(this.outlineShape, DrawerFrameBlock.SIDES[i]);
+            if (!(world.getBlockEntity(possible) instanceof DrawerFrameBlockEntity other)) continue;
+            if (other.templateState == templateState) continue;
+
+            other.templateState = templateState;
+
+            world.setBlockState(possible, world.getBlockState(possible)
+                .with(DrawerFrameBlock.LIGHT_LEVEL, templateState != null ? templateState.getLuminance() : 0));
+            other.markDirty();
+            other.scheduleSpreadTemplate();
         }
     }
 
@@ -119,6 +170,8 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
 
         if (nbt.contains("TemplateState", NbtElement.COMPOUND_TYPE)) {
             templateState = NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), nbt.getCompound("TemplateState"));
+        } else {
+            templateState = null;
         }
 
         if (world != null && world.isClient) {

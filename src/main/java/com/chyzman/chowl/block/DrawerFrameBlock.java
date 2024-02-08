@@ -62,7 +62,7 @@ import java.util.function.ToIntFunction;
 import static com.chyzman.chowl.item.component.LockablePanelItem.LOCK_BUTTON;
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
-public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver, SidedComparatorOutput, ExtendedParticleSpriteBlock, ExtendedSoundGroupBlock {
+public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver, SidedComparatorOutput, ExtendedParticleSpriteBlock, ExtendedSoundGroupBlock, BreakProgressMaskingBlock {
 
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
     public static final IntProperty LIGHT_LEVEL = Properties.LEVEL_15;
@@ -126,7 +126,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 return ActionResult.SUCCESS;
             }).build();
     public static final BlockButton REMOVE_BUTTON = BlockButton.builder(14, 14, 16, 16)
-            .onAttack((world, state, hitResult, player) -> {
+            .onAttackOrUse((world, state, hitResult, player) -> {
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
                     return ActionResult.PASS;
 
@@ -186,7 +186,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             })
             .build();
     public static final BlockButton CONFIG_BUTTON = BlockButton.builder(12, 14, 14, 16)
-            .onUse((state, world, pos, player, hand, hitResult) -> {
+            .onAttackOrUse((world, state, hitResult, player) -> {
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
                     return ActionResult.PASS;
 
@@ -313,6 +313,13 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     @Override
     public FluidState getFluidState(BlockState state) {
         return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+    }
+
+    @Override
+    public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+        if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame) {
+            frame.spreadTemplate();
+        }
     }
 
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
@@ -522,7 +529,9 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
     @Override
     public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
-        if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame && !(frame.templateState == null)) {
+        if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame
+            && !(frame.templateState == null)
+            && frame.templateState != state) {
             frame.templateState.getBlock().randomDisplayTick(frame.templateState, world, pos, random);
         } else {
             super.randomDisplayTick(state, world, pos, random);
@@ -535,6 +544,15 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             return frame.templateState.getBlock().isTransparent(frame.templateState, world, pos);
         }
         return super.isTransparent(state, world, pos);
+    }
+
+    @Override
+    public float calcMaskedBlockBreakingDelta(BlockState state, PlayerEntity player, BlockView world, BlockPos pos) {
+        if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame && frame.templateState != null) {
+            return frame.templateState.calcBlockBreakingDelta(player, world, pos);
+        }
+
+        return calcBlockBreakingDelta(state, player, world, pos);
     }
 
 //    @Override

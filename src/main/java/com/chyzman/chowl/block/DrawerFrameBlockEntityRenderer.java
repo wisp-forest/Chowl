@@ -86,7 +86,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
 
                 matrices.push();
                 if (!(stack.getItem() instanceof PanelItem)) {
-                    var properties = ItemScalingUtil.getItemModelProperties(stack, client, matrices);
+                    var properties = ItemScalingUtil.getItemModelProperties(stack);
                     float scale = 1;
                     if (properties.size().x > 1 || properties.size().y > 1 || properties.size().z > 1) {
                         scale = (float) Math.min(2, (1 / (Math.max(properties.size().x, Math.max(properties.size().y, properties.size().z)))));
@@ -148,7 +148,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                         matrices.translate(-button.maxX() / 16, button.maxY() / 16, 0);
                         matrices.scale((button.maxX() - button.minX()) / 16, (button.maxY() - button.minY()) / 16, 1);
 
-                        if (button.equals(hoveredButton) && showOutlines) {
+                        if (panelFocused && button.equals(hoveredButton) && showOutlines) {
                             var shape = Block.createCuboidShape(0, 0, 0, 16, 16, 0.001);
                             WorldRenderer.drawShapeOutline(matrices, client.getBufferBuilders().getOutlineVertexConsumers().getBuffer(RenderLayer.LINES), shape, 0, -1, 0, 0f, 0f, 0f, 0.4f, false);
                         }

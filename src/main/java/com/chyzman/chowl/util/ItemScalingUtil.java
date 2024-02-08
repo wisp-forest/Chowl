@@ -1,7 +1,9 @@
 package com.chyzman.chowl.util;
 
 import com.chyzman.chowl.classes.AABBConstructingVertexConsumerProvider;
-import com.google.common.math.BigIntegerMath;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
@@ -10,19 +12,22 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Vec3d;
 
-import java.math.BigInteger;
-import java.math.RoundingMode;
-
-import static com.chyzman.chowl.Chowl.CHOWL_CONFIG;
+import java.util.concurrent.TimeUnit;
 
 public final class ItemScalingUtil {
-    public static ItemModelProperties getItemModelProperties(ItemStack stack, MinecraftClient client, MatrixStack matrices) {
-        matrices.push();
-        matrices.loadIdentity();
+    private static final ThreadLocal<MatrixStack> MATRICES = ThreadLocal.withInitial(MatrixStack::new);
+    private static final LoadingCache<ItemStack, ItemModelProperties> CACHE = CacheBuilder.newBuilder()
+        .expireAfterWrite(5, TimeUnit.SECONDS)
+        .build(CacheLoader.from(stack -> {
+            MatrixStack matrices = MATRICES.get();
+            MinecraftClient client = MinecraftClient.getInstance();
 
-        var provider = new AABBConstructingVertexConsumerProvider();
+            matrices.push();
+            matrices.loadIdentity();
 
-        client.getItemRenderer().renderItem(
+            var provider = new AABBConstructingVertexConsumerProvider();
+
+            client.getItemRenderer().renderItem(
                 stack,
                 ModelTransformationMode.FIXED,
                 false,
@@ -31,22 +36,27 @@ public final class ItemScalingUtil {
                 LightmapTextureManager.MAX_LIGHT_COORDINATE,
                 OverlayTexture.DEFAULT_UV,
                 client.getItemRenderer().getModels().getModel(stack)
-        );
+            );
 
-        matrices.pop();
+            matrices.pop();
 
-        return new ItemModelProperties(
+            return new ItemModelProperties(
                 new Vec3d(
-                        provider.minX,
-                        provider.minY,
-                        provider.minZ
+                    provider.minX,
+                    provider.minY,
+                    provider.minZ
                 ),
                 new Vec3d(
-                        provider.maxX,
-                        provider.maxY,
-                        provider.maxY
+                    provider.maxX,
+                    provider.maxY,
+                    provider.maxY
                 )
-        );
+            );
+        }));
+
+
+    public static ItemModelProperties getItemModelProperties(ItemStack stack) {
+        return CACHE.getUnchecked(stack);
     }
 
     public record ItemModelProperties(Vec3d size, Vec3d offset, Vec3d min, Vec3d max) {

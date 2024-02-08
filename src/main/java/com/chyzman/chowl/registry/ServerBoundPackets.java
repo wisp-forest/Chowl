@@ -76,14 +76,13 @@ public class ServerBoundPackets {
             BlockPos pos = message.hitResult().getBlockPos();
 
             var state = world.getBlockState(pos);
-            if (!(state.getBlock() instanceof DoubleClickableBlock receiver)) return;
 
             if (!CommonProtection.canInteractBlock(world, pos, player.getGameProfile(), player)) {
                 // TODO: tell client interaction failed.
                 return;
             }
 
-            receiver.onDoubleClick(world, state, message.hitResult(), player);
+            DoubleClickableBlock.doDoubleClick(world, state, message.hitResult(), player);
             player.swingHand(Hand.MAIN_HAND);
         });
 

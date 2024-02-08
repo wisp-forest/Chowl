@@ -1,5 +1,6 @@
 package com.chyzman.chowl.block;
 
+import com.chyzman.chowl.event.DoubleClickEvent;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ActionResult;
@@ -9,6 +10,15 @@ import org.jetbrains.annotations.NotNull;
 
 public interface DoubleClickableBlock {
     @NotNull ActionResult onDoubleClick(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player);
+
+    static ActionResult doDoubleClick(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player) {
+        var resEvent = DoubleClickEvent.EVENT.invoker().onDoubleClick(player, world, state, hitResult);
+        if (resEvent != ActionResult.PASS) return resEvent;
+
+        if (!(state.getBlock() instanceof DoubleClickableBlock block)) return ActionResult.PASS;
+
+        return block.onDoubleClick(world, state, hitResult, player);
+    }
 
     record DoubleClickPacket(BlockHitResult hitResult) {}
 }
