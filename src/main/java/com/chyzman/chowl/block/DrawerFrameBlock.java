@@ -560,12 +560,4 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType type) {
         return false;
     }
-
-    //    @Override
-//    public float calcBlockBreakingDelta(BlockState state, PlayerEntity player, BlockView world, BlockPos pos) {
-//        if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame && !(frame.templateState == null) && world instanceof World world1 && world1.isClient) {
-//            return frame.templateState.getBlock().calcBlockBreakingDelta(frame.templateState, player, world, pos);
-//        }
-//        return super.calcBlockBreakingDelta(state, player, world, pos);
-//    }
 }

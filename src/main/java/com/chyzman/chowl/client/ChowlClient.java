@@ -36,9 +36,6 @@ import static com.chyzman.chowl.Chowl.DRAWER_FRAME_BLOCK_ENTITY_TYPE;
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
 public class ChowlClient implements ClientModInitializer {
-
-    public static Float breakingProgressWorkaround = null;
-
     @Override
     public void onInitializeClient() {
         ClientEventListeners.init();

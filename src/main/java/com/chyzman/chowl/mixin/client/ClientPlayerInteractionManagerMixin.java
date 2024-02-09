@@ -21,6 +21,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerInteractionManager.class)
@@ -47,7 +48,12 @@ public class ClientPlayerInteractionManagerMixin {
     }
     
     @Inject(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;currentBreakingProgress:F", ordinal = 4))
-    private void clearWorkaroundBreakingProgress(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
+    private void clearWorkaroundBreakingProgressWhenFinished(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
+        fakeBreakProgress = null;
+    }
+
+    @Inject(method = "cancelBlockBreaking", at = @At(value = "HEAD"))
+    private void clearWorkaroundBreakingProgressWhenCanceled(CallbackInfo ci) {
         fakeBreakProgress = null;
     }
 
