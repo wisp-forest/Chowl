@@ -20,6 +20,7 @@ import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
@@ -142,7 +143,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 return ActionResult.SUCCESS;
             })
             .renderWhen(ButtonRenderCondition.PANEL_FOCUSED)
-            .renderer(ButtonRenderer.stack(Items.BARRIER.getDefaultStack()))
+            .renderer(ButtonRenderer.model(id("item/remove")))
             .build();
 
     public static final BlockButton FULL_REMOVE_BUTTON = BlockButton.builder(0, 0, 16, 16)
@@ -555,7 +556,12 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         return calcBlockBreakingDelta(state, player, world, pos);
     }
 
-//    @Override
+    @Override
+    public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType type) {
+        return false;
+    }
+
+    //    @Override
 //    public float calcBlockBreakingDelta(BlockState state, PlayerEntity player, BlockView world, BlockPos pos) {
 //        if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame && !(frame.templateState == null) && world instanceof World world1 && world1.isClient) {
 //            return frame.templateState.getBlock().calcBlockBreakingDelta(frame.templateState, player, world, pos);

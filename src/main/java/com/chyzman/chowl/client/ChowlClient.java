@@ -36,6 +36,9 @@ import static com.chyzman.chowl.Chowl.DRAWER_FRAME_BLOCK_ENTITY_TYPE;
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
 public class ChowlClient implements ClientModInitializer {
+
+    public static Float breakingProgressWorkaround = null;
+
     @Override
     public void onInitializeClient() {
         ClientEventListeners.init();
@@ -57,7 +60,7 @@ public class ChowlClient implements ClientModInitializer {
             ctx.addModels(id("item/drawer_panel_base"), id("item/mirror_panel_base"),
                     id("block/drawer_frame_base"), id("item/compressing_panel_base"),
                     id("item/access_panel_base"), id("block/drawer_frame"),
-                    id("item/cog"), id("item/lock"));
+                    id("item/cog"), id("item/lock"), id("item/remove"));
 
             ctx.resolveModel().register(context -> {
                 if (context.id().equals(id("block/drawer_frame"))) {
