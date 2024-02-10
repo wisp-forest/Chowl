@@ -1,17 +1,25 @@
 package com.chyzman.chowl.mixin.client;
 
 import com.chyzman.chowl.block.ExtendedSoundGroupBlock;
+import com.chyzman.chowl.client.DoubleClickTracker;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerInteractionManager.class)
 public class ClientPlayerInteractionManagerMixin {
@@ -24,6 +32,20 @@ public class ClientPlayerInteractionManagerMixin {
         }
 
         return original;
+    }
+
+    @Inject(method = "interactBlock", at = @At("RETURN"))
+    private void resetDoubleClick(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
+        if (cir.getReturnValue().isAccepted()) {
+            DoubleClickTracker.reset();
+        }
+    }
+
+    @Inject(method = "interactItem", at = @At("RETURN"))
+    private void resetDoubleClick(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
+        if (cir.getReturnValue().isAccepted()) {
+            DoubleClickTracker.reset();
+        }
     }
 
 //    @WrapOperation(method = "updateBlockBreakingProgress", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;calcBlockBreakingDelta(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)F"))

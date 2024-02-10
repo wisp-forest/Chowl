@@ -41,4 +41,9 @@ public class DoubleClickTracker {
             return ActionResult.PASS;
         });
     }
+
+    public static void reset() {
+        lastClickTime = 0;
+        lastBlockPos = null;
+    }
 }

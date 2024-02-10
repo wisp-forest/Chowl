@@ -196,7 +196,10 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
         matrices.pop();
 
         if (customization.showPercentage() && RenderGlobals.IN_FRAME) {
-            var fullPercent = new BigDecimal(BigStorageView.bigAmount(slots.get(0))).divide(new BigDecimal(BigStorageView.bigCapacity(slots.get(0))), MathContext.DECIMAL32).multiply(BigDecimal.valueOf(100)).doubleValue();
+            var fullPercent = new BigDecimal(BigStorageView.bigAmount(slots.get(0)))
+                .divide(new BigDecimal(BigStorageView.bigCapacity(slots.get(0)).max(BigInteger.ONE)), MathContext.DECIMAL32)
+                .multiply(BigDecimal.valueOf(100))
+                .doubleValue();
             Double roundedPercent = (double) Math.round(fullPercent * 100) / 100;
             var percent = roundedPercent + "%";
 
