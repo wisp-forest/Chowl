@@ -48,7 +48,9 @@ public interface ButtonRenderer {
             @Environment(EnvType.CLIENT)
             @Override
             public void render(MinecraftClient client, DrawerFrameBlockEntity entity, BlockHitResult hitResult, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay) {
+                matrices.push();
                 matrices.scale(1, 1, 1 / 8f);
+                matrices.scale(127/128f, 127/128f, 127/128f);
                 var model = MinecraftClient.getInstance().getBakedModelManager().getModel(id);
                 client.getItemRenderer().renderItem(
                         Items.STRUCTURE_VOID.getDefaultStack(),
@@ -60,7 +62,7 @@ public interface ButtonRenderer {
                         overlay,
                         model != null ? model : client.getBakedModelManager().getMissingModel()
                 );
-                matrices.scale(1, 1, 8);
+                matrices.pop();
             }
         };
     }
