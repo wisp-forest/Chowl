@@ -2,6 +2,7 @@ package com.chyzman.chowl.item.component;
 
 import com.chyzman.chowl.util.NbtKeyTypes;
 import io.wispforest.owo.nbt.NbtKey;
+import io.wispforest.owo.ui.core.Color;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtOps;
@@ -9,13 +10,34 @@ import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Calendar;
+
+import static com.chyzman.chowl.Chowl.LABELING_UPGRADE_TAG;
 
 public interface DisplayingPanelItem extends PanelItem {
     NbtKey<Config> CONFIG = new NbtKey<>("Config", Config.KEY_TYPE);
 
     default @Nullable Text styleText(ItemStack stack, Text wrapped) {
-        return Text.literal("").append(wrapped).setStyle(getConfig(stack).textStyle());
+        Calendar calendar = Calendar.getInstance();
+        var style = getConfig(stack).textStyle();
+        var chroma = Color.ofArgb(MathHelper.hsvToRgb((float) (System.currentTimeMillis() / 20d % 360d) / 360f, 1f, 1f)).rgb();
+        if (calendar.get(Calendar.MONTH) + 1 == 5 && calendar.get(Calendar.DATE) == 16) {
+            style = style.withColor(chroma);
+        } else if (stack.getItem() instanceof UpgradeablePanelItem upgradeable) {
+            if (upgradeable.hasUpgrade(stack, upgrade -> upgrade.isIn(LABELING_UPGRADE_TAG))) {
+                var labelStack = upgradeable.upgrades(stack).stream().filter(upgradeStack -> upgradeStack.isIn(LABELING_UPGRADE_TAG) && upgradeStack.hasCustomName()).findFirst().orElse(null);
+                if (labelStack != null) {
+                    switch (labelStack.getName().getString()) {
+                        case "jeb_" -> style = style.withColor(chroma);
+                        case "chyzman" -> style = style.withColor(Color.ofArgb(0xFFFF00).rgb());
+                    }
+                }
+            }
+        }
+        return Text.literal("").append(wrapped).setStyle(style);
     }
 
     default Config defaultConfig() {

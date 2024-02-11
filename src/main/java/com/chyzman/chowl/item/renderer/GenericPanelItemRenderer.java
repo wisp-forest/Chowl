@@ -6,6 +6,7 @@ import com.chyzman.chowl.item.component.UpgradeablePanelItem;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.FakeStorageView;
 import com.chyzman.chowl.transfer.PanelStorageContext;
+import com.chyzman.chowl.upgrade.LabelingUpgrade;
 import com.chyzman.chowl.util.ItemScalingUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -56,6 +57,10 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
 
             matrices.translate(0.5, 0.5, 0.5);
             matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
+            if (!RenderGlobals.IN_FRAME && stack.getItem() instanceof UpgradeablePanelItem upgradeable) {
+                var orientation = LabelingUpgrade.rotateOrientationForEasterEggs(0, upgradeable.upgrades(stack));
+                matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90 * orientation));
+            }
 
             var baseModel = client.getBakedModelManager().getModel(baseModelId);
             if (baseModel != null && RenderGlobals.BAKED.get() != Boolean.TRUE) {
@@ -197,9 +202,9 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
 
         if (customization.showPercentage() && RenderGlobals.IN_FRAME) {
             var fullPercent = new BigDecimal(BigStorageView.bigAmount(slots.get(0)))
-                .divide(new BigDecimal(BigStorageView.bigCapacity(slots.get(0)).max(BigInteger.ONE)), MathContext.DECIMAL32)
-                .multiply(BigDecimal.valueOf(100))
-                .doubleValue();
+                    .divide(new BigDecimal(BigStorageView.bigCapacity(slots.get(0)).max(BigInteger.ONE)), MathContext.DECIMAL32)
+                    .multiply(BigDecimal.valueOf(100))
+                    .doubleValue();
             Double roundedPercent = (double) Math.round(fullPercent * 100) / 100;
             var percent = roundedPercent + "%";
 
