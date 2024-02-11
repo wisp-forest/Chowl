@@ -59,7 +59,7 @@ public class NukeCoreUpgrade {
                         if (!player.isPartOfGame()) continue;
                         if (!affected.contains(player.getPos())) continue;
 
-                        ChowlRegistry.WITNESSED_BLASTING_CRITERIA.trigger((ServerPlayerEntity) player);
+                        ChowlRegistry.WITNESSED_BLASTING_CRITERIA.trigger((ServerPlayerEntity) player, true);
                     }
 
                     EpicExplosion.explode(

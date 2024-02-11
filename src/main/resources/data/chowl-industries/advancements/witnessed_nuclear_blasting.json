@@ -1,0 +1,41 @@
+{
+    "fabric:load_conditions": [
+        {
+            "condition": "fabric:all_mods_loaded",
+            "values": [
+                "mythicmetals"
+            ]
+        }
+    ],
+
+    "parent": "chowl-industries:witnessed_blasting",
+    "display": {
+        "icon": {
+            "item": "mythicmetals:banglum_nuke_core"
+        },
+        "title": {
+            "translate": "advancements.chowl-industries.witnessed_nuclear_blasting.title"
+        },
+        "description": {
+            "translate": "advancements.chowl-industries.witnessed_nuclear_blasting.description"
+        },
+
+        "frame": "challenge",
+        "announce_to_chat": false,
+        "hidden": true,
+        "show_toast": true
+    },
+    "criteria": {
+        "witnessed_blasting": {
+            "trigger": "chowl-industries:witnessed_blasting",
+            "conditions": {
+                "nuclear": true
+            }
+        }
+    },
+    "requirements": [
+        [
+            "witnessed_blasting"
+        ]
+    ]
+}

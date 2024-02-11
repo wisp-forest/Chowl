@@ -1,5 +1,21 @@
 {
-    "parent": "minecraft:recipes/root",
+    "parent": "chowl-industries:drawer_panel",
+    "display": {
+        "icon": {
+            "item": "minecraft:tnt"
+        },
+        "title": {
+            "translate": "advancements.chowl-industries.witnessed_blasting.title"
+        },
+        "description": {
+            "translate": "advancements.chowl-industries.witnessed_blasting.description"
+        },
+
+        "frame": "challenge",
+        "announce_to_chat": false,
+        "hidden": true,
+        "show_toast": true
+    },
     "criteria": {
         "witnessed_blasting": {
             "trigger": "chowl-industries:witnessed_blasting"

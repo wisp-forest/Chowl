@@ -49,7 +49,7 @@ public class ExplosiveUpgrade {
                         if (!player.isPartOfGame()) continue;
                         if (!affected.contains(player.getPos())) continue;
 
-                        ChowlRegistry.WITNESSED_BLASTING_CRITERIA.trigger((ServerPlayerEntity) player);
+                        ChowlRegistry.WITNESSED_BLASTING_CRITERIA.trigger((ServerPlayerEntity) player, false);
                     }
 
                     world.createExplosion(
