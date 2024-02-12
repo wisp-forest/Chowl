@@ -2,6 +2,7 @@ package com.chyzman.chowl.item.component;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.block.button.*;
+import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.screen.PanelConfigSreenHandler;
 import com.chyzman.chowl.transfer.PanelStorageContext;
 import com.chyzman.chowl.util.BlockSideUtils;
@@ -46,13 +47,15 @@ public interface PanelItem {
                 var storage = panel.getStorage(PanelStorageContext.from(frame, side));
 
                 try (var tx = Transaction.openOuter()) {
-                    StorageUtil.move(
+                    long moved = StorageUtil.move(
                             PlayerInventoryStorage.of(player).getHandSlot(hand),
                             storage,
                             variant -> true,
                             stackInHand.getCount(),
                             tx
                     );
+
+                    player.increaseStat(ChowlRegistry.ITEMS_INSERTED_STAT, (int) moved);
 
                     tx.commit();
                 }
@@ -76,6 +79,8 @@ public interface PanelItem {
 
                             if (extracted > 0) {
                                 PlayerInventoryStorage.of(player).offerOrDrop(resource, extracted, tx);
+                                player.increaseStat(ChowlRegistry.ITEMS_EXTRACTED_STAT, (int) extracted);
+
                                 tx.commit();
                                 return ActionResult.SUCCESS;
                             }
@@ -101,7 +106,8 @@ public interface PanelItem {
                 if (world.isClient) return ActionResult.SUCCESS;
 
                 try (var tx = Transaction.openOuter()) {
-                    StorageUtil.move(PlayerInventoryStorage.of(player), new CombinedSlottedStorage<>(slots), variant -> true, Long.MAX_VALUE, tx);
+                    long moved = StorageUtil.move(PlayerInventoryStorage.of(player), new CombinedSlottedStorage<>(slots), variant -> true, Long.MAX_VALUE, tx);
+                    player.increaseStat(ChowlRegistry.ITEMS_INSERTED_STAT, (int) moved);
 
                     tx.commit();
 

@@ -56,5 +56,8 @@
   "advancements.chowl-industries.labeling_upgrade.title": "Nice and Organized",
   "advancements.chowl-industries.labeling_upgrade.description": "Rename a panel with a Name Tag",
   "advancements.chowl-industries.fired.title": "Fired!",
-  "advancements.chowl-industries.fired.description": "Finally found the perpetrator..."
+  "advancements.chowl-industries.fired.description": "Finally found the perpetrator...",
+
+  "stat.chowl-industries.items_extracted": "Items Extracted",
+  "stat.chowl-industries.items_inserted": "Items Inserted"
 }

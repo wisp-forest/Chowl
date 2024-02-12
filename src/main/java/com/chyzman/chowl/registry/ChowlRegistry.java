@@ -13,6 +13,8 @@ import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.stat.Stats;
+import net.minecraft.util.Identifier;
 
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
@@ -23,6 +25,15 @@ public class ChowlRegistry {
 
     private static Block registerBlock(String name, Block block) {
         return Registry.register(Registries.BLOCK, id(name), block);
+    }
+
+    private static Identifier registerCustomStat(String name) {
+        Identifier stat = id(name);
+
+        Registry.register(Registries.CUSTOM_STAT, stat, stat);
+        Stats.CUSTOM.getOrCreateStat(stat);
+
+        return stat;
     }
 
     public static final Item CHOWL_HANDBOOK = LavenderBookItem.registerForBook(id("chowl_handbook"), new Item.Settings().maxCount(1));
@@ -54,6 +65,9 @@ public class ChowlRegistry {
     public static final WitnessedBlastingCriteria WITNESSED_BLASTING_CRITERIA = Criteria.register(new WitnessedBlastingCriteria());
     public static final LabeledPanelCriteria LABELED_PANEL_CRITERIA = Criteria.register(new LabeledPanelCriteria());
     public static final InsertedUpgradeCriteria INSERTED_UPGRADE_CRITERIA = Criteria.register(new InsertedUpgradeCriteria());
+
+    public static final Identifier ITEMS_INSERTED_STAT = registerCustomStat("items_inserted");
+    public static final Identifier ITEMS_EXTRACTED_STAT = registerCustomStat("items_extracted");
 
     public static void init() {
     }
