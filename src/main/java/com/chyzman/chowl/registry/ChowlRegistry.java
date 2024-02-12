@@ -1,6 +1,7 @@
 package com.chyzman.chowl.registry;
 
 import com.chyzman.chowl.block.DrawerFrameBlock;
+import com.chyzman.chowl.criteria.InsertedUpgradeCriteria;
 import com.chyzman.chowl.criteria.LabeledPanelCriteria;
 import com.chyzman.chowl.criteria.WitnessedBlastingCriteria;
 import com.chyzman.chowl.item.*;
@@ -52,6 +53,7 @@ public class ChowlRegistry {
 
     public static final WitnessedBlastingCriteria WITNESSED_BLASTING_CRITERIA = Criteria.register(new WitnessedBlastingCriteria());
     public static final LabeledPanelCriteria LABELED_PANEL_CRITERIA = Criteria.register(new LabeledPanelCriteria());
+    public static final InsertedUpgradeCriteria INSERTED_UPGRADE_CRITERIA = Criteria.register(new InsertedUpgradeCriteria());
 
     public static void init() {
     }

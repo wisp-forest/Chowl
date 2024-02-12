@@ -1,0 +1,29 @@
+{
+    "parent": "chowl-industries:drawer_panel",
+    "display": {
+        "icon": {
+            "item": "minecraft:lava_bucket"
+        },
+        "title": {
+            "translate": "advancements.chowl-industries.upgrades.title"
+        },
+        "description": {
+            "translate": "advancements.chowl-industries.upgrades.description"
+        },
+
+        "frame": "task",
+        "hidden": false,
+        "announce_to_chat": false,
+        "show_toast": false
+    },
+    "criteria": {
+        "inserted_upgrade": {
+            "trigger": "chowl-industries:inserted_upgrade"
+        }
+    },
+    "requirements": [
+        [
+            "inserted_upgrade"
+        ]
+    ]
+}

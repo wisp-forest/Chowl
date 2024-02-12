@@ -1,5 +1,5 @@
 {
-    "parent": "chowl-industries:drawer_panel",
+    "parent": "chowl-industries:upgrades",
     "display": {
         "icon": {
             "item": "minecraft:name_tag"
