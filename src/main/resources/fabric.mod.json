@@ -10,7 +10,7 @@
     "sources": "https://github.com/wisp-forest/ChowlIndustries"
   },
   "license": "All-Rights-Reserved",
-  "icon": "assets/chowl/icon.png",
+  "icon": "assets/chowl-industries/icon.png",
   "environment": "*",
   "entrypoints": {
     "client": [
