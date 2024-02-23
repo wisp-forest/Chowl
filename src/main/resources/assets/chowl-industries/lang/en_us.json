@@ -57,6 +57,8 @@
   "advancements.chowl-industries.labeling_upgrade.description": "Rename a panel with a Name Tag",
   "advancements.chowl-industries.fired.title": "Fired!",
   "advancements.chowl-industries.fired.description": "Finally found the perpetrator...",
+  "advancements.chowl-industries.not_a_secret.title": "Not A Secret",
+  "advancements.chowl-industries.not_a_secret.description": "What did you think would happen?",
 
   "stat.chowl-industries.items_extracted": "Items Extracted",
   "stat.chowl-industries.items_inserted": "Items Inserted"
