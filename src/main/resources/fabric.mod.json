@@ -3,13 +3,13 @@
   "id": "chowl-industries",
   "version": "${version}",
   "name": "Chowl Industries",
-  "description": "The (self-proclaimed) best drawer mod",
+  "description": "Enterprise™ mass item storage",
   "authors": ["chyzman", "BasiqueEvangelist"],
   "contact": {
     "issues": "https://github.com/wisp-forest/ChowlIndustries/issues",
     "sources": "https://github.com/wisp-forest/ChowlIndustries"
   },
-  "license": "All-Rights-Reserved",
+  "license": "LGPL-3.0-only",
   "icon": "assets/chowl-industries/icon.png",
   "environment": "*",
   "entrypoints": {
@@ -33,7 +33,7 @@
     "modmenu": {
       "links": {
         "modmenu.discord": "https://wispforest.io/discord",
-        "modmenu.modrinth": "https://modrinth.com/mod/chowl"
+        "modmenu.modrinth": "https://modrinth.com/mod/chowl-industries"
       }
     }
   },
