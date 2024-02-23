@@ -87,11 +87,11 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     );
 
     public static final VoxelShape[] SIDES = {
-            Block.createCuboidShape(2, 0, 2, 14, 1, 14),
+            Block.createCuboidShape(2, 0, 2, 14, 2, 14),
             Block.createCuboidShape(2, 14, 2, 14, 16, 14),
-            Block.createCuboidShape(2, 2, 0, 14, 14, 1),
+            Block.createCuboidShape(2, 2, 0, 14, 14, 2),
             Block.createCuboidShape(2, 2, 14, 14, 14, 16),
-            Block.createCuboidShape(0, 2, 2, 1, 14, 14),
+            Block.createCuboidShape(0, 2, 2, 2, 14, 14),
             Block.createCuboidShape(14, 2, 2, 16, 14, 14),
     };
 

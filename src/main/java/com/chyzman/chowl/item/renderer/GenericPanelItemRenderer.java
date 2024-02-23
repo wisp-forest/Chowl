@@ -80,7 +80,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
 
         if (storage == null) return;
 
-        matrices.translate(0, 0, -1 / 32f - 0.001);
+        matrices.translate(0, 0, -1/16f - 0.001);
         matrices.push();
 
         List<StorageView<ItemVariant>> slots = new ArrayList<>(storage.getSlots());

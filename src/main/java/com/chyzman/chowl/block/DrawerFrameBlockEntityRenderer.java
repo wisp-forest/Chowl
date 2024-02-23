@@ -23,6 +23,8 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
 
 @Environment(EnvType.CLIENT)
@@ -104,6 +106,8 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                     matrices.scale(scale, scale, scale);
                     matrices.translate(-properties.offset().x, -properties.offset().y, (Math.abs(properties.offset().z) > 0.5f) ? -properties.offset().z : 0);
 
+                } else {
+                    matrices.translate(0, 0, 1 / 32f);
                 }
 
                 try {
@@ -177,7 +181,13 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
         }
 
         if (showOutlines && blockFocused && hoveredButton == null && frameOutline) {
-            WorldRenderer.drawCuboidShapeOutline(matrices, vertexConsumers.getBuffer(RenderLayer.getLines()), DrawerFrameBlock.BASE, 0, 0, 0, 0f, 0f, 0f, 0.4f);
+            var shape = DrawerFrameBlock.BASE;
+            for (DrawerFrameBlockEntity.SideState sideState : entity.stacks) {
+                if (!sideState.stack.isEmpty() || sideState.isBlank) {
+                    shape = VoxelShapes.union(shape, DrawerFrameBlock.SIDES[entity.stacks.indexOf(sideState)]);
+                }
+            }
+            WorldRenderer.drawCuboidShapeOutline(matrices, vertexConsumers.getBuffer(RenderLayer.getLines()), shape, 0, 0, 0, 0f, 0f, 0f, 0.4f);
         }
     }
 }

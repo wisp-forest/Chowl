@@ -5,7 +5,9 @@ import com.chyzman.chowl.block.DrawerFrameBlock;
 import com.chyzman.chowl.classes.AttackInteractionReceiver;
 import com.chyzman.chowl.util.BlockSideUtils;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -28,6 +30,8 @@ public interface BlockButtonProvider extends AttackInteractionReceiver, DoubleCl
         vec.rotate(side.getRotationQuaternion().invert())
                 .rotate(Direction.WEST.getRotationQuaternion())
                 .rotate(RotationAxis.NEGATIVE_X.rotationDegrees((orientation > 0 && orientation < 4) ? orientation * 90 : 0));
+
+//        if (Math.abs(vec.x) != 0.5) return null;
 
         vec.add(0.5f, 0.5f, 0.5f);
 

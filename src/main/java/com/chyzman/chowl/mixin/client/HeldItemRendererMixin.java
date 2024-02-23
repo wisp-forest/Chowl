@@ -28,7 +28,7 @@ public abstract class HeldItemRendererMixin {
         if (item.getItem() instanceof BasePanelItem) {
             var arm = hand == Hand.MAIN_HAND ? 1.0F : -1.0F;
             matrices.push();
-            matrices.translate(arm * 0.25, -0.25, 0);
+            matrices.translate(arm * 0.15, -0.2, 0);
             matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(arm * 10.0F));
             renderArmHoldingItem(matrices, vertexConsumers, light, equipProgress, swingProgress, hand == Hand.MAIN_HAND ? player.getMainArm() : player.getMainArm().getOpposite());
             matrices.pop();
