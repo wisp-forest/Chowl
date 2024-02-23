@@ -61,7 +61,7 @@ public class ChowlClient implements ClientModInitializer {
 
             ctx.resolveModel().register(context -> {
                 if (context.id().equals(id("block/drawer_frame"))) {
-                    return new DrawerFrameBlockModel.Unbaked(id("block/drawer_frame_base"), id("block/drawer_frame_panels"));
+                    return DrawerFrameBlockModel.Unbaked.create(id("block/drawer_frame_base"), id("block/panel"));
                 } else if (context.id().equals(id("item/phantom_panel"))) {
                     return new BlankPanelItemModel.Unbaked(id("item/phantom_panel_base"));
                 } else {

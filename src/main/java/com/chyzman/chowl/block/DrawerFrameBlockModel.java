@@ -24,15 +24,14 @@ import net.minecraft.world.BlockRenderView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class DrawerFrameBlockModel extends ForwardingBakedModel {
-    private final BakedModel panels;
+    private final Map<Direction, BakedModel> panels;
 
-    private DrawerFrameBlockModel(BakedModel wrapped, BakedModel panels) {
+    private DrawerFrameBlockModel(BakedModel wrapped, Map<Direction, BakedModel> panels) {
         this.panels = panels;
         this.wrapped = wrapped;
     }
@@ -45,33 +44,23 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
     @Override
     public void emitBlockQuads(BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context) {
         var template = (BlockState) blockView.getBlockEntityRenderData(pos);
-        RetextureTransform retexture = null;
 
         if (template != null) {
             var info = RetextureInfo.get(template);
-            retexture = new RetextureTransform(info, blockView, pos);
-            context.pushTransform(retexture);
+            context.pushTransform(new RetextureTransform(info, blockView, pos));
         }
         super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
 
         var be = blockView.getBlockEntity(pos);
 
         if (be instanceof DrawerFrameBlockEntity frame) {
-            if (retexture != null) retexture.dropNominalFace = true;
+            for (int sideId = 0; sideId < 6; sideId++) {
+                Direction side = Direction.byId(sideId);
 
-            context.pushTransform(quad -> {
-                Direction face = quad.cullFace();
-                if (face == null) return true;
+                if (!frame.isSideBaked(sideId)) continue;
 
-                quad.cullFace(null);
-                quad.nominalFace(face);
-
-                return frame.isSideBaked(face.getId());
-            });
-
-            panels.emitBlockQuads(blockView, state, pos, randomSupplier, context);
-
-            context.popTransform();
+                panels.get(side).emitBlockQuads(blockView, state, pos, randomSupplier, context);
+            }
         }
 
         if (template != null) context.popTransform();
@@ -90,16 +79,13 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
         super.emitItemQuads(stack, randomSupplier, context);
 
         if (frame != null) {
-            context.pushTransform(quad -> {
-                Direction face = quad.cullFace();
-                if (face == null) return true;
+            for (int sideId = 0; sideId < 6; sideId++) {
+                Direction side = Direction.byId(sideId);
 
-                return frame.isSideBaked(face.getId());
-            });
+                if (!frame.isSideBaked(sideId)) continue;
 
-            panels.emitItemQuads(stack, randomSupplier, context);
-
-            context.popTransform();
+                panels.get(side).emitItemQuads(stack, randomSupplier, context);
+            }
         }
 
         if (template != null) context.popTransform();
@@ -109,7 +95,6 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
         private final RetextureInfo info;
         private final @Nullable BlockRenderView world;
         private final @Nullable BlockPos pos;
-        private boolean dropNominalFace;
 
         private RetextureTransform(RetextureInfo info, @Nullable BlockRenderView world, @Nullable BlockPos pos) {
             this.info = info;
@@ -126,16 +111,31 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
 
             if (world != null && pos != null) info.changeColor(quad, face, world, pos);
 
-            if (dropNominalFace) quad.nominalFace(null);
-
             return true;
         }
     }
 
-    public record Unbaked(Identifier baseModel, Identifier panelsModel) implements UnbakedModel {
+    public record Unbaked(Identifier baseModel, Map<Direction, Identifier> panelModels) implements UnbakedModel {
+        public static Unbaked create(Identifier baseModel, Identifier panelModelPrefix) {
+            Map<Direction, Identifier> panelModels = new HashMap<>();
+
+            for (int sideId = 0; sideId < 6; sideId++) {
+                Direction side = Direction.byId(sideId);
+
+                panelModels.put(side, new Identifier(panelModelPrefix.getNamespace(), panelModelPrefix.getPath() + "_" + side.getName()));
+            }
+
+            return new Unbaked(baseModel, panelModels);
+        }
+
         @Override
         public Collection<Identifier> getModelDependencies() {
-            return List.of(baseModel, panelsModel);
+            List<Identifier> deps = new ArrayList<>();
+
+            deps.add(baseModel);
+            deps.addAll(panelModels.values());
+
+            return deps;
         }
 
         @Override
@@ -145,7 +145,13 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
 
         @Override
         public @NotNull BakedModel bake(Baker baker, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer, Identifier modelId) {
-            return new DrawerFrameBlockModel(baker.bake(baseModel, rotationContainer), baker.bake(panelsModel, rotationContainer));
+            Map<Direction, BakedModel> bakedPanelModels = new EnumMap<>(Direction.class);
+
+            for (var entry : panelModels.entrySet()) {
+                bakedPanelModels.put(entry.getKey(), baker.bake(entry.getValue(), rotationContainer));
+            }
+
+            return new DrawerFrameBlockModel(baker.bake(baseModel, rotationContainer), bakedPanelModels);
         }
     }
 
