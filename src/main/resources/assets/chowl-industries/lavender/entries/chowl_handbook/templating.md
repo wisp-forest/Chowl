@@ -14,8 +14,9 @@ a block where your frame is. Any attached [panels](^chowl-industries:panels) are
 
 ;;;;;
 
-<block;chowl-industries:drawer_frame[]{TemplateState: {Name: "minecraft:diamond_block"}, Inventory: [{Orientation: 0, Stack: {id: "minecraft:air", Count: 0b}}, {Orientation: 2, Stack: {id: "chowl-industries:blank_panel", Count: 1b}}, {Orientation: 0, Stack: {id: "chowl-industries:drawer_panel", Count: 1b, tag: {Variant: {item: "minecraft:diamond"}, Count: "23"}}}, {Orientation: 0, Stack: {id: "minecraft:air", Count: 0b}}, {Orientation: 0, Stack: {id: "minecraft:air", Count: 0b}}, {Orientation: 0, Stack: {id: "minecraft:air", Count: 0b}}]}>
+<|templating-image@chowl-industries:book_components|>
 
-*TODO: fix this later tm*
+
+
 
 *{gray}Perfect for hiding drawers in your base!{}*

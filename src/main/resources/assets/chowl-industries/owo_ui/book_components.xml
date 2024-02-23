@@ -126,5 +126,26 @@
                 </sizing>
             </flow-layout>
         </template>
+
+        <template name="templating-image">
+            <stack-layout>
+                <children>
+                    <item>
+                        <stack>chowl-industries:drawer_frame{BlockEntityTag:{TemplateState: {Name: "minecraft:diamond_block"}, Inventory: [{IsBlank: 1b, Orientation: 2, Stack: {id: "minecraft:air", Count: 0b}}, {IsBlank: 1b, Orientation: 0, Stack: {id: "minecraft:air", Count: 0b}}, {IsBlank: 1b, Orientation: 0, Stack: {id: "minecraft:air", Count: 0b}}, {IsBlank: 0b, Orientation: 0, Stack: {id: "chowl-industries:drawer_panel", Count: 1b, tag: {Variant: {item: "minecraft:sandstone"}, Count: "1"}}}, {IsBlank: 1b, Orientation: 0, Stack: {id: "minecraft:air", Count: 0b}}, {IsBlank: 1b, Orientation: 0, Stack: {id: "minecraft:air", Count: 0b}}]}}</stack>
+                        <set-tooltip-from-stack>true</set-tooltip-from-stack>
+                        <sizing>
+                            <horizontal method="fixed">48</horizontal>
+                            <vertical method="fixed">48</vertical>
+                        </sizing>
+                    </item>
+                </children>
+                <sizing>
+                    <horizontal method="fill">100</horizontal>
+                    <vertical method="fixed">70</vertical>
+                </sizing>
+                <horizontal-alignment>center</horizontal-alignment>
+                <vertical-alignment>center</vertical-alignment>
+            </stack-layout>
+        </template>
     </templates>
 </owo-ui>
