@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "byb",
+    "yiy",
+    "byb"
+  ],
+  "key": {
+    "y": {
+      "tag": "c:yellow_dyes"
+    },
+    "b": {
+      "tag": "c:black_dyes"
+    },
+    "i": {
+      "tag": "c:iron_ingots"
+    }
+  },
+  "result": {
+    "item": "chowl-industries:caution_block",
+    "count": 8
+  }
+}

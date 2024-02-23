@@ -6,14 +6,17 @@ import com.chyzman.chowl.criteria.LabeledPanelCriteria;
 import com.chyzman.chowl.criteria.WitnessedBlastingCriteria;
 import com.chyzman.chowl.item.*;
 import io.wispforest.lavender.book.LavenderBookItem;
+import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.stat.Stats;
+import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
@@ -61,6 +64,9 @@ public class ChowlRegistry {
             )
     );
     public static final Item DRAWER_FRAME_ITEM = registerItem("drawer_frame", new DrawerFrameBlockItem(DRAWER_FRAME_BLOCK, new Item.Settings()));
+
+    public static final Block CAUTION_BLOCK = registerBlock("caution_block", new Block(FabricBlockSettings.copy(Blocks.IRON_BLOCK).mapColor(DyeColor.YELLOW)));
+    public static final Item CAUTION_BLOCK_ITEM = registerItem("caution_block", new BlockItem(CAUTION_BLOCK, new Item.Settings()));
 
     public static final WitnessedBlastingCriteria WITNESSED_BLASTING_CRITERIA = Criteria.register(new WitnessedBlastingCriteria());
     public static final LabeledPanelCriteria LABELED_PANEL_CRITERIA = Criteria.register(new LabeledPanelCriteria());

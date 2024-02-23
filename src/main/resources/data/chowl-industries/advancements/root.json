@@ -10,7 +10,7 @@
             "translate": "advancements.chowl-industries.root.description"
         },
 
-        "background": "chowl-industries:textures/gui/advancement_background.png",
+        "background": "chowl-industries:textures/block/caution_block.png",
         "frame": "task",
         "hidden": false,
         "announce_to_chat": false,
