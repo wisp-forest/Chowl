@@ -21,7 +21,7 @@ import java.util.List;
 import static com.chyzman.chowl.Chowl.*;
 
 @SuppressWarnings("UnstableApiUsage")
-public class DrawerPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem, UpgradeablePanelItem, CapacityLimitedPanelItem {
+public class DrawerPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem, UpgradeablePanelItem, StoragePanelItem {
     public static final NbtKey<ItemVariant> VARIANT = new NbtKey<>("Variant", NbtKeyTypes.ITEM_VARIANT);
     public static final NbtKey<BigInteger> COUNT = new NbtKey<>("Count", NbtKeyTypes.BIG_INTEGER);
     public static final NbtKey<Boolean> LOCKED = new NbtKey<>("Locked", NbtKey.Type.BOOLEAN);
@@ -82,6 +82,16 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
     @Override
     public BigInteger baseCapacity() {
         return new BigInteger(CHOWL_CONFIG.base_panel_capacity());
+    }
+
+    @Override
+    public BigInteger count(ItemStack stack) {
+        return stack.getOr(COUNT, BigInteger.ZERO);
+    }
+
+    @Override
+    public void setCount(ItemStack stack, BigInteger count) {
+        stack.put(COUNT, count);
     }
 
     @SuppressWarnings("UnstableApiUsage")

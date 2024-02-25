@@ -3,6 +3,7 @@ package com.chyzman.chowl;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.classes.ChowlIndustriesConfig;
 import com.chyzman.chowl.commands.DebugCommands;
+import com.chyzman.chowl.commands.RandomizeCommand;
 import com.chyzman.chowl.recipe.ChowlRecipeSerializers;
 import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.registry.ServerBoundPackets;
@@ -86,6 +87,8 @@ public class Chowl implements ModInitializer {
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             if (Owo.DEBUG) DebugCommands.register(dispatcher, registryAccess);
+
+            RandomizeCommand.register(dispatcher);
         });
 
         CHOWL_GROUP.initialize();

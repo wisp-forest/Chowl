@@ -32,7 +32,7 @@ import java.util.List;
 import static com.chyzman.chowl.Chowl.*;
 
 @SuppressWarnings("UnstableApiUsage")
-public class CompressingPanelItem extends BasePanelItem implements FilteringPanelItem, LockablePanelItem, DisplayingPanelItem, CapacityLimitedPanelItem, UpgradeablePanelItem {
+public class CompressingPanelItem extends BasePanelItem implements FilteringPanelItem, LockablePanelItem, DisplayingPanelItem, StoragePanelItem, UpgradeablePanelItem {
     public static final NbtKey<Item> ITEM = new NbtKey<>("Variant", NbtKey.Type.ofRegistry(Registries.ITEM));
     public static final NbtKey<BigInteger> COUNT = new NbtKey<>("Count", NbtKeyTypes.BIG_INTEGER);
     public static final NbtKey<Boolean> LOCKED = new NbtKey<>("Locked", NbtKey.Type.BOOLEAN);
@@ -206,7 +206,22 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
 
     @Override
     public BigInteger capacity(ItemStack panel) {
-        return CapacityLimitedPanelItem.super.capacity(panel);
+        return StoragePanelItem.super.capacity(panel);
+    }
+
+    @Override
+    public BigInteger fullCapacity(ItemStack stack) {
+        return capacity(stack).multiply(CompressionManager.followUp(stack.getOr(ITEM, Items.AIR)).totalMultiplier());
+    }
+
+    @Override
+    public BigInteger count(ItemStack stack) {
+        return stack.getOr(COUNT, BigInteger.ZERO);
+    }
+
+    @Override
+    public void setCount(ItemStack stack, BigInteger count) {
+        stack.put(COUNT, count);
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -292,7 +307,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
 
         @Override
         public BigInteger bigCapacity() {
-            return CompressingPanelItem.this.capacity(ctx.stack()).multiply(CompressionManager.followUp(ctx.stack().getOr(ITEM, Items.AIR)).totalMultiplier());
+            return CompressingPanelItem.this.fullCapacity(ctx.stack());
         }
     }
 }
