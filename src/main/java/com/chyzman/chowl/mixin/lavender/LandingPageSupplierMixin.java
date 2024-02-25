@@ -24,14 +24,18 @@ public abstract class LandingPageSupplierMixin extends LavenderBookScreen.PageSu
         super(context);
     }
 
+    private static boolean shouldEnableChowl(LavenderBookScreen ctx) {
+        return ctx.book.id().getNamespace().equals(Chowl.MODID) && !Chowl.CHOWL_CONFIG.cringe_ahh_book();
+    }
+
     @ModifyExpressionValue(method = "<init>", at = @At(value = "INVOKE", target = "Ljava/util/Collection;isEmpty()Z"))
     private boolean malding(boolean original, LavenderBookScreen ctx) {
-        return ctx.book.id().getNamespace().equals(Chowl.MODID) || original;
+        return shouldEnableChowl(ctx) || original;
     }
 
     @ModifyExpressionValue(method = "<init>", at = @At(value = "INVOKE", target = "Lio/wispforest/lavender/book/Book;orphanedEntries()Ljava/util/Collection;"))
     private Collection<Entry> malding(Collection<Entry> original, LavenderBookScreen context) {
-        if (!context.book.id().getNamespace().equals(Chowl.MODID)) return original;
+        if (!shouldEnableChowl(context)) return original;
 
         List<Entry> better = new ArrayList<>(original);
 

@@ -23,6 +23,9 @@ public class ChowlIndustriesConfigModel {
     @Sync(Option.SyncMode.NONE)
     public int recursive_rendering_limit = 3;
 
+    @Sync(Option.SyncMode.NONE)
+    public boolean cringe_ahh_book = false;
+
     @SectionHeader("Server")
 
     @Sync(Option.SyncMode.OVERRIDE_CLIENT)
