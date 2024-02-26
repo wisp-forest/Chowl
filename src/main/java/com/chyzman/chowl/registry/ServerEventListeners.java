@@ -1,5 +1,6 @@
 package com.chyzman.chowl.registry;
 
+import com.chyzman.chowl.Chowl;
 import com.chyzman.chowl.block.DrawerFrameBlock;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.event.DoubleClickEvent;
@@ -46,6 +47,7 @@ public class ServerEventListeners {
         });
 
         DoubleClickEvent.EVENT.register((player, world, state, hitResult) -> {
+            if (!Chowl.CHOWL_CONFIG.double_click_templating()) return ActionResult.PASS;
             if (hitResult.isInsideBlock()) return ActionResult.PASS;
 
             var pos = hitResult.getBlockPos().offset(hitResult.getSide());

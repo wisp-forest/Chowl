@@ -36,6 +36,8 @@
   "text.config.chowl-industries.option.base_panel_capacity.tooltip": "The base capacity of drawer panels",
   "text.config.chowl-industries.option.base_compressing_panel_capacity": "Base panel capacity",
   "text.config.chowl-industries.option.base_compressing_panel_capacity.tooltip": "The base capacity of compressing panels",
+  "text.config.chowl-industries.option.double_click_templating": "Double click templating",
+  "text.config.chowl-industries.option.double_click_templating.tooltip": "Allows double clicking frames to apply a template to the entire network",
   "advancements.chowl-industries.root.title": "Chowl Industries",
   "advancements.chowl-industries.root.description": "Giant warehouses await!",
   "advancements.chowl-industries.drawer_frame.title": "You've been Framed!",

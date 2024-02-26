@@ -31,5 +31,7 @@ public class ChowlIndustriesConfigModel {
     @Sync(Option.SyncMode.OVERRIDE_CLIENT)
     public String base_panel_capacity = "2048";
     public String base_compressing_panel_capacity = "2048";
+    @Sync(Option.SyncMode.OVERRIDE_CLIENT)
+    public boolean double_click_templating = true;
 
 }
