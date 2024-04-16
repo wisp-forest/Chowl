@@ -8,6 +8,7 @@ import io.wispforest.lavender.book.Category;
 import io.wispforest.lavender.book.Entry;
 import io.wispforest.lavender.book.LavenderBookItem;
 import io.wispforest.lavender.client.LavenderBookScreen;
+import io.wispforest.owo.ui.component.Components;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -47,7 +48,7 @@ public abstract class LandingPageSupplierMixin extends LavenderBookScreen.PageSu
                 category.id(),
                 null,
                 category.title(),
-                category.icon(),
+                category.iconFactory(),
                 category.secret(),
                 category.ordinal(),
                 book.shouldDisplayCategory(category, client.player)
@@ -66,7 +67,7 @@ public abstract class LandingPageSupplierMixin extends LavenderBookScreen.PageSu
             new Identifier("haha", "explosion"),
             null,
             "All Entries",
-            LavenderBookItem.itemOf(context.book),
+            sizing -> Components.item(LavenderBookItem.itemOf(context.book)).sizing(sizing),
             false,
             100,
             ImmutableSet.of(),

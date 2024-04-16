@@ -16,8 +16,7 @@
     "ServerPlayNetworkHandlerMixin",
     "ServerWorldMixin",
     "ShapeContextMixin",
-    "lavender.EntryMixin",
-    "lavender.LavenderBookScreenAccessor"
+    "lavender.EntryMixin"
   ],
   "client": [
     "client.ClientPlayerInteractionManagerMixin",
