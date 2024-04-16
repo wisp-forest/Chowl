@@ -9,7 +9,7 @@
 			"from": [0, 2, 2],
 			"to": [2, 14, 14],
 			"faces": {
-				"east": {"uv": [2, 2, 14, 14], "texture": "#1", "cullface": "east"},
+				"east": {"uv": [2, 2, 14, 14], "texture": "#1"},
 				"west": {"uv": [2, 2, 14, 14], "texture": "#1", "cullface": "west"}
 			}
 		}
