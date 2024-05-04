@@ -223,20 +223,30 @@ public class CompressionManager {
             INVENTORY.clear();
             for (int i = 0; i < 9; i++) INVENTORY.setStack(i, of);
 
-            var recipe = recipeManager.get().getFirstMatch(RecipeType.CRAFTING, INVENTORY, null);
-            return recipe
-                .map(craftingRecipe -> craftingRecipe.craft(INVENTORY, DynamicRegistryManager.EMPTY))
-                .orElse(null);
+            try {
+                var recipe = recipeManager.get().getFirstMatch(RecipeType.CRAFTING, INVENTORY, null);
+                return recipe
+                    .map(craftingRecipe -> craftingRecipe.craft(INVENTORY, DynamicRegistryManager.EMPTY))
+                    .orElse(null);
+            } catch (Exception e) {
+                // bruh
+                return null;
+            }
         }
 
         private static @Nullable ItemStack try1x1(ItemStack of) {
             INVENTORY.clear();
             INVENTORY.setStack(0, of);
 
-            var recipe = recipeManager.get().getFirstMatch(RecipeType.CRAFTING, INVENTORY, null);
-            return recipe
-                .map(craftingRecipe -> craftingRecipe.craft(INVENTORY, DynamicRegistryManager.EMPTY))
-                .orElse(null);
+            try {
+                var recipe = recipeManager.get().getFirstMatch(RecipeType.CRAFTING, INVENTORY, null);
+                return recipe
+                    .map(craftingRecipe -> craftingRecipe.craft(INVENTORY, DynamicRegistryManager.EMPTY))
+                    .orElse(null);
+            } catch (Exception e) {
+                // bruh
+                return null;
+            }
         }
 
         private static @Nullable ItemStack try2x2(ItemStack of) {
@@ -246,10 +256,15 @@ public class CompressionManager {
             INVENTORY.setStack(3, of);
             INVENTORY.setStack(4, of);
 
-            var recipe = recipeManager.get().getFirstMatch(RecipeType.CRAFTING, INVENTORY, null);
-            return recipe
-                .map(craftingRecipe -> craftingRecipe.craft(INVENTORY, DynamicRegistryManager.EMPTY))
-                .orElse(null);
+            try {
+                var recipe = recipeManager.get().getFirstMatch(RecipeType.CRAFTING, INVENTORY, null);
+                return recipe
+                    .map(craftingRecipe -> craftingRecipe.craft(INVENTORY, DynamicRegistryManager.EMPTY))
+                    .orElse(null);
+            } catch (Exception e) {
+                // bruh
+                return null;
+            }
         }
     }
 }
