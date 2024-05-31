@@ -4,11 +4,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.RecipeManager;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +34,11 @@ public class CompressionManager {
             return false;
         }
     }, 3, 3);
-    private static WeakReference<RecipeManager> recipeManager = new WeakReference<>(null);
+    private static ThreadLocal<WeakReference<World>> world = new ThreadLocal<>();
 
-    public static void rebuild(RecipeManager recipeManager) {
+    public static void rebuild(World w) {
         NODES.clear();
-        CompressionManager.recipeManager = new WeakReference<>(recipeManager);
+        world.set(new WeakReference<>(w));
     }
 
     public static String dumpDotGraph() {
@@ -223,30 +223,22 @@ public class CompressionManager {
             INVENTORY.clear();
             for (int i = 0; i < 9; i++) INVENTORY.setStack(i, of);
 
-            try {
-                var recipe = recipeManager.get().getFirstMatch(RecipeType.CRAFTING, INVENTORY, null);
-                return recipe
-                    .map(craftingRecipe -> craftingRecipe.craft(INVENTORY, DynamicRegistryManager.EMPTY))
-                    .orElse(null);
-            } catch (Exception e) {
-                // bruh
-                return null;
-            }
+            World w = world.get().get();
+            var recipe = w.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, INVENTORY, w);
+            return recipe
+                .map(craftingRecipe -> craftingRecipe.craft(INVENTORY, DynamicRegistryManager.EMPTY))
+                .orElse(null);
         }
 
         private static @Nullable ItemStack try1x1(ItemStack of) {
             INVENTORY.clear();
             INVENTORY.setStack(0, of);
 
-            try {
-                var recipe = recipeManager.get().getFirstMatch(RecipeType.CRAFTING, INVENTORY, null);
-                return recipe
-                    .map(craftingRecipe -> craftingRecipe.craft(INVENTORY, DynamicRegistryManager.EMPTY))
-                    .orElse(null);
-            } catch (Exception e) {
-                // bruh
-                return null;
-            }
+            World w = world.get().get();
+            var recipe = w.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, INVENTORY, w);
+            return recipe
+                .map(craftingRecipe -> craftingRecipe.craft(INVENTORY, DynamicRegistryManager.EMPTY))
+                .orElse(null);
         }
 
         private static @Nullable ItemStack try2x2(ItemStack of) {
@@ -256,15 +248,11 @@ public class CompressionManager {
             INVENTORY.setStack(3, of);
             INVENTORY.setStack(4, of);
 
-            try {
-                var recipe = recipeManager.get().getFirstMatch(RecipeType.CRAFTING, INVENTORY, null);
-                return recipe
-                    .map(craftingRecipe -> craftingRecipe.craft(INVENTORY, DynamicRegistryManager.EMPTY))
-                    .orElse(null);
-            } catch (Exception e) {
-                // bruh
-                return null;
-            }
+            World w = world.get().get();
+            var recipe = w.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, INVENTORY, w);
+            return recipe
+                .map(craftingRecipe -> craftingRecipe.craft(INVENTORY, DynamicRegistryManager.EMPTY))
+                .orElse(null);
         }
     }
 }

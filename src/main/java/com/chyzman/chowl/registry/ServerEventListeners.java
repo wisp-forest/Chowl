@@ -4,6 +4,8 @@ import com.chyzman.chowl.Chowl;
 import com.chyzman.chowl.block.DrawerFrameBlock;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.event.DoubleClickEvent;
+import com.chyzman.chowl.util.CompressionManager;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
@@ -11,6 +13,10 @@ import net.minecraft.util.ActionResult;
 
 public class ServerEventListeners {
     public static void init() {
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            CompressionManager.rebuild(server.getOverworld());
+        });
+
         UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
             if (hitResult.isInsideBlock()) return ActionResult.PASS;
 
