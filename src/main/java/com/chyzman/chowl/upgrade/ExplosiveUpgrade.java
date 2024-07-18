@@ -9,6 +9,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableInt;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.chyzman.chowl.Chowl.EXPLOSIVE_UPGRADE_TAG;
 import static com.chyzman.chowl.Chowl.FIERY_UPGRADE_TAG;
@@ -21,27 +25,28 @@ public class ExplosiveUpgrade {
                 && panelItem.hasUpgrade(ctx.stack(), upgrade -> upgrade.isIn(EXPLOSIVE_UPGRADE_TAG))) {
                 var world = ctx.drawerFrame().getWorld();
                 var pos = ctx.drawerFrame().getPos();
-                var upgrades = panelItem.upgrades(ctx.stack());
-                int power = 0;
-                boolean fiery = false;
+                MutableInt power = new MutableInt();
+                MutableBoolean fiery = new MutableBoolean(false);
 
-                for (ItemStack upgrade : upgrades) {
-                    if (upgrade.isIn(EXPLOSIVE_UPGRADE_TAG)) {
-                        power += 1;
-                        upgrade.decrement(1);
+                panelItem.modifyUpgrades(ctx.stack(), upgrades -> {
+                    for (ItemStack upgrade : upgrades) {
+                        if (upgrade.isIn(EXPLOSIVE_UPGRADE_TAG)) {
+                            power.add(1);
+                            upgrade.decrement(1);
+                        }
+                        if (upgrade.isIn(FIERY_UPGRADE_TAG)) {
+                            fiery.setTrue();
+                            upgrade.decrement(1);
+                        }
                     }
-                    if (upgrade.isIn(FIERY_UPGRADE_TAG)) {
-                        fiery = true;
-                        upgrade.decrement(1);
-                    }
-                }
 
-                if (power == 0) return;
+                    return upgrades;
+                });
 
-                panelItem.setUpgrades(ctx.stack(), upgrades);
+                if (power.getValue() == 0) return;
 
-                boolean finalFiery = fiery;
-                int finalPower = power;
+                boolean finalFiery = fiery.getValue();
+                int finalPower = power.getValue();
                 ServerTickHelper.schedule(() -> {
                     Box affected = Box.of(pos.toCenterPos(), 10, 10, 10);
 

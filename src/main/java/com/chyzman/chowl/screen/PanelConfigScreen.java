@@ -2,10 +2,7 @@ package com.chyzman.chowl.screen;
 
 import com.chyzman.chowl.client.AutoGridLayout;
 import com.chyzman.chowl.client.DisableableCheckboxComponent;
-import com.chyzman.chowl.item.component.DisplayingPanelItem;
-import com.chyzman.chowl.item.component.FilteringPanelItem;
-import com.chyzman.chowl.item.component.LockablePanelItem;
-import com.chyzman.chowl.item.component.UpgradeablePanelItem;
+import com.chyzman.chowl.item.component.*;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.ItemComponent;
@@ -275,7 +272,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
     private void resendConfig() {
         if (ignoreChanges) return;
 
-        var displayConfig = new DisplayingPanelItem.Config();
+        var displayConfig = new DisplayingPanelConfig.Builder();
         boolean locked = false;
 
         if (lockedCheckbox != null) locked = lockedCheckbox.checked();
@@ -289,7 +286,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
         if (ignoreTemplatingCheckBox != null) displayConfig.ignoreTemplating(ignoreTemplatingCheckBox.checked());
 
 
-        handler.sendMessage(new PanelConfigSreenHandler.ConfigConfig(displayConfig, locked));
+        handler.sendMessage(new PanelConfigSreenHandler.ConfigConfig(displayConfig.build(), locked));
     }
 
     @Override

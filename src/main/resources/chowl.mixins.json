@@ -12,7 +12,6 @@
     "ItemEntityMixin",
     "LivingEntityMixin",
     "PlayerEntityMixin",
-    "ServerPlayNetworkHandlerMixin",
     "ServerWorldMixin",
     "ShapeContextMixin",
     "lavender.EntryMixin"

@@ -18,13 +18,11 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Pair;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -37,8 +35,8 @@ import java.util.function.Consumer;
 @SuppressWarnings("UnstableApiUsage")
 public interface PanelItem {
     BlockButton STORAGE_BUTTON = new ButtonBuilder(2, 2, 14, 14)
-            .onUse((world, frame, side, stack, player, hand) -> {
-                var stackInHand = player.getStackInHand(hand);
+            .onUse((world, frame, side, stack, player) -> {
+                var stackInHand = player.getStackInHand(Hand.MAIN_HAND);
                 if (stackInHand.isEmpty()) return ActionResult.PASS;
                 if (!(stack.getItem() instanceof PanelItem panel)) return ActionResult.PASS;
 
@@ -48,7 +46,7 @@ public interface PanelItem {
 
                 try (var tx = Transaction.openOuter()) {
                     long moved = StorageUtil.move(
-                            PlayerInventoryStorage.of(player).getHandSlot(hand),
+                            PlayerInventoryStorage.of(player).getHandSlot(Hand.MAIN_HAND),
                             storage,
                             variant -> true,
                             stackInHand.getCount(),
@@ -139,7 +137,7 @@ public interface PanelItem {
     }
 
     default void openConfig(ItemStack stack, PlayerEntity user, @Nullable Consumer<ItemStack> updater) {
-        var factory = new ExtendedScreenHandlerFactory() {
+        var factory = new ExtendedScreenHandlerFactory<ItemStack>() {
             @Override
             public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
                 return new PanelConfigSreenHandler(syncId, playerInventory, stack, updater);
@@ -151,8 +149,8 @@ public interface PanelItem {
             }
 
             @Override
-            public void writeScreenOpeningData(ServerPlayerEntity player, PacketByteBuf buf) {
-                buf.writeItemStack(stack);
+            public ItemStack getScreenOpeningData(ServerPlayerEntity player) {
+                return stack;
             }
         };
 
@@ -171,12 +169,12 @@ public interface PanelItem {
         }
 
         public ButtonBuilder onUse(UseFunction use) {
-            this.wrapped.onUse((state, world, pos, player, hand, hit) -> {
+            this.wrapped.onUse((state, world, pos, player, hit) -> {
                 if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrame))
                     return ActionResult.PASS;
                 var side = BlockSideUtils.getSide(hit);
 
-                return use.onUse(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).stack, player, hand);
+                return use.onUse(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).stack(), player);
             });
 
             return this;
@@ -190,7 +188,7 @@ public interface PanelItem {
                 if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrame))
                     return ActionResult.PASS;
 
-                return attack.onAttack(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).stack, player);
+                return attack.onAttack(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).stack(), player);
             });
 
             return this;
@@ -204,7 +202,7 @@ public interface PanelItem {
                 if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity drawerFrame))
                     return ActionResult.PASS;
 
-                return doubleClick.onDoubleClick(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).stack, player);
+                return doubleClick.onDoubleClick(world, drawerFrame, side, drawerFrame.stacks.get(side.getId()).stack(), player);
             });
 
             return this;
@@ -228,7 +226,7 @@ public interface PanelItem {
 
         @FunctionalInterface
         public interface UseFunction {
-            ActionResult onUse(World world, DrawerFrameBlockEntity frame, Direction side, ItemStack stack, PlayerEntity player, Hand hand);
+            ActionResult onUse(World world, DrawerFrameBlockEntity frame, Direction side, ItemStack stack, PlayerEntity player);
         }
 
         @FunctionalInterface

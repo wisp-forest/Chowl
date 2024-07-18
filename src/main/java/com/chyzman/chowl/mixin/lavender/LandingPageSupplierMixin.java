@@ -53,7 +53,7 @@ public abstract class LandingPageSupplierMixin extends LavenderBookScreen.PageSu
                 category.ordinal(),
                 book.shouldDisplayCategory(category, client.player)
                     ? ImmutableSet.of()
-                    : ImmutableSet.of(new Identifier("haha", "lmao")),
+                    : ImmutableSet.of(Identifier.of("haha", "lmao")),
                 ImmutableSet.of(),
                 "explosion"
             );
@@ -64,7 +64,7 @@ public abstract class LandingPageSupplierMixin extends LavenderBookScreen.PageSu
         }
 
         var allEntries = new Entry(
-            new Identifier("haha", "explosion"),
+            Identifier.of("haha", "explosion"),
             null,
             "All Entries",
             sizing -> Components.item(LavenderBookItem.itemOf(context.book)).sizing(sizing),

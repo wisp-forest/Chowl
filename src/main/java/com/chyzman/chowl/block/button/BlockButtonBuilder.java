@@ -31,7 +31,7 @@ public class BlockButtonBuilder {
 
     public BlockButtonBuilder onAttackOrUse(BlockButtonProvider.AttackFunction attack) {
         onAttack(attack);
-        onUse((state, world, pos, player, hand, hit) -> attack.apply(world, state, hit, player));
+        onUse((state, world, pos, player, hit) -> attack.apply(world, state, hit, player));
 
         return this;
     }

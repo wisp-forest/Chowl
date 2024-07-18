@@ -89,7 +89,7 @@ public class ChowlClient implements ClientModInitializer {
 
                 } else if (client.crosshairTarget instanceof BlockHitResult blockHitResult && blockHitResult.getType() == HitResult.Type.BLOCK) {
                     var side = BlockSideUtils.getSide(blockHitResult);
-                    var selected = frame.stacks.get(side.getId()).stack;
+                    var selected = frame.stacks.get(side.getId()).stack();
                     if (!selected.isEmpty()) {
                         return selected.copy();
                     }

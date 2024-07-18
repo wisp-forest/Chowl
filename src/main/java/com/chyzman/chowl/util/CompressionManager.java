@@ -5,6 +5,7 @@ import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeType;
+import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.screen.ScreenHandler;
@@ -15,25 +16,11 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.ref.WeakReference;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class CompressionManager {
     private static final Logger LOGGER = LoggerFactory.getLogger("Chowl/CompressionManager");
     public static final Map<Item, Node> NODES = new HashMap<>();
-    private static final CraftingInventory INVENTORY = new CraftingInventory(new ScreenHandler(null, -1) {
-        @Override
-        public ItemStack quickMove(PlayerEntity player, int slot) {
-            return null;
-        }
-
-        @Override
-        public boolean canUse(PlayerEntity player) {
-            return false;
-        }
-    }, 3, 3);
     private static ThreadLocal<WeakReference<World>> world = new ThreadLocal<>();
 
     public static void rebuild(World w) {
@@ -220,38 +207,35 @@ public class CompressionManager {
         }
 
         private static @Nullable ItemStack try3x3(ItemStack of) {
-            INVENTORY.clear();
-            for (int i = 0; i < 9; i++) INVENTORY.setStack(i, of);
+            List<ItemStack> stacks = new ArrayList<>(9);
+            for (int i = 0; i < 9; i++) stacks.add(of);
+
+            CraftingRecipeInput input = CraftingRecipeInput.create(3, 3, stacks);
 
             World w = world.get().get();
-            var recipe = w.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, INVENTORY, w);
+            var recipe = w.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, input, w);
             return recipe
-                .map(craftingRecipe -> craftingRecipe.craft(INVENTORY, DynamicRegistryManager.EMPTY))
+                .map(craftingRecipe -> craftingRecipe.value().craft(input, DynamicRegistryManager.EMPTY))
                 .orElse(null);
         }
 
         private static @Nullable ItemStack try1x1(ItemStack of) {
-            INVENTORY.clear();
-            INVENTORY.setStack(0, of);
+            CraftingRecipeInput input = CraftingRecipeInput.create(1, 1, List.of(of));
 
             World w = world.get().get();
-            var recipe = w.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, INVENTORY, w);
+            var recipe = w.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, input, w);
             return recipe
-                .map(craftingRecipe -> craftingRecipe.craft(INVENTORY, DynamicRegistryManager.EMPTY))
+                .map(craftingRecipe -> craftingRecipe.value().craft(input, DynamicRegistryManager.EMPTY))
                 .orElse(null);
         }
 
         private static @Nullable ItemStack try2x2(ItemStack of) {
-            INVENTORY.clear();
-            INVENTORY.setStack(0, of);
-            INVENTORY.setStack(1, of);
-            INVENTORY.setStack(3, of);
-            INVENTORY.setStack(4, of);
+            CraftingRecipeInput input = CraftingRecipeInput.create(2, 2, List.of(of, of, of, of));
 
             World w = world.get().get();
-            var recipe = w.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, INVENTORY, w);
+            var recipe = w.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, input, w);
             return recipe
-                .map(craftingRecipe -> craftingRecipe.craft(INVENTORY, DynamicRegistryManager.EMPTY))
+                .map(craftingRecipe -> craftingRecipe.value().craft(input, DynamicRegistryManager.EMPTY))
                 .orElse(null);
         }
     }

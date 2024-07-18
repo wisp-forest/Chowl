@@ -8,12 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AABBConstructingVertexConsumerProvider implements VertexConsumerProvider {
-    public double minX = Double.MAX_VALUE;
-    public double minY = Double.MAX_VALUE;
-    public double minZ = Double.MAX_VALUE;
-    public double maxX = -Double.MAX_VALUE;
-    public double maxY = -Double.MAX_VALUE;
-    public double maxZ = -Double.MAX_VALUE;
+    public float minX = Float.MAX_VALUE;
+    public float minY = Float.MAX_VALUE;
+    public float minZ = Float.MAX_VALUE;
+    public float maxX = -Float.MAX_VALUE;
+    public float maxY = -Float.MAX_VALUE;
+    public float maxZ = -Float.MAX_VALUE;
 
     private final Map<RenderLayer, VertexConsumerImpl> consumers = new HashMap<>();
 
@@ -24,7 +24,7 @@ public class AABBConstructingVertexConsumerProvider implements VertexConsumerPro
 
     public class VertexConsumerImpl implements VertexConsumer {
         @Override
-        public VertexConsumer vertex(double x, double y, double z) {
+        public VertexConsumer vertex(float x, float y, float z) {
             minX = Math.min(minX, x);
             maxX = Math.max(maxX, x);
 
@@ -60,21 +60,6 @@ public class AABBConstructingVertexConsumerProvider implements VertexConsumerPro
         @Override
         public VertexConsumer normal(float x, float y, float z) {
             return this;
-        }
-
-        @Override
-        public void next() {
-
-        }
-
-        @Override
-        public void fixedColor(int red, int green, int blue, int alpha) {
-
-        }
-
-        @Override
-        public void unfixColor() {
-
         }
     }
 }

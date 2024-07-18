@@ -24,7 +24,7 @@ public abstract class BasePanelItem extends Item implements PanelItem {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public Optional<net.minecraft.client.item.TooltipData> getTooltipData(ItemStack stack) {
+    public Optional<net.minecraft.item.tooltip.TooltipData> getTooltipData(ItemStack stack) {
         return Optional.of(new TooltipData(stack));
     }
 
@@ -37,7 +37,7 @@ public abstract class BasePanelItem extends Item implements PanelItem {
         return super.use(world, user, hand);
     }
 
-    public record TooltipData(ItemStack stack) implements net.minecraft.client.item.TooltipData {
+    public record TooltipData(ItemStack stack) implements net.minecraft.item.tooltip.TooltipData {
     }
 
     @Override

@@ -19,6 +19,7 @@ import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -58,7 +59,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
             matrices.translate(0.5, 0.5, 0.5);
             matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
             if (!RenderGlobals.IN_FRAME && stack.getItem() instanceof UpgradeablePanelItem upgradeable) {
-                var orientation = LabelingUpgrade.rotateOrientationForEasterEggs(0, upgradeable.upgrades(stack));
+                var orientation = LabelingUpgrade.rotateOrientationForEasterEggs(0, upgradeable.upgrades(stack).upgradeStacks());
                 matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90 * orientation));
             }
 
@@ -133,7 +134,9 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                     AtomicReference<MutableText> title = new AtomicReference<>((MutableText) displayStack.getName());
                     if (stack.getItem() instanceof UpgradeablePanelItem upgradeable) {
                         if (upgradeable.hasUpgrade(stack, upgrade -> upgrade.isIn(LABELING_UPGRADE_TAG))) {
-                            upgradeable.upgrades(stack).stream().filter(upgradeStack -> upgradeStack.isIn(LABELING_UPGRADE_TAG) && upgradeStack.hasCustomName()).findFirst().ifPresent(upgradeStack -> title.set((MutableText) upgradeStack.getName()));
+                            var label = upgradeable.upgrades(stack).findUpgrade(upgradeStack -> upgradeStack.isIn(LABELING_UPGRADE_TAG) && upgradeStack.contains(DataComponentTypes.CUSTOM_NAME));
+                            if (label != null)
+                                title.set((MutableText) label.getName());
                         }
                     }
                     var titleWidth = client.textRenderer.getWidth(title.get());

@@ -71,7 +71,7 @@ public class PanelTooltipComponent extends BaseOwoTooltipComponent<FlowLayout> {
             }
 
             if (stack.getItem() instanceof UpgradeablePanelItem panel) {
-                var upgrades = panel.upgrades(stack);
+                var upgrades = panel.upgrades(stack).copyStacks();
 
                 upgrades.removeIf(ItemStack::isEmpty);
 

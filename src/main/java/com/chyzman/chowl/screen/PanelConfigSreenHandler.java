@@ -1,6 +1,8 @@
 package com.chyzman.chowl.screen;
 
 import com.chyzman.chowl.item.component.*;
+import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.registry.ServerBoundPackets;
 import io.wispforest.owo.client.screens.ScreenUtils;
 import io.wispforest.owo.client.screens.SlotGenerator;
 import io.wispforest.owo.client.screens.SyncedProperty;
@@ -16,18 +18,19 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-@SuppressWarnings("UnstableApiUsage")
 public class PanelConfigSreenHandler extends ScreenHandler {
 
     final SyncedProperty<ItemStack> stack;
     public PlayerInventory inventory;
 
-    public static final ScreenHandlerType<PanelConfigSreenHandler> TYPE = new ExtendedScreenHandlerType<>(PanelConfigSreenHandler::new);
+    public static final ExtendedScreenHandlerType<PanelConfigSreenHandler, ItemStack> TYPE = new ExtendedScreenHandlerType<>(PanelConfigSreenHandler::new, ItemStack.OPTIONAL_PACKET_CODEC);
 
     public PanelConfigSreenHandler(int syncId, PlayerInventory playerInventory, ItemStack stack, @Nullable Consumer<ItemStack> updater) {
         super(TYPE, syncId);
         this.inventory = playerInventory;
         this.stack = this.createProperty(ItemStack.class, stack);
+
+        ServerBoundPackets.addEndecs(endecBuilder());
 
         this.addServerboundMessage(ConfigFilter.class, (message) -> {
             if (!(this.stack.get().getItem() instanceof FilteringPanelItem filteringPanel)) return;
@@ -45,7 +48,7 @@ public class PanelConfigSreenHandler extends ScreenHandler {
             var temp = this.stack.get();
 
             if (temp.getItem() instanceof DisplayingPanelItem) {
-                temp.put(DisplayingPanelItem.CONFIG, message.displayConfig());
+                temp.set(ChowlRegistry.DISPLAYING_CONFIG, message.displayConfig);
             }
             if (temp.getItem() instanceof LockablePanelItem lockable) {
                 lockable.setLocked(temp, message.locked);
@@ -67,8 +70,8 @@ public class PanelConfigSreenHandler extends ScreenHandler {
         }
     }
 
-    public PanelConfigSreenHandler(int syncId, PlayerInventory playerInventory, PacketByteBuf buf) {
-        this(syncId, playerInventory, buf.readItemStack(), null);
+    public PanelConfigSreenHandler(int syncId, PlayerInventory playerInventory, ItemStack stack) {
+        this(syncId, playerInventory, stack, null);
     }
 
     @Override
@@ -83,5 +86,5 @@ public class PanelConfigSreenHandler extends ScreenHandler {
 
     public record ConfigFilter(ItemStack newFilter) { }
 
-    public record ConfigConfig(DisplayingPanelItem.Config displayConfig, boolean locked) { }
+    public record ConfigConfig(DisplayingPanelConfig displayConfig, boolean locked) { }
 }

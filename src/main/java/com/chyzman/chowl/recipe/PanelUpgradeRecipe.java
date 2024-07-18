@@ -1,9 +1,9 @@
 package com.chyzman.chowl.recipe;
 
 import com.chyzman.chowl.item.DrawerPanelItem;
-import com.chyzman.chowl.item.component.CapacityLimitedPanelItem;
-import com.chyzman.chowl.item.component.FilteringPanelItem;
-import com.chyzman.chowl.item.component.UpgradeablePanelItem;
+import com.chyzman.chowl.item.component.*;
+import com.chyzman.chowl.registry.ChowlRegistry;
+import io.wispforest.endec.Endec;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.Item;
@@ -11,32 +11,36 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
+import net.minecraft.recipe.input.CraftingRecipeInput;
 import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
-public class PanelUpgradeRecipe<T extends Item & CapacityLimitedPanelItem & FilteringPanelItem & UpgradeablePanelItem> extends SpecialCraftingRecipe {
-    public final T item;
+public class PanelUpgradeRecipe extends SpecialCraftingRecipe {
+    public final StoragePanelItem item;
 
-    public PanelUpgradeRecipe(Identifier id, CraftingRecipeCategory category, T item) {
-        super(id, category);
+    public PanelUpgradeRecipe(CraftingRecipeCategory category, StoragePanelItem item) {
+        super(category);
         this.item = item;
     }
 
     @Override
-    public boolean matches(RecipeInputInventory inventory, World world) {
-        return getOutput(inventory) != null;
+    public boolean matches(CraftingRecipeInput input, World world) {
+        return getOutput(input) != null;
     }
 
     @Override
-    public ItemStack craft(RecipeInputInventory inventory, DynamicRegistryManager registryManager) {
-        return getOutput(inventory);
+    public ItemStack craft(CraftingRecipeInput input, RegistryWrapper.WrapperLookup lookup) {
+        return getOutput(input);
     }
 
     @Override
@@ -49,8 +53,8 @@ public class PanelUpgradeRecipe<T extends Item & CapacityLimitedPanelItem & Filt
         return ChowlRecipeSerializers.PANEL_UPGRADE_RECIPE;
     }
 
-    public @Nullable ItemStack getOutput(RecipeInputInventory inventory) {
-        ArrayList<ItemStack> stacks = new ArrayList<>(inventory.getInputStacks().stream().map(ItemStack::copy).filter(stack -> !stack.isEmpty()).toList());
+    public @Nullable ItemStack getOutput(CraftingRecipeInput inventory) {
+        ArrayList<ItemStack> stacks = new ArrayList<>(inventory.getStacks().stream().map(ItemStack::copy).filter(stack -> !stack.isEmpty()).toList());
         if (stacks.size() <= 1) return null;
         for (Item item : stacks.stream().map(ItemStack::getItem).toList()) {
             if (item != this.item) return null;
@@ -66,20 +70,29 @@ public class PanelUpgradeRecipe<T extends Item & CapacityLimitedPanelItem & Filt
                             !item.canSetFilter(nextStack, item.currentFilter(firstStack))) return null;
                     if (!(CapacityLimitedPanelItem.capacityTier(firstStack).compareTo(CapacityLimitedPanelItem.capacityTier(nextStack)) == 0))
                         return null;
-                    ArrayList<ItemStack> newUpgrades = new ArrayList<>();
-                    if (item.upgrades(firstStack).stream().filter(stack -> !stack.isEmpty()).toList().isEmpty()) {
-                        newUpgrades = new ArrayList<>(item.upgrades(nextStack));
-                    } else if (item.upgrades(nextStack).stream().filter(stack -> !stack.isEmpty()).toList().isEmpty()) {
-                        newUpgrades = new ArrayList<>(item.upgrades(firstStack));
+
+                    List<ItemStack> newUpgrades;
+
+                    if (item.upgrades(firstStack).isEmpty()) {
+                        newUpgrades = item.upgrades(nextStack).copyStacks();
+                    } else if (item.upgrades(nextStack).isEmpty()) {
+                        newUpgrades = item.upgrades(firstStack).copyStacks();
                     } else {
-                        newUpgrades.addAll(item.upgrades(firstStack).stream().filter(stack -> !stack.isEmpty()).toList());
-                        newUpgrades.addAll(item.upgrades(nextStack).stream().filter(stack -> !stack.isEmpty()).toList());
+                        newUpgrades = new ArrayList<>();
+                        newUpgrades.addAll(item.upgrades(firstStack).upgradeStacks().stream().filter(stack -> !stack.isEmpty()).toList());
+                        newUpgrades.addAll(item.upgrades(nextStack).upgradeStacks().stream().filter(stack -> !stack.isEmpty()).toList());
                     }
+
                     if (newUpgrades.size() > 8) return null;
+
                     if (item.currentFilter(firstStack).isBlank()) item.setFilter(firstStack, item.currentFilter(nextStack));
-                    firstStack.put(CapacityLimitedPanelItem.CAPACITY, CapacityLimitedPanelItem.capacityTier(firstStack).add(BigInteger.ONE));
-                    item.setUpgrades(firstStack, newUpgrades);
-                    firstStack.put(DrawerPanelItem.COUNT, firstStack.get(DrawerPanelItem.COUNT).add(nextStack.get(DrawerPanelItem.COUNT)));
+
+                    firstStack.set(ChowlRegistry.CAPACITY, CapacityLimitedPanelItem.capacityTier(firstStack).add(BigInteger.ONE));
+                    firstStack.set(ChowlRegistry.UPGRADE_LIST, new UpgradeListComponent(Collections.unmodifiableList(newUpgrades)));
+                    firstStack.set(ChowlRegistry.COUNT,
+                        firstStack.getOrDefault(ChowlRegistry.COUNT, BigInteger.ZERO)
+                            .add(nextStack.getOrDefault(ChowlRegistry.COUNT, BigInteger.ZERO)));
+
                     stacks.set(i, firstStack);
                     stacks.remove(nextStack);
                     break;

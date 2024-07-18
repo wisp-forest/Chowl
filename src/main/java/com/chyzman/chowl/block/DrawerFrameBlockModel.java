@@ -122,7 +122,7 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
             for (int sideId = 0; sideId < 6; sideId++) {
                 Direction side = Direction.byId(sideId);
 
-                panelModels.put(side, new Identifier(panelModelPrefix.getNamespace(), panelModelPrefix.getPath() + "_" + side.getName()));
+                panelModels.put(side, Identifier.of(panelModelPrefix.getNamespace(), panelModelPrefix.getPath() + "_" + side.getName()));
             }
 
             return new Unbaked(baseModel, panelModels);
@@ -144,7 +144,7 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
         }
 
         @Override
-        public @NotNull BakedModel bake(Baker baker, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer, Identifier modelId) {
+        public @NotNull BakedModel bake(Baker baker, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer) {
             Map<Direction, BakedModel> bakedPanelModels = new EnumMap<>(Direction.class);
 
             for (var entry : panelModels.entrySet()) {

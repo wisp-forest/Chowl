@@ -9,7 +9,14 @@ import com.chyzman.chowl.transfer.PanelStorageContext;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import io.wispforest.endec.Endec;
+import io.wispforest.endec.SerializationContext;
+import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.ops.WorldOps;
+import io.wispforest.owo.serialization.RegistriesAttribute;
+import io.wispforest.owo.serialization.endec.MinecraftEndecs;
+import io.wispforest.owo.serialization.format.nbt.NbtDeserializer;
+import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -25,7 +32,10 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -36,9 +46,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageBlockEntity {
+    private static final Endec<List<SideState>> STACKS_ENDEC = SideState.ENDEC.listOf();
 
     public List<SideState> stacks = new ArrayList<>(DefaultedList.ofSize(6, new SideState(ItemStack.EMPTY, 0, false)).stream().toList());
     public BlockState templateState = null;
@@ -63,8 +73,8 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     }
 
     @Override
-    public NbtCompound toInitialChunkDataNbt() {
-        return this.createNbt();
+    public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup) {
+        return this.createNbt(registryLookup);
     }
 
     @Nullable
@@ -155,18 +165,13 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
         updateShapes();
     }
 
-    public void readNbt(NbtCompound nbt) {
+    public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         if (nbt == null) return;
-        super.readNbt(nbt);
+
+        super.readNbt(nbt, registryLookup);
+
         var nbtList = nbt.getList("Inventory", NbtElement.COMPOUND_TYPE);
-        for (int i = 0; i < nbtList.size(); i++) {
-            NbtCompound compound = (NbtCompound) nbtList.get(i);
-            stacks.set(i, new SideState(
-                ItemStack.fromNbt(compound.getCompound("Stack")),
-                compound.getInt("Orientation"),
-                compound.getBoolean("IsBlank")
-            ));
-        }
+        stacks = STACKS_ENDEC.decodeFully(SerializationContext.attributes(RegistriesAttribute.of((DynamicRegistryManager) registryLookup)), NbtDeserializer::of, nbtList);
 
         if (nbt.contains("TemplateState", NbtElement.COMPOUND_TYPE)) {
             templateState = NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), nbt.getCompound("TemplateState"));
@@ -182,25 +187,16 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     }
 
     @Override
-    public void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
-        writePanelsToNbt(stacks, nbt);
+    public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        super.writeNbt(nbt, registryLookup);
+        writePanelsToNbt(stacks, nbt, registryLookup);
+
         if (templateState != null)
             nbt.put("TemplateState", NbtHelper.fromBlockState(templateState));
     }
 
-    public static void writePanelsToNbt(List<SideState> panels, NbtCompound nbt) {
-        var nbtList = new NbtList();
-        for (var stack : panels) {
-            var compound = new NbtCompound();
-
-            compound.put("Stack", stack.stack.writeNbt(new NbtCompound()));
-            compound.putInt("Orientation", stack.orientation);
-            compound.putBoolean("IsBlank", stack.isBlank);
-
-            nbtList.add(compound);
-        }
-        nbt.put("Inventory", nbtList);
+    public static void writePanelsToNbt(List<SideState> panels, NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+        nbt.put("Inventory", STACKS_ENDEC.encodeFully(SerializationContext.attributes(RegistriesAttribute.of((DynamicRegistryManager) registryLookup)), NbtSerializer::of, panels));
     }
 
     @Override
@@ -246,27 +242,24 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
 //        }
 //    }
 
-    public static final class SideState {
-        public ItemStack stack;
-        public int orientation;
-        public boolean isBlank;
-
-        public SideState(ItemStack stack, int orientation, boolean isBlank) {
-            this.stack = stack;
-            this.orientation = orientation;
-            this.isBlank = isBlank;
-        }
+    public record SideState(ItemStack stack, int orientation, boolean isBlank) {
+        public static final Endec<SideState> ENDEC = StructEndecBuilder.of(
+            MinecraftEndecs.ITEM_STACK.fieldOf("Stack", SideState::stack),
+            Endec.INT.fieldOf("Orientation", SideState::orientation),
+            Endec.BOOLEAN.fieldOf("IsBlank", SideState::isBlank),
+            SideState::new
+        );
 
         public static SideState empty() {
-            return new SideState(ItemStack.EMPTY, 0, false);
-        }
+                return new SideState(ItemStack.EMPTY, 0, false);
+            }
 
         public SideState withStack(ItemStack stack) {
             return new SideState(stack, orientation, isBlank);
         }
 
         public boolean isEmpty() {
-            return stack.isEmpty() && !isBlank;
-        }
+                return stack.isEmpty() && !isBlank;
+            }
     }
 }

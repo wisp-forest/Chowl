@@ -1,6 +1,7 @@
 package com.chyzman.chowl.mixin;
 
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.BlockItem;
@@ -23,7 +24,7 @@ public abstract class ItemEntityMixin {
     @Inject(method = "isFireImmune", at = @At("HEAD"), cancellable = true)
     public void noBurny(CallbackInfoReturnable<Boolean> cir) {
         if (getStack().getItem() instanceof UpgradeablePanelItem panel) {
-            if (panel.hasUpgrade(getStack(), stack -> stack.getItem().isFireproof() || stack.isIn(NETHERITE_UPGRADE_TAG))) cir.setReturnValue(true);
+            if (panel.hasUpgrade(getStack(), stack -> this.getStack().contains(DataComponentTypes.FIRE_RESISTANT) || stack.isIn(NETHERITE_UPGRADE_TAG))) cir.setReturnValue(true);
         }
     }
 

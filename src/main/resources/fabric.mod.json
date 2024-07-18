@@ -27,8 +27,8 @@
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
     "minecraft": "${minecraft_version}",
-    "owo": ">=0.11.2",
-    "lavender": ">=0.1.9"
+    "owo": ">=0.12.10",
+    "lavender": ">=0.1.10"
   },
   "custom": {
     "modmenu": {

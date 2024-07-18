@@ -3,11 +3,11 @@ package com.chyzman.chowl.item;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.block.button.BlockButton;
 import com.chyzman.chowl.item.component.*;
+import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.BigSingleSlotStorage;
 import com.chyzman.chowl.transfer.PanelStorage;
 import com.chyzman.chowl.transfer.PanelStorageContext;
-import com.chyzman.chowl.util.NbtKeyTypes;
-import io.wispforest.owo.nbt.NbtKey;
+import com.chyzman.chowl.util.VariantUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
@@ -22,10 +22,6 @@ import static com.chyzman.chowl.Chowl.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public class DrawerPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem, UpgradeablePanelItem, StoragePanelItem {
-    public static final NbtKey<ItemVariant> VARIANT = new NbtKey<>("Variant", NbtKeyTypes.ITEM_VARIANT);
-    public static final NbtKey<BigInteger> COUNT = new NbtKey<>("Count", NbtKeyTypes.BIG_INTEGER);
-    public static final NbtKey<Boolean> LOCKED = new NbtKey<>("Locked", NbtKey.Type.BOOLEAN);
-
     public DrawerPanelItem(Settings settings) {
         super(settings);
     }
@@ -46,31 +42,31 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public ItemVariant currentFilter(ItemStack stack) {
-        return stack.getOr(VARIANT, ItemVariant.blank());
+        return stack.getOrDefault(ChowlRegistry.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
     }
 
     @Override
     public boolean canSetFilter(ItemStack stack, ItemVariant to) {
-        return stack.getOr(COUNT, BigInteger.ZERO).signum() == 0;
+        return stack.getOrDefault(ChowlRegistry.COUNT, BigInteger.ZERO).signum() == 0;
     }
 
     @Override
     public void setFilter(ItemStack stack, ItemVariant newFilter) {
-        stack.put(VARIANT, newFilter);
-        stack.put(LOCKED, !newFilter.equals(ItemVariant.blank()));
+        stack.set(ChowlRegistry.CONTAINED_ITEM_VARIANT, newFilter);
+        stack.set(ChowlRegistry.LOCKED, !newFilter.equals(ItemVariant.blank()));
     }
 
     @Override
     public boolean locked(ItemStack stack) {
-        return stack.getOr(LOCKED, false);
+        return stack.getOrDefault(ChowlRegistry.LOCKED, false);
     }
 
     @Override
     public void setLocked(ItemStack stack, boolean locked) {
-        stack.put(LOCKED, locked);
+        stack.set(ChowlRegistry.LOCKED, locked);
 
-        if (!locked && stack.getOr(COUNT, BigInteger.ZERO).equals(BigInteger.ZERO)) {
-            stack.put(VARIANT, ItemVariant.blank());
+        if (!locked && stack.getOrDefault(ChowlRegistry.COUNT, BigInteger.ZERO).equals(BigInteger.ZERO)) {
+            stack.set(ChowlRegistry.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
         }
     }
 
@@ -86,12 +82,12 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public BigInteger count(ItemStack stack) {
-        return stack.getOr(COUNT, BigInteger.ZERO);
+        return stack.getOrDefault(ChowlRegistry.COUNT, BigInteger.ZERO);
     }
 
     @Override
     public void setCount(ItemStack stack, BigInteger count) {
-        stack.put(COUNT, count);
+        stack.set(ChowlRegistry.COUNT, count);
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -102,26 +98,26 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
         @Override
         public BigInteger bigInsert(ItemVariant resource, BigInteger maxAmount, TransactionContext transaction) {
-            var contained = ctx.stack().getOr(VARIANT, ItemVariant.blank());
+            var contained = ctx.stack().getOrDefault(ChowlRegistry.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
 
             if (contained.isBlank()) contained = resource;
             if (!contained.equals(resource)) return BigInteger.ZERO;
 
-            var currentCount = ctx.stack().getOr(COUNT, BigInteger.ZERO);
+            var currentCount = ctx.stack().getOrDefault(ChowlRegistry.COUNT, BigInteger.ZERO);
             var capacity = DrawerPanelItem.this.capacity(ctx.stack());
             var spaceLeft = capacity.subtract(currentCount).max(BigInteger.ZERO);
             var inserted = spaceLeft.min(maxAmount);
 
             updateSnapshots(transaction);
-            ctx.stack().put(VARIANT, contained);
-            ctx.stack().put(COUNT, currentCount.add(inserted));
+            ctx.stack().set(ChowlRegistry.CONTAINED_ITEM_VARIANT, contained);
+            ctx.stack().set(ChowlRegistry.COUNT, currentCount.add(inserted));
 
             ItemVariant finalContained = contained;
 
             if (DrawerPanelItem.this.hasUpgrade(
                     ctx.stack(),
                     upgrade -> upgrade.isIn(VOID_UPGRADE_TAG)
-                            || (!finalContained.getItem().isFireproof() && upgrade.isIn(LAVA_UPGRADE_TAG))
+                            || (!VariantUtils.isFireproof(finalContained) && upgrade.isIn(LAVA_UPGRADE_TAG))
             ))
                 return maxAmount;
 
@@ -130,22 +126,22 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
         @Override
         public BigInteger bigExtract(ItemVariant resource, BigInteger maxAmount, TransactionContext tx) {
-            var contained = ctx.stack().getOr(VARIANT, ItemVariant.blank());
+            var contained = ctx.stack().getOrDefault(ChowlRegistry.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
 
             if (contained.isBlank()) return BigInteger.ZERO;
             if (!contained.equals(resource)) return BigInteger.ZERO;
 
-            var currentCount = ctx.stack().getOr(COUNT, BigInteger.ZERO);
+            var currentCount = ctx.stack().getOrDefault(ChowlRegistry.COUNT, BigInteger.ZERO);
 
             BigInteger removed = currentCount.min(maxAmount);
             var newCount = currentCount.subtract(removed);
 
             updateSnapshots(tx);
-            ctx.stack().put(COUNT, newCount);
+            ctx.stack().set(ChowlRegistry.COUNT, newCount);
 
             if (newCount.compareTo(BigInteger.ZERO) <= 0) {
-                if (!ctx.stack().getOr(LOCKED, false)) {
-                    ctx.stack().put(VARIANT, ItemVariant.blank());
+                if (!ctx.stack().getOrDefault(ChowlRegistry.LOCKED, false)) {
+                    ctx.stack().set(ChowlRegistry.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
                 }
 
                 needsEmptiedEvent = true;
@@ -160,12 +156,12 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
         @Override
         public ItemVariant getResource() {
-            return ctx.stack().getOr(VARIANT, ItemVariant.blank());
+            return ctx.stack().getOrDefault(ChowlRegistry.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
         }
 
         @Override
         public BigInteger bigAmount() {
-            return ctx.stack().getOr(COUNT, BigInteger.ZERO);
+            return ctx.stack().getOrDefault(ChowlRegistry.COUNT, BigInteger.ZERO);
         }
 
         @Override

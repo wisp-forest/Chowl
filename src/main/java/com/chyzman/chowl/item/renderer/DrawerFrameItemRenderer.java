@@ -10,6 +10,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -25,7 +27,7 @@ public class DrawerFrameItemRenderer implements BuiltinItemRendererRegistry.Dyna
         try (var ignored = RenderGlobals.enterRender()) {
             var state = ((BlockItem) stack.getItem()).getBlock().getDefaultState();
             var blockEntity = new DrawerFrameBlockEntity(BlockPos.ORIGIN, state);
-            blockEntity.readNbt(stack.getSubNbt("BlockEntityTag"));
+            stack.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT).applyToBlockEntity(blockEntity, MinecraftClient.getInstance().player.getRegistryManager());
 
             try {
                 RenderGlobals.DRAWER_FRAME.set(blockEntity);

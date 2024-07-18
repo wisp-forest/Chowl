@@ -42,7 +42,7 @@ public final class RandomizeCommand {
             if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame)) continue;
 
             for (int sideId = 0; sideId < 6; sideId++) {
-                var stack = frame.stacks.get(sideId).stack;
+                var stack = frame.stacks.get(sideId).stack();
 
                 if (!(stack.getItem() instanceof StoragePanelItem storage)) continue;
 

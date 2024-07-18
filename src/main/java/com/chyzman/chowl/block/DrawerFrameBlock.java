@@ -15,20 +15,20 @@ import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.PanelStorageContext;
 import com.chyzman.chowl.util.BlockSideUtils;
+import com.mojang.serialization.MapCodec;
 import io.wispforest.owo.ops.ItemOps;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.registry.Registries;
@@ -63,7 +63,7 @@ import java.util.function.ToIntFunction;
 import static com.chyzman.chowl.item.component.LockablePanelItem.LOCK_BUTTON;
 import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
 
-public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver, SidedComparatorOutput, ExtendedParticleSpriteBlock, ExtendedSoundGroupBlock, BreakProgressMaskingBlock {
+public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver, DoubleClickableBlock, SidedComparatorOutput, ExtendedParticleSpriteBlock, ExtendedSoundGroupBlock, BreakProgressMaskingBlock {
 
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
     public static final IntProperty LIGHT_LEVEL = Properties.LEVEL_15;
@@ -96,9 +96,9 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     };
 
     public static final BlockButton DEFAULT_PANEL_BUTTON = PanelItem.buttonBuilder(2, 2, 14, 14)
-            .onUse((world, drawerFrame, side, stack, player, hand) -> {
+            .onUse((world, drawerFrame, side, stack, player) -> {
                 var stacks = drawerFrame.stacks;
-                var stackInHand = player.getStackInHand(hand);
+                var stackInHand = player.getStackInHand(Hand.MAIN_HAND);
 
                 if (stackInHand.isEmpty()) return ActionResult.PASS;
                 if (!stack.isEmpty()) return ActionResult.PASS;
@@ -132,7 +132,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                     return ActionResult.PASS;
 
                 var side = BlockSideUtils.getSide(hitResult);
-                var selected = blockEntity.stacks.get(side.getId()).stack;
+                var selected = blockEntity.stacks.get(side.getId()).stack();
 
                 if (!world.isClient) {
                     player.getInventory().offerOrDrop(selected);
@@ -157,7 +157,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 var selected = blockEntity.stacks.get(side.getId());
 
                 if (!world.isClient) {
-                    player.getInventory().offerOrDrop(selected.stack);
+                    player.getInventory().offerOrDrop(selected.stack());
                     blockEntity.stacks.set(side.getId(), DrawerFrameBlockEntity.SideState.empty());
                     blockEntity.markDirty();
                 }
@@ -192,7 +192,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                     return ActionResult.PASS;
 
                 var side = BlockSideUtils.getSide(hitResult);
-                var selected = blockEntity.stacks.get(side.getId()).stack;
+                var selected = blockEntity.stacks.get(side.getId()).stack();
 
                 if (!(selected.getItem() instanceof PanelItem panel)) return ActionResult.FAIL;
                 if (!panel.hasConfig()) return ActionResult.FAIL;
@@ -214,6 +214,12 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 .with(WATERLOGGED, Boolean.FALSE)
                 .with(LIGHT_LEVEL, 0)
                 .with(TICKING, Boolean.FALSE));
+    }
+
+    @Override
+    protected MapCodec<? extends BlockWithEntity> getCodec() {
+        // bruh
+        return null;
     }
 
     @Nullable
@@ -238,7 +244,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             BlockEntity blockEntity = world.getBlockEntity(pos);
             if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
                 for (DrawerFrameBlockEntity.SideState stack : drawerFrameBlockEntity.stacks) {
-                    ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), stack.stack);
+                    ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), stack.stack());
                 }
             }
         }
@@ -328,8 +334,8 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (player.getStackInHand(hand).isOf(asItem())) return ActionResult.PASS;
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        if (player.getStackInHand(Hand.MAIN_HAND).isOf(asItem())) return ActionResult.PASS;
 
         var side = BlockSideUtils.getSide(hit);
         var orientation = 0;
@@ -339,7 +345,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             orientation = (int) player.getHorizontalFacing().asRotation() / 90;
 
         }
-        var res = BlockButtonProvider.super.onUse(state, world, pos, player, hand, hit);
+        var res = tryUseButtons(state, world, pos, player, hit);
         if (res != ActionResult.PASS) {
             scheduleFluidTick(world, pos, state);
             return res;
@@ -347,7 +353,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         var blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof DrawerFrameBlockEntity frame) {
             var stacks = frame.stacks;
-            var stackInHand = player.getStackInHand(hand);
+            var stackInHand = player.getStackInHand(Hand.MAIN_HAND);
             var sideStack = stacks.get(side.getId());
             if (sideStack.isEmpty()) {
                 if (!stackInHand.isEmpty()) {
@@ -385,26 +391,26 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
         List<BlockButton> buttons = new ArrayList<>();
 
-        if (selected.isBlank || selected.stack.isOf(ChowlRegistry.PHANTOM_PANEL_ITEM)) {
+        if (selected.isBlank() || selected.stack().isOf(ChowlRegistry.PHANTOM_PANEL_ITEM)) {
             buttons.add(FULL_REMOVE_BUTTON);
         } else {
             buttons.add(REMOVE_BUTTON);
         }
 
-        if (selected.stack.getItem() instanceof LockablePanelItem) {
+        if (selected.stack().getItem() instanceof LockablePanelItem) {
             buttons.add(LOCK_BUTTON);
         }
 
-        if (selected.stack.getItem() instanceof PanelItem panelItem) {
+        if (selected.stack().getItem() instanceof PanelItem panelItem) {
             if (panelItem.hasConfig())
                 buttons.add(CONFIG_BUTTON);
 
-            if (selected.stack.getItem() instanceof UpgradeablePanelItem upgradeable
-                    && !DisplayingPanelItem.getConfig(selected.stack).hideUpgrades()) {
-                upgradeable.addUpgradeButtons(selected.stack, buttons);
+            if (selected.stack().getItem() instanceof UpgradeablePanelItem upgradeable
+                    && !DisplayingPanelItem.getConfig(selected.stack()).hideUpgrades()) {
+                upgradeable.addUpgradeButtons(selected.stack(), buttons);
             }
 
-            buttons.addAll(panelItem.listButtons(blockEntity, side, selected.stack));
+            buttons.addAll(panelItem.listButtons(blockEntity, side, selected.stack()));
         } else {
             buttons.add(DEFAULT_PANEL_BUTTON);
         }
@@ -415,13 +421,13 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     @Override
     public @NotNull ActionResult onAttack(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player) {
         scheduleFluidTick(world, hitResult.getBlockPos(), state);
-        return BlockButtonProvider.super.onAttack(world, state, hitResult, player);
+        return tryAttackButtons(world, state, hitResult, player);
     }
 
     @Override
     public @NotNull ActionResult onDoubleClick(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player) {
         scheduleFluidTick(world, hitResult.getBlockPos(), state);
-        return BlockButtonProvider.super.onDoubleClick(world, state, hitResult, player);
+        return tryDoubleClickButtons(world, state, hitResult, player);
     }
 
 //    @Override
@@ -448,7 +454,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         for (int i = 0; i < 6; i++) {
             var panelStack = frame.stacks.get(i);
 
-            if (!(panelStack.stack.getItem() instanceof PanelItem panel)) continue;
+            if (!(panelStack.stack().getItem() instanceof PanelItem panel)) continue;
             if (!panel.hasComparatorOutput()) continue;
 
             var storage = panel.getStorage(PanelStorageContext.from(frame, Direction.byId(i)));
@@ -472,7 +478,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
         var panelStack = frame.stacks.get(side.getOpposite().getId());
 
-        if (!(panelStack.stack.getItem() instanceof PanelItem panel)) return 0;
+        if (!(panelStack.stack().getItem() instanceof PanelItem panel)) return 0;
         if (!panel.hasComparatorOutput()) return 0;
 
         var storage = panel.getStorage(PanelStorageContext.from(frame, side.getOpposite()));
@@ -491,7 +497,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         var blockEntity = world.getBlockEntity(hitResult.getBlockPos());
         if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
             var side = BlockSideUtils.getSide(hitResult);
-            return drawerFrameBlockEntity.stacks.get(side.getId()).orientation;
+            return drawerFrameBlockEntity.stacks.get(side.getId()).orientation();
         }
         return 0;
     }
@@ -520,12 +526,12 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
     @Override
     public BlockSoundGroup getSoundGroup(World world, BlockPos pos, BlockState state, ItemStack stack) {
-        NbtCompound tag = BlockItem.getBlockEntityNbt(stack);
+        NbtComponent data = stack.get(DataComponentTypes.CUSTOM_DATA);
 
-        if (tag == null) return getSoundGroup(state);
-        if (!tag.contains("TemplateState", NbtElement.COMPOUND_TYPE)) return getSoundGroup(state);
+        if (data == null) return getSoundGroup(state);
+        if (!data.getNbt().contains("TemplateState", NbtElement.COMPOUND_TYPE)) return getSoundGroup(state);
 
-        return NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), tag.getCompound("TemplateState")).getSoundGroup();
+        return NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), data.getNbt().getCompound("TemplateState")).getSoundGroup();
     }
 
     @Override
@@ -542,7 +548,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     @Override
     public boolean isTransparent(BlockState state, BlockView world, BlockPos pos) {
         if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame && !(frame.templateState == null)) {
-            return frame.templateState.getBlock().isTransparent(frame.templateState, world, pos);
+            return frame.templateState.isTransparent(world, pos);
         }
         return super.isTransparent(state, world, pos);
     }
@@ -557,7 +563,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     }
 
     @Override
-    public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType type) {
+    protected boolean canPathfindThrough(BlockState state, NavigationType type) {
         return false;
     }
 }

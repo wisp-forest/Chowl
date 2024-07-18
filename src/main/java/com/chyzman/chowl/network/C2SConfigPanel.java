@@ -1,7 +1,7 @@
 package com.chyzman.chowl.network;
 
 
-import com.chyzman.chowl.item.component.DisplayingPanelItem;
+import com.chyzman.chowl.item.component.DisplayingPanelConfig;
 
-public record C2SConfigPanel(DisplayingPanelItem.Config config) {
+public record C2SConfigPanel(DisplayingPanelConfig config) {
 }

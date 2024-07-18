@@ -18,12 +18,11 @@ import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.SkullItem;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
 
@@ -59,12 +58,12 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
 
         for (int i = 0; i < entity.stacks.size(); i++) {
             Direction side = Direction.byId(i);
-            var stack = entity.stacks.get(i).stack;
-            var orientation = entity.stacks.get(i).orientation;
+            var stack = entity.stacks.get(i).stack();
+            var orientation = entity.stacks.get(i).orientation();
 
             boolean panelFocused = blockFocused && BlockSideUtils.getSide(hitResult).equals(side);
 
-            if (entity.stacks.get(i).isBlank && panelFocused) {
+            if (entity.stacks.get(i).isBlank() && panelFocused) {
                 frameOutline = false;
                 var shape = Block.createCuboidShape(0, 16, 0, 16, 32, 16);
                 WorldRenderer.drawShapeOutline(matrices, client.getBufferBuilders().getOutlineVertexConsumers().getBuffer(RenderLayer.LINES), shape, 0, -1, 0, 0f, 0f, 0f, 0.4f, false);
@@ -94,7 +93,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
                         scale = (float) Math.min(2, (1 / (Math.max(properties.size().x, Math.max(properties.size().y, properties.size().z)))));
                         scale *= 0.6f;
                     }
-                    if (stack.getItem() instanceof SkullItem) {
+                    if (stack.isIn(ItemTags.SKULLS)) {
                         matrices.translate(0, 0, 1 / 32f);
                         matrices.scale(6 / 4f, 6 / 4f, 1 / 4f);
                         matrices.translate(0, 0, 1 / 8f);
@@ -183,7 +182,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
         if (showOutlines && blockFocused && hoveredButton == null && frameOutline) {
             var shape = DrawerFrameBlock.BASE;
             for (DrawerFrameBlockEntity.SideState sideState : entity.stacks) {
-                if (!sideState.stack.isEmpty() || sideState.isBlank) {
+                if (!sideState.stack().isEmpty() || sideState.isBlank()) {
                     shape = VoxelShapes.union(shape, DrawerFrameBlock.SIDES[entity.stacks.indexOf(sideState)]);
                 }
             }

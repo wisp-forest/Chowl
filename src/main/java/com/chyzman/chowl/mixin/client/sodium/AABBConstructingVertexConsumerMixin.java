@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(AABBConstructingVertexConsumerProvider.VertexConsumerImpl.class)
 public abstract class AABBConstructingVertexConsumerMixin implements VertexBufferWriter {
     @Shadow
-    public abstract VertexConsumer vertex(double x, double y, double z);
+    public abstract VertexConsumer vertex(float x, float y, float z);
 
     @Override
     public void push(MemoryStack stack, long ptr, int count, VertexFormatDescription format) {

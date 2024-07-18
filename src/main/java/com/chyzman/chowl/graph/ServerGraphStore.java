@@ -12,6 +12,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
@@ -52,8 +53,11 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
 
     public static ServerGraphStore get(ServerWorld world) {
         return world.getPersistentStateManager().getOrCreate(
-            tag -> new ServerGraphStore(world, tag),
-            () -> new ServerGraphStore(world),
+            new Type<>(
+                () -> new ServerGraphStore(world),
+                (tag, registriesLookup) -> new ServerGraphStore(world, tag),
+                null
+            ),
             "chowl_graph"
         );
     }
@@ -142,7 +146,7 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
     }
 
     @Override
-    public NbtCompound writeNbt(NbtCompound tag) {
+    public NbtCompound writeNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registriesLookup) {
         NbtList graphsTag = new NbtList();
         tag.put("Graphs", graphsTag);
 

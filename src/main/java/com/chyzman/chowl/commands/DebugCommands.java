@@ -7,6 +7,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.command.argument.ItemStackArgument;
+import net.minecraft.command.argument.ItemStackArgumentType;
 import net.minecraft.command.argument.RegistryEntryArgumentType;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
@@ -41,7 +43,7 @@ public final class DebugCommands {
                     .then(literal("clear")
                         .executes(DebugCommands::clearCompression))
                     .then(literal("build")
-                        .then(argument("item", RegistryEntryArgumentType.registryEntry(registryAccess, RegistryKeys.ITEM))
+                        .then(argument("item", ItemStackArgumentType.itemStack(registryAccess))
                             .executes(DebugCommands::buildItemCompression))))
         );
     }
@@ -97,7 +99,7 @@ public final class DebugCommands {
     }
 
     private static int buildItemCompression(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Item item = RegistryEntryArgumentType.getRegistryEntry(ctx, "item", RegistryKeys.ITEM).value();
+        Item item = ItemStackArgumentType.getItemStackArgument(ctx, "item").getItem();
 
         long startNanos = System.nanoTime();
         CompressionManager.getOrCreateNode(item);

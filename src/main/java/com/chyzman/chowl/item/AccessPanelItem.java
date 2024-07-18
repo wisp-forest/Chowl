@@ -2,7 +2,9 @@ package com.chyzman.chowl.item;
 
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.block.button.BlockButton;
+import com.chyzman.chowl.item.component.DisplayingPanelConfig;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
+import com.chyzman.chowl.registry.ChowlRegistry;
 import com.chyzman.chowl.transfer.PanelStorageContext;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
@@ -48,17 +50,6 @@ public class AccessPanelItem extends BasePanelItem implements UpgradeablePanelIt
     @Override
     public boolean hasConfig() {
         return true;
-    }
-
-    @Override
-    public Config defaultConfig() {
-        Config cfg = new Config();
-
-        cfg.hideCapacity(true);
-        cfg.hideCount(true);
-        cfg.hideName(true);
-
-        return cfg;
     }
 
     @Override

@@ -5,6 +5,6 @@ import net.minecraft.util.Identifier;
 
 public class ChowlRegistryHelper {
     public static Identifier id(String path) {
-        return new Identifier(Chowl.MODID, path);
+        return Identifier.of(Chowl.MODID, path);
     }
 }

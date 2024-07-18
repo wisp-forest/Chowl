@@ -46,7 +46,8 @@ public class Chowl implements ModInitializer {
     public static final TagKey<Item> BLAST_PROOF_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("blast_proof_panel_upgrade"));
 
 
-    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(id(getChannelVersion()));
+    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(id(getChannelVersion()))
+        .addEndecs(ServerBoundPackets::addEndecs);
 
     public static BlockEntityType<DrawerFrameBlockEntity> DRAWER_FRAME_BLOCK_ENTITY_TYPE = Registry.register(Registries.BLOCK_ENTITY_TYPE, id("drawer_frame"), FabricBlockEntityTypeBuilder.create(DrawerFrameBlockEntity::new, ChowlRegistry.DRAWER_FRAME_BLOCK).build());
 
