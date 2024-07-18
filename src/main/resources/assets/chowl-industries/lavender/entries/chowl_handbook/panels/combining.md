@@ -16,4 +16,4 @@ twice the storage, keeping all your upgrades and items!
 <|combine-panels-example@chowl-industries:book_components|>
 
 
-*{gray}R&D has discovered that you can combine more than two panels at the same time{}*
+cha*{gray}R&D has recently discovered that you can combine more than two panels at the same time. Exciting!{}*
