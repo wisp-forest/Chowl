@@ -10,4 +10,5 @@ pluginManagement {
 
 include 'industries'
 include 'logistics'
+include 'visage'
 include 'testmod'
