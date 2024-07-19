@@ -1,10 +1,10 @@
 package com.chyzman.chowl.block;
 
-import com.chyzman.chowl.Chowl;
 import com.chyzman.chowl.client.ChowlClient;
 import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
-import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.registry.ChowlBlocks;
+import com.chyzman.chowl.registry.ChowlItems;
 import com.chyzman.chowl.transfer.PanelStorageContext;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -28,13 +28,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryOps;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
@@ -69,7 +67,7 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
         }));
 
     public DrawerFrameBlockEntity(BlockPos pos, BlockState state) {
-        super(Chowl.DRAWER_FRAME_BLOCK_ENTITY_TYPE, pos, state);
+        super(ChowlBlocks.Entities.DRAWER_FRAME, pos, state);
     }
 
     @Override
@@ -129,7 +127,7 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
             if (!side.isEmpty()) {
                 outline |= (1 << i);
 
-                if (side.stack.getItem() != ChowlRegistry.PHANTOM_PANEL_ITEM)
+                if (side.stack.getItem() != ChowlItems.PHANTOM_PANEL)
                     collision |= (1 << i);
             }
         }

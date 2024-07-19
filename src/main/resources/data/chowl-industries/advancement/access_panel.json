@@ -2,13 +2,13 @@
     "parent": "chowl-industries:drawer_panel",
     "display": {
         "icon": {
-            "item": "chowl-industries:compressing_panel"
+            "id": "chowl-industries:access_panel"
         },
         "title": {
-            "translate": "advancements.chowl-industries.compressing_panel.title"
+            "translate": "advancements.chowl-industries.access_panel.title"
         },
         "description": {
-            "translate": "advancements.chowl-industries.compressing_panel.description"
+            "translate": "advancements.chowl-industries.access_panel.description"
         },
 
         "frame": "task",
@@ -17,12 +17,12 @@
         "show_toast": true
     },
     "criteria": {
-        "compressing_panel": {
+        "access_panel": {
             "conditions": {
                 "items": [
                     {
                         "items": [
-                            "chowl-industries:compressing_panel"
+                            "chowl-industries:access_panel"
                         ]
                     }
                 ]
@@ -32,7 +32,7 @@
     },
     "requirements": [
         [
-            "compressing_panel"
+            "access_panel"
         ]
     ]
 }

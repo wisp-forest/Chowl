@@ -2,7 +2,7 @@
     "parent": "chowl-industries:drawer_panel",
     "display": {
         "icon": {
-            "item": "minecraft:lava_bucket"
+            "id": "minecraft:lava_bucket"
         },
         "title": {
             "translate": "advancements.chowl-industries.upgrades.title"

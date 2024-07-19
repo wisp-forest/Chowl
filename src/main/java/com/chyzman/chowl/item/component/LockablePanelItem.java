@@ -6,7 +6,7 @@ import com.chyzman.chowl.block.button.ButtonRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 
-import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
+import static com.chyzman.chowl.Chowl.id;
 
 public interface LockablePanelItem extends FilteringPanelItem {
     BlockButton LOCK_BUTTON = PanelItem.buttonBuilder(0, 14, 2, 16)

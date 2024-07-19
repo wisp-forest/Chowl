@@ -4,11 +4,10 @@ import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.client.RenderGlobals;
 import com.chyzman.chowl.graph.GraphStore;
 import com.chyzman.chowl.item.component.PanelItem;
-import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.registry.ChowlBlocks;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Pair;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -46,7 +45,7 @@ public interface PanelStorageContext {
         if (graph == null) return false;
 
         for (var node : graph.nodes()) {
-            if (!node.state().isOf(ChowlRegistry.DRAWER_FRAME_BLOCK)) continue;
+            if (!node.state().isOf(ChowlBlocks.DRAWER_FRAME)) continue;
 
             var otherBE = w.getBlockEntity(node.pos());
             if (!(otherBE instanceof DrawerFrameBlockEntity otherFrame)) continue;

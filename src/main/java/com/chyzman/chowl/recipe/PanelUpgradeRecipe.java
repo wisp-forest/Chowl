@@ -1,20 +1,14 @@
 package com.chyzman.chowl.recipe;
 
-import com.chyzman.chowl.item.DrawerPanelItem;
 import com.chyzman.chowl.item.component.*;
-import com.chyzman.chowl.registry.ChowlRegistry;
-import io.wispforest.endec.Endec;
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.minecraft.inventory.RecipeInputInventory;
+import com.chyzman.chowl.registry.ChowlComponents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.recipe.input.CraftingRecipeInput;
-import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -87,11 +81,11 @@ public class PanelUpgradeRecipe extends SpecialCraftingRecipe {
 
                     if (item.currentFilter(firstStack).isBlank()) item.setFilter(firstStack, item.currentFilter(nextStack));
 
-                    firstStack.set(ChowlRegistry.CAPACITY, CapacityLimitedPanelItem.capacityTier(firstStack).add(BigInteger.ONE));
-                    firstStack.set(ChowlRegistry.UPGRADE_LIST, new UpgradeListComponent(Collections.unmodifiableList(newUpgrades)));
-                    firstStack.set(ChowlRegistry.COUNT,
-                        firstStack.getOrDefault(ChowlRegistry.COUNT, BigInteger.ZERO)
-                            .add(nextStack.getOrDefault(ChowlRegistry.COUNT, BigInteger.ZERO)));
+                    firstStack.set(ChowlComponents.CAPACITY, CapacityLimitedPanelItem.capacityTier(firstStack).add(BigInteger.ONE));
+                    firstStack.set(ChowlComponents.UPGRADE_LIST, new UpgradeListComponent(Collections.unmodifiableList(newUpgrades)));
+                    firstStack.set(ChowlComponents.COUNT,
+                        firstStack.getOrDefault(ChowlComponents.COUNT, BigInteger.ZERO)
+                            .add(nextStack.getOrDefault(ChowlComponents.COUNT, BigInteger.ZERO)));
 
                     stacks.set(i, firstStack);
                     stacks.remove(nextStack);

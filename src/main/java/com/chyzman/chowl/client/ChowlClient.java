@@ -8,7 +8,8 @@ import com.chyzman.chowl.item.model.BlankPanelItemModel;
 import com.chyzman.chowl.item.renderer.AccessPanelItemRenderer;
 import com.chyzman.chowl.item.renderer.DrawerFrameItemRenderer;
 import com.chyzman.chowl.item.renderer.GenericPanelItemRenderer;
-import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.registry.ChowlBlocks;
+import com.chyzman.chowl.registry.ChowlItems;
 import com.chyzman.chowl.registry.client.ClientBoundPackets;
 import com.chyzman.chowl.registry.client.ClientEventListeners;
 import com.chyzman.chowl.screen.PanelConfigScreen;
@@ -32,8 +33,8 @@ import net.minecraft.world.World;
 
 import java.util.function.Function;
 
-import static com.chyzman.chowl.Chowl.DRAWER_FRAME_BLOCK_ENTITY_TYPE;
-import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
+import static com.chyzman.chowl.registry.ChowlBlocks.Entities.DRAWER_FRAME;
+import static com.chyzman.chowl.Chowl.id;
 
 public class ChowlClient implements ClientModInitializer {
     @Override
@@ -42,13 +43,13 @@ public class ChowlClient implements ClientModInitializer {
         ClientBoundPackets.init();
         ClientGraphStore.init();
         DoubleClickTracker.init();
-        BlockEntityRendererFactories.register(DRAWER_FRAME_BLOCK_ENTITY_TYPE, DrawerFrameBlockEntityRenderer::new);
-        BlockRenderLayerMap.INSTANCE.putBlock(ChowlRegistry.DRAWER_FRAME_BLOCK, RenderLayer.getCutout());
-        BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.DRAWER_FRAME_ITEM, new DrawerFrameItemRenderer());
-        BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.DRAWER_PANEL_ITEM, new GenericPanelItemRenderer(id("item/drawer_panel_base")));
-        BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.MIRROR_PANEL_ITEM, new GenericPanelItemRenderer(id("item/mirror_panel_base")));
-        BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.COMPRESSING_PANEL_ITEM, new GenericPanelItemRenderer(id("item/compressing_panel_base")));
-        BuiltinItemRendererRegistry.INSTANCE.register(ChowlRegistry.ACCESS_PANEL_ITEM, new AccessPanelItemRenderer(id("item/access_panel_base")));
+        BlockEntityRendererFactories.register(DRAWER_FRAME, DrawerFrameBlockEntityRenderer::new);
+        BlockRenderLayerMap.INSTANCE.putBlock(ChowlBlocks.DRAWER_FRAME, RenderLayer.getCutout());
+        BuiltinItemRendererRegistry.INSTANCE.register(ChowlBlocks.DRAWER_FRAME.asItem(), new DrawerFrameItemRenderer());
+        BuiltinItemRendererRegistry.INSTANCE.register(ChowlItems.DRAWER_PANEL, new GenericPanelItemRenderer(id("item/drawer_panel_base")));
+        BuiltinItemRendererRegistry.INSTANCE.register(ChowlItems.MIRROR_PANEL, new GenericPanelItemRenderer(id("item/mirror_panel_base")));
+        BuiltinItemRendererRegistry.INSTANCE.register(ChowlItems.COMPRESSING_PANEL, new GenericPanelItemRenderer(id("item/compressing_panel_base")));
+        BuiltinItemRendererRegistry.INSTANCE.register(ChowlItems.ACCESS_PANEL, new AccessPanelItemRenderer(id("item/access_panel_base")));
         HandledScreens.register(PanelConfigSreenHandler.TYPE, PanelConfigScreen::new);
 
         SetIngredientComponent.init();

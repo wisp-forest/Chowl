@@ -1,17 +1,17 @@
 {
-    "parent": "chowl-industries:upgrades",
+    "parent": "chowl-industries:labeling_upgrade",
     "display": {
         "icon": {
-            "item": "minecraft:name_tag"
+            "id": "minecraft:name_tag"
         },
         "title": {
-            "translate": "advancements.chowl-industries.labeling_upgrade.title"
+            "translate": "advancements.chowl-industries.fired.title"
         },
         "description": {
-            "translate": "advancements.chowl-industries.labeling_upgrade.description"
+            "translate": "advancements.chowl-industries.fired.description"
         },
 
-        "frame": "task",
+        "frame": "goal",
         "announce_to_chat": true,
         "hidden": true,
         "show_toast": true
@@ -20,6 +20,7 @@
         "labeled_panel": {
             "trigger": "chowl-industries:labeled_panel",
             "conditions": {
+                "name": "e"
             }
         }
     },

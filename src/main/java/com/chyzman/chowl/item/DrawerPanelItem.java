@@ -3,7 +3,7 @@ package com.chyzman.chowl.item;
 import com.chyzman.chowl.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.block.button.BlockButton;
 import com.chyzman.chowl.item.component.*;
-import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.registry.ChowlComponents;
 import com.chyzman.chowl.transfer.BigSingleSlotStorage;
 import com.chyzman.chowl.transfer.PanelStorage;
 import com.chyzman.chowl.transfer.PanelStorageContext;
@@ -42,31 +42,31 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public ItemVariant currentFilter(ItemStack stack) {
-        return stack.getOrDefault(ChowlRegistry.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
+        return stack.getOrDefault(ChowlComponents.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
     }
 
     @Override
     public boolean canSetFilter(ItemStack stack, ItemVariant to) {
-        return stack.getOrDefault(ChowlRegistry.COUNT, BigInteger.ZERO).signum() == 0;
+        return stack.getOrDefault(ChowlComponents.COUNT, BigInteger.ZERO).signum() == 0;
     }
 
     @Override
     public void setFilter(ItemStack stack, ItemVariant newFilter) {
-        stack.set(ChowlRegistry.CONTAINED_ITEM_VARIANT, newFilter);
-        stack.set(ChowlRegistry.LOCKED, !newFilter.equals(ItemVariant.blank()));
+        stack.set(ChowlComponents.CONTAINED_ITEM_VARIANT, newFilter);
+        stack.set(ChowlComponents.LOCKED, !newFilter.equals(ItemVariant.blank()));
     }
 
     @Override
     public boolean locked(ItemStack stack) {
-        return stack.getOrDefault(ChowlRegistry.LOCKED, false);
+        return stack.getOrDefault(ChowlComponents.LOCKED, false);
     }
 
     @Override
     public void setLocked(ItemStack stack, boolean locked) {
-        stack.set(ChowlRegistry.LOCKED, locked);
+        stack.set(ChowlComponents.LOCKED, locked);
 
-        if (!locked && stack.getOrDefault(ChowlRegistry.COUNT, BigInteger.ZERO).equals(BigInteger.ZERO)) {
-            stack.set(ChowlRegistry.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
+        if (!locked && stack.getOrDefault(ChowlComponents.COUNT, BigInteger.ZERO).equals(BigInteger.ZERO)) {
+            stack.set(ChowlComponents.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
         }
     }
 
@@ -82,12 +82,12 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public BigInteger count(ItemStack stack) {
-        return stack.getOrDefault(ChowlRegistry.COUNT, BigInteger.ZERO);
+        return stack.getOrDefault(ChowlComponents.COUNT, BigInteger.ZERO);
     }
 
     @Override
     public void setCount(ItemStack stack, BigInteger count) {
-        stack.set(ChowlRegistry.COUNT, count);
+        stack.set(ChowlComponents.COUNT, count);
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -98,19 +98,19 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
         @Override
         public BigInteger bigInsert(ItemVariant resource, BigInteger maxAmount, TransactionContext transaction) {
-            var contained = ctx.stack().getOrDefault(ChowlRegistry.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
+            var contained = ctx.stack().getOrDefault(ChowlComponents.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
 
             if (contained.isBlank()) contained = resource;
             if (!contained.equals(resource)) return BigInteger.ZERO;
 
-            var currentCount = ctx.stack().getOrDefault(ChowlRegistry.COUNT, BigInteger.ZERO);
+            var currentCount = ctx.stack().getOrDefault(ChowlComponents.COUNT, BigInteger.ZERO);
             var capacity = DrawerPanelItem.this.capacity(ctx.stack());
             var spaceLeft = capacity.subtract(currentCount).max(BigInteger.ZERO);
             var inserted = spaceLeft.min(maxAmount);
 
             updateSnapshots(transaction);
-            ctx.stack().set(ChowlRegistry.CONTAINED_ITEM_VARIANT, contained);
-            ctx.stack().set(ChowlRegistry.COUNT, currentCount.add(inserted));
+            ctx.stack().set(ChowlComponents.CONTAINED_ITEM_VARIANT, contained);
+            ctx.stack().set(ChowlComponents.COUNT, currentCount.add(inserted));
 
             ItemVariant finalContained = contained;
 
@@ -126,22 +126,22 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
         @Override
         public BigInteger bigExtract(ItemVariant resource, BigInteger maxAmount, TransactionContext tx) {
-            var contained = ctx.stack().getOrDefault(ChowlRegistry.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
+            var contained = ctx.stack().getOrDefault(ChowlComponents.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
 
             if (contained.isBlank()) return BigInteger.ZERO;
             if (!contained.equals(resource)) return BigInteger.ZERO;
 
-            var currentCount = ctx.stack().getOrDefault(ChowlRegistry.COUNT, BigInteger.ZERO);
+            var currentCount = ctx.stack().getOrDefault(ChowlComponents.COUNT, BigInteger.ZERO);
 
             BigInteger removed = currentCount.min(maxAmount);
             var newCount = currentCount.subtract(removed);
 
             updateSnapshots(tx);
-            ctx.stack().set(ChowlRegistry.COUNT, newCount);
+            ctx.stack().set(ChowlComponents.COUNT, newCount);
 
             if (newCount.compareTo(BigInteger.ZERO) <= 0) {
-                if (!ctx.stack().getOrDefault(ChowlRegistry.LOCKED, false)) {
-                    ctx.stack().set(ChowlRegistry.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
+                if (!ctx.stack().getOrDefault(ChowlComponents.LOCKED, false)) {
+                    ctx.stack().set(ChowlComponents.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
                 }
 
                 needsEmptiedEvent = true;
@@ -156,12 +156,12 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
         @Override
         public ItemVariant getResource() {
-            return ctx.stack().getOrDefault(ChowlRegistry.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
+            return ctx.stack().getOrDefault(ChowlComponents.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
         }
 
         @Override
         public BigInteger bigAmount() {
-            return ctx.stack().getOrDefault(ChowlRegistry.COUNT, BigInteger.ZERO);
+            return ctx.stack().getOrDefault(ChowlComponents.COUNT, BigInteger.ZERO);
         }
 
         @Override

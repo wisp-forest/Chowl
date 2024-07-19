@@ -1,7 +1,7 @@
 package com.chyzman.chowl.criteria;
 
+import com.chyzman.chowl.Chowl;
 import com.chyzman.chowl.event.UpgradeInteractionEvents;
-import com.chyzman.chowl.util.ChowlRegistryHelper;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.advancement.criterion.AbstractCriterion;
@@ -13,7 +13,7 @@ import net.minecraft.util.Identifier;
 import java.util.Optional;
 
 public class InsertedUpgradeCriteria extends AbstractCriterion<InsertedUpgradeCriteria.Conditions> {
-    public static final Identifier ID = ChowlRegistryHelper.id("inserted_upgrade");
+    public static final Identifier ID = Chowl.id("inserted_upgrade");
 
     public InsertedUpgradeCriteria() {
         UpgradeInteractionEvents.UPGRADE_INSERTED.register((player, frame, side, panel, upgrade) -> {

@@ -2,7 +2,6 @@ package com.chyzman.chowl.client;
 
 import com.chyzman.chowl.Chowl;
 import com.chyzman.chowl.block.DoubleClickableBlock;
-import com.chyzman.chowl.util.ChowlRegistryHelper;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.util.ActionResult;
@@ -10,7 +9,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
 public class DoubleClickTracker {
-    public static final Identifier EVENT_ID = ChowlRegistryHelper.id("double_click");
+    public static final Identifier EVENT_ID = Chowl.id("double_click");
 
     private static long lastClickTime = 0;
     private static BlockPos lastBlockPos = null;

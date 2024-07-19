@@ -6,7 +6,7 @@ import com.chyzman.chowl.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.item.component.FilteringPanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
-import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.registry.ChowlComponents;
 import com.chyzman.chowl.transfer.CombinedSingleSlotStorage;
 import com.chyzman.chowl.transfer.PanelStorageContext;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -29,7 +29,7 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
             if (stackInHand.isEmpty()) return ActionResult.PASS;
             if (world.isClient) return ActionResult.SUCCESS;
 
-            stack.set(ChowlRegistry.ITEM_FILTER, ItemVariant.of(stackInHand));
+            stack.set(ChowlComponents.ITEM_FILTER, ItemVariant.of(stackInHand));
             drawerFrame.markDirty();
 
             return ActionResult.SUCCESS;
@@ -43,7 +43,7 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public @Nullable SingleSlotStorage<ItemVariant> getStorage(PanelStorageContext ctx) {
-        ItemVariant filter = ctx.stack().getOrDefault(ChowlRegistry.ITEM_FILTER, ItemVariant.blank());
+        ItemVariant filter = ctx.stack().getOrDefault(ChowlComponents.ITEM_FILTER, ItemVariant.blank());
         if (filter.isBlank()) return null;
 
         List<SingleSlotStorage<ItemVariant>> slots = new ArrayList<>();
@@ -66,7 +66,7 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public List<BlockButton> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
-        if (stack.getOrDefault(ChowlRegistry.ITEM_FILTER, ItemVariant.blank()).isBlank()) {
+        if (stack.getOrDefault(ChowlComponents.ITEM_FILTER, ItemVariant.blank()).isBlank()) {
             return List.of(SET_FILTER_BUTTON);
         } else {
             return List.of(STORAGE_BUTTON);
@@ -80,7 +80,7 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public ItemVariant currentFilter(ItemStack stack) {
-        return stack.getOrDefault(ChowlRegistry.ITEM_FILTER, ItemVariant.blank());
+        return stack.getOrDefault(ChowlComponents.ITEM_FILTER, ItemVariant.blank());
     }
 
     @Override
@@ -90,6 +90,6 @@ public class MirrorPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public void setFilter(ItemStack stack, ItemVariant newFilter) {
-        stack.set(ChowlRegistry.ITEM_FILTER, newFilter);
+        stack.set(ChowlComponents.ITEM_FILTER, newFilter);
     }
 }

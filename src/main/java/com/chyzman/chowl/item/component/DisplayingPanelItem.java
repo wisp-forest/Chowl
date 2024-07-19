@@ -1,6 +1,6 @@
 package com.chyzman.chowl.item.component;
 
-import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.registry.ChowlComponents;
 import io.wispforest.owo.ui.core.Color;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
@@ -43,6 +43,6 @@ public interface DisplayingPanelItem extends PanelItem {
     }
 
     static DisplayingPanelConfig getConfig(ItemStack stack) {
-        return stack.getOrDefault(ChowlRegistry.DISPLAYING_CONFIG, DisplayingPanelConfig.DEFAULT);
+        return stack.getOrDefault(ChowlComponents.DISPLAYING_CONFIG, DisplayingPanelConfig.DEFAULT);
     }
 }

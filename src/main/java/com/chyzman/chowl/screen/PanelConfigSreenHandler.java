@@ -1,7 +1,7 @@
 package com.chyzman.chowl.screen;
 
 import com.chyzman.chowl.item.component.*;
-import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.registry.ChowlComponents;
 import com.chyzman.chowl.registry.ServerBoundPackets;
 import io.wispforest.owo.client.screens.ScreenUtils;
 import io.wispforest.owo.client.screens.SlotGenerator;
@@ -11,9 +11,7 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
@@ -48,7 +46,7 @@ public class PanelConfigSreenHandler extends ScreenHandler {
             var temp = this.stack.get();
 
             if (temp.getItem() instanceof DisplayingPanelItem) {
-                temp.set(ChowlRegistry.DISPLAYING_CONFIG, message.displayConfig);
+                temp.set(ChowlComponents.DISPLAYING_CONFIG, message.displayConfig);
             }
             if (temp.getItem() instanceof LockablePanelItem lockable) {
                 lockable.setLocked(temp, message.locked);

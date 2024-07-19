@@ -2,7 +2,7 @@ package com.chyzman.chowl.upgrade;
 
 import com.chyzman.chowl.event.PanelEmptiedEvent;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
-import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.registry.ChowlCriteria;
 import com.chyzman.chowl.util.ServerTickHelper;
 import eu.pb4.common.protection.api.CommonProtection;
 import net.minecraft.entity.LivingEntity;
@@ -62,7 +62,7 @@ public class NukeCoreUpgrade {
                         if (!player.isPartOfGame()) continue;
                         if (!affected.contains(player.getPos())) continue;
 
-                        ChowlRegistry.WITNESSED_BLASTING_CRITERIA.trigger((ServerPlayerEntity) player, true);
+                        ChowlCriteria.WITNESSED_BLASTING.trigger((ServerPlayerEntity) player, true);
                     }
 
                     EpicExplosion.explode(

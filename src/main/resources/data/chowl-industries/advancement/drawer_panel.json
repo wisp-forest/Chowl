@@ -2,13 +2,13 @@
     "parent": "chowl-industries:drawer_frame",
     "display": {
         "icon": {
-            "item": "chowl-industries:phantom_panel"
+            "id": "chowl-industries:drawer_panel"
         },
         "title": {
-            "translate": "advancements.chowl-industries.phantom_panel.title"
+            "translate": "advancements.chowl-industries.drawer_panel.title"
         },
         "description": {
-            "translate": "advancements.chowl-industries.phantom_panel.description"
+            "translate": "advancements.chowl-industries.drawer_panel.description"
         },
 
         "frame": "task",
@@ -17,12 +17,12 @@
         "show_toast": true
     },
     "criteria": {
-        "phantom_panel": {
+        "drawer_panel": {
             "conditions": {
                 "items": [
                     {
                         "items": [
-                            "chowl-industries:phantom_panel"
+                            "chowl-industries:drawer_panel"
                         ]
                     }
                 ]
@@ -32,7 +32,7 @@
     },
     "requirements": [
         [
-            "phantom_panel"
+            "drawer_panel"
         ]
     ]
 }

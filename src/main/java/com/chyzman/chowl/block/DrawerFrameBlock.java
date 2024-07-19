@@ -11,7 +11,7 @@ import com.chyzman.chowl.item.component.LockablePanelItem;
 import com.chyzman.chowl.item.component.PanelItem;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
 import com.chyzman.chowl.pond.ShapeContextExtended;
-import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.registry.ChowlItems;
 import com.chyzman.chowl.transfer.BigStorageView;
 import com.chyzman.chowl.transfer.PanelStorageContext;
 import com.chyzman.chowl.util.BlockSideUtils;
@@ -61,7 +61,7 @@ import java.util.Set;
 import java.util.function.ToIntFunction;
 
 import static com.chyzman.chowl.item.component.LockablePanelItem.LOCK_BUTTON;
-import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
+import static com.chyzman.chowl.Chowl.id;
 
 public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver, DoubleClickableBlock, SidedComparatorOutput, ExtendedParticleSpriteBlock, ExtendedSoundGroupBlock, BreakProgressMaskingBlock {
 
@@ -391,7 +391,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
         List<BlockButton> buttons = new ArrayList<>();
 
-        if (selected.isBlank() || selected.stack().isOf(ChowlRegistry.PHANTOM_PANEL_ITEM)) {
+        if (selected.isBlank() || selected.stack().isOf(ChowlItems.PHANTOM_PANEL)) {
             buttons.add(FULL_REMOVE_BUTTON);
         } else {
             buttons.add(REMOVE_BUTTON);

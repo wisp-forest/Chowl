@@ -3,8 +3,8 @@ package com.chyzman.chowl.item.component;
 import com.chyzman.chowl.block.button.BlockButton;
 import com.chyzman.chowl.block.button.ButtonRenderCondition;
 import com.chyzman.chowl.block.button.ButtonRenderer;
-import com.chyzman.chowl.event.UpgradeInsertedEvent;
-import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.event.UpgradeInteractionEvents;
+import com.chyzman.chowl.registry.ChowlComponents;
 import io.wispforest.owo.ops.ItemOps;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -18,18 +18,18 @@ import java.util.function.UnaryOperator;
 
 public interface UpgradeablePanelItem extends DisplayingPanelItem {
     default UpgradeListComponent upgrades(ItemStack stack) {
-        return stack.getOrDefault(ChowlRegistry.UPGRADE_LIST, UpgradeListComponent.DEFAULT);
+        return stack.getOrDefault(ChowlComponents.UPGRADE_LIST, UpgradeListComponent.DEFAULT);
     }
 
     @Deprecated(forRemoval = true)
     default void setUpgrades(ItemStack stack, List<ItemStack> upgrades) {
-        stack.set(ChowlRegistry.UPGRADE_LIST, new UpgradeListComponent(Collections.unmodifiableList(upgrades)));
+        stack.set(ChowlComponents.UPGRADE_LIST, new UpgradeListComponent(Collections.unmodifiableList(upgrades)));
     }
 
     default void modifyUpgrades(ItemStack stack, UnaryOperator<List<ItemStack>> modifier) {
-        var stacks = stack.getOrDefault(ChowlRegistry.UPGRADE_LIST, UpgradeListComponent.DEFAULT).copyStacks();
+        var stacks = stack.getOrDefault(ChowlComponents.UPGRADE_LIST, UpgradeListComponent.DEFAULT).copyStacks();
         stacks = modifier.apply(stacks);
-        stack.set(ChowlRegistry.UPGRADE_LIST, new UpgradeListComponent(Collections.unmodifiableList(stacks)));
+        stack.set(ChowlComponents.UPGRADE_LIST, new UpgradeListComponent(Collections.unmodifiableList(stacks)));
     }
 
     default boolean hasUpgrade(ItemStack stack, Predicate<ItemStack> upgrade) {
@@ -58,9 +58,9 @@ public interface UpgradeablePanelItem extends DisplayingPanelItem {
 
                         if (world.isClient) return ActionResult.SUCCESS;
 
-                        UpgradeInsertedEvent.EVENT.invoker().onUpgradeInserted((ServerPlayerEntity) player, frame, useSide, useStack, upgrade);
+                        UpgradeInteractionEvents.UPGRADE_INSERTED.invoker().onUpgradeInserted((ServerPlayerEntity) player, frame, useSide, useStack, upgrade);
 
-                        useStack.set(ChowlRegistry.UPGRADE_LIST, upgrades.set(finalI, upgrade));
+                        useStack.set(ChowlComponents.UPGRADE_LIST, upgrades.set(finalI, upgrade));
                         frame.stacks.set(useSide.getId(), frame.stacks.get(useSide.getId()).withStack(useStack));
                         frame.markDirty();
 
@@ -72,9 +72,11 @@ public interface UpgradeablePanelItem extends DisplayingPanelItem {
 
                         var upgrade = upgrades.get(finalI);
 
+                        UpgradeInteractionEvents.UPGRADE_EXTRACTED.invoker().onUpgradeExtracted((ServerPlayerEntity) player, frame, attackedSide, attackedStack, upgrade);
+
                         player.getInventory().offerOrDrop(upgrade);
 
-                        attackedStack.set(ChowlRegistry.UPGRADE_LIST, upgrades.set(finalI, ItemStack.EMPTY));
+                        attackedStack.set(ChowlComponents.UPGRADE_LIST, upgrades.set(finalI, ItemStack.EMPTY));
                         frame.stacks.set(attackedSide.getId(), frame.stacks.get(attackedSide.getId()).withStack(attackedStack));
                         frame.markDirty();
 

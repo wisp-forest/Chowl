@@ -2,7 +2,7 @@ package com.chyzman.chowl.upgrade;
 
 import com.chyzman.chowl.event.PanelEmptiedEvent;
 import com.chyzman.chowl.item.component.UpgradeablePanelItem;
-import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.registry.ChowlCriteria;
 import com.chyzman.chowl.util.ServerTickHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -11,8 +11,6 @@ import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.chyzman.chowl.Chowl.EXPLOSIVE_UPGRADE_TAG;
 import static com.chyzman.chowl.Chowl.FIERY_UPGRADE_TAG;
@@ -54,7 +52,7 @@ public class ExplosiveUpgrade {
                         if (!player.isPartOfGame()) continue;
                         if (!affected.contains(player.getPos())) continue;
 
-                        ChowlRegistry.WITNESSED_BLASTING_CRITERIA.trigger((ServerPlayerEntity) player, false);
+                        ChowlCriteria.WITNESSED_BLASTING.trigger((ServerPlayerEntity) player, false);
                     }
 
                     world.createExplosion(

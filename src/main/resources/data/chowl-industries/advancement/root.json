@@ -1,28 +1,28 @@
 {
-    "parent": "chowl-industries:drawer_panel",
     "display": {
         "icon": {
-            "item": "chowl-industries:mirror_panel"
+            "id": "chowl-industries:chowl_handbook"
         },
         "title": {
-            "translate": "advancements.chowl-industries.mirror_panel.title"
+            "translate": "advancements.chowl-industries.root.title"
         },
         "description": {
-            "translate": "advancements.chowl-industries.mirror_panel.description"
+            "translate": "advancements.chowl-industries.root.description"
         },
 
+        "background": "chowl-industries:textures/block/caution_block.png",
         "frame": "task",
-        "announce_to_chat": true,
         "hidden": false,
-        "show_toast": true
+        "announce_to_chat": false,
+        "show_toast": false
     },
     "criteria": {
-        "mirror_panel": {
+        "frame": {
             "conditions": {
                 "items": [
                     {
                         "items": [
-                            "chowl-industries:mirror_panel"
+                            "chowl-industries:drawer_frame"
                         ]
                     }
                 ]
@@ -32,7 +32,7 @@
     },
     "requirements": [
         [
-            "mirror_panel"
+            "frame"
         ]
     ]
 }

@@ -31,7 +31,7 @@ public class ServerEventListeners {
             var handStack = player.getStackInHand(hand);
 
             if (handStack.getItem() instanceof BlockItem blockItem
-                && !handStack.isOf(ChowlRegistry.DRAWER_FRAME_ITEM)
+                && !handStack.isOf(ChowlBlocks.DRAWER_FRAME.asItem())
                 && !player.isSneaking()) {
                 var targetState = blockItem.getBlock().getPlacementState(new ItemPlacementContext(player, hand, handStack, hitResult));
                 if (drawerFrameBlockEntity.templateState != targetState && targetState != null) {

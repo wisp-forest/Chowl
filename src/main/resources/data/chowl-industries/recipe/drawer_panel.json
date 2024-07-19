@@ -1,19 +1,19 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " p ",
-    "pcp",
-    " p "
+    " w ",
+    "wcw",
+    " w "
   ],
   "key": {
-    "p": {
-      "item": "minecraft:piston"
+    "w": {
+      "tag": "minecraft:planks"
     },
     "c": {
       "item": "minecraft:chest"
     }
   },
   "result": {
-    "item": "chowl-industries:compressing_panel"
+    "id": "chowl-industries:drawer_panel"
   }
 }

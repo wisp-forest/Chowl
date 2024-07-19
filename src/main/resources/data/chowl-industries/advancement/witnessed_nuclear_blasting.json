@@ -11,7 +11,7 @@
     "parent": "chowl-industries:witnessed_blasting",
     "display": {
         "icon": {
-            "item": "mythicmetals:banglum_nuke_core"
+            "id": "mythicmetals:banglum_nuke_core"
         },
         "title": {
             "translate": "advancements.chowl-industries.witnessed_nuclear_blasting.title"

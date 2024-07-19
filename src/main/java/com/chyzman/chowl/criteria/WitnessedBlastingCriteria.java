@@ -1,6 +1,6 @@
 package com.chyzman.chowl.criteria;
 
-import com.chyzman.chowl.util.ChowlRegistryHelper;
+import com.chyzman.chowl.Chowl;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.advancement.criterion.AbstractCriterion;
@@ -12,7 +12,7 @@ import net.minecraft.util.Identifier;
 import java.util.Optional;
 
 public class WitnessedBlastingCriteria extends AbstractCriterion<WitnessedBlastingCriteria.Conditions> {
-    public static final Identifier ID = ChowlRegistryHelper.id("witnessed_blasting");
+    public static final Identifier ID = Chowl.id("witnessed_blasting");
 
     public void trigger(ServerPlayerEntity entity, boolean nuclear) {
         this.trigger(entity, conditions -> !conditions.requiresNuclear || nuclear);

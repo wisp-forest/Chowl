@@ -2,7 +2,7 @@
     "parent": "chowl-industries:upgrades",
     "display": {
         "icon": {
-            "item": "minecraft:tnt"
+            "id": "minecraft:tnt"
         },
         "title": {
             "translate": "advancements.chowl-industries.witnessed_blasting.title"

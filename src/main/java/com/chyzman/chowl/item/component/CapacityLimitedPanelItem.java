@@ -1,6 +1,6 @@
 package com.chyzman.chowl.item.component;
 
-import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.registry.ChowlComponents;
 import com.chyzman.chowl.util.BigIntUtils;
 import net.minecraft.item.ItemStack;
 
@@ -14,6 +14,6 @@ public interface CapacityLimitedPanelItem extends PanelItem {
     }
 
     static BigInteger capacityTier(ItemStack stack) {
-        return stack.getOrDefault(ChowlRegistry.CAPACITY, BigInteger.ZERO);
+        return stack.getOrDefault(ChowlComponents.CAPACITY, BigInteger.ZERO);
     }
 }

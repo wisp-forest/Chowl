@@ -1,8 +1,8 @@
 package com.chyzman.chowl.upgrade;
 
 import com.chyzman.chowl.Chowl;
-import com.chyzman.chowl.event.UpgradeInsertedEvent;
-import com.chyzman.chowl.registry.ChowlRegistry;
+import com.chyzman.chowl.event.UpgradeInteractionEvents;
+import com.chyzman.chowl.registry.ChowlCriteria;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 
@@ -10,11 +10,11 @@ import java.util.List;
 
 public class LabelingUpgrade {
     public static void init() {
-        UpgradeInsertedEvent.EVENT.register((player, frame, side, panel, upgrade) -> {
+        UpgradeInteractionEvents.UPGRADE_INSERTED.register((player, frame, side, panel, upgrade) -> {
             if (!upgrade.isIn(Chowl.LABELING_UPGRADE_TAG)) return;
             if (!upgrade.contains(DataComponentTypes.CUSTOM_NAME)) return;
 
-            ChowlRegistry.LABELED_PANEL_CRITERIA.trigger(player, upgrade.getName().getString());
+            ChowlCriteria.LABELED_PANEL.trigger(player, upgrade.getName().getString());
         });
     }
 

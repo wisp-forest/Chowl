@@ -16,7 +16,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 
-import static com.chyzman.chowl.util.ChowlRegistryHelper.id;
+import static com.chyzman.chowl.Chowl.id;
 
 @Environment(EnvType.CLIENT)
 public class DrawerFrameItemRenderer implements BuiltinItemRendererRegistry.DynamicItemRenderer {
