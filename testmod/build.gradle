@@ -1,0 +1,4 @@
+dependencies {
+    implementation project(path: ":industries", configuration: "namedElements")
+    implementation project(path: ":logistics", configuration: "namedElements")
+}

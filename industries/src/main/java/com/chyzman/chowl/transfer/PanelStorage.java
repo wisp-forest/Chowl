@@ -14,7 +14,7 @@ public class PanelStorage extends SnapshotParticipant<PanelStorage.State> {
     }
 
     @Override
-    protected PanelStorage.State createSnapshot() {
+    protected State createSnapshot() {
         var old = ctx.stack();
         ctx.setStack(old.copy());
         return new State(old, needsEmptiedEvent);

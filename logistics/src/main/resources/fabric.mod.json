@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "chowl-logistics",
+  "version": "${version}",
+  "name": "Chowl Logistics",
+  "description": "Enterprise™ item manipulation",
+  "authors": ["chyzman", "BasiqueEvangelist"],
+  "contact": {
+    "issues": "https://github.com/wisp-forest/Chowl/issues",
+    "sources": "https://github.com/wisp-forest/Chowl"
+  },
+  "license": "LGPL-3.0-only",
+  "icon": "assets/chowl-logistics/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "com.chyzman.chowl.logistics.client.ChowlLogisticsClient"
+    ],
+    "main": [
+      "com.chyzman.chowl.logistics.ChowlLogistics"
+    ]
+  },
+  "mixins": [
+    "chowl-logistics.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}",
+    "owo": ">=0.12.10",
+    "lavender": ">=0.1.10",
+    "chowl-industries": "${version}"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://wispforest.io/discord",
+        "modmenu.modrinth": "https://modrinth.com/mod/chowl-logistics"
+      }
+    }
+  }
+}

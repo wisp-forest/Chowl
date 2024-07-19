@@ -1,0 +1,13 @@
+dependencies {
+    modCompileOnly "maven.modrinth:sodium:${project.sodium_version}"
+
+    modCompileOnly "maven.modrinth:mythicmetals:${project.mythicmetals_version}"
+
+    include("io.wispforest:lavender:${project.lavender_version}")
+
+    include("eu.pb4:common-protection-api:${project.cpa_version}")
+}
+
+loom {
+    accessWidenerPath = file("src/main/resources/chowl.accesswidener")
+}

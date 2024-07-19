@@ -157,7 +157,7 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
         return tag;
     }
 
-    public class GraphEntry implements GraphStore.Graph {
+    public class GraphEntry implements Graph {
         public final UUID graphId;
         public Long2ObjectOpenHashMap<GraphNodeEntry> nodes;
         private boolean needsSync = false;
@@ -309,7 +309,7 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
         }
     }
 
-    public record GraphNodeEntry(BlockPos pos, BlockState state, LongSet links) implements GraphStore.GraphNode {
+    public record GraphNodeEntry(BlockPos pos, BlockState state, LongSet links) implements GraphNode {
         public static GraphNodeEntry read(NbtCompound tag) {
             BlockPos pos = BlockPos.fromLong(tag.getLong("Pos"));
             BlockState state = NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), tag.getCompound("State"));

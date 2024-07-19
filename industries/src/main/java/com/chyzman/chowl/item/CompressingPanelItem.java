@@ -32,7 +32,7 @@ import static com.chyzman.chowl.Chowl.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public class CompressingPanelItem extends BasePanelItem implements FilteringPanelItem, LockablePanelItem, DisplayingPanelItem, StoragePanelItem, UpgradeablePanelItem {
-    public CompressingPanelItem(Item.Settings settings) {
+    public CompressingPanelItem(Settings settings) {
         super(settings);
     }
 

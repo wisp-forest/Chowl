@@ -1,140 +1,99 @@
 plugins {
-    id 'fabric-loom' version '1.7-SNAPSHOT'
-    id 'maven-publish'
+    id 'fabric-loom' version '1.7-SNAPSHOT' apply false
 }
 
-version = "${project.mod_version}+${project.minecraft_base_version}"
-group = project.maven_group
+subprojects {
+    apply plugin: "java"
+    apply plugin: "fabric-loom"
+    apply plugin: "maven-publish"
 
-repositories {
-    maven { url 'https://jitpack.io' }
-    maven { url 'https://maven.wispforest.io/releases/' }
-    maven { url 'https://maven.nucleoid.xyz/' }
-    maven { url 'https://api.modrinth.com/maven/' }
-    maven { url 'https://maven.cafeteria.dev/releases/' }
-}
-
-sourceSets {
-    testmod {
-        runtimeClasspath += main.runtimeClasspath
-        compileClasspath += main.compileClasspath
-    }
-}
-
-dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-    annotationProcessor modImplementation("io.wispforest:owo-lib:${project.owo_version}") {
-        exclude group: "net.fabricmc.fabric-api"
-    }
-
-    include("io.wispforest:owo-sentinel:${project.owo_version}")
-
-    modCompileOnly "maven.modrinth:sodium:${project.sodium_version}"
-
-    modCompileOnly "maven.modrinth:mythicmetals:${project.mythicmetals_version}"
-
-    modImplementation include("io.wispforest:lavender:${project.lavender_version}")
-
-    modImplementation include("eu.pb4:common-protection-api:${project.cpa_version}")
-
-//    modImplementation include("me.luligabi:NoIndium:${project.no_indium_version}")
-
-    testmodImplementation sourceSets.main.output
-}
-
-
-
-processResources {
-    inputs.property "version", project.version
-    inputs.property "minecraft_version", project.minecraft_version
-    inputs.property "loader_version", project.loader_version
-    filteringCharset "UTF-8"
-
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version,
-                "minecraft_version": project.minecraft_version,
-                "loader_version": project.loader_version
-    }
-}
-
-processTestmodResources {
-    inputs.property "version", project.version
-    inputs.property "minecraft_version", project.minecraft_version
-    inputs.property "loader_version", project.loader_version
-    filteringCharset "UTF-8"
-
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version,
-                "minecraft_version": project.minecraft_version,
-                "loader_version": project.loader_version
-    }
-}
-
-def targetJavaVersion = 21
-tasks.withType(JavaCompile).configureEach {
-    it.options.encoding = "UTF-8"
-    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        it.options.release = targetJavaVersion
-    }
-}
-
-java {
-    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    }
-    archivesBaseName = project.archives_base_name
-    withSourcesJar()
-}
-
-loom {
-    runs {
-        testmodClient {
-            client()
-            ideConfigGenerated project.rootProject == project
-            name = "Testmod Client"
-            source sourceSets.testmod
-        }
-        testmodServer {
-            server()
-            ideConfigGenerated project.rootProject == project
-            name = "Testmod Server"
-            source sourceSets.testmod
-        }
-    }
-
-    accessWidenerPath = file("src/main/resources/chowl.accesswidener")
-
-    runs {
-        chyz {
-            client()
-            ideConfigGenerated true
-            name "Minecraft Client (chyz impersonation)"
-            programArgs("--username", "chyzman")
-            programArgs("--uuid", "09de8a6d86bf4c15bb93ce3384ce4e96")
-        }
-    }
-}
-
-jar {
-    from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
-    }
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
+    version = "${project.mod_version}+${project.minecraft_base_version}"
+    group = project.maven_group
 
     repositories {
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://maven.wispforest.io/releases/' }
+        maven { url 'https://maven.nucleoid.xyz/' }
+        maven { url 'https://api.modrinth.com/maven/' }
+        maven { url 'https://maven.cafeteria.dev/releases/' }
+    }
 
+    dependencies {
+        minecraft "com.mojang:minecraft:${project.minecraft_version}"
+        mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+        modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+        modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+        annotationProcessor modImplementation("io.wispforest:owo-lib:${project.owo_version}") {
+            exclude group: "net.fabricmc.fabric-api"
+        }
+
+        include("io.wispforest:owo-sentinel:${project.owo_version}")
+
+        modImplementation("eu.pb4:common-protection-api:${project.cpa_version}")
+
+        modImplementation("io.wispforest:lavender:${project.lavender_version}")
+
+//    modImplementation include("me.luligabi:NoIndium:${project.no_indium_version}")
+    }
+
+    processResources {
+        inputs.property "version", project.version
+        inputs.property "minecraft_version", project.minecraft_version
+        inputs.property "loader_version", project.loader_version
+        filteringCharset "UTF-8"
+
+        filesMatching("fabric.mod.json") {
+            expand "version": project.version,
+                    "minecraft_version": project.minecraft_version,
+                    "loader_version": project.loader_version
+        }
+    }
+
+    def targetJavaVersion = 21
+
+    tasks.withType(JavaCompile).configureEach {
+        it.options.release = targetJavaVersion
+    }
+
+    base {
+        archivesName = "chowl-${project.module_name}"
+    }
+
+    java {
+        def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+        if (JavaVersion.current() < javaVersion) {
+            toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+        }
+        withSourcesJar()
+    }
+
+    loom {
+        runs {
+            configureEach {
+                ideConfigGenerated true
+                environmentVariable("NOUVEAU_USE_ZINK", "1")
+                runDir "../run"
+            }
+        }
+    }
+
+    jar {
+        from("LICENSE") {
+            rename { "${it}_${project.archivesBaseName}" }
+        }
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+
+        repositories {
+
+        }
     }
 }
