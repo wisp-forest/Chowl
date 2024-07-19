@@ -14,10 +14,10 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "com.chyzman.chowl.client.ChowlClient"
+      "com.chyzman.chowl.industries.client.ChowlClient"
     ],
     "main": [
-      "com.chyzman.chowl.Chowl"
+      "com.chyzman.chowl.industries.Chowl"
     ]
   },
   "mixins": [

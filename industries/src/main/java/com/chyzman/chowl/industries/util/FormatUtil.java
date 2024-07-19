@@ -1,0 +1,20 @@
+package com.chyzman.chowl.industries.util;
+
+import com.google.common.math.BigIntegerMath;
+
+import java.math.BigInteger;
+import java.math.RoundingMode;
+
+import static com.chyzman.chowl.industries.Chowl.CHOWL_CONFIG;
+
+public final class FormatUtil {
+
+    public static String formatCount(BigInteger count) {
+        var digits = BigInteger.valueOf(count.toString().length());
+
+        if (digits.compareTo(new BigInteger(CHOWL_CONFIG.max_digits_before_exponents())) > 0)
+            return "2^" + (BigIntegerMath.log2(count, RoundingMode.HALF_UP));
+        else
+            return count.toString();
+    }
+}

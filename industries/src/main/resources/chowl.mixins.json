@@ -1,8 +1,8 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "com.chyzman.chowl.mixin",
-  "plugin": "com.chyzman.chowl.asm.ChowlMixinPlugin",
+  "package": "com.chyzman.chowl.industries.mixin",
+  "plugin": "com.chyzman.chowl.industries.asm.ChowlMixinPlugin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "BlockItemMixin",
