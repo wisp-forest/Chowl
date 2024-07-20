@@ -138,7 +138,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
 
                 var customization = DisplayingPanelItem.getConfig(stack);
 
-                if (entity.getWorld() != null && (customization == null || !customization.hideButtons())) {
+                if (entity.getWorld() != null && (customization == null || !customization.hideButtons()) && !MinecraftClient.getInstance().options.hudHidden) {
                     var buttonProvider = (BlockButtonProvider) entity.getCachedState().getBlock();
 
                     matrices.push();

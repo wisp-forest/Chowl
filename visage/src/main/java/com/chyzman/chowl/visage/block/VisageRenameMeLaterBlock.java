@@ -2,20 +2,26 @@ package com.chyzman.chowl.visage.block;
 
 import com.chyzman.chowl.industries.block.*;
 import com.mojang.serialization.MapCodec;
+import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.AxeItem;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.registry.Registries;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.state.property.Properties;
@@ -28,6 +34,7 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import net.minecraft.world.event.GameEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -89,12 +96,25 @@ public class VisageRenameMeLaterBlock extends BlockWithEntity implements DoubleC
         if (world.getBlockEntity(pos) instanceof VisageRenameMeLaterBlockEntity visage) {
             if (stack.getItem() instanceof BlockItem blockItem) {
                 var targetState = blockItem.getBlock().getPlacementState(new ItemPlacementContext(player, hand, stack, hit));
-                if (visage.templateState != targetState && targetState != null) {
+                if (visage.templateState == null && targetState != null) {
                     visage.templateState = targetState;
                     world.setBlockState(pos, state.with(LIGHT_LEVEL, targetState.getLuminance()));
 
                     visage.markDirty();
                     return ItemActionResult.SUCCESS;
+                }
+            } else if (stack.getItem() instanceof AxeItem) {
+                if (visage.templateState != null) {
+                    visage.templateState = null;
+                    world.setBlockState(pos, state.with(LIGHT_LEVEL, 0));
+                    if (player instanceof ServerPlayerEntity serverPlayerEntity) Criteria.ITEM_USED_ON_BLOCK.trigger(serverPlayerEntity, pos, stack);
+                    world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(player, state));
+                    world.playSound(player, pos, SoundEvents.ITEM_AXE_STRIP, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                    stack.damage(1, player, LivingEntity.getSlotForHand(hand));
+
+                    visage.markDirty();
+                    return ItemActionResult.SUCCESS;
+
                 }
             }
         }
