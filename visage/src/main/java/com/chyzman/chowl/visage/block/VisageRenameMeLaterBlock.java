@@ -94,7 +94,7 @@ public class VisageRenameMeLaterBlock extends BlockWithEntity implements DoubleC
     @Override
     protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         if (world.getBlockEntity(pos) instanceof VisageRenameMeLaterBlockEntity visage) {
-            if (stack.getItem() instanceof BlockItem blockItem) {
+            if (stack.getItem() instanceof BlockItem blockItem && !(blockItem.getBlock() instanceof VisageRenameMeLaterBlock)) {
                 var targetState = blockItem.getBlock().getPlacementState(new ItemPlacementContext(player, hand, stack, hit));
                 if (visage.templateState == null && targetState != null) {
                     visage.templateState = targetState;

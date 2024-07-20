@@ -6,8 +6,10 @@ import com.chyzman.chowl.visage.block.VisageRenameMeLaterBlockModel;
 import com.chyzman.chowl.visage.item.renderer.RenameMeLaterItemRenderer;
 import com.chyzman.chowl.visage.registry.VisageBlocks;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
+import net.minecraft.client.render.RenderLayer;
 
 import static com.chyzman.chowl.visage.ChowlVisage.id;
 import static com.chyzman.chowl.visage.registry.VisageBlocks.RENAME_ME_LATER;
@@ -17,6 +19,7 @@ public class ChowlVisageClient implements ClientModInitializer {
     public void onInitializeClient() {
         BuiltinItemRendererRegistry.INSTANCE.register(RENAME_ME_LATER.asItem(), new RenameMeLaterItemRenderer());
 
+        BlockRenderLayerMap.INSTANCE.putBlock(VisageBlocks.RENAME_ME_LATER, RenderLayer.getCutout());
 
         ModelLoadingPlugin.register(ctx -> {
             ctx.resolveModel().register(context -> {

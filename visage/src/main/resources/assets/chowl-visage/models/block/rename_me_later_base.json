@@ -1,12 +1,11 @@
 {
 	"credit": "Made by chyzman",
 	"textures": {
-		"0": "block/oak_log",
-		"particle": "block/oak_log"
+		"0": "chowl-visage:block/visage",
+		"particle": "chowl-visage:block/visage"
 	},
 	"elements": [
 		{
-			"name": "Cube",
 			"from": [0, 0, 0],
 			"to": [16, 16, 16],
 			"faces": {
@@ -16,6 +15,18 @@
 				"west": {"uv": [0, 0, 16, 16], "texture": "#0", "cullface": "west"},
 				"up": {"uv": [0, 0, 16, 16], "texture": "#0", "cullface": "up"},
 				"down": {"uv": [0, 0, 16, 16], "texture": "#0", "cullface": "down"}
+			}
+		},
+		{
+			"from": [15.998, 0.002, 0.002],
+			"to": [0.002, 15.998, 15.998],
+			"faces": {
+				"north": {"uv": [16, 0, 0, 16], "texture": "#0", "cullface": "north"},
+				"east": {"uv": [16, 0, 0, 16], "texture": "#0", "cullface": "east"},
+				"south": {"uv": [16, 0, 0, 16], "texture": "#0", "cullface": "south"},
+				"west": {"uv": [16, 0, 0, 16], "texture": "#0", "cullface": "west"},
+				"up": {"uv": [16, 0, 0, 16], "texture": "#0", "cullface": "up"},
+				"down": {"uv": [16, 0, 0, 16], "texture": "#0", "cullface": "down"}
 			}
 		}
 	],
