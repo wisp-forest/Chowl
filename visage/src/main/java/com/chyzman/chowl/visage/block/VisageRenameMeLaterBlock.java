@@ -96,6 +96,7 @@ public class VisageRenameMeLaterBlock extends BlockWithEntity implements DoubleC
         if (world.getBlockEntity(pos) instanceof VisageRenameMeLaterBlockEntity visage) {
             if (stack.getItem() instanceof BlockItem blockItem && !(blockItem.getBlock() instanceof VisageRenameMeLaterBlock)) {
                 var targetState = blockItem.getBlock().getPlacementState(new ItemPlacementContext(player, hand, stack, hit));
+                if (targetState == null) targetState = blockItem.getBlock().getDefaultState();
                 if (visage.templateState == null && targetState != null) {
                     visage.templateState = targetState;
                     world.setBlockState(pos, state.with(LIGHT_LEVEL, targetState.getLuminance()));
@@ -114,7 +115,6 @@ public class VisageRenameMeLaterBlock extends BlockWithEntity implements DoubleC
 
                     visage.markDirty();
                     return ItemActionResult.SUCCESS;
-
                 }
             }
         }

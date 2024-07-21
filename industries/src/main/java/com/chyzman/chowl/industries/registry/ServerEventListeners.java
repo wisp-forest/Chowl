@@ -34,6 +34,7 @@ public class ServerEventListeners {
                 && !handStack.isOf(ChowlBlocks.DRAWER_FRAME.asItem())
                 && !player.isSneaking()) {
                 var targetState = blockItem.getBlock().getPlacementState(new ItemPlacementContext(player, hand, handStack, hitResult));
+                if (targetState != null) targetState = blockItem.getBlock().getDefaultState();
                 if (drawerFrameBlockEntity.templateState != targetState && targetState != null) {
                     drawerFrameBlockEntity.templateState = targetState;
                     world.setBlockState(pos, state.with(DrawerFrameBlock.LIGHT_LEVEL, targetState.getLuminance()));
