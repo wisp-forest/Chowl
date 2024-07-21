@@ -1,27 +1,15 @@
 package com.chyzman.chowl.visage.block;
 
-import com.mojang.serialization.MapCodec;
-import net.minecraft.advancement.criterion.Criteria;
-import net.minecraft.block.*;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.LivingEntity;
+import com.chyzman.chowl.visage.registry.VisageBlocks;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.ShapeContext;
+import net.minecraft.block.StairsBlock;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.registry.Registries;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.hit.BlockHitResult;
@@ -30,31 +18,10 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
-import org.jetbrains.annotations.NotNull;
 
-public class VisageRenameMeLaterBlock extends Block implements VisageBlockTemplate {
-
-    public static final VoxelShape SHAPE = createCuboidShape(0, 0, 0, 16, 16, 16);
-
-    public VisageRenameMeLaterBlock(Settings settings) {
-        super(settings);
-    }
-
-    @Override
-    protected MapCodec<? extends Block> getCodec() {
-        // bruh
-        return null;
-    }
-
-    @Override
-    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return SHAPE;
-    }
-
-    @Override
-    protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return SHAPE;
+public class VisageStairsBlock extends StairsBlock implements VisageBlockTemplate {
+    public VisageStairsBlock(BlockState baseBlockState, Settings settings) {
+        super(baseBlockState, settings);
     }
 
     @Override
@@ -65,6 +32,7 @@ public class VisageRenameMeLaterBlock extends Block implements VisageBlockTempla
     }
 
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+        super.appendProperties(builder);
         builder.add(LIGHT_LEVEL);
     }
 
@@ -81,8 +49,8 @@ public class VisageRenameMeLaterBlock extends Block implements VisageBlockTempla
     @Override
     public boolean isTransparent(BlockState state, BlockView world, BlockPos pos) {
         if (world.getBlockEntity(pos) instanceof VisageRenameMeLaterBlockEntity visage &&
-                !(visage.templateState == null) &&
-                !(visage.templateState.getBlock() instanceof VisageBlockTemplate)) {
+            !(visage.templateState == null) &&
+            !(visage.templateState.getBlock() instanceof VisageBlockTemplate)) {
             return visage.templateState.isTransparent(world, pos);
         }
         return super.isTransparent(state, world, pos);

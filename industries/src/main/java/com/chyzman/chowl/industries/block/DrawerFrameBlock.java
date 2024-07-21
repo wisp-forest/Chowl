@@ -526,7 +526,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
     @Override
     public BlockSoundGroup getSoundGroup(World world, BlockPos pos, BlockState state, ItemStack stack) {
-        NbtComponent data = stack.get(DataComponentTypes.CUSTOM_DATA);
+        NbtComponent data = stack.get(DataComponentTypes.BLOCK_ENTITY_DATA);
 
         if (data == null) return getSoundGroup(state);
         if (!data.getNbt().contains("TemplateState", NbtElement.COMPOUND_TYPE)) return getSoundGroup(state);
