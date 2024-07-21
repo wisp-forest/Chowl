@@ -1,7 +1,6 @@
 package com.chyzman.chowl.visage.block;
 
 import com.chyzman.chowl.industries.block.BreakProgressMaskingBlock;
-import com.chyzman.chowl.industries.block.DoubleClickableBlock;
 import com.chyzman.chowl.industries.block.ExtendedParticleSpriteBlock;
 import com.chyzman.chowl.industries.block.ExtendedSoundGroupBlock;
 import net.minecraft.advancement.criterion.Criteria;
@@ -44,11 +43,11 @@ public interface VisageBlockTemplate extends /* Block, */ BlockEntityProvider, E
     @Nullable
     @Override
     default BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new VisageRenameMeLaterBlockEntity(pos, state);
+        return new VisageBlockEntity(pos, state);
     }
 
     default ItemActionResult doOnUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (world.getBlockEntity(pos) instanceof VisageRenameMeLaterBlockEntity visage) {
+        if (world.getBlockEntity(pos) instanceof VisageBlockEntity visage) {
             if (stack.getItem() instanceof BlockItem blockItem && !(blockItem.getBlock() instanceof VisageBlockTemplate)) {
                 var targetState = blockItem.getBlock().getPlacementState(new ItemPlacementContext(player, hand, stack, hit));
                 if (visage.templateState == null && targetState != null) {
@@ -78,7 +77,7 @@ public interface VisageBlockTemplate extends /* Block, */ BlockEntityProvider, E
 
     @Override
     default BlockState getParticleState(World world, BlockPos pos, BlockState state) {
-        if (!(world.getBlockEntity(pos) instanceof VisageRenameMeLaterBlockEntity visage)) return state;
+        if (!(world.getBlockEntity(pos) instanceof VisageBlockEntity visage)) return state;
         if (visage.templateState == null) return state;
 
         return visage.templateState;
@@ -86,7 +85,7 @@ public interface VisageBlockTemplate extends /* Block, */ BlockEntityProvider, E
 
     @Override
     default BlockSoundGroup getSoundGroup(World world, BlockPos pos, BlockState state) {
-        if (!(world.getBlockEntity(pos) instanceof VisageRenameMeLaterBlockEntity visage)) return state.getSoundGroup();
+        if (!(world.getBlockEntity(pos) instanceof VisageBlockEntity visage)) return state.getSoundGroup();
         if (visage.templateState == null) return state.getSoundGroup();
 
         return visage.templateState.getSoundGroup();
@@ -103,7 +102,7 @@ public interface VisageBlockTemplate extends /* Block, */ BlockEntityProvider, E
     }
 
     default void doRandomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
-        if (world.getBlockEntity(pos) instanceof VisageRenameMeLaterBlockEntity visage
+        if (world.getBlockEntity(pos) instanceof VisageBlockEntity visage
             && !(visage.templateState == null)
             && visage.templateState != state
             && !(visage.templateState.getBlock() instanceof VisageBlockTemplate)) {
@@ -113,7 +112,7 @@ public interface VisageBlockTemplate extends /* Block, */ BlockEntityProvider, E
 
     @Override
     default float calcMaskedBlockBreakingDelta(BlockState state, PlayerEntity player, BlockView world, BlockPos pos) {
-        if (world.getBlockEntity(pos) instanceof VisageRenameMeLaterBlockEntity visage &&
+        if (world.getBlockEntity(pos) instanceof VisageBlockEntity visage &&
             visage.templateState != null &&
             !(visage.templateState.getBlock() instanceof VisageBlockTemplate)) {
             return visage.templateState.calcBlockBreakingDelta(player, world, pos);

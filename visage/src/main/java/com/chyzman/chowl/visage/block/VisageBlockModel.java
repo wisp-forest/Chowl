@@ -28,10 +28,10 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class VisageRenameMeLaterBlockModel extends ForwardingBakedModel {
+public class VisageBlockModel extends ForwardingBakedModel {
     private final BakedModel templated;
 
-    private VisageRenameMeLaterBlockModel(BakedModel base, BakedModel templated) {
+    private VisageBlockModel(BakedModel base, BakedModel templated) {
         this.templated = templated;
         this.wrapped = base;
     }
@@ -107,7 +107,7 @@ public class VisageRenameMeLaterBlockModel extends ForwardingBakedModel {
 
         @Override
         public @NotNull BakedModel bake(Baker baker, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer) {
-            return new VisageRenameMeLaterBlockModel(
+            return new VisageBlockModel(
                 baker.bake(baseModel, rotationContainer),
                 baker.bake(templatedModel, rotationContainer)
             );
