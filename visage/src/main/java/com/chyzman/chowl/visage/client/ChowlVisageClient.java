@@ -29,6 +29,21 @@ public class ChowlVisageClient implements ClientModInitializer {
                         id("block/rename_me_later_base"),
                         Identifier.of("minecraft:block/diamond_block")
                     );
+                } else if (context.id().equals(id("block/visage_stairs"))) {
+                    return new VisageRenameMeLaterBlockModel.Unbaked(
+                        id("block/visage_stairs_base"),
+                        Identifier.of("minecraft:block/oak_stairs")
+                    );
+                } else if (context.id().equals(id("block/visage_stairs_inner"))) {
+                    return new VisageRenameMeLaterBlockModel.Unbaked(
+                        id("block/visage_stairs_inner_base"),
+                        Identifier.of("minecraft:block/oak_stairs_inner")
+                    );
+                } else if (context.id().equals(id("block/visage_stairs_outer"))) {
+                    return new VisageRenameMeLaterBlockModel.Unbaked(
+                        id("block/visage_stairs_outer_base"),
+                        Identifier.of("minecraft:block/oak_stairs_outer")
+                    );
                 } else {
                     return null;
                 }
