@@ -1,27 +1,12 @@
 package com.chyzman.chowl.visage.block;
 
 import com.mojang.serialization.MapCodec;
-import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.*;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.registry.Registries;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.hit.BlockHitResult;
@@ -30,14 +15,12 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
-import org.jetbrains.annotations.NotNull;
 
-public class VisageRenameMeLaterBlock extends Block implements VisageBlockTemplate {
+public class VisageBlock extends Block implements VisageBlockTemplate {
 
     public static final VoxelShape SHAPE = createCuboidShape(0, 0, 0, 16, 16, 16);
 
-    public VisageRenameMeLaterBlock(Settings settings) {
+    public VisageBlock(Settings settings) {
         super(settings);
     }
 
@@ -57,14 +40,16 @@ public class VisageRenameMeLaterBlock extends Block implements VisageBlockTempla
         return SHAPE;
     }
 
+    //region visage template
     @Override
     public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        if (world.getBlockEntity(pos) instanceof VisageRenameMeLaterBlockEntity visage) {
+        if (world.getBlockEntity(pos) instanceof VisageBlockEntity visage) {
             visage.spreadTemplate();
         }
     }
 
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+        super.appendProperties(builder);
         builder.add(LIGHT_LEVEL);
     }
 
@@ -80,9 +65,9 @@ public class VisageRenameMeLaterBlock extends Block implements VisageBlockTempla
 
     @Override
     public boolean isTransparent(BlockState state, BlockView world, BlockPos pos) {
-        if (world.getBlockEntity(pos) instanceof VisageRenameMeLaterBlockEntity visage &&
-                !(visage.templateState == null) &&
-                !(visage.templateState.getBlock() instanceof VisageBlockTemplate)) {
+        if (world.getBlockEntity(pos) instanceof VisageBlockEntity visage &&
+            !(visage.templateState == null) &&
+            !(visage.templateState.getBlock() instanceof VisageBlockTemplate)) {
             return visage.templateState.isTransparent(world, pos);
         }
         return super.isTransparent(state, world, pos);
@@ -92,4 +77,5 @@ public class VisageRenameMeLaterBlock extends Block implements VisageBlockTempla
     protected boolean canPathfindThrough(BlockState state, NavigationType type) {
         return false;
     }
+    //endregion
 }

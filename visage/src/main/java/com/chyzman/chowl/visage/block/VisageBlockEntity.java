@@ -19,12 +19,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
-public class VisageRenameMeLaterBlockEntity extends BlockEntity {
+public class VisageBlockEntity extends BlockEntity {
 
     public BlockState templateState = null;
 
-    public VisageRenameMeLaterBlockEntity(BlockPos pos, BlockState state) {
-        super(VisageBlocks.Entities.RENAME_ME_LATER, pos, state);
+    public VisageBlockEntity(BlockPos pos, BlockState state) {
+        super(VisageBlocks.Entities.VISAGE_BLOCK, pos, state);
     }
 
 

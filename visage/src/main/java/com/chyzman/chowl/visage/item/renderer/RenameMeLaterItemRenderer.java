@@ -1,9 +1,7 @@
 package com.chyzman.chowl.visage.item.renderer;
 
-
-
 import com.chyzman.chowl.visage.client.RenderGlobals;
-import com.chyzman.chowl.visage.block.VisageRenameMeLaterBlockEntity;
+import com.chyzman.chowl.visage.block.VisageBlockEntity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
@@ -27,13 +25,13 @@ public class RenameMeLaterItemRenderer implements BuiltinItemRendererRegistry.Dy
 
         try (var ignored = RenderGlobals.enterRender()) {
             var state = ((BlockItem) stack.getItem()).getBlock().getDefaultState();
-            var blockEntity = new VisageRenameMeLaterBlockEntity(BlockPos.ORIGIN, state);
+            var blockEntity = new VisageBlockEntity(BlockPos.ORIGIN, state);
             stack.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT).applyToBlockEntity(blockEntity, MinecraftClient.getInstance().player.getRegistryManager());
 
             try {
                 RenderGlobals.VISAGE.set(blockEntity);
 
-                var model = MinecraftClient.getInstance().getBakedModelManager().getModel(id("block/rename_me_later"));
+                var model = MinecraftClient.getInstance().getBakedModelManager().getModel(id("block/visage_block"));
                 if (model != null) {
                     matrices.push();
                     matrices.translate(0.5F, 0.5F, 0.5F);

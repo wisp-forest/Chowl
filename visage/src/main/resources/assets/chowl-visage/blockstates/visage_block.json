@@ -2,7 +2,7 @@
   "variants": {
     "": [
       {
-        "model": "chowl-visage:block/rename_me_later"
+        "model": "chowl-visage:block/visage_block"
       }
     ]
   }
