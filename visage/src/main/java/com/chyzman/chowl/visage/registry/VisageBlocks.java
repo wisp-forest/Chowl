@@ -2,6 +2,7 @@ package com.chyzman.chowl.visage.registry;
 
 import com.chyzman.chowl.industries.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.visage.block.VisageRenameMeLaterBlock;
+import com.chyzman.chowl.visage.block.VisageRenameMeLaterBlockEntity;
 import io.wispforest.owo.registration.reflect.AutoRegistryContainer;
 import io.wispforest.owo.registration.reflect.BlockRegistryContainer;
 import net.minecraft.block.AbstractBlock;
@@ -27,8 +28,8 @@ public class VisageBlocks implements BlockRegistryContainer {
 
     public static class Entities implements AutoRegistryContainer<BlockEntityType<?>> {
 
-        public static BlockEntityType<DrawerFrameBlockEntity> RENAME_ME_LATER =
-            BlockEntityType.Builder.create(DrawerFrameBlockEntity::new, VisageBlocks.RENAME_ME_LATER)
+        public static BlockEntityType<VisageRenameMeLaterBlockEntity> RENAME_ME_LATER =
+            BlockEntityType.Builder.create(VisageRenameMeLaterBlockEntity::new, VisageBlocks.RENAME_ME_LATER)
                 .build();
 
         @Override

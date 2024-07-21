@@ -65,6 +65,7 @@ public class VisageRenameMeLaterBlockEntity extends BlockEntity {
         WorldOps.updateIfOnServer(world, pos);
     }
 
+    @Override
     public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         if (nbt == null) return;
 
@@ -87,6 +88,8 @@ public class VisageRenameMeLaterBlockEntity extends BlockEntity {
 
         if (templateState != null)
             nbt.put("TemplateState", NbtHelper.fromBlockState(templateState));
+        else
+            nbt.putString("TemplateState", "me when mojang code");
     }
 
     @Override

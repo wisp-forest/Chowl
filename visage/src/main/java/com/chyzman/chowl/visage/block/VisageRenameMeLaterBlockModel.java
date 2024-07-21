@@ -29,9 +29,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class VisageRenameMeLaterBlockModel extends ForwardingBakedModel {
+    private final BakedModel templated;
 
-    private VisageRenameMeLaterBlockModel(BakedModel wrapped) {
-        this.wrapped = wrapped;
+    private VisageRenameMeLaterBlockModel(BakedModel base, BakedModel templated) {
+        this.templated = templated;
+        this.wrapped = base;
     }
 
     @Override
@@ -46,10 +48,11 @@ public class VisageRenameMeLaterBlockModel extends ForwardingBakedModel {
         if (template != null) {
             var info = RetextureInfo.get(template);
             context.pushTransform(new RetextureTransform(info, blockView, pos));
+            templated.emitBlockQuads(blockView, state, pos, randomSupplier, context);
+            context.popTransform();
+        } else {
+            super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
         }
-        super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
-
-        if (template != null) context.popTransform();
     }
 
     @Override
@@ -60,11 +63,11 @@ public class VisageRenameMeLaterBlockModel extends ForwardingBakedModel {
         if (template != null) {
             var info = RetextureInfo.get(template);
             context.pushTransform(new RetextureTransform(info, null, null));
+            templated.emitItemQuads(stack, randomSupplier, context);
+            context.popTransform();
+        } else {
+            super.emitItemQuads(stack, randomSupplier, context);
         }
-
-        super.emitItemQuads(stack, randomSupplier, context);
-
-        if (template != null) context.popTransform();
     }
 
     private static class RetextureTransform implements RenderContext.QuadTransform {
@@ -91,14 +94,10 @@ public class VisageRenameMeLaterBlockModel extends ForwardingBakedModel {
         }
     }
 
-    public record Unbaked(Identifier baseModel) implements UnbakedModel {
-        public static Unbaked create(Identifier baseModel) {
-            return new Unbaked(baseModel);
-        }
-
+    public record Unbaked(Identifier baseModel, Identifier templatedModel) implements UnbakedModel {
         @Override
         public Collection<Identifier> getModelDependencies() {
-            return new ArrayList<>(List.of(baseModel));
+            return new ArrayList<>(List.of(baseModel, templatedModel));
         }
 
         @Override
@@ -108,7 +107,10 @@ public class VisageRenameMeLaterBlockModel extends ForwardingBakedModel {
 
         @Override
         public @NotNull BakedModel bake(Baker baker, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer) {
-            return new VisageRenameMeLaterBlockModel(baker.bake(baseModel, rotationContainer));
+            return new VisageRenameMeLaterBlockModel(
+                baker.bake(baseModel, rotationContainer),
+                baker.bake(templatedModel, rotationContainer)
+            );
         }
     }
 

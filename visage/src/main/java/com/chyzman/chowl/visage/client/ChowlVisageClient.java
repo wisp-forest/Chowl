@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.util.Identifier;
 
 import static com.chyzman.chowl.visage.ChowlVisage.id;
 import static com.chyzman.chowl.visage.registry.VisageBlocks.RENAME_ME_LATER;
@@ -24,7 +25,10 @@ public class ChowlVisageClient implements ClientModInitializer {
         ModelLoadingPlugin.register(ctx -> {
             ctx.resolveModel().register(context -> {
                 if (context.id().equals(id("block/rename_me_later"))) {
-                    return VisageRenameMeLaterBlockModel.Unbaked.create(id("block/rename_me_later_base"));
+                    return new VisageRenameMeLaterBlockModel.Unbaked(
+                        id("block/rename_me_later_base"),
+                        Identifier.of("minecraft:block/diamond_block")
+                    );
                 } else {
                     return null;
                 }
