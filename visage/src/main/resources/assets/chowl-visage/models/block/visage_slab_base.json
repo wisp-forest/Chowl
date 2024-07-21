@@ -1,8 +1,8 @@
 {
 	"credit": "Made by chyzman",
 	"textures": {
-		"0": "chowl-visage:block/test",
-		"particle": "chowl-visage:block/test"
+		"0": "minecraft:block/oak_log",
+		"particle": "minecraft:block/oak_log"
 	},
 	"elements": [
 		{

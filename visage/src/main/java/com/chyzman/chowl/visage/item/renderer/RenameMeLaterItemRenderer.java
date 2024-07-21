@@ -2,6 +2,7 @@ package com.chyzman.chowl.visage.item.renderer;
 
 import com.chyzman.chowl.visage.client.RenderGlobals;
 import com.chyzman.chowl.visage.block.VisageBlockEntity;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
@@ -13,12 +14,19 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
 import static com.chyzman.chowl.visage.ChowlVisage.id;
 
 @Environment(EnvType.CLIENT)
 public class RenameMeLaterItemRenderer implements BuiltinItemRendererRegistry.DynamicItemRenderer {
+    private final Identifier modelId;
+
+    public RenameMeLaterItemRenderer(Identifier modelId) {
+        this.modelId = modelId;
+    }
+
     @Override
     public void render(ItemStack stack, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         if (!RenderGlobals.shouldRender()) return;
@@ -31,7 +39,7 @@ public class RenameMeLaterItemRenderer implements BuiltinItemRendererRegistry.Dy
             try {
                 RenderGlobals.VISAGE.set(blockEntity);
 
-                var model = MinecraftClient.getInstance().getBakedModelManager().getModel(id("block/visage_block"));
+                var model = MinecraftClient.getInstance().getBakedModelManager().getModel(modelId);
                 if (model != null) {
                     matrices.push();
                     matrices.translate(0.5F, 0.5F, 0.5F);

@@ -3,6 +3,7 @@ package com.chyzman.chowl.visage.block;
 import com.chyzman.chowl.industries.block.BreakProgressMaskingBlock;
 import com.chyzman.chowl.industries.block.ExtendedParticleSpriteBlock;
 import com.chyzman.chowl.industries.block.ExtendedSoundGroupBlock;
+import com.chyzman.chowl.visage.mixin.BlockItemAccessor;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
@@ -53,6 +54,16 @@ public interface VisageBlockTemplate extends /* Block, */ BlockEntityProvider, E
                 if (visage.templateState == null && targetState != null) {
                     visage.templateState = targetState;
                     world.setBlockState(pos, state.with(LIGHT_LEVEL, targetState.getLuminance()));
+
+                    BlockSoundGroup blockSoundGroup = targetState.getSoundGroup();
+                    world.playSound(
+                            player,
+                            pos,
+                            ((BlockItemAccessor) blockItem).chowlVisage$getPlaceSound(targetState),
+                            SoundCategory.BLOCKS,
+                            (blockSoundGroup.getVolume() + 1.0F) / 2.0F,
+                            blockSoundGroup.getPitch() * 0.8F
+                    );
 
                     visage.markDirty();
                     return ItemActionResult.SUCCESS;

@@ -4,6 +4,7 @@
   "package": "com.chyzman.chowl.visage.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "BlockItemAccessor"
   ],
   "client": [
   ],

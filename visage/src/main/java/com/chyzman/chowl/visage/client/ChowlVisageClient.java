@@ -16,13 +16,15 @@ import static com.chyzman.chowl.visage.registry.VisageBlocks.*;
 public class ChowlVisageClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        BuiltinItemRendererRegistry.INSTANCE.register(VISAGE_BLOCK.asItem(), new RenameMeLaterItemRenderer());
-        BuiltinItemRendererRegistry.INSTANCE.register(VISAGE_STAIRS.asItem(), new RenameMeLaterItemRenderer());
-        BuiltinItemRendererRegistry.INSTANCE.register(VISAGE_SLAB.asItem(), new RenameMeLaterItemRenderer());
+        BuiltinItemRendererRegistry.INSTANCE.register(VISAGE_BLOCK.asItem(), new RenameMeLaterItemRenderer(id("block/visage_block")));
+        BuiltinItemRendererRegistry.INSTANCE.register(VISAGE_STAIRS.asItem(), new RenameMeLaterItemRenderer(id("block/visage_stairs")));
+        BuiltinItemRendererRegistry.INSTANCE.register(VISAGE_SLAB.asItem(), new RenameMeLaterItemRenderer(id("block/visage_slab")));
 
         BlockRenderLayerMap.INSTANCE.putBlock(VisageBlocks.VISAGE_BLOCK, RenderLayer.getCutout());
 
         ModelLoadingPlugin.register(ctx -> {
+            ctx.addModels(id("block/visage_block"), id("block/visage_stairs"), id("block/visage_slab"));
+
             addTemplated(
                 ctx,
                 id("block/visage_block"),
@@ -34,21 +36,21 @@ public class ChowlVisageClient implements ClientModInitializer {
                 ctx,
                 id("block/visage_stairs"),
                 id("block/visage_stairs_base"),
-                Identifier.of("minecraft:block/oak_stairs")
+                id("block/stairs")
             );
 
             addTemplated(
                 ctx,
                 id("block/visage_stairs_inner"),
                 id("block/visage_stairs_inner_base"),
-                Identifier.of("minecraft:block/oak_stairs_inner")
+                    id("block/inner_stairs")
             );
 
             addTemplated(
                 ctx,
                 id("block/visage_stairs_outer"),
                 id("block/visage_stairs_outer_base"),
-                Identifier.of("minecraft:block/oak_stairs_outer")
+                    id("block/outer_stairs")
             );
 
             addTemplated(
