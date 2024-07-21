@@ -13,7 +13,7 @@
     "###"
   ],
   "result": {
-    "item": "minecraft:cyan_wool"
+    "id": "minecraft:cyan_wool"
   },
   "show_notification": true
 }
