@@ -181,7 +181,7 @@ public class DrawerFrameBlockEntityRenderer implements BlockEntityRenderer<Drawe
 
         if (showOutlines && blockFocused && hoveredButton == null && frameOutline) {
             var shape = DrawerFrameBlock.BASE;
-            for (DrawerFrameBlockEntity.SideState sideState : entity.stacks) {
+            for (DrawerFrameSideState sideState : entity.stacks) {
                 if (!sideState.stack().isEmpty() || sideState.isBlank()) {
                     shape = VoxelShapes.union(shape, DrawerFrameBlock.SIDES[entity.stacks.indexOf(sideState)]);
                 }

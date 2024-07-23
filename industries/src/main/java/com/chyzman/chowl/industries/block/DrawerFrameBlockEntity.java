@@ -10,10 +10,8 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationContext;
-import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.ops.WorldOps;
 import io.wispforest.owo.serialization.RegistriesAttribute;
-import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.serialization.format.nbt.NbtDeserializer;
 import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -42,9 +40,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DrawerFrameBlockEntity extends TemplatableBlockEntity implements SidedStorageBlockEntity {
-    private static final Endec<List<SideState>> STACKS_ENDEC = SideState.ENDEC.listOf();
+    private static final Endec<List<DrawerFrameSideState>> STACKS_ENDEC = DrawerFrameSideState.ENDEC.listOf();
 
-    public List<SideState> stacks = new ArrayList<>(DefaultedList.ofSize(6, new SideState(ItemStack.EMPTY, 0, false)).stream().toList());
+    public List<DrawerFrameSideState> stacks = new ArrayList<>(DefaultedList.ofSize(6, new DrawerFrameSideState(ItemStack.EMPTY, 0, false)).stream().toList());
     public VoxelShape outlineShape = DrawerFrameBlock.BASE;
     public VoxelShape collisionShape = DrawerFrameBlock.BASE;
 
@@ -105,11 +103,11 @@ public class DrawerFrameBlockEntity extends TemplatableBlockEntity implements Si
     public boolean isSideBaked(int sideId) {
         var side = stacks.get(sideId);
 
-        if (templateState() != null && side.stack.getItem() instanceof PanelItem) {
-            if (!DisplayingPanelItem.getConfig(side.stack).ignoreTemplating()) return true;
+        if (templateState() != null && side.stack().getItem() instanceof PanelItem) {
+            if (!DisplayingPanelItem.getConfig(side.stack()).ignoreTemplating()) return true;
         }
 
-        return side.isBlank;
+        return side.isBlank();
     }
 
     private void updateShapes() {
@@ -122,7 +120,7 @@ public class DrawerFrameBlockEntity extends TemplatableBlockEntity implements Si
             if (!side.isEmpty()) {
                 outline |= (1 << i);
 
-                if (side.stack.getItem() != ChowlItems.PHANTOM_PANEL)
+                if (side.stack().getItem() != ChowlItems.PHANTOM_PANEL)
                     collision |= (1 << i);
             }
         }
@@ -174,8 +172,8 @@ public class DrawerFrameBlockEntity extends TemplatableBlockEntity implements Si
 
     public void tick(World world, BlockPos pos, BlockState state) {
         if (world.isClient) return;
-        for (SideState stored : stacks) {
-            if (stored.stack.isEmpty()) continue;
+        for (DrawerFrameSideState stored : stacks) {
+            if (stored.stack().isEmpty()) continue;
 
         }
     }
@@ -210,24 +208,4 @@ public class DrawerFrameBlockEntity extends TemplatableBlockEntity implements Si
 //        }
 //    }
 
-    public record SideState(ItemStack stack, int orientation, boolean isBlank) {
-        public static final Endec<SideState> ENDEC = StructEndecBuilder.of(
-            MinecraftEndecs.ITEM_STACK.fieldOf("Stack", SideState::stack),
-            Endec.INT.fieldOf("Orientation", SideState::orientation),
-            Endec.BOOLEAN.fieldOf("IsBlank", SideState::isBlank),
-            SideState::new
-        );
-
-        public static SideState empty() {
-                return new SideState(ItemStack.EMPTY, 0, false);
-            }
-
-        public SideState withStack(ItemStack stack) {
-            return new SideState(stack, orientation, isBlank);
-        }
-
-        public boolean isEmpty() {
-                return stack.isEmpty() && !isBlank;
-            }
-    }
 }

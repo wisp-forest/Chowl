@@ -22,17 +22,12 @@ import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.registry.Registries;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.state.StateManager;
@@ -121,7 +116,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
                 if (!world.isClient) {
                     player.getInventory().offerOrDrop(stack);
-                    stacks.set(side.getId(), DrawerFrameBlockEntity.SideState.empty());
+                    stacks.set(side.getId(), DrawerFrameSideState.empty());
                     drawerFrame.markDirty();
                 }
 
@@ -137,7 +132,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
                 if (!world.isClient) {
                     player.getInventory().offerOrDrop(selected);
-                    blockEntity.stacks.set(side.getId(), DrawerFrameBlockEntity.SideState.empty());
+                    blockEntity.stacks.set(side.getId(), DrawerFrameSideState.empty());
                     blockEntity.markDirty();
                 }
 
@@ -159,7 +154,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
                 if (!world.isClient) {
                     player.getInventory().offerOrDrop(selected.stack());
-                    blockEntity.stacks.set(side.getId(), DrawerFrameBlockEntity.SideState.empty());
+                    blockEntity.stacks.set(side.getId(), DrawerFrameSideState.empty());
                     blockEntity.markDirty();
                 }
 
@@ -176,7 +171,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                     if (world.isClient) return ActionResult.SUCCESS;
 
                     changed = true;
-                    blockEntity.stacks.set(i, new DrawerFrameBlockEntity.SideState(ItemStack.EMPTY, 0, true));
+                    blockEntity.stacks.set(i, new DrawerFrameSideState(ItemStack.EMPTY, 0, true));
                 }
 
                 if (changed) {
@@ -244,7 +239,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         if (!state.isOf(newState.getBlock())) {
             BlockEntity blockEntity = world.getBlockEntity(pos);
             if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
-                for (DrawerFrameBlockEntity.SideState stack : drawerFrameBlockEntity.stacks) {
+                for (DrawerFrameSideState stack : drawerFrameBlockEntity.stacks) {
                     ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), stack.stack());
                 }
             }
@@ -360,7 +355,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 if (!stackInHand.isEmpty()) {
                     if (!world.isClient) {
                         var temp = ItemOps.singleCopy(stackInHand);
-                        stacks.set(side.getId(), new DrawerFrameBlockEntity.SideState(ItemOps.singleCopy(temp), orientation, false));
+                        stacks.set(side.getId(), new DrawerFrameSideState(ItemOps.singleCopy(temp), orientation, false));
                         stackInHand.decrement(1);
                         frame.markDirty();
                         world.updateNeighbors(pos, this);
@@ -369,7 +364,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                     return ActionResult.SUCCESS;
                 } else {
                     if (!world.isClient) {
-                        stacks.set(side.getId(), new DrawerFrameBlockEntity.SideState(ItemStack.EMPTY, orientation, true));
+                        stacks.set(side.getId(), new DrawerFrameSideState(ItemStack.EMPTY, orientation, true));
                         frame.markDirty();
                         world.updateNeighbors(pos, this);
                     }

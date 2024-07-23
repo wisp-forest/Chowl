@@ -1,6 +1,7 @@
 package com.chyzman.chowl.industries.item;
 
 import com.chyzman.chowl.industries.block.DrawerFrameBlockEntity;
+import com.chyzman.chowl.industries.block.DrawerFrameSideState;
 import com.chyzman.chowl.industries.block.button.BlockButton;
 import com.chyzman.chowl.industries.item.component.*;
 import com.chyzman.chowl.industries.transfer.*;
@@ -140,7 +141,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
 
 
                         player.getInventory().offerOrDrop(stack);
-                        drawerFrame.stacks.set(side.getId(), DrawerFrameBlockEntity.SideState.empty());
+                        drawerFrame.stacks.set(side.getId(), DrawerFrameSideState.empty());
                         drawerFrame.markDirty();
                         return ActionResult.SUCCESS;
                     })
