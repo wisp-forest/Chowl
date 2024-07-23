@@ -1,5 +1,5 @@
 {
-    "item.chowl-logistics.input_access_panel": "Input Access Panel",
+    "itemGroup.chowl-core.group.tab.logistics": "Logistics",
 
-    "itemGroup.chowl-logistics.group": "Chowl Logistics"
+    "item.chowl-logistics.input_access_panel": "Input Access Panel"
 }

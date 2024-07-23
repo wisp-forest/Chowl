@@ -1,5 +1,6 @@
 package com.chyzman.chowl.industries;
 
+import com.chyzman.chowl.core.ChowlItemGroup;
 import com.chyzman.chowl.core.util.ChannelUtil;
 import com.chyzman.chowl.industries.classes.ChowlIndustriesConfig;
 import com.chyzman.chowl.industries.commands.DebugCommands;
@@ -12,7 +13,6 @@ import com.chyzman.chowl.industries.upgrade.LabelingUpgrade;
 import com.chyzman.chowl.industries.upgrade.NukeCoreUpgrade;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.itemgroup.Icon;
-import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.network.OwoNetChannel;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import net.fabricmc.api.ModInitializer;
@@ -44,21 +44,6 @@ public class Chowl implements ModInitializer {
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(ChannelUtil.getChannelId(MODID))
         .addEndecs(ServerBoundPackets::addEndecs);
 
-    public static final OwoItemGroup CHOWL_GROUP = OwoItemGroup.builder(id("group"), () -> Icon.of(ChowlBlocks.DRAWER_FRAME.asItem()))
-            .initializer(group -> {
-                group.addCustomTab(Icon.of(ChowlBlocks.DRAWER_FRAME.asItem()), "general", (context, entries) -> {
-                    entries.add(new ItemStack(ChowlBlocks.DRAWER_FRAME.asItem()));
-                    entries.add(new ItemStack(ChowlItems.DRAWER_PANEL));
-                    entries.add(new ItemStack(ChowlItems.ACCESS_PANEL));
-                    entries.add(new ItemStack(ChowlItems.MIRROR_PANEL));
-                    entries.add(new ItemStack(ChowlItems.PHANTOM_PANEL));
-                    entries.add(new ItemStack(ChowlItems.COMPRESSING_PANEL));
-                    entries.add(new ItemStack(ChowlItems.CHOWL_HANDBOOK));
-                    entries.add(new ItemStack(ChowlBlocks.CAUTION_BLOCK.asItem()));
-                }, true);
-            })
-            .build();
-
     public static Identifier id(String path) {
         return Identifier.of(MODID, path);
     }
@@ -88,6 +73,20 @@ public class Chowl implements ModInitializer {
             RandomizeCommand.register(dispatcher);
         });
 
-        CHOWL_GROUP.initialize();
+        ChowlItemGroup.proposeIcon(() -> Icon.of(ChowlBlocks.DRAWER_FRAME.asItem()), 100);
+
+        ChowlItemGroup.addInitializer(group -> {
+            group.addCustomTab(Icon.of(ChowlBlocks.DRAWER_FRAME.asItem()), "industries", (context, entries) -> {
+                entries.add(new ItemStack(ChowlBlocks.DRAWER_FRAME.asItem()));
+                entries.add(new ItemStack(ChowlItems.DRAWER_PANEL));
+                entries.add(new ItemStack(ChowlItems.ACCESS_PANEL));
+                entries.add(new ItemStack(ChowlItems.MIRROR_PANEL));
+                entries.add(new ItemStack(ChowlItems.PHANTOM_PANEL));
+                entries.add(new ItemStack(ChowlItems.COMPRESSING_PANEL));
+                entries.add(new ItemStack(ChowlItems.CHOWL_HANDBOOK));
+                entries.add(new ItemStack(ChowlBlocks.CAUTION_BLOCK.asItem()));
+            }, false);
+        }, 100);
+
     }
 }

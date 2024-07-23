@@ -29,7 +29,7 @@
     "minecraft": "${minecraft_version}",
     "owo": ">=0.12.10",
     "lavender": ">=0.1.10",
-    "chowl-industries": "${version}"
+    "chowl-core": "${version}"
   },
   "custom": {
     "modmenu": {

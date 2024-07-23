@@ -28,7 +28,8 @@
     "fabric": "*",
     "minecraft": "${minecraft_version}",
     "owo": ">=0.12.10",
-    "lavender": ">=0.1.10"
+    "lavender": ">=0.1.10",
+    "chowl-core": "${version}"
   },
   "custom": {
     "modmenu": {
