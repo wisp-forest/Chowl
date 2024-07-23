@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-@SuppressWarnings("UnstableApiUsage")
 public class PanelUpgradeRecipe extends SpecialCraftingRecipe {
     public final StoragePanelItem item;
 

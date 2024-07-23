@@ -39,7 +39,6 @@ import static com.chyzman.chowl.industries.Chowl.LABELING_UPGRADE_TAG;
 import static com.chyzman.chowl.industries.util.FormatUtil.formatCount;
 
 @Environment(EnvType.CLIENT)
-@SuppressWarnings("UnstableApiUsage")
 public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.DynamicItemRenderer {
     public static final float MAX_WIDTH = 30;
 

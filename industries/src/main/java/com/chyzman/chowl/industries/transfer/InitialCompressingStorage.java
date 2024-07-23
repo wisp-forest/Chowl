@@ -6,7 +6,6 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 
-@SuppressWarnings("UnstableApiUsage")
 public class InitialCompressingStorage implements SingleSlotStorage<ItemVariant>, FakeStorageView {
     private final SingleSlotStorage<ItemVariant> base;
 

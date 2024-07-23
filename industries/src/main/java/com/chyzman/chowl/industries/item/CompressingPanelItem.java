@@ -31,7 +31,6 @@ import java.util.List;
 
 import static com.chyzman.chowl.industries.Chowl.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public class CompressingPanelItem extends BasePanelItem implements FilteringPanelItem, LockablePanelItem, DisplayingPanelItem, StoragePanelItem, UpgradeablePanelItem {
     public CompressingPanelItem(Settings settings) {
         super(settings);
@@ -220,7 +219,6 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
         stack.set(ChowlComponents.COUNT, count);
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private class BaseStorage extends PanelStorage implements BigSingleSlotStorage<ItemVariant> {
         public BaseStorage(PanelStorageContext ctx) {
             super(ctx);

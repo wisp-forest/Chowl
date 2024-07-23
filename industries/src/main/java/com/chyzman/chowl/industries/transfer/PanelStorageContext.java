@@ -14,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-@SuppressWarnings("UnstableApiUsage")
 public interface PanelStorageContext {
     static PanelStorageContext from(DrawerFrameBlockEntity drawerFrame, Direction side) {
         return new DrawerFrameContext(drawerFrame, side);

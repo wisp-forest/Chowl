@@ -20,7 +20,6 @@ import java.util.List;
 
 import static com.chyzman.chowl.industries.Chowl.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public class DrawerPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem, UpgradeablePanelItem, StoragePanelItem {
     public DrawerPanelItem(Settings settings) {
         super(settings);
@@ -90,7 +89,6 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
         stack.set(ChowlComponents.COUNT, count);
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private class Storage extends PanelStorage implements BigSingleSlotStorage<ItemVariant> {
         public Storage(PanelStorageContext ctx) {
             super(ctx);

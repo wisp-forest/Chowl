@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 
 import java.math.BigInteger;
 
-@SuppressWarnings("UnstableApiUsage")
 public interface BigSingleSlotStorage<T> extends BigStorageView<T>, StorageView<T>, SingleSlotStorage<T> {
     BigInteger bigInsert(T resource, BigInteger maxAmount, TransactionContext transaction);
 

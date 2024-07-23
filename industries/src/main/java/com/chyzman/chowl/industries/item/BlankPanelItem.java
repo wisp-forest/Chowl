@@ -5,7 +5,6 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import org.jetbrains.annotations.Nullable;
 
-@SuppressWarnings("UnstableApiUsage")
 public class BlankPanelItem extends BasePanelItem {
     public BlankPanelItem(Settings settings) {
         super(settings);

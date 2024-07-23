@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 
 import java.math.BigInteger;
 
-@SuppressWarnings("UnstableApiUsage")
 public class CompressingStorage implements BigSingleSlotStorage<ItemVariant>, FakeStorageView {
     private final BigSingleSlotStorage<ItemVariant> base;
     private final int times;

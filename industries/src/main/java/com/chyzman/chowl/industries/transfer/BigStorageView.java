@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 
 import java.math.BigInteger;
 
-@SuppressWarnings("UnstableApiUsage")
 public interface BigStorageView<T> extends StorageView<T> {
     BigInteger bigExtract(T resource, BigInteger maxAmount, TransactionContext transaction);
 

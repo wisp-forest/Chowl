@@ -36,7 +36,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-@SuppressWarnings("UnstableApiUsage")
 public interface PanelItem {
     BlockButton STORAGE_BUTTON = new ButtonBuilder(2, 2, 14, 14)
             .onUse((world, frame, side, stack, player) -> {
@@ -117,7 +116,6 @@ public interface PanelItem {
                 }
             }).build();
 
-    @SuppressWarnings("UnstableApiUsage")
     @Nullable SlottedStorage<ItemVariant> getStorage(PanelStorageContext ctx);
 
     default @Nullable SlottedStorage<ItemVariant> getNetworkStorage(PanelStorageContext ctx) {

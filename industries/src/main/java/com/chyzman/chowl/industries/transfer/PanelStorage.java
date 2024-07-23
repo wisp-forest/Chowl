@@ -4,7 +4,6 @@ import com.chyzman.chowl.industries.event.PanelEmptiedEvent;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 import net.minecraft.item.ItemStack;
 
-@SuppressWarnings("UnstableApiUsage")
 public class PanelStorage extends SnapshotParticipant<PanelStorage.State> {
     protected final PanelStorageContext ctx;
     protected boolean needsEmptiedEvent = false;

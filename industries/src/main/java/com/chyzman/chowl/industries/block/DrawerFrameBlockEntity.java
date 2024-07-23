@@ -72,7 +72,6 @@ public class DrawerFrameBlockEntity extends TemplatableBlockEntity implements Si
         return BlockEntityUpdateS2CPacket.create(this);
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     @Override
     public @Nullable Storage<ItemVariant> getItemStorage(@Nullable Direction fromSide) {
         if (fromSide == null) {

@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import java.math.BigInteger;
 import java.util.List;
 
-@SuppressWarnings("UnstableApiUsage")
 public class CombinedSingleSlotStorage<T> implements BigSingleSlotStorage<T> {
     private final List<SingleSlotStorage<T>> components;
     private final T ofVariant;

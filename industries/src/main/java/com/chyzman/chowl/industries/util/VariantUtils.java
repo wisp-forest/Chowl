@@ -5,7 +5,6 @@ import net.minecraft.component.ComponentMap;
 import net.minecraft.component.ComponentMapImpl;
 import net.minecraft.component.DataComponentTypes;
 
-@SuppressWarnings("UnstableApiUsage")
 public final class VariantUtils {
     private VariantUtils() {
 
