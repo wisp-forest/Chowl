@@ -11,6 +11,7 @@ import com.chyzman.chowl.industries.item.component.LockablePanelItem;
 import com.chyzman.chowl.industries.item.component.PanelItem;
 import com.chyzman.chowl.industries.item.component.UpgradeablePanelItem;
 import com.chyzman.chowl.industries.pond.ShapeContextExtended;
+import com.chyzman.chowl.industries.registry.ChowlComponents;
 import com.chyzman.chowl.industries.registry.ChowlItems;
 import com.chyzman.chowl.industries.transfer.BigStorageView;
 import com.chyzman.chowl.industries.transfer.PanelStorageContext;
@@ -511,35 +512,34 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     @Override
     public BlockState getParticleState(World world, BlockPos pos, BlockState state) {
         if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame)) return state;
-        if (frame.templateState == null) return state;
+        if (frame.templateState() == null) return state;
 
-        return frame.templateState;
+        return frame.templateState();
     }
 
     @Override
     public BlockSoundGroup getSoundGroup(World world, BlockPos pos, BlockState state) {
         if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame)) return getSoundGroup(state);
-        if (frame.templateState == null) return getSoundGroup(state);
+        if (frame.templateState() == null) return getSoundGroup(state);
 
-        return frame.templateState.getSoundGroup();
+        return frame.templateState().getSoundGroup();
     }
 
     @Override
     public BlockSoundGroup getSoundGroup(World world, BlockPos pos, BlockState state, ItemStack stack) {
-        NbtComponent data = stack.get(DataComponentTypes.BLOCK_ENTITY_DATA);
+        BlockState templateState = stack.get(ChowlComponents.TEMPLATE_STATE);
 
-        if (data == null) return getSoundGroup(state);
-        if (!data.getNbt().contains("TemplateState", NbtElement.COMPOUND_TYPE)) return getSoundGroup(state);
+        if (templateState == null) return getSoundGroup(state);
 
-        return NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), data.getNbt().getCompound("TemplateState")).getSoundGroup();
+        return templateState.getSoundGroup();
     }
 
     @Override
     public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
         if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame
-            && !(frame.templateState == null)
-            && frame.templateState != state) {
-            frame.templateState.getBlock().randomDisplayTick(frame.templateState, world, pos, random);
+            && !(frame.templateState() == null)
+            && frame.templateState() != state) {
+            frame.templateState().getBlock().randomDisplayTick(frame.templateState(), world, pos, random);
         } else {
             super.randomDisplayTick(state, world, pos, random);
         }
@@ -547,16 +547,16 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
     @Override
     public boolean isTransparent(BlockState state, BlockView world, BlockPos pos) {
-        if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame && !(frame.templateState == null)) {
-            return frame.templateState.isTransparent(world, pos);
+        if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame && !(frame.templateState() == null)) {
+            return frame.templateState().isTransparent(world, pos);
         }
         return super.isTransparent(state, world, pos);
     }
 
     @Override
     public float calcMaskedBlockBreakingDelta(BlockState state, PlayerEntity player, BlockView world, BlockPos pos) {
-        if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame && frame.templateState != null) {
-            return frame.templateState.calcBlockBreakingDelta(player, world, pos);
+        if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame && frame.templateState() != null) {
+            return frame.templateState().calcBlockBreakingDelta(player, world, pos);
         }
 
         return calcBlockBreakingDelta(state, player, world, pos);

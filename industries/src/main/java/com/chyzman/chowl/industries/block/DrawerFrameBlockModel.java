@@ -5,6 +5,7 @@ package com.chyzman.chowl.industries.block;
 
 import com.chyzman.chowl.industries.client.RenderGlobals;
 import com.chyzman.chowl.industries.client.RetextureInfo;
+import com.chyzman.chowl.industries.registry.ChowlComponents;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
@@ -68,8 +69,7 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
 
     @Override
     public void emitItemQuads(ItemStack stack, Supplier<Random> randomSupplier, RenderContext context) {
-        var frame = RenderGlobals.DRAWER_FRAME.get();
-        BlockState template = frame != null ? frame.templateState : null;
+        BlockState template = stack.get(ChowlComponents.TEMPLATE_STATE);
 
         if (template != null) {
             var info = RetextureInfo.get(template);
@@ -78,6 +78,7 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
 
         super.emitItemQuads(stack, randomSupplier, context);
 
+        var frame = RenderGlobals.DRAWER_FRAME.get();
         if (frame != null) {
             for (int sideId = 0; sideId < 6; sideId++) {
                 Direction side = Direction.byId(sideId);

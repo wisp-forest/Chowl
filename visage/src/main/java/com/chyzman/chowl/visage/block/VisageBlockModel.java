@@ -3,7 +3,7 @@
 
 package com.chyzman.chowl.visage.block;
 
-import com.chyzman.chowl.visage.client.RenderGlobals;
+import com.chyzman.chowl.industries.registry.ChowlComponents;
 import com.chyzman.chowl.industries.client.RetextureInfo;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
@@ -57,8 +57,7 @@ public class VisageBlockModel extends ForwardingBakedModel {
 
     @Override
     public void emitItemQuads(ItemStack stack, Supplier<Random> randomSupplier, RenderContext context) {
-        var visage = RenderGlobals.VISAGE.get();
-        BlockState template = visage != null ? visage.templateState : null;
+        BlockState template = stack.get(ChowlComponents.TEMPLATE_STATE);
 
         if (template != null) {
             var info = RetextureInfo.get(template);

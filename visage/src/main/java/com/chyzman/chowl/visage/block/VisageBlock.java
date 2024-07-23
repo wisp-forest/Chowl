@@ -66,9 +66,9 @@ public class VisageBlock extends Block implements VisageBlockTemplate {
     @Override
     public boolean isTransparent(BlockState state, BlockView world, BlockPos pos) {
         if (world.getBlockEntity(pos) instanceof VisageBlockEntity visage &&
-            !(visage.templateState == null) &&
-            !(visage.templateState.getBlock() instanceof VisageBlockTemplate)) {
-            return visage.templateState.isTransparent(world, pos);
+            !(visage.templateState() == null) &&
+            !(visage.templateState().getBlock() instanceof VisageBlockTemplate)) {
+            return visage.templateState().isTransparent(world, pos);
         }
         return super.isTransparent(state, world, pos);
     }

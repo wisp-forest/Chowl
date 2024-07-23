@@ -3,6 +3,7 @@ package com.chyzman.chowl.visage.block;
 import com.chyzman.chowl.industries.block.BreakProgressMaskingBlock;
 import com.chyzman.chowl.industries.block.ExtendedParticleSpriteBlock;
 import com.chyzman.chowl.industries.block.ExtendedSoundGroupBlock;
+import com.chyzman.chowl.industries.registry.ChowlComponents;
 import com.chyzman.chowl.visage.mixin.BlockItemAccessor;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.BlockEntityProvider;
@@ -51,9 +52,11 @@ public interface VisageBlockTemplate extends /* Block, */ BlockEntityProvider, E
         if (world.getBlockEntity(pos) instanceof VisageBlockEntity visage) {
             if (stack.getItem() instanceof BlockItem blockItem && !(blockItem.getBlock() instanceof VisageBlockTemplate)) {
                 var targetState = blockItem.getBlock().getPlacementState(new ItemPlacementContext(player, hand, stack, hit));
-                if (visage.templateState == null && targetState != null) {
-                    visage.templateState = targetState;
-                    world.setBlockState(pos, state.with(LIGHT_LEVEL, targetState.getLuminance()));
+
+                if (targetState != null) targetState = blockItem.getBlock().getDefaultState();
+
+                if (visage.templateState() == null) {
+                    visage.setTemplateState(targetState);
 
                     BlockSoundGroup blockSoundGroup = targetState.getSoundGroup();
                     world.playSound(
@@ -65,19 +68,18 @@ public interface VisageBlockTemplate extends /* Block, */ BlockEntityProvider, E
                             blockSoundGroup.getPitch() * 0.8F
                     );
 
-                    visage.markDirty();
                     return ItemActionResult.SUCCESS;
                 }
             } else if (stack.getItem() instanceof AxeItem) {
-                if (visage.templateState != null) {
-                    visage.templateState = null;
-                    world.setBlockState(pos, state.with(LIGHT_LEVEL, 0));
+                if (visage.templateState() != null) {
+                    visage.setTemplateState(null);
+
                     if (player instanceof ServerPlayerEntity serverPlayerEntity) Criteria.ITEM_USED_ON_BLOCK.trigger(serverPlayerEntity, pos, stack);
+
                     world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(player, state));
                     world.playSound(player, pos, SoundEvents.ITEM_AXE_STRIP, SoundCategory.BLOCKS, 1.0F, 1.0F);
                     stack.damage(1, player, LivingEntity.getSlotForHand(hand));
 
-                    visage.markDirty();
                     return ItemActionResult.SUCCESS;
 
                 }
@@ -89,44 +91,43 @@ public interface VisageBlockTemplate extends /* Block, */ BlockEntityProvider, E
     @Override
     default BlockState getParticleState(World world, BlockPos pos, BlockState state) {
         if (!(world.getBlockEntity(pos) instanceof VisageBlockEntity visage)) return state;
-        if (visage.templateState == null) return state;
+        if (visage.templateState() == null) return state;
 
-        return visage.templateState;
+        return visage.templateState();
     }
 
     @Override
     default BlockSoundGroup getSoundGroup(World world, BlockPos pos, BlockState state) {
         if (!(world.getBlockEntity(pos) instanceof VisageBlockEntity visage)) return state.getSoundGroup();
-        if (visage.templateState == null) return state.getSoundGroup();
+        if (visage.templateState() == null) return state.getSoundGroup();
 
-        return visage.templateState.getSoundGroup();
+        return visage.templateState().getSoundGroup();
     }
 
     @Override
     default BlockSoundGroup getSoundGroup(World world, BlockPos pos, BlockState state, ItemStack stack) {
-        NbtComponent data = stack.get(DataComponentTypes.BLOCK_ENTITY_DATA);
+        BlockState templateState = stack.get(ChowlComponents.TEMPLATE_STATE);
 
-        if (data == null) return state.getSoundGroup();
-        if (!data.getNbt().contains("TemplateState", NbtElement.COMPOUND_TYPE)) return state.getSoundGroup();
+        if (templateState == null) return state.getSoundGroup();
 
-        return NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), data.getNbt().getCompound("TemplateState")).getSoundGroup();
+        return templateState.getSoundGroup();
     }
 
     default void doRandomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
         if (world.getBlockEntity(pos) instanceof VisageBlockEntity visage
-            && !(visage.templateState == null)
-            && visage.templateState != state
-            && !(visage.templateState.getBlock() instanceof VisageBlockTemplate)) {
-            visage.templateState.getBlock().randomDisplayTick(visage.templateState, world, pos, random);
+            && !(visage.templateState() == null)
+            && visage.templateState() != state
+            && !(visage.templateState().getBlock() instanceof VisageBlockTemplate)) {
+            visage.templateState().getBlock().randomDisplayTick(visage.templateState(), world, pos, random);
         }
     }
 
     @Override
     default float calcMaskedBlockBreakingDelta(BlockState state, PlayerEntity player, BlockView world, BlockPos pos) {
         if (world.getBlockEntity(pos) instanceof VisageBlockEntity visage &&
-            visage.templateState != null &&
-            !(visage.templateState.getBlock() instanceof VisageBlockTemplate)) {
-            return visage.templateState.calcBlockBreakingDelta(player, world, pos);
+            visage.templateState() != null &&
+            !(visage.templateState().getBlock() instanceof VisageBlockTemplate)) {
+            return visage.templateState().calcBlockBreakingDelta(player, world, pos);
         }
 
         return state.calcBlockBreakingDelta(player, world, pos);

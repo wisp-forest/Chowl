@@ -27,7 +27,11 @@ public class DrawerFrameItemRenderer implements BuiltinItemRendererRegistry.Dyna
         try (var ignored = RenderGlobals.enterRender()) {
             var state = ((BlockItem) stack.getItem()).getBlock().getDefaultState();
             var blockEntity = new DrawerFrameBlockEntity(BlockPos.ORIGIN, state);
-            stack.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT).applyToBlockEntity(blockEntity, MinecraftClient.getInstance().player.getRegistryManager());
+
+            stack.getOrDefault(DataComponentTypes.BLOCK_ENTITY_DATA, NbtComponent.DEFAULT)
+                .applyToBlockEntity(blockEntity, MinecraftClient.getInstance().player.getRegistryManager());
+
+            blockEntity.readComponents(stack);
 
             try {
                 RenderGlobals.DRAWER_FRAME.set(blockEntity);

@@ -1,6 +1,5 @@
 package com.chyzman.chowl.industries.block;
 
-import com.chyzman.chowl.industries.client.ChowlClient;
 import com.chyzman.chowl.industries.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.industries.item.component.PanelItem;
 import com.chyzman.chowl.industries.registry.ChowlBlocks;
@@ -23,16 +22,13 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
@@ -45,11 +41,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageBlockEntity {
+public class DrawerFrameBlockEntity extends TemplatableBlockEntity implements SidedStorageBlockEntity {
     private static final Endec<List<SideState>> STACKS_ENDEC = SideState.ENDEC.listOf();
 
     public List<SideState> stacks = new ArrayList<>(DefaultedList.ofSize(6, new SideState(ItemStack.EMPTY, 0, false)).stream().toList());
-    public BlockState templateState = null;
     public VoxelShape outlineShape = DrawerFrameBlock.BASE;
     public VoxelShape collisionShape = DrawerFrameBlock.BASE;
 
@@ -110,7 +105,7 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
     public boolean isSideBaked(int sideId) {
         var side = stacks.get(sideId);
 
-        if (templateState != null && side.stack.getItem() instanceof PanelItem) {
+        if (templateState() != null && side.stack.getItem() instanceof PanelItem) {
             if (!DisplayingPanelItem.getConfig(side.stack).ignoreTemplating()) return true;
         }
 
@@ -145,13 +140,9 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
             var possible = pos.offset(Direction.byId(i));
 
             if (!(world.getBlockEntity(possible) instanceof DrawerFrameBlockEntity other)) continue;
-            if (other.templateState == templateState) continue;
+            if (other.templateState() == templateState()) continue;
 
-            other.templateState = templateState;
-
-            world.setBlockState(possible, world.getBlockState(possible)
-                .with(DrawerFrameBlock.LIGHT_LEVEL, templateState != null ? templateState.getLuminance() : 0));
-            other.markDirty();
+            other.setTemplateState(templateState());
             other.scheduleSpreadTemplate();
         }
     }
@@ -171,35 +162,14 @@ public class DrawerFrameBlockEntity extends BlockEntity implements SidedStorageB
         var nbtList = nbt.getList("Inventory", NbtElement.COMPOUND_TYPE);
         stacks = STACKS_ENDEC.decodeFully(SerializationContext.attributes(RegistriesAttribute.of((DynamicRegistryManager) registryLookup)), NbtDeserializer::of, nbtList);
 
-        if (nbt.contains("TemplateState", NbtElement.COMPOUND_TYPE)) {
-            templateState = NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), nbt.getCompound("TemplateState"));
-        } else {
-            templateState = null;
-        }
-
-        if (world != null && world.isClient) {
-            ChowlClient.reloadPos(world, pos);
-        }
-
         updateShapes();
     }
 
     @Override
     public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.writeNbt(nbt, registryLookup);
-        writePanelsToNbt(stacks, nbt, registryLookup);
 
-        if (templateState != null)
-            nbt.put("TemplateState", NbtHelper.fromBlockState(templateState));
-    }
-
-    public static void writePanelsToNbt(List<SideState> panels, NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        nbt.put("Inventory", STACKS_ENDEC.encodeFully(SerializationContext.attributes(RegistriesAttribute.of((DynamicRegistryManager) registryLookup)), NbtSerializer::of, panels));
-    }
-
-    @Override
-    public @Nullable Object getRenderData() {
-        return templateState;
+        nbt.put("Inventory", STACKS_ENDEC.encodeFully(SerializationContext.attributes(RegistriesAttribute.of((DynamicRegistryManager) registryLookup)), NbtSerializer::of, stacks));
     }
 
     public void tick(World world, BlockPos pos, BlockState state) {

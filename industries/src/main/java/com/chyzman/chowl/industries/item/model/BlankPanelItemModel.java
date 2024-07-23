@@ -37,12 +37,12 @@ public class BlankPanelItemModel extends ForwardingBakedModel {
         if (RenderGlobals.BAKED.get() == Boolean.TRUE) return;
 
         DrawerFrameBlockEntity drawerFrame = RenderGlobals.DRAWER_FRAME.get();
-        if (drawerFrame == null || drawerFrame.templateState == null) {
+        if (drawerFrame == null || drawerFrame.templateState() == null) {
             super.emitItemQuads(stack, randomSupplier, context);
             return;
         }
 
-        var info = RetextureInfo.get(drawerFrame.templateState);
+        var info = RetextureInfo.get(drawerFrame.templateState());
         var world = RenderGlobals.FRAME_WORLD.get();
         var pos = RenderGlobals.FRAME_POS.get();
 
