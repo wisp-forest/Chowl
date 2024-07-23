@@ -3,12 +3,12 @@ package com.chyzman.chowl.industries.block;
 import com.chyzman.chowl.industries.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.industries.item.component.PanelItem;
 import com.chyzman.chowl.industries.registry.ChowlBlocks;
+import com.chyzman.chowl.industries.registry.ChowlComponents;
 import com.chyzman.chowl.industries.registry.ChowlItems;
 import com.chyzman.chowl.industries.transfer.PanelStorageContext;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import io.wispforest.endec.Endec;
 import io.wispforest.endec.SerializationContext;
 import io.wispforest.owo.ops.WorldOps;
 import io.wispforest.owo.serialization.RegistriesAttribute;
@@ -20,7 +20,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
+import net.minecraft.component.ComponentMap;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.network.listener.ClientPlayPacketListener;
@@ -40,9 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DrawerFrameBlockEntity extends TemplatableBlockEntity implements SidedStorageBlockEntity {
-    private static final Endec<List<DrawerFrameSideState>> STACKS_ENDEC = DrawerFrameSideState.ENDEC.listOf();
-
-    public List<DrawerFrameSideState> stacks = new ArrayList<>(DefaultedList.ofSize(6, new DrawerFrameSideState(ItemStack.EMPTY, 0, false)).stream().toList());
+    public List<DrawerFrameSideState> stacks = new ArrayList<>(DefaultedList.ofSize(6, DrawerFrameSideState.empty()).stream().toList());
     public VoxelShape outlineShape = DrawerFrameBlock.BASE;
     public VoxelShape collisionShape = DrawerFrameBlock.BASE;
 
@@ -158,7 +156,11 @@ public class DrawerFrameBlockEntity extends TemplatableBlockEntity implements Si
         super.readNbt(nbt, registryLookup);
 
         var nbtList = nbt.getList("Inventory", NbtElement.COMPOUND_TYPE);
-        stacks = STACKS_ENDEC.decodeFully(SerializationContext.attributes(RegistriesAttribute.of((DynamicRegistryManager) registryLookup)), NbtDeserializer::of, nbtList);
+        stacks = DrawerFrameSideState.LIST_ENDEC.decodeFully(
+            SerializationContext.attributes(RegistriesAttribute.of((DynamicRegistryManager) registryLookup)),
+            NbtDeserializer::of,
+            nbtList
+        );
 
         updateShapes();
     }
@@ -167,7 +169,12 @@ public class DrawerFrameBlockEntity extends TemplatableBlockEntity implements Si
     public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         super.writeNbt(nbt, registryLookup);
 
-        nbt.put("Inventory", STACKS_ENDEC.encodeFully(SerializationContext.attributes(RegistriesAttribute.of((DynamicRegistryManager) registryLookup)), NbtSerializer::of, stacks));
+        nbt.put("Inventory", DrawerFrameSideState.LIST_ENDEC
+            .encodeFully(
+                SerializationContext.attributes(RegistriesAttribute.of((DynamicRegistryManager) registryLookup)),
+                NbtSerializer::of,
+                stacks
+            ));
     }
 
     public void tick(World world, BlockPos pos, BlockState state) {
@@ -176,6 +183,31 @@ public class DrawerFrameBlockEntity extends TemplatableBlockEntity implements Si
             if (stored.stack().isEmpty()) continue;
 
         }
+    }
+
+    @Override
+    protected void addComponents(ComponentMap.Builder components) {
+        super.addComponents(components);
+
+        components.add(ChowlComponents.DRAWER_FRAME_SIDES, DrawerFrameSideState.copyList(stacks));
+    }
+
+    @Override
+    protected void readComponents(ComponentsAccess components) {
+        super.readComponents(components);
+
+        var sidesComponent = components.get(ChowlComponents.DRAWER_FRAME_SIDES);
+
+        if (sidesComponent != null) {
+            stacks = DrawerFrameSideState.copyList(sidesComponent);
+        }
+    }
+
+    @Override
+    public void removeFromCopiedStackNbt(NbtCompound nbt) {
+        super.removeFromCopiedStackNbt(nbt);
+
+        nbt.remove("Inventory");
     }
 
 //    @Override

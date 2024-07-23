@@ -54,6 +54,7 @@ public abstract class TemplatableBlockEntity extends BlockEntity {
         return templateState;
     }
 
+    @MustBeInvokedByOverriders
     @Override
     protected void addComponents(ComponentMap.Builder components) {
         if (templateState != null) {
@@ -61,11 +62,13 @@ public abstract class TemplatableBlockEntity extends BlockEntity {
         }
     }
 
+    @MustBeInvokedByOverriders
     @Override
     protected void readComponents(ComponentsAccess components) {
         templateState = components.get(ChowlComponents.TEMPLATE_STATE);
     }
 
+    @MustBeInvokedByOverriders
     @SuppressWarnings("deprecation")
     @Override
     public void removeFromCopiedStackNbt(NbtCompound nbt) {
