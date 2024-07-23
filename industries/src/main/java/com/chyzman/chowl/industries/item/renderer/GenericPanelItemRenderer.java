@@ -1,5 +1,6 @@
 package com.chyzman.chowl.industries.item.renderer;
 
+import com.chyzman.chowl.core.client.util.RenderCounter;
 import com.chyzman.chowl.industries.client.RenderGlobals;
 import com.chyzman.chowl.industries.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.industries.item.component.UpgradeablePanelItem;
@@ -50,9 +51,9 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
 
     @Override
     public void render(ItemStack stack, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        if (!RenderGlobals.shouldRender()) return;
+        if (!RenderCounter.shouldRender()) return;
 
-        try (var ignored = RenderGlobals.enterRender()) {
+        try (var ignored = RenderCounter.enterRender()) {
             var client = MinecraftClient.getInstance();
 
             matrices.translate(0.5, 0.5, 0.5);

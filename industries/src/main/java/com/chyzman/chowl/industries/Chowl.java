@@ -1,5 +1,6 @@
 package com.chyzman.chowl.industries;
 
+import com.chyzman.chowl.core.util.ChannelUtil;
 import com.chyzman.chowl.industries.classes.ChowlIndustriesConfig;
 import com.chyzman.chowl.industries.commands.DebugCommands;
 import com.chyzman.chowl.industries.commands.RandomizeCommand;
@@ -40,7 +41,7 @@ public class Chowl implements ModInitializer {
     public static final TagKey<Item> BLAST_PROOF_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("blast_proof_panel_upgrade"));
 
 
-    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(id(getChannelVersion()))
+    public static final OwoNetChannel CHANNEL = OwoNetChannel.create(ChannelUtil.getChannelId(MODID))
         .addEndecs(ServerBoundPackets::addEndecs);
 
     public static final OwoItemGroup CHOWL_GROUP = OwoItemGroup.builder(id("group"), () -> Icon.of(ChowlBlocks.DRAWER_FRAME.asItem()))
@@ -88,18 +89,5 @@ public class Chowl implements ModInitializer {
         });
 
         CHOWL_GROUP.initialize();
-    }
-
-    private static String getChannelVersion() {
-        String v = FabricLoader.getInstance()
-            .getModContainer("chowl-industries")
-            .orElseThrow()
-            .getMetadata()
-            .getVersion()
-            .getFriendlyString();
-
-        int plusIndex = v.indexOf('+');
-
-        return v.substring(0, plusIndex);
     }
 }

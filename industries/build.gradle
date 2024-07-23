@@ -1,4 +1,7 @@
 dependencies {
+    api project(path: ":core", configuration: "namedElements")
+    include project(":core")
+
     modCompileOnly "maven.modrinth:sodium:${project.sodium_version}"
 
     modCompileOnly "maven.modrinth:mythicmetals:${project.mythicmetals_version}"

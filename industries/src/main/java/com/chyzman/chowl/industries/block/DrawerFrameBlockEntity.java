@@ -1,5 +1,6 @@
 package com.chyzman.chowl.industries.block;
 
+import com.chyzman.chowl.core.blockentity.TemplatableBlockEntity;
 import com.chyzman.chowl.industries.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.industries.item.component.PanelItem;
 import com.chyzman.chowl.industries.registry.ChowlBlocks;

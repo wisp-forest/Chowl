@@ -1,25 +1,20 @@
 package com.chyzman.chowl.visage.block;
 
-import com.chyzman.chowl.industries.block.BreakProgressMaskingBlock;
-import com.chyzman.chowl.industries.block.ExtendedParticleSpriteBlock;
-import com.chyzman.chowl.industries.block.ExtendedSoundGroupBlock;
-import com.chyzman.chowl.industries.registry.ChowlComponents;
+import com.chyzman.chowl.core.ext.BreakProgressMaskingBlock;
+import com.chyzman.chowl.core.ext.ExtendedParticleSpriteBlock;
+import com.chyzman.chowl.core.ext.ExtendedSoundGroupBlock;
+import com.chyzman.chowl.core.registry.ChowlCoreComponents;
 import com.chyzman.chowl.visage.mixin.BlockItemAccessor;
 import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
@@ -106,7 +101,7 @@ public interface VisageBlockTemplate extends /* Block, */ BlockEntityProvider, E
 
     @Override
     default BlockSoundGroup getSoundGroup(World world, BlockPos pos, BlockState state, ItemStack stack) {
-        BlockState templateState = stack.get(ChowlComponents.TEMPLATE_STATE);
+        BlockState templateState = stack.get(ChowlCoreComponents.TEMPLATE_STATE);
 
         if (templateState == null) return state.getSoundGroup();
 

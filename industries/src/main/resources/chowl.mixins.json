@@ -5,24 +5,15 @@
   "plugin": "com.chyzman.chowl.industries.asm.ChowlMixinPlugin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "BlockItemMixin",
-    "ComparatorBlockMixin",
-    "EntityMixin",
     "EntityShapeContextMixin",
     "ItemEntityMixin",
-    "LivingEntityMixin",
-    "PlayerEntityMixin",
     "ServerWorldMixin",
     "ShapeContextMixin",
     "lavender.EntryMixin"
   ],
   "client": [
-    "client.ClientPlayerInteractionManagerMixin",
     "client.ClientPlayNetworkHandlerMixin",
     "client.HeldItemRendererMixin",
-    "client.MinecraftClientMixin",
-    "client.ParticleManagerMixin",
-    "client.WorldRendererMixin",
     "client.sodium.AABBConstructingVertexConsumerMixin",
     "lavender.LandingPageSupplierMixin",
     "lavender.PageSupplierMixin"

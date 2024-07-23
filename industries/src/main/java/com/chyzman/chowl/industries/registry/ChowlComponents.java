@@ -8,8 +8,6 @@ import com.mojang.serialization.Codec;
 import io.wispforest.owo.registration.reflect.AutoRegistryContainer;
 import io.wispforest.owo.serialization.CodecUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.component.ComponentType;
 import net.minecraft.item.Item;
 import net.minecraft.network.codec.PacketCodecs;
@@ -19,7 +17,6 @@ import net.minecraft.registry.RegistryKeys;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Optional;
 
 public class ChowlComponents implements AutoRegistryContainer<ComponentType<?>> {
     public static final ComponentType<DisplayingPanelConfig> DISPLAYING_CONFIG = ComponentType.<DisplayingPanelConfig>builder()
@@ -60,11 +57,6 @@ public class ChowlComponents implements AutoRegistryContainer<ComponentType<?>> 
     public static final ComponentType<UpgradeListComponent> UPGRADE_LIST = ComponentType.<UpgradeListComponent>builder()
         .codec(CodecUtils.toCodec(UpgradeListComponent.ENDEC))
         .packetCodec(CodecUtils.toPacketCodec(UpgradeListComponent.ENDEC))
-        .build();
-
-    public static final ComponentType<BlockState> TEMPLATE_STATE = ComponentType.<BlockState>builder()
-        .codec(BlockState.CODEC)
-        .packetCodec(PacketCodecs.entryOf(Block.STATE_IDS))
         .build();
 
     public static final ComponentType<List<DrawerFrameSideState>> DRAWER_FRAME_SIDES = ComponentType.<List<DrawerFrameSideState>>builder()

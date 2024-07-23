@@ -1,0 +1,8 @@
+{
+    "itemGroup.chowl-core.group": "Chowl™",
+
+    "text.config.chowl-core.option.max_ticks_for_double_click": "Maximum ticks for double click",
+    "text.config.chowl-core.option.max_ticks_for_double_click.tooltip": "Maximum ticks between two clicks for the second to count as a double click",
+    "text.config.chowl-core.option.recursive_rendering_limit": "Recursive rendering limit",
+    "text.config.chowl-core.option.recursive_rendering_limit.tooltip": "Maximum amount of times panels and frames can be rendered inside one another"
+}

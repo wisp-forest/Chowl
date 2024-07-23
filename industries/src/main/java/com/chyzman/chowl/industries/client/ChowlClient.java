@@ -1,5 +1,6 @@
 package com.chyzman.chowl.industries.client;
 
+import com.chyzman.chowl.core.client.DoubleClickTracker;
 import com.chyzman.chowl.industries.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.industries.block.DrawerFrameBlockEntityRenderer;
 import com.chyzman.chowl.industries.block.DrawerFrameBlockModel;
@@ -70,14 +71,6 @@ public class ChowlClient implements ClientModInitializer {
                 }
             });
         });
-    }
-
-    public static void reloadPos(World world, BlockPos pos) {
-        MinecraftClient client = MinecraftClient.getInstance();
-
-        if (world == client.world) {
-            client.worldRenderer.scheduleBlockRender(pos.getX() >> 4, pos.getY() >> 4, pos.getZ() >> 4);
-        }
     }
 
     public static ItemStack getDrawerFramePickStack(BlockView world, BlockPos pos, BlockState state, Function<BlockState, ItemStack> original) {

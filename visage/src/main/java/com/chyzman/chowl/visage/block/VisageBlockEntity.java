@@ -1,6 +1,6 @@
 package com.chyzman.chowl.visage.block;
 
-import com.chyzman.chowl.industries.block.TemplatableBlockEntity;
+import com.chyzman.chowl.core.blockentity.TemplatableBlockEntity;
 import com.chyzman.chowl.visage.registry.VisageBlocks;
 import io.wispforest.owo.ops.WorldOps;
 import net.minecraft.block.BlockState;

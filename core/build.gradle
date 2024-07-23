@@ -1,0 +1,3 @@
+dependencies {
+    modCompileOnly "maven.modrinth:sodium:${project.sodium_version}"
+}

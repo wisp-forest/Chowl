@@ -1,5 +1,6 @@
 package com.chyzman.chowl.industries.item.renderer;
 
+import com.chyzman.chowl.core.client.util.RenderCounter;
 import com.chyzman.chowl.industries.block.DrawerFrameBlockEntity;
 import com.chyzman.chowl.industries.block.DrawerFrameBlockEntityRenderer;
 import com.chyzman.chowl.industries.client.RenderGlobals;
@@ -22,9 +23,9 @@ import static com.chyzman.chowl.industries.Chowl.id;
 public class DrawerFrameItemRenderer implements BuiltinItemRendererRegistry.DynamicItemRenderer {
     @Override
     public void render(ItemStack stack, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        if (!RenderGlobals.shouldRender()) return;
+        if (!RenderCounter.shouldRender()) return;
 
-        try (var ignored = RenderGlobals.enterRender()) {
+        try (var ignored = RenderCounter.enterRender()) {
             var state = ((BlockItem) stack.getItem()).getBlock().getDefaultState();
             var blockEntity = new DrawerFrameBlockEntity(BlockPos.ORIGIN, state);
 

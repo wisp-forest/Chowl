@@ -3,9 +3,9 @@
 
 package com.chyzman.chowl.industries.block;
 
+import com.chyzman.chowl.core.registry.ChowlCoreComponents;
 import com.chyzman.chowl.industries.client.RenderGlobals;
-import com.chyzman.chowl.industries.client.RetextureInfo;
-import com.chyzman.chowl.industries.registry.ChowlComponents;
+import com.chyzman.chowl.core.client.RetextureInfo;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
@@ -69,7 +69,7 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
 
     @Override
     public void emitItemQuads(ItemStack stack, Supplier<Random> randomSupplier, RenderContext context) {
-        BlockState template = stack.get(ChowlComponents.TEMPLATE_STATE);
+        BlockState template = stack.get(ChowlCoreComponents.TEMPLATE_STATE);
 
         if (template != null) {
             var info = RetextureInfo.get(template);

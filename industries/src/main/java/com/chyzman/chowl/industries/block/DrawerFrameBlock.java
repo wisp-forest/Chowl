@@ -1,17 +1,18 @@
 package com.chyzman.chowl.industries.block;
 
+import com.chyzman.chowl.core.ext.*;
+import com.chyzman.chowl.core.registry.ChowlCoreComponents;
 import com.chyzman.chowl.industries.block.button.BlockButton;
 import com.chyzman.chowl.industries.block.button.BlockButtonProvider;
 import com.chyzman.chowl.industries.block.button.ButtonRenderCondition;
 import com.chyzman.chowl.industries.block.button.ButtonRenderer;
-import com.chyzman.chowl.industries.classes.AttackInteractionReceiver;
+import com.chyzman.chowl.core.ext.AttackInteractionReceiver;
 import com.chyzman.chowl.industries.graph.ServerGraphStore;
 import com.chyzman.chowl.industries.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.industries.item.component.LockablePanelItem;
 import com.chyzman.chowl.industries.item.component.PanelItem;
 import com.chyzman.chowl.industries.item.component.UpgradeablePanelItem;
 import com.chyzman.chowl.industries.pond.ShapeContextExtended;
-import com.chyzman.chowl.industries.registry.ChowlComponents;
 import com.chyzman.chowl.industries.registry.ChowlItems;
 import com.chyzman.chowl.industries.transfer.BigStorageView;
 import com.chyzman.chowl.industries.transfer.PanelStorageContext;
@@ -522,7 +523,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
     @Override
     public BlockSoundGroup getSoundGroup(World world, BlockPos pos, BlockState state, ItemStack stack) {
-        BlockState templateState = stack.get(ChowlComponents.TEMPLATE_STATE);
+        BlockState templateState = stack.get(ChowlCoreComponents.TEMPLATE_STATE);
 
         if (templateState == null) return getSoundGroup(state);
 

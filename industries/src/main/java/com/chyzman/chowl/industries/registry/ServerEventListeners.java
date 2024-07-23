@@ -3,7 +3,7 @@ package com.chyzman.chowl.industries.registry;
 import com.chyzman.chowl.industries.Chowl;
 import com.chyzman.chowl.industries.block.DrawerFrameBlock;
 import com.chyzman.chowl.industries.block.DrawerFrameBlockEntity;
-import com.chyzman.chowl.industries.event.DoubleClickEvent;
+import com.chyzman.chowl.core.event.DoubleClickEvent;
 import com.chyzman.chowl.industries.util.CompressionManager;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;

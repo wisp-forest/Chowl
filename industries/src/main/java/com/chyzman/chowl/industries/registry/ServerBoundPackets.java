@@ -1,7 +1,7 @@
 package com.chyzman.chowl.industries.registry;
 
-import com.chyzman.chowl.industries.block.DoubleClickableBlock;
-import com.chyzman.chowl.industries.classes.AttackInteractionReceiver;
+import com.chyzman.chowl.core.ext.AttackInteractionReceiver;
+import com.chyzman.chowl.core.network.AttackInteractionC2SPacket;
 import com.chyzman.chowl.industries.graph.DestroyGraphPacket;
 import com.chyzman.chowl.industries.graph.SyncGraphPacket;
 import com.chyzman.chowl.industries.item.component.DisplayingPanelConfig;
@@ -17,38 +17,6 @@ import static com.chyzman.chowl.industries.Chowl.CHANNEL;
 
 public class ServerBoundPackets {
     public static void init() {
-        CHANNEL.registerServerbound(AttackInteractionReceiver.InteractionPacket.class, (message, access) -> {
-            var player = access.player();
-            var world = player.getWorld();
-            BlockPos pos = message.hitResult().getBlockPos();
-
-            var state = world.getBlockState(pos);
-            if (!(state.getBlock() instanceof AttackInteractionReceiver receiver)) return;
-
-            if (!CommonProtection.canInteractBlock(world, pos, player.getGameProfile(), player)) {
-                // TODO: tell client interaction failed.
-                return;
-            }
-
-            receiver.onAttack(world, state, message.hitResult(), player);
-            player.swingHand(Hand.MAIN_HAND);
-        });
-        CHANNEL.registerServerbound(DoubleClickableBlock.DoubleClickPacket.class, (message, access) -> {
-            var player = access.player();
-            var world = player.getWorld();
-            BlockPos pos = message.hitResult().getBlockPos();
-
-            var state = world.getBlockState(pos);
-
-            if (!CommonProtection.canInteractBlock(world, pos, player.getGameProfile(), player)) {
-                // TODO: tell client interaction failed.
-                return;
-            }
-
-            DoubleClickableBlock.doDoubleClick(world, state, message.hitResult(), player);
-            player.swingHand(Hand.MAIN_HAND);
-        });
-
         CHANNEL.registerClientboundDeferred(SyncGraphPacket.class);
         CHANNEL.registerClientboundDeferred(DestroyGraphPacket.class);
     }

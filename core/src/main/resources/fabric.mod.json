@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "chowl-core",
+  "version": "${version}",
+  "name": "Chowl Core",
+  "description": "Enterprise™ enterprising",
+  "authors": ["chyzman", "BasiqueEvangelist"],
+  "contact": {
+    "issues": "https://github.com/wisp-forest/Chowl/issues",
+    "sources": "https://github.com/wisp-forest/Chowl"
+  },
+  "license": "LGPL-3.0-only",
+  "icon": "assets/chowl-core/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "com.chyzman.chowl.core.client.ChowlCoreClient"
+    ],
+    "main": [
+      "com.chyzman.chowl.core.ChowlCore"
+    ]
+  },
+  "mixins": [
+    "chowl-core.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}",
+    "owo": ">=0.12.10"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://wispforest.io/discord"
+      },
+      "badges": [
+        "library"
+      ]
+    }
+  }
+}

@@ -18,12 +18,6 @@ public class ChowlIndustriesConfigModel {
     public String max_digits_before_exponents = "16";
 
     @Sync(Option.SyncMode.NONE)
-    public int max_ticks_for_double_click = 5;
-
-    @Sync(Option.SyncMode.NONE)
-    public int recursive_rendering_limit = 3;
-
-    @Sync(Option.SyncMode.NONE)
     public boolean cringe_ahh_book = false;
 
     @SectionHeader("Server")
