@@ -1,0 +1,7 @@
+{
+  "credit": "made by chyzman",
+  "parent": "chowl-industries:item/panel_base",
+  "textures": {
+    "0": "chowl-logistics:item/input_access_panel"
+  }
+}

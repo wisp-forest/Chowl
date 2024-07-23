@@ -7,6 +7,7 @@ import com.chyzman.chowl.industries.item.component.PanelItem;
 import com.chyzman.chowl.industries.registry.ChowlBlocks;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -29,16 +30,14 @@ public interface PanelStorageContext {
     DrawerFrameBlockEntity drawerFrame();
     Direction frameSide();
 
+    World world();
+
     void markDirty();
 
     default boolean traverseNetwork(Consumer<SlottedStorage<ItemVariant>> consumer) {
         if (drawerFrame() == null) return false;
 
-        World w = drawerFrame().getWorld();
-
-        if (w == null) return false;
-
-        GraphStore store = GraphStore.get(w);
+        GraphStore store = GraphStore.get(world());
         var graph = store.getGraphFor(drawerFrame().getPos());
 
         if (graph == null) return false;
@@ -46,7 +45,7 @@ public interface PanelStorageContext {
         for (var node : graph.nodes()) {
             if (!node.state().isOf(ChowlBlocks.DRAWER_FRAME)) continue;
 
-            var otherBE = w.getBlockEntity(node.pos());
+            var otherBE = world().getBlockEntity(node.pos());
             if (!(otherBE instanceof DrawerFrameBlockEntity otherFrame)) continue;
 
             for (int sideId = 0; sideId < 6; sideId++) {
@@ -85,13 +84,18 @@ class DrawerFrameContext implements PanelStorageContext {
     }
 
     @Override
-    public @Nullable DrawerFrameBlockEntity drawerFrame() {
+    public DrawerFrameBlockEntity drawerFrame() {
         return drawerFrame;
     }
 
     @Override
-    public @Nullable Direction frameSide() {
+    public Direction frameSide() {
         return side;
+    }
+
+    @Override
+    public World world() {
+        return drawerFrame.getWorld();
     }
 
     @Override
@@ -147,6 +151,11 @@ class RenderPanelContext implements PanelStorageContext {
     @Override
     public Direction frameSide() {
         return side;
+    }
+
+    @Override
+    public World world() {
+        return MinecraftClient.getInstance().world;
     }
 
     @Override

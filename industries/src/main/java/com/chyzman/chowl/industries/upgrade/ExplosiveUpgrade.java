@@ -21,7 +21,7 @@ public class ExplosiveUpgrade {
             if (ctx.drawerFrame() != null
                 && ctx.stack().getItem() instanceof UpgradeablePanelItem panelItem
                 && panelItem.hasUpgrade(ctx.stack(), upgrade -> upgrade.isIn(EXPLOSIVE_UPGRADE_TAG))) {
-                var world = ctx.drawerFrame().getWorld();
+                var world = ctx.world();
                 var pos = ctx.drawerFrame().getPos();
                 MutableInt power = new MutableInt();
                 MutableBoolean fiery = new MutableBoolean(false);

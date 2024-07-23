@@ -30,7 +30,7 @@ public class NukeCoreUpgrade {
         PanelEmptiedEvent.EVENT.register(ctx -> {
             if (ctx.drawerFrame() != null
                 && ctx.stack().getItem() instanceof UpgradeablePanelItem panelItem) {
-                var world = ctx.drawerFrame().getWorld();
+                var world = ctx.world();
                 var pos = ctx.drawerFrame().getPos();
                 var upgrades = panelItem.upgrades(ctx.stack()).copyStacks();
 
