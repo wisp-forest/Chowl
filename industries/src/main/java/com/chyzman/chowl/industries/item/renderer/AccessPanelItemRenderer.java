@@ -57,7 +57,7 @@ public class AccessPanelItemRenderer extends GenericPanelItemRenderer {
 
         if (capacity.equals(BigInteger.ZERO)) return;
 
-        matrices.translate(0, 0, -1 / 32f - 0.001);
+        matrices.translate(0, 0, -1 / 16f - 0.001);
         matrices.push();
 
         matrices.scale(3 / 4f, 3 / 4f, 3 / 4f);
