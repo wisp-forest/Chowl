@@ -8,6 +8,8 @@ import net.fabricmc.api.ModInitializer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
+import java.util.List;
+
 public class ChowlVisage implements ModInitializer {
     public static final String MODID = "chowl-visage";
 
@@ -19,9 +21,12 @@ public class ChowlVisage implements ModInitializer {
 
         ChowlItemGroup.addInitializer(group -> {
             group.addCustomTab(Icon.of(VisageBlocks.VISAGE_BLOCK.asItem()), "visage", (context, entries) -> {
-                entries.add(new ItemStack(VisageBlocks.VISAGE_BLOCK.asItem()));
-                entries.add(new ItemStack(VisageBlocks.VISAGE_STAIRS.asItem()));
-                entries.add(new ItemStack(VisageBlocks.VISAGE_SLAB.asItem()));
+                entries.addAll(List.of(
+                        new ItemStack(VisageBlocks.VISAGE_BLOCK.asItem()),
+                        new ItemStack(VisageBlocks.VISAGE_STAIRS.asItem()),
+                        new ItemStack(VisageBlocks.VISAGE_SLAB.asItem()),
+                        new ItemStack(VisageBlocks.VISAGE_FENCE.asItem())
+                ));
             }, false);
         }, 300);
     }

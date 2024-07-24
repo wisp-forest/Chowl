@@ -1,9 +1,6 @@
 package com.chyzman.chowl.visage.registry;
 
-import com.chyzman.chowl.visage.block.VisageBlock;
-import com.chyzman.chowl.visage.block.VisageBlockEntity;
-import com.chyzman.chowl.visage.block.VisageSlabBlock;
-import com.chyzman.chowl.visage.block.VisageStairsBlock;
+import com.chyzman.chowl.visage.block.*;
 import io.wispforest.owo.registration.reflect.AutoRegistryContainer;
 import io.wispforest.owo.registration.reflect.BlockEntityRegistryContainer;
 import io.wispforest.owo.registration.reflect.BlockRegistryContainer;
@@ -29,11 +26,12 @@ public class VisageBlocks implements BlockRegistryContainer {
     public static final Block VISAGE_BLOCK = new VisageBlock(SETTINGS);
     public static final Block VISAGE_STAIRS = new VisageStairsBlock(VISAGE_BLOCK.getDefaultState(), SETTINGS);
     public static final Block VISAGE_SLAB = new VisageSlabBlock(SETTINGS);
+    public static final Block VISAGE_FENCE = new VisageFenceBlock(SETTINGS);
 
     public static class Entities implements BlockEntityRegistryContainer {
         public static BlockEntityType<VisageBlockEntity> VISAGE_BLOCK =
             BlockEntityType.Builder.create(
-                VisageBlockEntity::new, VisageBlocks.VISAGE_BLOCK, VisageBlocks.VISAGE_STAIRS, VisageBlocks.VISAGE_SLAB
+                VisageBlockEntity::new, VisageBlocks.VISAGE_BLOCK, VisageBlocks.VISAGE_STAIRS, VisageBlocks.VISAGE_SLAB, VisageBlocks.VISAGE_FENCE
             )
                 .build();
     }

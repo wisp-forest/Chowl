@@ -19,59 +19,87 @@ public class ChowlVisageClient implements ClientModInitializer {
         BuiltinItemRendererRegistry.INSTANCE.register(VISAGE_BLOCK.asItem(), new RenameMeLaterItemRenderer(id("block/visage_block")));
         BuiltinItemRendererRegistry.INSTANCE.register(VISAGE_STAIRS.asItem(), new RenameMeLaterItemRenderer(id("block/visage_stairs")));
         BuiltinItemRendererRegistry.INSTANCE.register(VISAGE_SLAB.asItem(), new RenameMeLaterItemRenderer(id("block/visage_slab")));
+        BuiltinItemRendererRegistry.INSTANCE.register(VISAGE_FENCE.asItem(), new RenameMeLaterItemRenderer(id("block/visage_fence_inventory")));
+
 
         BlockRenderLayerMap.INSTANCE.putBlock(VisageBlocks.VISAGE_BLOCK, RenderLayer.getCutout());
 
         ModelLoadingPlugin.register(ctx -> {
-            ctx.addModels(id("block/visage_block"), id("block/visage_stairs"), id("block/visage_slab"));
-
-            addTemplated(
-                ctx,
-                id("block/visage_block"),
-                id("block/visage_block_base"),
-                Identifier.of("minecraft:block/diamond_block")
+            ctx.addModels(
+                    id("block/visage_block"),
+                    id("block/visage_stairs"),
+                    id("block/visage_slab"),
+                    id("block/visage_fence_inventory")
             );
 
             addTemplated(
-                ctx,
-                id("block/visage_stairs"),
-                id("block/visage_stairs_base"),
-                id("block/stairs")
+                    ctx,
+                    id("block/visage_block"),
+                    id("block/visage_block_base"),
+                    Identifier.of("minecraft:block/diamond_block")
             );
 
             addTemplated(
-                ctx,
-                id("block/visage_stairs_inner"),
-                id("block/visage_stairs_inner_base"),
+                    ctx,
+                    id("block/visage_stairs"),
+                    id("block/visage_stairs_base"),
+                    id("block/stairs")
+            );
+
+            addTemplated(
+                    ctx,
+                    id("block/visage_stairs_inner"),
+                    id("block/visage_stairs_inner_base"),
                     id("block/inner_stairs")
             );
 
             addTemplated(
-                ctx,
-                id("block/visage_stairs_outer"),
-                id("block/visage_stairs_outer_base"),
+                    ctx,
+                    id("block/visage_stairs_outer"),
+                    id("block/visage_stairs_outer_base"),
                     id("block/outer_stairs")
             );
 
             addTemplated(
-                ctx,
-                id("block/visage_slab"),
-                id("block/visage_slab_base"),
-                Identifier.of("minecraft:block/oak_slab")
+                    ctx,
+                    id("block/visage_slab"),
+                    id("block/visage_slab_base"),
+                    Identifier.of("minecraft:block/oak_slab")
             );
 
             addTemplated(
-                ctx,
-                id("block/visage_slab_double"),
-                id("block/visage_slab_double_base"),
-                Identifier.of("minecraft:block/oak_planks")
+                    ctx,
+                    id("block/visage_slab_double"),
+                    id("block/visage_slab_double_base"),
+                    Identifier.of("minecraft:block/oak_planks")
             );
 
             addTemplated(
-                ctx,
-                id("block/visage_slab_top"),
-                id("block/visage_slab_top_base"),
-                Identifier.of("minecraft:block/oak_slab_top")
+                    ctx,
+                    id("block/visage_slab_top"),
+                    id("block/visage_slab_top_base"),
+                    Identifier.of("minecraft:block/oak_slab_top")
+            );
+
+            addTemplated(
+                    ctx,
+                    id("block/visage_fence_post"),
+                    id("block/visage_fence_post_base"),
+                    id("block/visage_fence_post_template")
+            );
+
+            addTemplated(
+                    ctx,
+                    id("block/visage_fence_side"),
+                    id("block/visage_fence_side_base"),
+                    id("block/visage_fence_side_template")
+            );
+
+            addTemplated(
+                    ctx,
+                    id("block/visage_fence_inventory"),
+                    id("block/visage_fence_inventory_base"),
+                    id("block/visage_fence_inventory_template")
             );
         });
     }
