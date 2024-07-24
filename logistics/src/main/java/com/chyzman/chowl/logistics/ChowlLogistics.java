@@ -16,8 +16,8 @@ public class ChowlLogistics implements ModInitializer {
         FieldRegistrationHandler.register(LogisticsItems.class, MODID, true);
 
         ChowlItemGroup.addInitializer(group -> {
-            group.addCustomTab(Icon.of(LogisticsItems.INPUT_ACCESS_PANEL), "logistics", (context, entries) -> {
-                entries.add(new ItemStack(LogisticsItems.INPUT_ACCESS_PANEL.asItem()));
+            group.addCustomTab(Icon.of(LogisticsItems.IMPORT_PANEL), "logistics", (context, entries) -> {
+                entries.add(new ItemStack(LogisticsItems.IMPORT_PANEL.asItem()));
             }, false);
         }, 200);
     }

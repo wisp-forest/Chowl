@@ -11,10 +11,10 @@ import static com.chyzman.chowl.logistics.ChowlLogistics.id;
 public class ChowlLogisticsClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        BuiltinItemRendererRegistry.INSTANCE.register(LogisticsItems.INPUT_ACCESS_PANEL, new GenericPanelItemRenderer(id("item/input_access_panel_base")));
+        BuiltinItemRendererRegistry.INSTANCE.register(LogisticsItems.IMPORT_PANEL, new GenericPanelItemRenderer(id("item/import_panel_base")));
 
         ModelLoadingPlugin.register(ctx -> {
-            ctx.addModels(id("item/input_access_panel_base"));
+            ctx.addModels(id("item/import_panel_base"));
         });
     }
 }

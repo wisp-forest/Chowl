@@ -8,8 +8,8 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import org.jetbrains.annotations.Nullable;
 
-public class InputAccessPanel extends BasePanelItem {
-    public InputAccessPanel(Settings settings) {
+public class ImportPanel extends BasePanelItem {
+    public ImportPanel(Settings settings) {
         super(settings);
     }
 
