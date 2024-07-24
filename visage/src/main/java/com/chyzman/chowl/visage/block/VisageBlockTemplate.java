@@ -48,7 +48,7 @@ public interface VisageBlockTemplate extends /* Block, */ BlockEntityProvider, E
             if (stack.getItem() instanceof BlockItem blockItem && !(blockItem.getBlock() instanceof VisageBlockTemplate)) {
                 var targetState = blockItem.getBlock().getPlacementState(new ItemPlacementContext(player, hand, stack, hit));
 
-                if (targetState != null) targetState = blockItem.getBlock().getDefaultState();
+                if (targetState == null) targetState = blockItem.getBlock().getDefaultState();
 
                 if (visage.templateState() == null) {
                     visage.setTemplateState(targetState);

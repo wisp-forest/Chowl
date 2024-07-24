@@ -35,7 +35,7 @@ public class ServerEventListeners {
                 && !player.isSneaking()) {
                 var targetState = blockItem.getBlock().getPlacementState(new ItemPlacementContext(player, hand, handStack, hitResult));
 
-                if (targetState != null) targetState = blockItem.getBlock().getDefaultState();
+                if (targetState == null) targetState = blockItem.getBlock().getDefaultState();
 
                 if (drawerFrameBlockEntity.templateState() != targetState) {
                     drawerFrameBlockEntity.setTemplateState(targetState);
