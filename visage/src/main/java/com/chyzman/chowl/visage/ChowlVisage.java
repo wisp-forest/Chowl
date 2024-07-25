@@ -1,6 +1,7 @@
 package com.chyzman.chowl.visage;
 
 import com.chyzman.chowl.core.ChowlItemGroup;
+import com.chyzman.chowl.visage.network.ChowlVisageNetworking;
 import com.chyzman.chowl.visage.registry.VisageBlocks;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
@@ -29,6 +30,8 @@ public class ChowlVisage implements ModInitializer {
                 ));
             }, false);
         }, 300);
+
+        ChowlVisageNetworking.init();
     }
 
     public static Identifier id(String path) {

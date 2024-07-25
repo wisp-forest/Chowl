@@ -1,8 +1,9 @@
-package com.chyzman.chowl.visage.block;
+package com.chyzman.chowl.visage.block.impl;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SlabBlock;
+import com.chyzman.chowl.visage.block.VisageBlockEntity;
+import com.chyzman.chowl.visage.block.VisageBlockTemplate;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.block.*;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -12,13 +13,34 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
-public class VisageSlabBlock extends SlabBlock implements VisageBlockTemplate {
-    public VisageSlabBlock(Settings settings) {
+public class VisageBlock extends Block implements VisageBlockTemplate {
+
+    public static final VoxelShape SHAPE = createCuboidShape(0, 0, 0, 16, 16, 16);
+
+    public VisageBlock(Settings settings) {
         super(settings);
+    }
+
+    @Override
+    protected MapCodec<? extends Block> getCodec() {
+        // bruh
+        return null;
+    }
+
+    @Override
+    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+        return SHAPE;
+    }
+
+    @Override
+    protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+        return SHAPE;
     }
 
     //region visage template

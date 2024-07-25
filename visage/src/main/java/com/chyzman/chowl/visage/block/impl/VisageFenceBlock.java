@@ -1,8 +1,10 @@
-package com.chyzman.chowl.visage.block;
+package com.chyzman.chowl.visage.block.impl;
 
+import com.chyzman.chowl.visage.block.VisageBlockEntity;
+import com.chyzman.chowl.visage.block.VisageBlockTemplate;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.StairsBlock;
+import net.minecraft.block.FenceBlock;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -16,9 +18,9 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
-public class VisageStairsBlock extends StairsBlock implements VisageBlockTemplate {
-    public VisageStairsBlock(BlockState baseBlockState, Settings settings) {
-        super(baseBlockState, settings);
+public class VisageFenceBlock extends FenceBlock implements VisageBlockTemplate {
+    public VisageFenceBlock(Settings settings) {
+        super(settings);
     }
 
     //region visage template
