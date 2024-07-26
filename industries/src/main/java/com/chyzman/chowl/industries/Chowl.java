@@ -7,7 +7,7 @@ import com.chyzman.chowl.industries.commands.DebugCommands;
 import com.chyzman.chowl.industries.commands.RandomizeCommand;
 import com.chyzman.chowl.industries.recipe.ChowlRecipeSerializers;
 import com.chyzman.chowl.industries.registry.*;
-import com.chyzman.chowl.industries.screen.PanelConfigSreenHandler;
+import com.chyzman.chowl.industries.screen.PanelConfigScreenHandler;
 import com.chyzman.chowl.industries.upgrade.ExplosiveUpgrade;
 import com.chyzman.chowl.industries.upgrade.LabelingUpgrade;
 import com.chyzman.chowl.industries.upgrade.NukeCoreUpgrade;
@@ -59,7 +59,7 @@ public class Chowl implements ModInitializer {
         ServerBoundPackets.init();
         ServerEventListeners.init();
         ChowlRecipeSerializers.init();
-        Registry.register(Registries.SCREEN_HANDLER, id("panel_config"), PanelConfigSreenHandler.TYPE);
+        Registry.register(Registries.SCREEN_HANDLER, id("panel_config"), PanelConfigScreenHandler.TYPE);
 
         ExplosiveUpgrade.init();
         LabelingUpgrade.init();

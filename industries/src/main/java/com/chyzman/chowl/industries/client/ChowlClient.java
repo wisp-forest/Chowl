@@ -14,7 +14,7 @@ import com.chyzman.chowl.industries.registry.ChowlItems;
 import com.chyzman.chowl.industries.registry.client.ClientBoundPackets;
 import com.chyzman.chowl.industries.registry.client.ClientEventListeners;
 import com.chyzman.chowl.industries.screen.PanelConfigScreen;
-import com.chyzman.chowl.industries.screen.PanelConfigSreenHandler;
+import com.chyzman.chowl.industries.screen.PanelConfigScreenHandler;
 import com.chyzman.chowl.industries.util.BlockSideUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
@@ -51,7 +51,7 @@ public class ChowlClient implements ClientModInitializer {
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlItems.MIRROR_PANEL, new GenericPanelItemRenderer(id("item/mirror_panel_base")));
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlItems.COMPRESSING_PANEL, new GenericPanelItemRenderer(id("item/compressing_panel_base")));
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlItems.ACCESS_PANEL, new AccessPanelItemRenderer(id("item/access_panel_base")));
-        HandledScreens.register(PanelConfigSreenHandler.TYPE, PanelConfigScreen::new);
+        HandledScreens.register(PanelConfigScreenHandler.TYPE, PanelConfigScreen::new);
 
         SetIngredientComponent.init();
 

@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 import static com.chyzman.chowl.industries.Chowl.id;
 
-public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelConfigSreenHandler> {
+public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelConfigScreenHandler> {
     private FakeSlotComponent filterSlot;
     private DisableableCheckboxComponent lockedCheckbox;
     private SmallCheckboxComponent showCountCheckBox;
@@ -32,7 +32,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
 
     private boolean ignoreChanges = false;
 
-    public PanelConfigScreen(PanelConfigSreenHandler screenHandler, PlayerInventory inventory, Text title) {
+    public PanelConfigScreen(PanelConfigScreenHandler screenHandler, PlayerInventory inventory, Text title) {
         super(screenHandler, inventory, title);
     }
 
@@ -50,7 +50,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
 
             filterSlot.mouseDown().subscribe((mouseX, mouseY, button) -> {
                 if (button == 0) {
-                    handler.sendMessage(new PanelConfigSreenHandler.ConfigFilter(handler.getCursorStack()));
+                    handler.sendMessage(new PanelConfigScreenHandler.ConfigFilter(handler.getCursorStack()));
                 }
                 return true;
             });
@@ -286,7 +286,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
         if (ignoreTemplatingCheckBox != null) displayConfig.ignoreTemplating(ignoreTemplatingCheckBox.checked());
 
 
-        handler.sendMessage(new PanelConfigSreenHandler.ConfigConfig(displayConfig.build(), locked));
+        handler.sendMessage(new PanelConfigScreenHandler.ConfigConfig(displayConfig.build(), locked));
     }
 
     @Override
