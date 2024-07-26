@@ -10,7 +10,7 @@ import java.util.List;
 
 public record DrawerFrameSideState(ItemStack stack, int orientation, boolean isBlank) {
     public static final Endec<DrawerFrameSideState> ENDEC = StructEndecBuilder.of(
-        ChowlEndecs.toEndecViaNbt(ItemStack.OPTIONAL_CODEC).fieldOf("Stack", DrawerFrameSideState::stack),
+        ChowlEndecs.ITEM_STACK.fieldOf("Stack", DrawerFrameSideState::stack),
         Endec.INT.fieldOf("Orientation", DrawerFrameSideState::orientation),
         Endec.BOOLEAN.fieldOf("IsBlank", DrawerFrameSideState::isBlank),
         DrawerFrameSideState::new

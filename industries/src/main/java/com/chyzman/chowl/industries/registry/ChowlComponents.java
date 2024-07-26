@@ -10,10 +10,12 @@ import io.wispforest.owo.serialization.CodecUtils;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.minecraft.component.ComponentType;
 import net.minecraft.item.Item;
+import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.util.Unit;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -49,9 +51,9 @@ public class ChowlComponents implements AutoRegistryContainer<ComponentType<?>> 
         .packetCodec(CodecUtils.toPacketCodec(ChowlEndecs.BIG_INTEGER))
         .build();
 
-    public static final ComponentType<Boolean> LOCKED = ComponentType.<Boolean>builder()
-        .codec(Codec.BOOL)
-        .packetCodec(PacketCodecs.BOOL)
+    public static final ComponentType<Unit> LOCKED = ComponentType.<Unit>builder()
+        .codec(Unit.CODEC)
+        .packetCodec(PacketCodec.unit(Unit.INSTANCE))
         .build();
 
     public static final ComponentType<UpgradeListComponent> UPGRADE_LIST = ComponentType.<UpgradeListComponent>builder()

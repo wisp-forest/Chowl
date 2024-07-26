@@ -6,6 +6,7 @@ import com.chyzman.chowl.industries.item.component.FilteringPanelItem;
 import com.chyzman.chowl.industries.item.component.LockablePanelItem;
 import com.chyzman.chowl.industries.registry.ChowlComponents;
 import com.chyzman.chowl.industries.registry.ServerBoundPackets;
+import com.chyzman.chowl.industries.util.ChowlEndecs;
 import io.wispforest.owo.client.screens.ScreenUtils;
 import io.wispforest.owo.client.screens.SlotGenerator;
 import io.wispforest.owo.client.screens.SyncedProperty;
@@ -29,7 +30,7 @@ public class PanelConfigSreenHandler extends ScreenHandler {
     public PanelConfigSreenHandler(int syncId, PlayerInventory playerInventory, ItemStack stack, @Nullable Consumer<ItemStack> updater) {
         super(TYPE, syncId);
         this.inventory = playerInventory;
-        this.stack = this.createProperty(ItemStack.class, stack);
+        this.stack = this.createProperty(ItemStack.class, ChowlEndecs.ITEM_STACK, stack);
 
         ServerBoundPackets.addEndecs(endecBuilder());
 

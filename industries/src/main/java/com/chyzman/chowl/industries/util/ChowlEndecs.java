@@ -5,6 +5,7 @@ import com.mojang.serialization.DynamicOps;
 import io.wispforest.endec.Endec;
 import io.wispforest.owo.serialization.RegistriesAttribute;
 import io.wispforest.owo.serialization.format.nbt.NbtEndec;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.RegistryOps;
@@ -18,6 +19,8 @@ public final class ChowlEndecs {
 
         return new BigInteger(str);
     }, BigInteger::toString);
+
+    public static final Endec<ItemStack> ITEM_STACK = toEndecViaNbt(ItemStack.OPTIONAL_CODEC);
 
     public static <T> Endec<T> toEndecViaNbt(Codec<T> codec) {
         return Endec.of(
