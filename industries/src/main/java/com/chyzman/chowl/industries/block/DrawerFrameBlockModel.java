@@ -47,7 +47,7 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
         var template = (BlockState) blockView.getBlockEntityRenderData(pos);
 
         if (template != null) {
-            var info = RetextureInfo.get(template);
+            var info = RetextureInfo.get(template, pos);
             context.pushTransform(new RetextureTransform(info, blockView, pos));
         }
         super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
@@ -72,7 +72,7 @@ public class DrawerFrameBlockModel extends ForwardingBakedModel {
         BlockState template = stack.get(ChowlCoreComponents.TEMPLATE_STATE);
 
         if (template != null) {
-            var info = RetextureInfo.get(template);
+            var info = RetextureInfo.get(template, BlockPos.ORIGIN);
             context.pushTransform(new RetextureTransform(info, null, null));
         }
 

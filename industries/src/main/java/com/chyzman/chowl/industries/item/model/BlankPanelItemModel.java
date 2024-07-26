@@ -42,7 +42,7 @@ public class BlankPanelItemModel extends ForwardingBakedModel {
             return;
         }
 
-        var info = RetextureInfo.get(drawerFrame.templateState());
+        var info = RetextureInfo.get(drawerFrame.templateState(), drawerFrame.getPos());
         var world = RenderGlobals.FRAME_WORLD.get();
         var pos = RenderGlobals.FRAME_POS.get();
 
