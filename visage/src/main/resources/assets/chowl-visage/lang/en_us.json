@@ -4,5 +4,8 @@
     "block.chowl-visage.visage_block": "Visage Block",
     "block.chowl-visage.visage_stairs": "Visage Stairs",
     "block.chowl-visage.visage_slab": "Visage Slab",
-    "block.chowl-visage.visage_fence": "Visage Fence"
+    "block.chowl-visage.visage_fence": "Visage Fence",
+    "block.chowl-visage.visage_wall": "Visage Wall",
+
+    "block.chowl-visage.true_visage": "True Visage"
 }

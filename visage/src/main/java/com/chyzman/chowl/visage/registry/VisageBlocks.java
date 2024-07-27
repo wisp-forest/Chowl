@@ -1,10 +1,7 @@
 package com.chyzman.chowl.visage.registry;
 
 import com.chyzman.chowl.visage.block.*;
-import com.chyzman.chowl.visage.block.impl.VisageBlock;
-import com.chyzman.chowl.visage.block.impl.VisageFenceBlock;
-import com.chyzman.chowl.visage.block.impl.VisageSlabBlock;
-import com.chyzman.chowl.visage.block.impl.VisageStairsBlock;
+import com.chyzman.chowl.visage.block.impl.*;
 import com.chyzman.chowl.visage.item.VisageBlockItem;
 import io.wispforest.owo.registration.reflect.BlockEntityRegistryContainer;
 import io.wispforest.owo.registration.reflect.BlockRegistryContainer;
@@ -19,18 +16,21 @@ import static com.chyzman.chowl.visage.block.VisageBlockTemplate.STATE_TO_LUMINA
 
 public class VisageBlocks implements BlockRegistryContainer {
     private static final AbstractBlock.Settings SETTINGS = AbstractBlock.Settings.copy(Blocks.OAK_PLANKS)
-        .nonOpaque()
-        .dynamicBounds()
-        .allowsSpawning(Blocks::never)
-        .solidBlock(Blocks::never)
-        .suffocates(Blocks::never)
-        .blockVision(Blocks::never)
-        .luminance(STATE_TO_LUMINANCE);
+            .nonOpaque()
+            .dynamicBounds()
+            .allowsSpawning(Blocks::never)
+            .solidBlock(Blocks::never)
+            .suffocates(Blocks::never)
+            .blockVision(Blocks::never)
+            .luminance(STATE_TO_LUMINANCE);
 
     public static final Block VISAGE_BLOCK = new VisageBlock(SETTINGS);
     public static final Block VISAGE_STAIRS = new VisageStairsBlock(VISAGE_BLOCK.getDefaultState(), SETTINGS);
     public static final Block VISAGE_SLAB = new VisageSlabBlock(SETTINGS);
     public static final Block VISAGE_FENCE = new VisageFenceBlock(SETTINGS);
+    public static final Block VISAGE_WALL = new VisageWallBlock(SETTINGS);
+
+    public static final Block TRUE_VISAGE = new TrueVisageBlock(SETTINGS);
 
     @Override
     public BlockItem createBlockItem(Block block, String identifier) {
@@ -39,9 +39,13 @@ public class VisageBlocks implements BlockRegistryContainer {
 
     public static class Entities implements BlockEntityRegistryContainer {
         public static BlockEntityType<VisageBlockEntity> VISAGE_BLOCK =
-            BlockEntityType.Builder.create(
-                VisageBlockEntity::new, VisageBlocks.VISAGE_BLOCK, VisageBlocks.VISAGE_STAIRS, VisageBlocks.VISAGE_SLAB, VisageBlocks.VISAGE_FENCE
-            )
-                .build();
+                BlockEntityType.Builder.create(
+                        VisageBlockEntity::new, VisageBlocks.VISAGE_BLOCK, VisageBlocks.VISAGE_STAIRS, VisageBlocks.VISAGE_SLAB, VisageBlocks.VISAGE_FENCE
+                ).build();
+
+        public static BlockEntityType<VisageBlockEntity> TRUE_VISAGE_BLOCK =
+                BlockEntityType.Builder.create(
+                        VisageBlockEntity::new, VisageBlocks.TRUE_VISAGE
+                ).build();
     }
 }

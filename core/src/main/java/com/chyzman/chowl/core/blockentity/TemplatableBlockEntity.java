@@ -18,7 +18,7 @@ import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class TemplatableBlockEntity extends BlockEntity {
-    private static final IntProperty LIGHT_LEVEL = Properties.LEVEL_15;
+    protected static final IntProperty LIGHT_LEVEL = Properties.LEVEL_15;
 
     private BlockState templateState = null;
 

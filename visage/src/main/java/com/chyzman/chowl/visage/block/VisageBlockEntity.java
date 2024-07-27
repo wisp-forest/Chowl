@@ -4,6 +4,7 @@ import com.chyzman.chowl.core.blockentity.TemplatableBlockEntity;
 import com.chyzman.chowl.visage.registry.VisageBlocks;
 import io.wispforest.owo.ops.WorldOps;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
@@ -16,6 +17,10 @@ import org.jetbrains.annotations.Nullable;
 public class VisageBlockEntity extends TemplatableBlockEntity {
     public VisageBlockEntity(BlockPos pos, BlockState state) {
         super(VisageBlocks.Entities.VISAGE_BLOCK, pos, state);
+    }
+
+    protected VisageBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
     }
 
     @Override

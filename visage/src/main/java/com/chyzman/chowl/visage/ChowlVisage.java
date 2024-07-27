@@ -26,7 +26,8 @@ public class ChowlVisage implements ModInitializer {
                         new ItemStack(VisageBlocks.VISAGE_BLOCK.asItem()),
                         new ItemStack(VisageBlocks.VISAGE_STAIRS.asItem()),
                         new ItemStack(VisageBlocks.VISAGE_SLAB.asItem()),
-                        new ItemStack(VisageBlocks.VISAGE_FENCE.asItem())
+                        new ItemStack(VisageBlocks.VISAGE_FENCE.asItem()),
+                        new ItemStack(VisageBlocks.VISAGE_WALL.asItem())
                 ));
             }, false);
         }, 300);

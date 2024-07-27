@@ -9,10 +9,16 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 
 public class ChowlCoreComponents implements AutoRegistryContainer<ComponentType<?>> {
+
     public static final ComponentType<BlockState> TEMPLATE_STATE = ComponentType.<BlockState>builder()
         .codec(BlockState.CODEC)
         .packetCodec(PacketCodecs.entryOf(Block.STATE_IDS))
         .build();
+
+    public static final ComponentType<BlockState> TEMPLATE_MODEL_STATE = ComponentType.<BlockState>builder()
+            .codec(BlockState.CODEC)
+            .packetCodec(PacketCodecs.entryOf(Block.STATE_IDS))
+            .build();
 
     @Override
     public Registry<ComponentType<?>> getRegistry() {

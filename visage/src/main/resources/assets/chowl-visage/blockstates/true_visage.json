@@ -1,0 +1,9 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "chowl-visage:block/true_visage"
+      }
+    ]
+  }
+}
