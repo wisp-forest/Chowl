@@ -7,7 +7,7 @@ import com.chyzman.chowl.industries.block.button.BlockButtonBuilder;
 import com.chyzman.chowl.industries.block.button.ButtonRenderCondition;
 import com.chyzman.chowl.industries.block.button.ButtonRenderer;
 import com.chyzman.chowl.industries.registry.ChowlStats;
-import com.chyzman.chowl.industries.screen.PanelConfigSreenHandler;
+import com.chyzman.chowl.industries.screen.PanelConfigScreenHandler;
 import com.chyzman.chowl.industries.transfer.PanelStorageContext;
 import com.chyzman.chowl.industries.util.BlockSideUtils;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
@@ -142,7 +142,7 @@ public interface PanelItem {
         var factory = new ExtendedScreenHandlerFactory<ItemStack>() {
             @Override
             public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-                return new PanelConfigSreenHandler(syncId, playerInventory, stack, updater);
+                return new PanelConfigScreenHandler(syncId, playerInventory, stack, updater);
             }
 
             @Override

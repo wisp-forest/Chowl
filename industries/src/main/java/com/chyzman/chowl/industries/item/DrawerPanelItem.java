@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Unit;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,17 +53,24 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
     @Override
     public void setFilter(ItemStack stack, ItemVariant newFilter) {
         stack.set(ChowlComponents.CONTAINED_ITEM_VARIANT, newFilter);
-        stack.set(ChowlComponents.LOCKED, !newFilter.equals(ItemVariant.blank()));
+
+        if (!newFilter.equals(ItemVariant.blank()))
+            stack.set(ChowlComponents.LOCKED, Unit.INSTANCE);
+        else
+            stack.remove(ChowlComponents.LOCKED);
     }
 
     @Override
     public boolean locked(ItemStack stack) {
-        return stack.getOrDefault(ChowlComponents.LOCKED, false);
+        return stack.contains(ChowlComponents.LOCKED);
     }
 
     @Override
     public void setLocked(ItemStack stack, boolean locked) {
-        stack.set(ChowlComponents.LOCKED, locked);
+        if (locked)
+            stack.set(ChowlComponents.LOCKED, Unit.INSTANCE);
+        else
+            stack.remove(ChowlComponents.LOCKED);
 
         if (!locked && stack.getOrDefault(ChowlComponents.COUNT, BigInteger.ZERO).equals(BigInteger.ZERO)) {
             stack.set(ChowlComponents.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
@@ -138,7 +146,7 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
             ctx.stack().set(ChowlComponents.COUNT, newCount);
 
             if (newCount.compareTo(BigInteger.ZERO) <= 0) {
-                if (!ctx.stack().getOrDefault(ChowlComponents.LOCKED, false)) {
+                if (!ctx.stack().contains(ChowlComponents.LOCKED)) {
                     ctx.stack().set(ChowlComponents.CONTAINED_ITEM_VARIANT, ItemVariant.blank());
                 }
 
