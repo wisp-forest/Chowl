@@ -27,7 +27,7 @@
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
     "minecraft": "${minecraft_version}",
-    "owo": ">=0.12.10",
+    "owo": ">=0.12.11",
     "lavender": ">=0.1.10",
     "chowl-core": "${version}"
   },
