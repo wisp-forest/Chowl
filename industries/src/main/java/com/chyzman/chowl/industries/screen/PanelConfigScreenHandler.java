@@ -30,7 +30,7 @@ public class PanelConfigScreenHandler extends ScreenHandler {
     public PanelConfigScreenHandler(int syncId, PlayerInventory playerInventory, ItemStack stack, @Nullable Consumer<ItemStack> updater) {
         super(TYPE, syncId);
         this.inventory = playerInventory;
-        this.stack = this.createProperty(ItemStack.class, ChowlEndecs.ITEM_STACK, stack);
+        this.stack = this.createProperty(ItemStack.class, stack);
 
         ServerBoundPackets.addEndecs(endecBuilder());
 

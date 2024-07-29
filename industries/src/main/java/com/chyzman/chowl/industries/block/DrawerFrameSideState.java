@@ -1,8 +1,8 @@
 package com.chyzman.chowl.industries.block;
 
-import com.chyzman.chowl.industries.util.ChowlEndecs;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.impl.StructEndecBuilder;
+import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import java.util.List;
 
 public record DrawerFrameSideState(ItemStack stack, int orientation, boolean isBlank) {
     public static final Endec<DrawerFrameSideState> ENDEC = StructEndecBuilder.of(
-        ChowlEndecs.ITEM_STACK.fieldOf("Stack", DrawerFrameSideState::stack),
+        MinecraftEndecs.ITEM_STACK.fieldOf("Stack", DrawerFrameSideState::stack),
         Endec.INT.fieldOf("Orientation", DrawerFrameSideState::orientation),
         Endec.BOOLEAN.fieldOf("IsBlank", DrawerFrameSideState::isBlank),
         DrawerFrameSideState::new

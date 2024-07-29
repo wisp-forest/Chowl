@@ -20,8 +20,8 @@ public record DisplayingPanelConfig(boolean hideCount, boolean hideCapacity, boo
         Endec.BOOLEAN.fieldOf("HideButtons", DisplayingPanelConfig::hideButtons),
         Endec.BOOLEAN.fieldOf("ShowPercentage", DisplayingPanelConfig::showPercentage),
         Endec.BOOLEAN.fieldOf("IgnoreTemplating", DisplayingPanelConfig::ignoreTemplating),
-        // TODO: use the CodecUtils.toEndec overload for both Codec and PacketCodec later
-        CodecUtils.toEndec(Style.Codecs.CODEC).optionalFieldOf("TextStyle", DisplayingPanelConfig::textStyle, DEFAULT_STYLE),
+        CodecUtils.toEndec(Style.Codecs.CODEC)
+            .optionalFieldOf("TextStyle", DisplayingPanelConfig::textStyle, DEFAULT_STYLE),
         DisplayingPanelConfig::new
     );
 
