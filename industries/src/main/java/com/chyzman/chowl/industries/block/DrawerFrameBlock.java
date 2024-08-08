@@ -143,6 +143,66 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
             .renderer(ButtonRenderer.model(id("item/remove")))
             .build();
 
+    public static final BlockButton BLANK_PANEL_BUTTON = BlockButton.builder(0, 0, 16, 16)
+            .onUse((state, world, pos, player, hit) -> {
+                if (!(world.getBlockEntity(hit.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
+                    return ActionResult.PASS;
+
+                if (player.isSneaking()) return ActionResult.PASS;
+
+                var side = BlockSideUtils.getSide(hit);
+                var stackInHand = player.getStackInHand(player.getActiveHand());
+                if (stackInHand.getItem() instanceof PanelItem) {
+                    if (!world.isClient) {
+                        var temp = stackInHand.copy();
+                        temp.setCount(1);
+                        blockEntity.stacks.set(side.getId(), new DrawerFrameSideState(temp, 0, false));
+                        stackInHand.decrement(1);
+                        blockEntity.markDirty();
+                    }
+                    return ActionResult.SUCCESS;
+                }
+                return ActionResult.PASS;
+            })
+            .onAttack((world, state, hitResult, player) -> {
+                if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
+                    return ActionResult.PASS;
+
+                if (!player.isSneaking()) return ActionResult.PASS;
+
+                var side = BlockSideUtils.getSide(hitResult);
+                var selected = blockEntity.stacks.get(side.getId());
+
+                if (!world.isClient) {
+                    player.getInventory().offerOrDrop(selected.stack());
+                    blockEntity.stacks.set(side.getId(), DrawerFrameSideState.empty());
+                    blockEntity.markDirty();
+                }
+
+                return ActionResult.SUCCESS;
+            })
+            .onDoubleClick((world, state, hitResult, player) -> {
+                if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
+                    return ActionResult.PASS;
+
+                boolean changed = false;
+                for (int i = 0; i < 6; i++) {
+                    if (!blockEntity.stacks.get(i).isEmpty()) continue;
+
+                    if (world.isClient) return ActionResult.SUCCESS;
+
+                    changed = true;
+                    blockEntity.stacks.set(i, new DrawerFrameSideState(ItemStack.EMPTY, 0, true));
+                }
+
+                if (changed) {
+                    blockEntity.markDirty();
+                    return ActionResult.SUCCESS;
+                } else {
+                    return ActionResult.PASS;
+                }
+            })
+            .build();
     public static final BlockButton FULL_REMOVE_BUTTON = BlockButton.builder(0, 0, 16, 16)
             .onAttack((world, state, hitResult, player) -> {
                 if (!(world.getBlockEntity(hitResult.getBlockPos()) instanceof DrawerFrameBlockEntity blockEntity))
@@ -388,7 +448,9 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
         List<BlockButton> buttons = new ArrayList<>();
 
-        if (selected.isBlank() || selected.stack().isOf(ChowlItems.PHANTOM_PANEL)) {
+        if (selected.isBlank()) {
+            buttons.add(BLANK_PANEL_BUTTON);
+        } else if (selected.stack().isOf(ChowlItems.PHANTOM_PANEL)) {
             buttons.add(FULL_REMOVE_BUTTON);
         } else {
             buttons.add(REMOVE_BUTTON);

@@ -7,6 +7,7 @@ import io.wispforest.owo.registration.reflect.BlockEntityRegistryContainer;
 import io.wispforest.owo.registration.reflect.BlockRegistryContainer;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockSetType;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.BlockItem;
@@ -29,6 +30,7 @@ public class VisageBlocks implements BlockRegistryContainer {
     public static final Block VISAGE_SLAB = new VisageSlabBlock(SETTINGS);
     public static final Block VISAGE_FENCE = new VisageFenceBlock(SETTINGS);
     public static final Block VISAGE_WALL = new VisageWallBlock(SETTINGS);
+    public static final Block VISAGE_DOOR = new VisageDoorBlock(BlockSetType.OAK, SETTINGS);
 
     public static final Block TRUE_VISAGE = new TrueVisageBlock(SETTINGS);
 

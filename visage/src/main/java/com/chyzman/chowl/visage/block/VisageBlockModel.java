@@ -107,8 +107,8 @@ public class VisageBlockModel extends ForwardingBakedModel {
         @Override
         public @NotNull BakedModel bake(Baker baker, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer) {
             return new VisageBlockModel(
-                baker.bake(baseModel, rotationContainer),
-                baker.bake(templatedModel, rotationContainer)
+                    baker.bake(baseModel, rotationContainer),
+                    baker.bake(templatedModel, rotationContainer)
             );
         }
     }

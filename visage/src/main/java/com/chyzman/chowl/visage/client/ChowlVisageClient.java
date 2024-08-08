@@ -13,7 +13,6 @@ import net.minecraft.util.Identifier;
 
 import static com.chyzman.chowl.visage.ChowlVisage.id;
 import static com.chyzman.chowl.visage.registry.VisageBlocks.*;
-import static com.chyzman.chowl.visage.registry.VisageBlocks.Entities.TRUE_VISAGE_BLOCK;
 
 public class ChowlVisageClient implements ClientModInitializer {
     @Override
@@ -23,6 +22,7 @@ public class ChowlVisageClient implements ClientModInitializer {
         BuiltinItemRendererRegistry.INSTANCE.register(VISAGE_SLAB.asItem(), new RenameMeLaterItemRenderer(id("block/visage_slab")));
         BuiltinItemRendererRegistry.INSTANCE.register(VISAGE_FENCE.asItem(), new RenameMeLaterItemRenderer(id("block/visage_fence_inventory")));
         BuiltinItemRendererRegistry.INSTANCE.register(VISAGE_WALL.asItem(), new RenameMeLaterItemRenderer(id("block/visage_wall_inventory")));
+        BuiltinItemRendererRegistry.INSTANCE.register(VISAGE_DOOR.asItem(), new RenameMeLaterItemRenderer(id("block/visage_door")));
 
         BuiltinItemRendererRegistry.INSTANCE.register(TRUE_VISAGE.asItem(), new RenameMeLaterItemRenderer(id("block/true_visage")));
 
