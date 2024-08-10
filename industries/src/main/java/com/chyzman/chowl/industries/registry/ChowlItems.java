@@ -29,4 +29,6 @@ public class ChowlItems implements ItemRegistryContainer {
     public static final Item PHANTOM_PANEL = new BlankPanelItem(new Item.Settings());
 
     public static final Item COMPRESSING_PANEL = new CompressingPanelItem(new Item.Settings().maxCount(1));
+
+    public static final Item PACKING_PANEL = new PackingPanelItem(new Item.Settings().maxCount(1));
 }

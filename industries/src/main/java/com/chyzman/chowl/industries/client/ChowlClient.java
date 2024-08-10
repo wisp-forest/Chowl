@@ -51,6 +51,7 @@ public class ChowlClient implements ClientModInitializer {
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlItems.MIRROR_PANEL, new GenericPanelItemRenderer(id("item/mirror_panel_base")));
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlItems.COMPRESSING_PANEL, new GenericPanelItemRenderer(id("item/compressing_panel_base")));
         BuiltinItemRendererRegistry.INSTANCE.register(ChowlItems.ACCESS_PANEL, new AccessPanelItemRenderer(id("item/access_panel_base")));
+        BuiltinItemRendererRegistry.INSTANCE.register(ChowlItems.PACKING_PANEL, new GenericPanelItemRenderer(id("item/packing_panel_base")));
         HandledScreens.register(PanelConfigScreenHandler.TYPE, PanelConfigScreen::new);
 
         SetIngredientComponent.init();
@@ -58,8 +59,8 @@ public class ChowlClient implements ClientModInitializer {
         ModelLoadingPlugin.register(ctx -> {
             ctx.addModels(id("item/drawer_panel_base"), id("item/mirror_panel_base"),
                     id("block/drawer_frame_base"), id("item/compressing_panel_base"),
-                    id("item/access_panel_base"), id("block/drawer_frame"),
-                    id("item/cog"), id("item/lock"), id("item/remove"));
+                    id("item/access_panel_base"), id("item/packing_panel_base"),
+                    id("block/drawer_frame"), id("item/cog"), id("item/lock"), id("item/remove"));
 
             ctx.resolveModel().register(context -> {
                 if (context.id().equals(id("block/drawer_frame"))) {

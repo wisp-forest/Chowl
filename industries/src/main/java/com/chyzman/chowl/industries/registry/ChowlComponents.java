@@ -1,6 +1,7 @@
 package com.chyzman.chowl.industries.registry;
 
 import com.chyzman.chowl.industries.block.DrawerFrameSideState;
+import com.chyzman.chowl.industries.item.component.BareItemsComponent;
 import com.chyzman.chowl.industries.item.component.DisplayingPanelConfig;
 import com.chyzman.chowl.industries.item.component.UpgradeListComponent;
 import com.chyzman.chowl.industries.util.ChowlEndecs;
@@ -57,6 +58,10 @@ public class ChowlComponents implements AutoRegistryContainer<ComponentType<?>> 
 
     public static final ComponentType<List<DrawerFrameSideState>> DRAWER_FRAME_SIDES = ComponentType.<List<DrawerFrameSideState>>builder()
         .endec(DrawerFrameSideState.LIST_ENDEC)
+        .build();
+
+    public static final ComponentType<BareItemsComponent> BARE_ITEMS = ComponentType.<BareItemsComponent>builder()
+        .endec(BareItemsComponent.ENDEC)
         .build();
 
     @Override
