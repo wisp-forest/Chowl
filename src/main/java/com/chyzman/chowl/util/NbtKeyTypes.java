@@ -1,33 +1,46 @@
 package com.chyzman.chowl.util;
 
-import io.wispforest.owo.nbt.NbtKey;
+import io.wispforest.owo.serialization.*;
+import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
-import net.minecraft.nbt.NbtCompound;
 
 import java.math.BigInteger;
-import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 
-@SuppressWarnings("UnstableApiUsage")
 public final class NbtKeyTypes {
-    public static final NbtKey.Type<ItemVariant> ITEM_VARIANT = NbtKey.Type.COMPOUND.then(ItemVariant::fromNbt, TransferVariant::toNbt);
-    public static final NbtKey.Type<BigInteger> BIG_INTEGER = NbtKey.Type.STRING.then(val -> val.isEmpty() ? BigInteger.ZERO : new BigInteger(val), BigInteger::toString);
+    public static final Endec<ItemVariant> ITEM_VARIANT = NbtEndec.COMPOUND.xmap(ItemVariant::fromNbt, TransferVariant::toNbt);
+    public static final Endec<BigInteger> BIG_INTEGER = switchSelfDescribing(
+        Endec.STRING.xmap(str -> {
+            if (str.isEmpty()) return BigInteger.ZERO;
+
+            return new BigInteger(str);
+        }, BigInteger::toString),
+        Endec.BYTES.xmap(BigInteger::new, BigInteger::toByteArray)
+    );
 
     private NbtKeyTypes() {
 
     }
 
-    public static <T> NbtKey.Type<T> fromFactory(Supplier<T> factory, BiConsumer<T, NbtCompound> deserializer,
-                                                 BiConsumer<T, NbtCompound> serializer) {
-        return NbtKey.Type.COMPOUND.then(tag -> {
-            T instance = factory.get();
-            deserializer.accept(instance, tag);
-            return instance;
-        }, instance -> {
-            NbtCompound tag = new NbtCompound();
-            serializer.accept(instance, tag);
-            return tag;
-        });
+    public static <T> Endec<T> switchSelfDescribing(Endec<T> selfDescribing, Endec<T> generic) {
+        return new Endec<>() {
+            @Override
+            public void encode(Serializer<?> serializer, T value) {
+                if (serializer.attributes().contains(SerializationAttribute.SELF_DESCRIBING)) {
+                    selfDescribing.encode(serializer, value);
+                } else {
+                    generic.encode(serializer, value);
+                }
+            }
+
+            @Override
+            public T decode(Deserializer<?> deserializer) {
+                if (deserializer instanceof SelfDescribedDeserializer<?>) {
+                    return selfDescribing.decode(deserializer);
+                } else {
+                    return generic.decode(deserializer);
+                }
+            }
+        };
     }
 }

@@ -68,9 +68,9 @@ public class ChowlRegistry {
     public static final Block CAUTION_BLOCK = registerBlock("caution_block", new Block(FabricBlockSettings.copy(Blocks.IRON_BLOCK).mapColor(DyeColor.YELLOW)));
     public static final Item CAUTION_BLOCK_ITEM = registerItem("caution_block", new BlockItem(CAUTION_BLOCK, new Item.Settings()));
 
-    public static final WitnessedBlastingCriteria WITNESSED_BLASTING_CRITERIA = Criteria.register(new WitnessedBlastingCriteria());
-    public static final LabeledPanelCriteria LABELED_PANEL_CRITERIA = Criteria.register(new LabeledPanelCriteria());
-    public static final InsertedUpgradeCriteria INSERTED_UPGRADE_CRITERIA = Criteria.register(new InsertedUpgradeCriteria());
+    public static final WitnessedBlastingCriteria WITNESSED_BLASTING_CRITERIA = Criteria.register(WitnessedBlastingCriteria.ID.toString(), new WitnessedBlastingCriteria());
+    public static final LabeledPanelCriteria LABELED_PANEL_CRITERIA = Criteria.register(LabeledPanelCriteria.ID.toString(), new LabeledPanelCriteria());
+    public static final InsertedUpgradeCriteria INSERTED_UPGRADE_CRITERIA = Criteria.register(InsertedUpgradeCriteria.ID.toString(), new InsertedUpgradeCriteria());
 
     public static final Identifier ITEMS_INSERTED_STAT = registerCustomStat("items_inserted");
     public static final Identifier ITEMS_EXTRACTED_STAT = registerCustomStat("items_extracted");

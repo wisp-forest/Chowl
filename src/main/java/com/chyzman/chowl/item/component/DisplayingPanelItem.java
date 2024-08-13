@@ -1,7 +1,8 @@
 package com.chyzman.chowl.item.component;
 
-import com.chyzman.chowl.util.NbtKeyTypes;
-import io.wispforest.owo.nbt.NbtKey;
+import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.endec.KeyedEndec;
+import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import io.wispforest.owo.ui.core.Color;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -18,7 +19,7 @@ import java.util.Calendar;
 import static com.chyzman.chowl.Chowl.LABELING_UPGRADE_TAG;
 
 public interface DisplayingPanelItem extends PanelItem {
-    NbtKey<Config> CONFIG = new NbtKey<>("Config", Config.KEY_TYPE);
+    KeyedEndec<Config> CONFIG = Config.ENDEC.keyed("Config", new Config());
 
     default @Nullable Text styleText(ItemStack stack, Text wrapped) {
         Calendar calendar = Calendar.getInstance();
@@ -65,7 +66,15 @@ public interface DisplayingPanelItem extends PanelItem {
     }
 
     class Config {
-        public static final NbtKey.Type<Config> KEY_TYPE = NbtKeyTypes.fromFactory(Config::new, Config::readNbt, Config::writeNbt);
+        public static final Endec<Config> ENDEC = NbtEndec.COMPOUND.xmap(n -> {
+            Config c = new Config();
+            c.readNbt(n);
+            return c;
+        }, c -> {
+            NbtCompound n = new NbtCompound();
+            c.writeNbt(n);
+            return n;
+        });
 
         private boolean hideCount = false;
         private boolean hideCapacity = false;
@@ -161,7 +170,7 @@ public interface DisplayingPanelItem extends PanelItem {
             this.hideButtons = nbt.getBoolean("HideButtons");
             this.showPercentage = nbt.getBoolean("ShowPercentage");
             this.ignoreTemplating = nbt.getBoolean("IgnoreTemplating");
-            this.textStyle = Style.CODEC.parse(NbtOps.INSTANCE, nbt.get("TextStyle"))
+            this.textStyle = Style.Codecs.CODEC.parse(NbtOps.INSTANCE, nbt.get("TextStyle"))
                     .get()
                     .left()
                     .orElse(Style.EMPTY.withColor(Formatting.WHITE));
@@ -177,7 +186,7 @@ public interface DisplayingPanelItem extends PanelItem {
             nbt.putBoolean("ShowPercentage", showPercentage);
             nbt.putBoolean("IgnoreTemplating", ignoreTemplating);
             nbt.put("TextStyle", Util.getResult(
-                    Style.CODEC.encodeStart(NbtOps.INSTANCE, textStyle),
+                    Style.Codecs.CODEC.encodeStart(NbtOps.INSTANCE, textStyle),
                     RuntimeException::new
             ));
         }

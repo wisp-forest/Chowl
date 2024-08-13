@@ -8,7 +8,9 @@ import com.chyzman.chowl.transfer.*;
 import com.chyzman.chowl.util.CompressionManager;
 import com.chyzman.chowl.util.NbtKeyTypes;
 import com.chyzman.chowl.util.VariantUtils;
-import io.wispforest.owo.nbt.NbtKey;
+import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.endec.BuiltInEndecs;
+import io.wispforest.owo.serialization.endec.KeyedEndec;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
@@ -21,7 +23,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Pair;
 import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,11 +32,10 @@ import java.util.List;
 
 import static com.chyzman.chowl.Chowl.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public class CompressingPanelItem extends BasePanelItem implements FilteringPanelItem, LockablePanelItem, DisplayingPanelItem, StoragePanelItem, UpgradeablePanelItem {
-    public static final NbtKey<Item> ITEM = new NbtKey<>("Variant", NbtKey.Type.ofRegistry(Registries.ITEM));
-    public static final NbtKey<BigInteger> COUNT = new NbtKey<>("Count", NbtKeyTypes.BIG_INTEGER);
-    public static final NbtKey<Boolean> LOCKED = new NbtKey<>("Locked", NbtKey.Type.BOOLEAN);
+    public static final KeyedEndec<Item> ITEM = BuiltInEndecs.ofRegistry(Registries.ITEM).keyed("Variant", Items.AIR);
+    public static final KeyedEndec<BigInteger> COUNT = NbtKeyTypes.BIG_INTEGER.keyed("Count", BigInteger.ZERO);
+    public static final KeyedEndec<Boolean> LOCKED = Endec.BOOLEAN.keyed("Locked", false);
 
     public CompressingPanelItem(Item.Settings settings) {
         super(settings);
@@ -43,14 +43,14 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
 
     @Override
     public ItemVariant currentFilter(ItemStack stack) {
-        return ItemVariant.of(stack.getOr(ITEM, Items.AIR));
+        return ItemVariant.of(stack.get(ITEM));
     }
 
     @Override
     public boolean canSetFilter(ItemStack stack, ItemVariant to) {
         if (to.getNbt() != null && !to.getNbt().isEmpty()) return false;
 
-        return stack.getOr(COUNT, BigInteger.ZERO).signum() == 0;
+        return stack.get(COUNT).signum() == 0;
     }
 
     @Override
@@ -63,14 +63,14 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
 
     @Override
     public boolean locked(ItemStack stack) {
-        return stack.getOr(LOCKED, false);
+        return stack.get(LOCKED);
     }
 
     @Override
     public void setLocked(ItemStack stack, boolean locked) {
         stack.put(LOCKED, locked);
 
-        if (!locked && stack.getOr(COUNT, BigInteger.ZERO).equals(BigInteger.ZERO)) {
+        if (!locked && stack.get(COUNT).equals(BigInteger.ZERO)) {
             stack.put(ITEM, Items.AIR);
         }
     }
@@ -80,8 +80,8 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
         var returned = new ArrayList<BlockButton>();
         var stacks = new ArrayList<ItemStack>();
 
-        stacks.add(new ItemStack(stack.getOr(ITEM, Items.AIR)));
-        var node = CompressionManager.getOrCreateNode(stack.getOr(ITEM, Items.AIR));
+        stacks.add(new ItemStack(stack.get(ITEM)));
+        var node = CompressionManager.getOrCreateNode(stack.get(ITEM));
         while (node.next != null) {
             node = node.next;
             stacks.add(node.item.getDefaultStack());
@@ -140,7 +140,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
                                     }
                                 }
                             }
-                            if (stack.getOr(COUNT, BigInteger.ZERO).compareTo(BigInteger.ZERO) > 0) return ActionResult.FAIL;
+                            if (stack.get(COUNT).compareTo(BigInteger.ZERO) > 0) return ActionResult.FAIL;
                         }
 
 
@@ -211,12 +211,12 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
 
     @Override
     public BigInteger fullCapacity(ItemStack stack) {
-        return capacity(stack).multiply(CompressionManager.followUp(stack.getOr(ITEM, Items.AIR)).totalMultiplier());
+        return capacity(stack).multiply(CompressionManager.followUp(stack.get(ITEM)).totalMultiplier());
     }
 
     @Override
     public BigInteger count(ItemStack stack) {
-        return stack.getOr(COUNT, BigInteger.ZERO);
+        return stack.get(COUNT);
     }
 
     @Override
@@ -224,7 +224,6 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
         stack.put(COUNT, count);
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private class BaseStorage extends PanelStorage implements BigSingleSlotStorage<ItemVariant> {
         public BaseStorage(PanelStorageContext ctx) {
             super(ctx);
@@ -235,7 +234,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
             if (VariantUtils.hasNbt(resource)) return BigInteger.ZERO;
             if (CompressionManager.getOrCreateNode(resource.getItem()).previous != null) return BigInteger.ZERO;
 
-            var contained = ctx.stack().getOr(ITEM, Items.AIR);
+            var contained = ctx.stack().get(ITEM);
 
             if (contained == Items.AIR) contained = resource.getItem();
             if (contained != resource.getItem()) return BigInteger.ZERO;
@@ -243,7 +242,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
             updateSnapshots(transaction);
             ctx.stack().put(ITEM, contained);
 
-            var currentCount = ctx.stack().getOr(COUNT, BigInteger.ZERO);
+            var currentCount = ctx.stack().get(COUNT);
             var capacity = bigCapacity();
             var spaceLeft = capacity.subtract(currentCount).max(BigInteger.ZERO);
             var inserted = spaceLeft.min(maxAmount);
@@ -266,12 +265,12 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
         public BigInteger bigExtract(ItemVariant resource, BigInteger maxAmount, TransactionContext tx) {
             if (VariantUtils.hasNbt(resource)) return BigInteger.ZERO;
 
-            var contained = ctx.stack().getOr(ITEM, Items.AIR);
+            var contained = ctx.stack().get(ITEM);
 
             if (contained == Items.AIR) return BigInteger.ZERO;
             if (contained != resource.getItem()) return BigInteger.ZERO;
 
-            var currentCount = ctx.stack().getOr(COUNT, BigInteger.ZERO);
+            var currentCount = ctx.stack().get(COUNT);
 
             BigInteger removed = currentCount.min(maxAmount);
             var newCount = currentCount.subtract(removed);
@@ -280,7 +279,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
             ctx.stack().put(COUNT, newCount);
 
             if (newCount.equals(BigInteger.ZERO)) {
-                if (!ctx.stack().getOr(LOCKED, false)) {
+                if (!ctx.stack().get(LOCKED)) {
                     ctx.stack().put(ITEM, Items.AIR);
                 }
 
@@ -297,12 +296,12 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
 
         @Override
         public ItemVariant getResource() {
-            return ItemVariant.of(ctx.stack().getOr(ITEM, Items.AIR));
+            return ItemVariant.of(ctx.stack().get(ITEM));
         }
 
         @Override
         public BigInteger bigAmount() {
-            return ctx.stack().getOr(COUNT, BigInteger.ZERO);
+            return ctx.stack().get(COUNT);
         }
 
         @Override

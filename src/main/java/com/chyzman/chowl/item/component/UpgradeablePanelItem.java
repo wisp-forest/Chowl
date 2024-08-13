@@ -3,22 +3,22 @@ package com.chyzman.chowl.item.component;
 import com.chyzman.chowl.block.button.BlockButton;
 import com.chyzman.chowl.block.button.ButtonRenderCondition;
 import com.chyzman.chowl.block.button.ButtonRenderer;
-import com.chyzman.chowl.event.UpgradeInsertedEvent;
-import io.wispforest.owo.nbt.NbtKey;
+import com.chyzman.chowl.event.UpgradeInteractionEvents;
 import io.wispforest.owo.ops.ItemOps;
+import io.wispforest.owo.serialization.endec.KeyedEndec;
+import io.wispforest.owo.serialization.format.nbt.NbtEndec;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
 public interface UpgradeablePanelItem extends DisplayingPanelItem {
-    NbtKey.ListKey<ItemStack> UPGRADES_LIST = new NbtKey.ListKey<>("Upgrades", NbtKey.Type.ITEM_STACK);
+    KeyedEndec<NbtList> UPGRADES_LIST = NbtEndec.ELEMENT.xmap(e -> (NbtList) e, e -> e).keyed("Upgrades", new NbtList());
 
     default List<ItemStack> upgrades(ItemStack stack) {
         var returned = new ArrayList<ItemStack>();
@@ -61,7 +61,7 @@ public interface UpgradeablePanelItem extends DisplayingPanelItem {
                             if (world.isClient) return ActionResult.SUCCESS;
                             upgrades.set(finalI, upgrade);
 
-                            UpgradeInsertedEvent.EVENT.invoker().onUpgradeInserted((ServerPlayerEntity) player, frame, useSide, useStack, upgrade);
+                            UpgradeInteractionEvents.UPGRADE_INSERTED.invoker().onUpgradeInserted((ServerPlayerEntity) player, frame, useSide, useStack, upgrade);
                         } else {
                             return ActionResult.FAIL;
                         }
@@ -77,6 +77,7 @@ public interface UpgradeablePanelItem extends DisplayingPanelItem {
                             var upgrade = upgrades.get(finalI);
                             if (world.isClient) return ActionResult.SUCCESS;
                             upgrades.set(finalI, ItemStack.EMPTY);
+                            UpgradeInteractionEvents.UPGRADE_EXTRACTED.invoker().onUpgradeExtracted((ServerPlayerEntity) player, frame, attackedSide, attackedStack, upgrade);
                             player.getInventory().offerOrDrop(upgrade);
                         } else {
                             return ActionResult.FAIL;

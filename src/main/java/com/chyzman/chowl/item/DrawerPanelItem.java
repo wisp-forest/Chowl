@@ -7,7 +7,8 @@ import com.chyzman.chowl.transfer.BigSingleSlotStorage;
 import com.chyzman.chowl.transfer.PanelStorage;
 import com.chyzman.chowl.transfer.PanelStorageContext;
 import com.chyzman.chowl.util.NbtKeyTypes;
-import io.wispforest.owo.nbt.NbtKey;
+import io.wispforest.owo.serialization.Endec;
+import io.wispforest.owo.serialization.endec.KeyedEndec;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
@@ -20,11 +21,10 @@ import java.util.List;
 
 import static com.chyzman.chowl.Chowl.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public class DrawerPanelItem extends BasePanelItem implements PanelItem, FilteringPanelItem, LockablePanelItem, DisplayingPanelItem, UpgradeablePanelItem, StoragePanelItem {
-    public static final NbtKey<ItemVariant> VARIANT = new NbtKey<>("Variant", NbtKeyTypes.ITEM_VARIANT);
-    public static final NbtKey<BigInteger> COUNT = new NbtKey<>("Count", NbtKeyTypes.BIG_INTEGER);
-    public static final NbtKey<Boolean> LOCKED = new NbtKey<>("Locked", NbtKey.Type.BOOLEAN);
+    public static final KeyedEndec<ItemVariant> VARIANT = NbtKeyTypes.ITEM_VARIANT.keyed("Variant", ItemVariant.blank());
+    public static final KeyedEndec<BigInteger> COUNT = NbtKeyTypes.BIG_INTEGER.keyed("Count", BigInteger.ZERO);
+    public static final KeyedEndec<Boolean> LOCKED = Endec.BOOLEAN.keyed("Locked", false);
 
     public DrawerPanelItem(Settings settings) {
         super(settings);
@@ -46,12 +46,12 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public ItemVariant currentFilter(ItemStack stack) {
-        return stack.getOr(VARIANT, ItemVariant.blank());
+        return stack.get(VARIANT);
     }
 
     @Override
     public boolean canSetFilter(ItemStack stack, ItemVariant to) {
-        return stack.getOr(COUNT, BigInteger.ZERO).signum() == 0;
+        return stack.get(COUNT).signum() == 0;
     }
 
     @Override
@@ -62,14 +62,14 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public boolean locked(ItemStack stack) {
-        return stack.getOr(LOCKED, false);
+        return stack.get(LOCKED);
     }
 
     @Override
     public void setLocked(ItemStack stack, boolean locked) {
         stack.put(LOCKED, locked);
 
-        if (!locked && stack.getOr(COUNT, BigInteger.ZERO).equals(BigInteger.ZERO)) {
+        if (!locked && stack.get(COUNT).equals(BigInteger.ZERO)) {
             stack.put(VARIANT, ItemVariant.blank());
         }
     }
@@ -86,7 +86,7 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public BigInteger count(ItemStack stack) {
-        return stack.getOr(COUNT, BigInteger.ZERO);
+        return stack.get(COUNT);
     }
 
     @Override
@@ -102,12 +102,12 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
         @Override
         public BigInteger bigInsert(ItemVariant resource, BigInteger maxAmount, TransactionContext transaction) {
-            var contained = ctx.stack().getOr(VARIANT, ItemVariant.blank());
+            var contained = ctx.stack().get(VARIANT);
 
             if (contained.isBlank()) contained = resource;
             if (!contained.equals(resource)) return BigInteger.ZERO;
 
-            var currentCount = ctx.stack().getOr(COUNT, BigInteger.ZERO);
+            var currentCount = ctx.stack().get(COUNT);
             var capacity = DrawerPanelItem.this.capacity(ctx.stack());
             var spaceLeft = capacity.subtract(currentCount).max(BigInteger.ZERO);
             var inserted = spaceLeft.min(maxAmount);
@@ -130,12 +130,12 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
         @Override
         public BigInteger bigExtract(ItemVariant resource, BigInteger maxAmount, TransactionContext tx) {
-            var contained = ctx.stack().getOr(VARIANT, ItemVariant.blank());
+            var contained = ctx.stack().get(VARIANT);
 
             if (contained.isBlank()) return BigInteger.ZERO;
             if (!contained.equals(resource)) return BigInteger.ZERO;
 
-            var currentCount = ctx.stack().getOr(COUNT, BigInteger.ZERO);
+            var currentCount = ctx.stack().get(COUNT);
 
             BigInteger removed = currentCount.min(maxAmount);
             var newCount = currentCount.subtract(removed);
@@ -144,7 +144,7 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
             ctx.stack().put(COUNT, newCount);
 
             if (newCount.compareTo(BigInteger.ZERO) <= 0) {
-                if (!ctx.stack().getOr(LOCKED, false)) {
+                if (!ctx.stack().get(LOCKED)) {
                     ctx.stack().put(VARIANT, ItemVariant.blank());
                 }
 
@@ -160,12 +160,12 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
         @Override
         public ItemVariant getResource() {
-            return ctx.stack().getOr(VARIANT, ItemVariant.blank());
+            return ctx.stack().get(VARIANT);
         }
 
         @Override
         public BigInteger bigAmount() {
-            return ctx.stack().getOr(COUNT, BigInteger.ZERO);
+            return ctx.stack().get(COUNT);
         }
 
         @Override

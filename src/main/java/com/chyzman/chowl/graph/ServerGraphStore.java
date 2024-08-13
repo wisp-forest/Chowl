@@ -52,8 +52,11 @@ public class ServerGraphStore extends PersistentState implements GraphStore {
 
     public static ServerGraphStore get(ServerWorld world) {
         return world.getPersistentStateManager().getOrCreate(
-            tag -> new ServerGraphStore(world, tag),
-            () -> new ServerGraphStore(world),
+            new Type<>(
+                () -> new ServerGraphStore(world),
+                tag -> new ServerGraphStore(world, tag),
+                null
+            ),
             "chowl_graph"
         );
     }

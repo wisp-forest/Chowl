@@ -16,6 +16,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.explosion.Explosion;
 import nourl.mythicmetals.data.MythicTags;
 import nourl.mythicmetals.entity.BanglumTntEntity;
 import nourl.mythicmetals.misc.BanglumNukeSource;
@@ -84,8 +85,10 @@ public class NukeCoreUpgrade {
                         player.playSound(RegisterSounds.BANGLUM_NUKE_EXPLOSION, SoundCategory.BLOCKS, 5.0F, (1.0F + (world.random.nextFloat() - world.random.nextFloat()) * 0.2F) * 0.7F);
                     }
 
+                    Explosion explosion = new Explosion(world, null, pos.getX(), pos.getY(), pos.getZ(), finalPower, false, Explosion.DestructionType.DESTROY_WITH_DECAY);
+
                     for (var entity : world.getOtherEntities(null, Box.of(pos3d, finalPower * 2, finalPower * 2, finalPower * 2))) {
-                        if (entity.isImmuneToExplosion()) continue;
+                        if (entity.isImmuneToExplosion(explosion)) continue;
                         if (!CommonProtection.canDamageEntity(world, entity, CommonProtection.UNKNOWN, null)) continue;
 
                         double distanceModifier = 1 - Math.sqrt(entity.squaredDistanceTo(pos3d)) / (double) finalPower;

@@ -2,9 +2,7 @@ package com.chyzman.chowl.recipe;
 
 import com.chyzman.chowl.item.DrawerPanelItem;
 import com.chyzman.chowl.item.component.CapacityLimitedPanelItem;
-import com.chyzman.chowl.item.component.FilteringPanelItem;
-import com.chyzman.chowl.item.component.UpgradeablePanelItem;
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import com.chyzman.chowl.item.component.StoragePanelItem;
 import net.minecraft.inventory.RecipeInputInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -12,7 +10,6 @@ import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.SpecialCraftingRecipe;
 import net.minecraft.recipe.book.CraftingRecipeCategory;
 import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,12 +17,11 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-@SuppressWarnings("UnstableApiUsage")
-public class PanelUpgradeRecipe<T extends Item & CapacityLimitedPanelItem & FilteringPanelItem & UpgradeablePanelItem> extends SpecialCraftingRecipe {
-    public final T item;
+public class PanelUpgradeRecipe extends SpecialCraftingRecipe {
+    public final StoragePanelItem item;
 
-    public PanelUpgradeRecipe(Identifier id, CraftingRecipeCategory category, T item) {
-        super(id, category);
+    public PanelUpgradeRecipe(CraftingRecipeCategory category, StoragePanelItem item) {
+        super(category);
         this.item = item;
     }
 
@@ -50,7 +46,7 @@ public class PanelUpgradeRecipe<T extends Item & CapacityLimitedPanelItem & Filt
     }
 
     public @Nullable ItemStack getOutput(RecipeInputInventory inventory) {
-        ArrayList<ItemStack> stacks = new ArrayList<>(inventory.getInputStacks().stream().map(ItemStack::copy).filter(stack -> !stack.isEmpty()).toList());
+        ArrayList<ItemStack> stacks = new ArrayList<>(inventory.getHeldStacks().stream().map(ItemStack::copy).filter(stack -> !stack.isEmpty()).toList());
         if (stacks.size() <= 1) return null;
         for (Item item : stacks.stream().map(ItemStack::getItem).toList()) {
             if (item != this.item) return null;
