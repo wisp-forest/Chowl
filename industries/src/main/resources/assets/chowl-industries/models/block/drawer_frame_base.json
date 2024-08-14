@@ -1,8 +1,8 @@
 {
 	"credit": "Made by chyzman",
 	"textures": {
-		"0": "block/oak_log",
-		"particle": "block/oak_log"
+		"0": "chowl-industries:block/frame",
+		"particle": "block/stripped_oak_log"
 	},
 	"elements": [
 		{
