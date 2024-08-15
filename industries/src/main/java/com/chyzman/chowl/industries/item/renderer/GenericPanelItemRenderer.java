@@ -8,7 +8,9 @@ import com.chyzman.chowl.industries.transfer.BigStorageView;
 import com.chyzman.chowl.industries.transfer.FakeStorageView;
 import com.chyzman.chowl.industries.transfer.PanelStorageContext;
 import com.chyzman.chowl.industries.upgrade.LabelingUpgrade;
+import com.chyzman.chowl.industries.util.BigIntUtils;
 import com.chyzman.chowl.industries.util.ItemScalingUtil;
+import io.wispforest.owo.ui.core.Color;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
@@ -23,10 +25,13 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
+import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
+import org.apache.logging.log4j.core.config.plugins.convert.TypeConverters;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -121,6 +126,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
 
             BigInteger count = BigStorageView.bigAmount(slot);
 
+
             if (!slot.isResourceBlank()) {
                 ItemStack displayStack = slot.getResource().toStack();
                 var properties = ItemScalingUtil.getItemModelProperties(displayStack);
@@ -172,7 +178,13 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                         matrices.scale(MAX_WIDTH / amountWidth, MAX_WIDTH / amountWidth, MAX_WIDTH / amountWidth);
                     }
 
-                    client.textRenderer.draw(panel.styleText(stack, Text.literal(countText.toString())), -amountWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
+                    //TODO make this not hardcoded/jank
+                    var color = Colors.WHITE;
+                    var space = BigStorageView.bigCapacity(slot).subtract(count);
+                    if (space.compareTo(BigInteger.valueOf(displayStack.getMaxCount())) <= 0) color = DyeColor.ORANGE.getSignColor();
+                    if (space.compareTo(BigInteger.ZERO) <= 0) color = DyeColor.RED.getSignColor();
+
+                    client.textRenderer.draw(panel.styleText(stack, Text.literal(countText.toString())).copy().withColor(color), -amountWidth / 2f + 0.5f, 0, Colors.WHITE, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, glowing ? LightmapTextureManager.MAX_LIGHT_COORDINATE : light);
                     matrices.pop();
                 }
 

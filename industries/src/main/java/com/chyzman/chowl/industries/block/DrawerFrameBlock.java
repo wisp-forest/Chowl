@@ -44,6 +44,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
@@ -552,6 +553,29 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
                 .intValue();
     }
 
+    @Override
+    public BlockState getAppearance(
+            BlockState state,
+            BlockRenderView renderView,
+            BlockPos pos,
+            Direction side,
+            @Nullable BlockState sourceState,
+            @Nullable BlockPos sourcePos
+    ) {
+        var finalState = state;
+        if (renderView instanceof ServerWorld serverWorld) {
+            if (serverWorld.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame && frame.templateState() != null) {
+                finalState = frame.templateState();
+            }
+        } else {
+            Object data = renderView.getBlockEntityRenderData(pos);
+            if (data instanceof BlockState templateState) {
+                finalState = templateState;
+            }
+        }
+        return finalState;
+    }
+
     public static int getOrientation(World world, BlockHitResult hitResult) {
         var blockEntity = world.getBlockEntity(hitResult.getBlockPos());
         if (blockEntity instanceof DrawerFrameBlockEntity drawerFrameBlockEntity) {
@@ -595,8 +619,8 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     @Override
     public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
         if (world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame
-            && !(frame.templateState() == null)
-            && frame.templateState() != state) {
+                && !(frame.templateState() == null)
+                && frame.templateState() != state) {
             frame.templateState().getBlock().randomDisplayTick(frame.templateState(), world, pos, random);
         } else {
             super.randomDisplayTick(state, world, pos, random);
@@ -623,5 +647,10 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     @Override
     protected boolean canPathfindThrough(BlockState state, NavigationType type) {
         return false;
+    }
+
+    @Override
+    public boolean hasDynamicBounds() {
+        return true;
     }
 }
