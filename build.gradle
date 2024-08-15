@@ -40,13 +40,13 @@ subprojects {
 
     processResources {
         inputs.property "version", project.version
-        inputs.property "minecraft_version", project.minecraft_version
+        inputs.property "minecraft_version_dep", project.minecraft_version_dep
         inputs.property "loader_version", project.loader_version
         filteringCharset "UTF-8"
 
         filesMatching("fabric.mod.json") {
             expand "version": project.version,
-                    "minecraft_version": project.minecraft_version,
+                    "minecraft_version_dep": project.minecraft_version_dep,
                     "loader_version": project.loader_version
         }
     }
