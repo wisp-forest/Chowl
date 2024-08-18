@@ -9,6 +9,7 @@ import com.chyzman.chowl.industries.transfer.FakeStorageView;
 import com.chyzman.chowl.industries.transfer.PanelStorageContext;
 import com.chyzman.chowl.industries.upgrade.LabelingUpgrade;
 import com.chyzman.chowl.industries.util.BigIntUtils;
+import com.chyzman.chowl.industries.util.EasterEggUtil;
 import com.chyzman.chowl.industries.util.ItemScalingUtil;
 import io.wispforest.owo.ui.core.Color;
 import net.fabricmc.api.EnvType;
@@ -41,7 +42,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.chyzman.chowl.industries.Chowl.GLOWING_UPGRADE_TAG;
-import static com.chyzman.chowl.industries.Chowl.LABELING_UPGRADE_TAG;
 import static com.chyzman.chowl.industries.util.FormatUtil.formatCount;
 
 @Environment(EnvType.CLIENT)
@@ -64,7 +64,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
             matrices.translate(0.5, 0.5, 0.5);
             matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
             if (!RenderGlobals.IN_FRAME && stack.getItem() instanceof UpgradeablePanelItem upgradeable) {
-                var orientation = LabelingUpgrade.rotateOrientationForEasterEggs(0, upgradeable.upgrades(stack).upgradeStacks());
+                var orientation = LabelingUpgrade.rotateOrientationForEasterEggs(0, stack);
                 matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90 * orientation));
             }
 
@@ -86,7 +86,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
 
         if (storage == null) return;
 
-        matrices.translate(0, 0, -1/16f - 0.001);
+        matrices.translate(0, 0, -1 / 16f - 0.001);
         matrices.push();
 
         List<StorageView<ItemVariant>> slots = new ArrayList<>(storage.getSlots());
@@ -138,12 +138,8 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                     matrices.scale(1 / 40f, 1 / 40f, 1 / 40f);
 
                     AtomicReference<MutableText> title = new AtomicReference<>((MutableText) displayStack.getName());
-                    if (stack.getItem() instanceof UpgradeablePanelItem upgradeable) {
-                        if (upgradeable.hasUpgrade(stack, upgrade -> upgrade.isIn(LABELING_UPGRADE_TAG))) {
-                            var label = upgradeable.upgrades(stack).findUpgrade(upgradeStack -> upgradeStack.isIn(LABELING_UPGRADE_TAG) && upgradeStack.contains(DataComponentTypes.CUSTOM_NAME));
-                            if (label != null)
-                                title.set((MutableText) label.getName());
-                        }
+                    if (stack.contains(DataComponentTypes.CUSTOM_NAME) && EasterEggUtil.EasterEgg.findEasterEgg(stack.getName().getString()) == null) {
+                        title.set((MutableText) stack.getName());
                     }
                     var titleWidth = client.textRenderer.getWidth(title.get());
                     if (titleWidth > MAX_WIDTH) {
