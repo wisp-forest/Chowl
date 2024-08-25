@@ -62,7 +62,6 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
 
                 lockedCheckbox.checked(lockable.locked(stack));
                 lockedCheckbox.onChanged().subscribe(nowChecked -> resendConfig());
-                lockedCheckbox.disabled(filtering.currentFilter(stack).isBlank());
             }
         }
 

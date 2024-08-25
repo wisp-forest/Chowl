@@ -9,7 +9,6 @@ import com.chyzman.chowl.industries.recipe.ChowlRecipeSerializers;
 import com.chyzman.chowl.industries.registry.*;
 import com.chyzman.chowl.industries.screen.PanelConfigScreenHandler;
 import com.chyzman.chowl.industries.upgrade.ExplosiveUpgrade;
-import com.chyzman.chowl.industries.upgrade.LabelingUpgrade;
 import com.chyzman.chowl.industries.upgrade.NukeCoreUpgrade;
 import io.wispforest.owo.Owo;
 import io.wispforest.owo.itemgroup.Icon;
@@ -61,7 +60,6 @@ public class Chowl implements ModInitializer {
         Registry.register(Registries.SCREEN_HANDLER, id("panel_config"), PanelConfigScreenHandler.TYPE);
 
         ExplosiveUpgrade.init();
-        LabelingUpgrade.init();
 
         if (FabricLoader.getInstance().isModLoaded("mythicmetals"))
             NukeCoreUpgrade.init();

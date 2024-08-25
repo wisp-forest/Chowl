@@ -7,11 +7,8 @@ import com.chyzman.chowl.industries.item.component.UpgradeablePanelItem;
 import com.chyzman.chowl.industries.transfer.BigStorageView;
 import com.chyzman.chowl.industries.transfer.FakeStorageView;
 import com.chyzman.chowl.industries.transfer.PanelStorageContext;
-import com.chyzman.chowl.industries.upgrade.LabelingUpgrade;
-import com.chyzman.chowl.industries.util.BigIntUtils;
 import com.chyzman.chowl.industries.util.EasterEggUtil;
 import com.chyzman.chowl.industries.util.ItemScalingUtil;
-import io.wispforest.owo.ui.core.Color;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
@@ -26,7 +23,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
 import net.minecraft.util.DyeColor;
@@ -63,10 +59,14 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
 
             matrices.translate(0.5, 0.5, 0.5);
             matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
-            if (!RenderGlobals.IN_FRAME && stack.getItem() instanceof UpgradeablePanelItem upgradeable) {
-                var orientation = LabelingUpgrade.rotateOrientationForEasterEggs(0, stack);
-                matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90 * orientation));
+            if (!RenderGlobals.IN_FRAME) {
+                if (stack.contains(DataComponentTypes.CUSTOM_NAME)) {
+                    var easterEgg = EasterEggUtil.EasterEgg.findEasterEgg(stack.getName().getString());
+                    if (easterEgg != null && easterEgg.orientationModifier != null) {
+                        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90 * easterEgg.orientationModifier.apply(0)));
+                }
             }
+                }
 
             var baseModel = client.getBakedModelManager().getModel(baseModelId);
             if (baseModel != null && RenderGlobals.BAKED.get() != Boolean.TRUE) {

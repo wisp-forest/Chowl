@@ -53,4 +53,9 @@ public abstract class BasePanelItem extends Item implements PanelItem {
         }
         return super.onClicked(stack, otherStack, slot, clickType, player, cursorStackReference);
     }
+
+    @Override
+    public boolean canBeNested() {
+        return false;
+    }
 }
