@@ -59,7 +59,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
 
             if (stack.getItem() instanceof LockablePanelItem lockable) {
                 this.lockedCheckbox = new DisableableCheckboxComponent(Text.translatable("ui.chowl-industries.config_panel.locked"));
-
+                //TODO make this clear the filter slot when unlocked and panel is empty
                 lockedCheckbox.checked(lockable.locked(stack));
                 lockedCheckbox.onChanged().subscribe(nowChecked -> resendConfig());
             }
