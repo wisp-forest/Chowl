@@ -39,6 +39,8 @@ public interface BlockButtonProvider {
     }
 
     default @NotNull ActionResult tryUseButtons(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        if (!player.canInteractWithBlockAt(pos, 0)) return ActionResult.PASS;
+
         BlockButton button = findButton(world, state, hit, DrawerFrameBlock.getOrientation(world, hit));
 
         if (button == null) return ActionResult.PASS;
@@ -47,6 +49,8 @@ public interface BlockButtonProvider {
     }
 
     default @NotNull ActionResult tryAttackButtons(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player) {
+        if (!player.canInteractWithBlockAt(hitResult.getBlockPos(), 0)) return ActionResult.PASS;
+
         BlockButton button = findButton(world, state, hitResult, DrawerFrameBlock.getOrientation(world, hitResult));
         if (button == null) return ActionResult.PASS;
         if (button.attack() == null) return ActionResult.PASS;
@@ -54,6 +58,8 @@ public interface BlockButtonProvider {
     }
 
     default @NotNull ActionResult tryDoubleClickButtons(World world, BlockState state, BlockHitResult hitResult, PlayerEntity player) {
+        if (!player.canInteractWithBlockAt(hitResult.getBlockPos(), 0)) return ActionResult.PASS;
+
         BlockButton button = findButton(world, state, hitResult, DrawerFrameBlock.getOrientation(world, hitResult));
 
         if (button == null) return ActionResult.PASS;
