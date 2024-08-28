@@ -1,24 +1,25 @@
 {
-  "required": true,
-  "minVersion": "0.8",
-  "package": "com.chyzman.chowl.industries.mixin",
-  "plugin": "com.chyzman.chowl.industries.asm.ChowlMixinPlugin",
-  "compatibilityLevel": "JAVA_17",
-  "mixins": [
-    "EntityShapeContextMixin",
-    "ItemEntityMixin",
-    "ServerWorldMixin",
-    "ShapeContextMixin",
-    "lavender.EntryMixin"
-  ],
-  "client": [
-    "client.ClientPlayNetworkHandlerMixin",
-    "client.HeldItemRendererMixin",
-    "client.sodium.AABBConstructingVertexConsumerMixin",
-    "lavender.LandingPageSupplierMixin",
-    "lavender.PageSupplierMixin"
-  ],
-  "injectors": {
-    "defaultRequire": 1
+    "required": true,
+    "minVersion": "0.8",
+    "package": "com.chyzman.chowl.industries.mixin",
+    "plugin": "com.chyzman.chowl.industries.asm.ChowlMixinPlugin",
+    "compatibilityLevel": "JAVA_17",
+    "mixins": [
+        "EntityShapeContextMixin",
+        "ItemEntityMixin",
+        "RegistryEntryReferenceAccessor",
+        "ServerWorldMixin",
+        "ShapeContextMixin",
+        "lavender.EntryMixin"
+    ],
+    "client": [
+        "client.ClientPlayNetworkHandlerMixin",
+        "client.HeldItemRendererMixin",
+        "client.sodium.AABBConstructingVertexConsumerMixin",
+        "lavender.LandingPageSupplierMixin",
+        "lavender.PageSupplierMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
   }
 }
