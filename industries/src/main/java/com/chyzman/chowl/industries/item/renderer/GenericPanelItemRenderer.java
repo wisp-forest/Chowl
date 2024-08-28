@@ -64,9 +64,9 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                     var easterEgg = EasterEggUtil.EasterEgg.findEasterEgg(stack.getName().getString());
                     if (easterEgg != null && easterEgg.orientationModifier != null) {
                         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90 * easterEgg.orientationModifier.apply(0)));
+                    }
                 }
             }
-                }
 
             var baseModel = client.getBakedModelManager().getModel(baseModelId);
             if (baseModel != null && RenderGlobals.BAKED.get() != Boolean.TRUE) {

@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 
-public class InitialCompressingStorage implements SingleSlotStorage<ItemVariant>, FakeStorageView {
+public class InitialCompressingStorage implements SingleSlotStorage<ItemVariant> {
     private final SingleSlotStorage<ItemVariant> base;
 
     public InitialCompressingStorage(SingleSlotStorage<ItemVariant> base) {
@@ -37,17 +37,17 @@ public class InitialCompressingStorage implements SingleSlotStorage<ItemVariant>
 
     @Override
     public boolean isResourceBlank() {
-        return true;
+        return base.isResourceBlank();
     }
 
     @Override
     public ItemVariant getResource() {
-        return ItemVariant.blank();
+        return base.getResource();
     }
 
     @Override
     public long getAmount() {
-        return 0;
+        return base.getAmount();
     }
 
     @Override

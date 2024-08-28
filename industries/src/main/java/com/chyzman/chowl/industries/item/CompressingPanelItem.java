@@ -80,97 +80,7 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
 
     @Override
     public List<BlockButton> listButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
-        var returned = new ArrayList<BlockButton>();
-        var stacks = new ArrayList<ItemStack>();
-
-        stacks.add(new ItemStack(stack.getOrDefault(ChowlComponents.CONTAINED_ITEM, Items.AIR)));
-        var node = CompressionManager.getOrCreateNode(stack.getOrDefault(ChowlComponents.CONTAINED_ITEM, Items.AIR));
-        while (node.next != null) {
-            node = node.next;
-            stacks.add(node.item.getDefaultStack());
-        }
-
-        var gridSize = Math.ceil(Math.sqrt(stacks.size()));
-        for (int i = 0; i < gridSize * gridSize; i++) {
-            var scale = 12 / gridSize;
-            float x = (float) (scale * (i % gridSize));
-            float y = (float) (scale * (gridSize - 1 - (float) (int) (i / gridSize)));
-            int finalI = i;
-            returned.add(PanelItem.buttonBuilder(2 + x, 2 + y, (float) (2 + x + scale), (float) (2 + y + scale))
-                    .onUse((world, frame, useSide, useStack, player) -> {
-                        var stackInHand = player.getStackInHand(Hand.MAIN_HAND);
-                        if (stackInHand.isEmpty()) return ActionResult.PASS;
-                        if (!(stack.getItem() instanceof PanelItem panel)) return ActionResult.PASS;
-
-                        if (world.isClient) return ActionResult.SUCCESS;
-
-                        var storage = panel.getStorage(PanelStorageContext.from(frame, side));
-
-                        try (var tx = Transaction.openOuter()) {
-                            long moved = StorageUtil.move(
-                                    PlayerInventoryStorage.of(player).getHandSlot(Hand.MAIN_HAND),
-                                    storage,
-                                    variant -> true,
-                                    stackInHand.getCount(),
-                                    tx
-                            );
-                            player.increaseStat(ChowlStats.ITEMS_INSERTED_STAT, (int) moved);
-
-                            tx.commit();
-                        }
-
-                        return ActionResult.SUCCESS;
-                    })
-                    .onAttack((world, attackedDrawerFrame, attackedSide, attackedStack, player) -> {
-                        if (stacks.size() <= finalI) return ActionResult.FAIL;
-                        if (canExtractFromButton()) {
-                            var storage = getStorage(PanelStorageContext.from(drawerFrame, side));
-
-                            if (storage == null) return ActionResult.FAIL;
-                            if (world.isClient) return ActionResult.SUCCESS;
-
-                            try (var tx = Transaction.openOuter()) {
-                                var resource = ItemVariant.of(stacks.get(finalI));
-
-                                if (resource != null) {
-                                    var extracted = storage.extract(resource, player.isSneaking() ? resource.toStack().getMaxCount() : 1, tx);
-
-                                    if (extracted > 0) {
-                                        PlayerInventoryStorage.of(player).offerOrDrop(resource, extracted, tx);
-                                        player.increaseStat(ChowlStats.ITEMS_EXTRACTED_STAT, (int) extracted);
-                                        tx.commit();
-                                        return ActionResult.SUCCESS;
-                                    }
-                                }
-                            }
-                            if (stack.getOrDefault(ChowlComponents.COUNT, BigInteger.ZERO).compareTo(BigInteger.ZERO) > 0) return ActionResult.FAIL;
-                        }
-
-
-                        player.getInventory().offerOrDrop(stack);
-                        drawerFrame.stacks.set(side.getId(), DrawerFrameSideState.empty());
-                        drawerFrame.markDirty();
-                        return ActionResult.SUCCESS;
-                    })
-                    .onDoubleClick((world, clickedFrame, clickedSide, clickedStack, player) -> {
-                        var storage = getStorage(PanelStorageContext.from(clickedFrame, side));
-
-                        if (storage == null) return ActionResult.FAIL;
-                        if (currentFilter(stack).isBlank()) return ActionResult.FAIL;
-                        if (world.isClient) return ActionResult.SUCCESS;
-
-                        try (var tx = Transaction.openOuter()) {
-                            long moved = StorageUtil.move(PlayerInventoryStorage.of(player), storage, variant -> true, Long.MAX_VALUE, tx);
-                            player.increaseStat(ChowlStats.ITEMS_INSERTED_STAT, (int) moved);
-
-                            tx.commit();
-
-                            return ActionResult.SUCCESS;
-                        }
-                    }).build()
-            );
-        }
-        return returned;
+        return listStorageButtons(drawerFrame, side, stack);
     }
 
     @Override
@@ -178,15 +88,15 @@ public class CompressingPanelItem extends BasePanelItem implements FilteringPane
         var storages = new ArrayList<SlottedStorage<ItemVariant>>();
         var base = new BaseStorage(ctx);
 
-        storages.add(base);
-
         int steps = CompressionManager.followUp(base.getResource().getItem()).totalSteps();
-        for (int i = 0; i < steps; i++) {
-            storages.add(new CompressingStorage(base, i + 1));
-        }
-
         if (steps == 0) {
             storages.add(new InitialCompressingStorage(base));
+        } else {
+            storages.add(base);
+
+            for (int i = 0; i < steps; i++) {
+                storages.add(new CompressingStorage(base, i + 1));
+            }
         }
 
         return new CombinedSlottedStorage<>(storages);

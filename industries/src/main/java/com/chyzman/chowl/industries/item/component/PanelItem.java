@@ -6,8 +6,10 @@ import com.chyzman.chowl.industries.block.button.BlockButton;
 import com.chyzman.chowl.industries.block.button.BlockButtonBuilder;
 import com.chyzman.chowl.industries.block.button.ButtonRenderCondition;
 import com.chyzman.chowl.industries.block.button.ButtonRenderer;
+import com.chyzman.chowl.industries.registry.ChowlComponents;
 import com.chyzman.chowl.industries.registry.ChowlStats;
 import com.chyzman.chowl.industries.screen.PanelConfigScreenHandler;
+import com.chyzman.chowl.industries.transfer.FakeStorageView;
 import com.chyzman.chowl.industries.transfer.PanelStorageContext;
 import com.chyzman.chowl.industries.util.BlockSideUtils;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
@@ -22,6 +24,7 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -31,6 +34,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -157,6 +161,94 @@ public interface PanelItem {
         };
 
         user.openHandledScreen(factory);
+    }
+
+    default List<BlockButton> listStorageButtons(DrawerFrameBlockEntity drawerFrame, Direction side, ItemStack stack) {
+        var storage = getStorage(PanelStorageContext.from(drawerFrame, side));
+        if (storage == null) return List.of();
+
+        var returned = new ArrayList<BlockButton>();
+
+        List<SingleSlotStorage<ItemVariant>> slots = new ArrayList<>(storage.getSlots());
+        slots.removeIf(x -> (x instanceof FakeStorageView fake && !fake.countInDisplay()));
+
+        var gridSize = Math.ceil(Math.sqrt(slots.size()));
+        for (int i = 0; i < gridSize * gridSize; i++) {
+            var scale = 12 / gridSize;
+            float x = (float) (scale * (i % gridSize));
+            float y = (float) (scale * (gridSize - 1 - (float) (int) (i / gridSize)));
+
+            var slot = i >= slots.size() ? null : slots.get(i);
+
+            returned.add(PanelItem.buttonBuilder(2 + x, 2 + y, (float) (2 + x + scale), (float) (2 + y + scale))
+                .onUse((world, frame, useSide, useStack, player) -> {
+                    var stackInHand = player.getStackInHand(Hand.MAIN_HAND);
+                    if (stackInHand.isEmpty()) return ActionResult.PASS;
+                    if (!(stack.getItem() instanceof PanelItem panel)) return ActionResult.PASS;
+
+                    if (world.isClient) return ActionResult.SUCCESS;
+
+                    try (var tx = Transaction.openOuter()) {
+                        long moved = StorageUtil.move(
+                            PlayerInventoryStorage.of(player).getHandSlot(Hand.MAIN_HAND),
+                            storage,
+                            variant -> true,
+                            stackInHand.getCount(),
+                            tx
+                        );
+                        player.increaseStat(ChowlStats.ITEMS_INSERTED_STAT, (int) moved);
+
+                        tx.commit();
+                    }
+
+                    return ActionResult.SUCCESS;
+                })
+                .onAttack((world, attackedDrawerFrame, attackedSide, attackedStack, player) -> {
+                    if (canExtractFromButton()) {
+                        if (slot == null) return ActionResult.FAIL;
+                        if (world.isClient) return ActionResult.SUCCESS;
+
+                        try (var tx = Transaction.openOuter()) {
+                            var resource = slot.getResource();
+
+                            if (!resource.isBlank()) {
+                                var extracted = slot.extract(resource, player.isSneaking() ? resource.toStack().getMaxCount() : 1, tx);
+
+                                if (extracted > 0) {
+                                    PlayerInventoryStorage.of(player).offerOrDrop(resource, extracted, tx);
+                                    player.increaseStat(ChowlStats.ITEMS_EXTRACTED_STAT, (int) extracted);
+                                    tx.commit();
+                                    return ActionResult.SUCCESS;
+                                }
+                            }
+                        }
+                        if (stack.getOrDefault(ChowlComponents.COUNT, BigInteger.ZERO).compareTo(BigInteger.ZERO) > 0) return ActionResult.FAIL;
+                    }
+
+
+                    player.getInventory().offerOrDrop(stack);
+                    drawerFrame.stacks.set(side.getId(), DrawerFrameSideState.empty());
+                    drawerFrame.markDirty();
+                    return ActionResult.SUCCESS;
+                })
+                .onDoubleClick((world, clickedFrame, clickedSide, clickedStack, player) -> {
+                    if (slot == null) return ActionResult.FAIL;
+                    // TODO: figure out what this line does
+//                    if (currentFilter(stack).isBlank()) return ActionResult.FAIL;
+                    if (world.isClient) return ActionResult.SUCCESS;
+
+                    try (var tx = Transaction.openOuter()) {
+                        long moved = StorageUtil.move(PlayerInventoryStorage.of(player), slot, variant -> true, Long.MAX_VALUE, tx);
+                        player.increaseStat(ChowlStats.ITEMS_INSERTED_STAT, (int) moved);
+
+                        tx.commit();
+
+                        return ActionResult.SUCCESS;
+                    }
+                }).build()
+            );
+        }
+        return returned;
     }
 
     static ButtonBuilder buttonBuilder(float minX, float minY, float maxX, float maxY) {
