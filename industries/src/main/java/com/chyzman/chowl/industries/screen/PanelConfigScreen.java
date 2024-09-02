@@ -138,15 +138,19 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                 });
 
 
-        var verticalFlow = (FlowLayout) Containers.verticalFlow(Sizing.fixed(225), Sizing.content())
+        var verticalFlow = (FlowLayout) Containers.verticalFlow(Sizing.content(), Sizing.content())
                 .<FlowLayout>configure(flowLayout -> {
                     flowLayout.surface(Surface.PANEL);
                     flowLayout.padding(Insets.of(7));
                     flowLayout.horizontalAlignment(HorizontalAlignment.CENTER);
 
-                    flowLayout.child(configFlow);
+                    flowLayout.child(
+                            Containers.stack(Sizing.content(4),Sizing.content(4))
+                                    .child(configFlow)
+                                    .alignment(HorizontalAlignment.CENTER, VerticalAlignment.CENTER)
+                                    .surface(Surface.PANEL_INSET));
 
-                    flowLayout.child(Containers.horizontalFlow(Sizing.fill(100), Sizing.content())
+                    flowLayout.child(Containers.horizontalFlow(Sizing.content(), Sizing.content())
                             .child(inventoryFlow)
                             .horizontalAlignment(HorizontalAlignment.CENTER));
                 });
@@ -183,7 +187,6 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
 //        });
 
         rootComponent.child(Containers.verticalFlow(Sizing.fill(100), Sizing.fill(100))
-                .child(Components.label(Text.translatable("ui.chowl-industries.config_panel.title")))
                 .child(verticalFlow)
                 .surface(Surface.VANILLA_TRANSLUCENT)
                 .verticalAlignment(VerticalAlignment.CENTER)
