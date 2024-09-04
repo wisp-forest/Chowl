@@ -9,12 +9,10 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 public class InteractionValidatingSlot extends Slot {
-    private final int index;
     private final Predicate<ItemStack> condition;
 
     public InteractionValidatingSlot(Inventory inventory, int index, int x, int y, Predicate<ItemStack> condition) {
         super(inventory, index, x, y);
-        this.index = index;
         this.condition = condition;
     }
 
