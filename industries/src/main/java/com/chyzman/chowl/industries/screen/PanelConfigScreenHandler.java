@@ -1,12 +1,8 @@
 package com.chyzman.chowl.industries.screen;
 
-import com.chyzman.chowl.industries.item.component.DisplayingPanelConfig;
-import com.chyzman.chowl.industries.item.component.DisplayingPanelItem;
-import com.chyzman.chowl.industries.item.component.FilteringPanelItem;
-import com.chyzman.chowl.industries.item.component.LockablePanelItem;
+import com.chyzman.chowl.industries.item.component.*;
 import com.chyzman.chowl.industries.registry.ChowlComponents;
 import com.chyzman.chowl.industries.registry.ServerBoundPackets;
-import com.chyzman.chowl.industries.util.ChowlEndecs;
 import io.wispforest.owo.client.screens.ScreenUtils;
 import io.wispforest.owo.client.screens.SlotGenerator;
 import io.wispforest.owo.client.screens.SyncedProperty;
@@ -23,13 +19,15 @@ import java.util.function.Consumer;
 public class PanelConfigScreenHandler extends ScreenHandler {
 
     final SyncedProperty<ItemStack> stack;
-    public PlayerInventory inventory;
+    public PlayerInventory playerInventory;
+    public UpgradesInventory upgradesInventory;
 
     public static final ExtendedScreenHandlerType<PanelConfigScreenHandler, ItemStack> TYPE = new ExtendedScreenHandlerType<>(PanelConfigScreenHandler::new, ItemStack.OPTIONAL_PACKET_CODEC);
 
     public PanelConfigScreenHandler(int syncId, PlayerInventory playerInventory, ItemStack stack, @Nullable Consumer<ItemStack> updater) {
         super(TYPE, syncId);
-        this.inventory = playerInventory;
+        this.playerInventory = playerInventory;
+        this.upgradesInventory = new UpgradesInventory();
         this.stack = this.createProperty(ItemStack.class, stack);
 
         ServerBoundPackets.addEndecs(endecBuilder());
@@ -60,12 +58,16 @@ public class PanelConfigScreenHandler extends ScreenHandler {
             this.stack.markDirty();
         });
 
-        SlotGenerator.begin(this::addSlot, 8, 84)
-            .slotFactory(
-                (inventory1, index, x, y) -> new DoubleValidatingSlot(inventory1, index, x, y,
-                        stack1 -> true,
-                        stack1 -> !(stack1.equals(stack))))
-            .playerInventory(playerInventory);
+        var generator = SlotGenerator.begin(this::addSlot, 8, 84);
+
+        if (stack.getItem() instanceof UpgradeablePanelItem upgradeable) {
+            generator.slotFactory(UpgradeSlot::new);
+            generator.grid(upgradesInventory, 0, 8, 1);
+            generator.defaultSlotFactory();
+        }
+
+        generator.slotFactory((inv, index, x, y) -> new InteractionValidatingSlot(inv, index, x, y,stack1 -> !stack1.equals(stack)));
+        generator.playerInventory(playerInventory);
 
         if (updater != null) {
             this.stack.observe(updater);
@@ -78,7 +80,8 @@ public class PanelConfigScreenHandler extends ScreenHandler {
 
     @Override
     public ItemStack quickMove(PlayerEntity player, int slot) {
-        return ScreenUtils.handleSlotTransfer(this, slot, 0);
+        //TODO make it so quick moving into upgrade slots will only ever move one item
+        return ScreenUtils.handleSlotTransfer(this, slot, 8);
     }
 
     @Override
@@ -86,7 +89,7 @@ public class PanelConfigScreenHandler extends ScreenHandler {
         return true;
     }
 
-    public record ConfigFilter(ItemStack newFilter) { }
+    public record ConfigFilter(ItemStack newFilter) {}
 
-    public record ConfigConfig(DisplayingPanelConfig displayConfig, boolean locked) { }
+    public record ConfigConfig(DisplayingPanelConfig displayConfig, boolean locked) {}
 }

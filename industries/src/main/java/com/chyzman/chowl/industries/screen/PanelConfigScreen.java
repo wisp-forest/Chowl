@@ -1,12 +1,9 @@
 package com.chyzman.chowl.industries.screen;
 
-import com.chyzman.chowl.industries.client.AutoGridLayout;
-import com.chyzman.chowl.industries.client.DisableableCheckboxComponent;
-import com.chyzman.chowl.industries.item.component.*;
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.component.ItemComponent;
-import io.wispforest.owo.ui.component.SmallCheckboxComponent;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.container.GridLayout;
@@ -14,25 +11,12 @@ import io.wispforest.owo.ui.container.StackLayout;
 import io.wispforest.owo.ui.core.*;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
 import static com.chyzman.chowl.industries.Chowl.id;
 
 public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelConfigScreenHandler> {
-    private FakeSlotComponent filterSlot;
-    private DisableableCheckboxComponent lockedCheckbox;
-    private SmallCheckboxComponent showCountCheckBox;
-    private SmallCheckboxComponent showCapacityCheckBox;
-    private SmallCheckboxComponent showItemCheckBox;
-    private SmallCheckboxComponent showNameCheckBox;
-    private SmallCheckboxComponent showPercentageCheckBox;
-    private SmallCheckboxComponent hideUpgradesCheckBox;
-    private SmallCheckboxComponent hideButtonsCheckBox;
-    private SmallCheckboxComponent ignoreTemplatingCheckBox;
-
-    private boolean ignoreChanges = false;
 
     public PanelConfigScreen(PanelConfigScreenHandler screenHandler, PlayerInventory inventory, Text title) {
         super(screenHandler, inventory, title);
@@ -47,88 +31,19 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
     protected void build(FlowLayout rootComponent) {
         ItemStack stack = handler.stack.get();
 
-//        if (stack.getItem() instanceof FilteringPanelItem filtering) {
-//            this.filterSlot = new FakeSlotComponent(filtering.currentFilter(stack).toStack());
-//
-//            filterSlot.mouseDown().subscribe((mouseX, mouseY, button) -> {
-//                if (button == 0) {
-//                    handler.sendMessage(new PanelConfigScreenHandler.ConfigFilter(handler.getCursorStack()));
-//                }
-//                return true;
-//            });
-//            filterSlot.setTooltipFromStack(true);
-//            filterSlot.id("filter-slot");
-//
-//            if (stack.getItem() instanceof LockablePanelItem lockable) {
-//                this.lockedCheckbox = new DisableableCheckboxComponent(Text.translatable("ui.chowl-industries.config_panel.locked"));
-//                //TODO make this clear the filter slot when unlocked and panel is empty
-//                lockedCheckbox.checked(lockable.locked(stack));
-//                lockedCheckbox.onChanged().subscribe(nowChecked -> resendConfig());
-//            }
-//        }
-//
-//        if (stack.getItem() instanceof DisplayingPanelItem displaying) {
-//            var config = DisplayingPanelItem.getConfig(stack);
-//
-//            this.showCountCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_count"));
-//            showCountCheckBox.checked(!config.hideCount());
-//            showCountCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
-//
-//            this.showCapacityCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_capacity"));
-//            showCapacityCheckBox.checked(!config.hideCapacity());
-//            showCapacityCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
-//
-//            if (displaying.supportsHideItem()) {
-//                this.showItemCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_item"));
-//                showItemCheckBox.checked(!config.hideItem());
-//                showItemCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
-//            }
-//
-//            if (displaying.supportsHideName()) {
-//                this.showNameCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_name"));
-//                showNameCheckBox.checked(!config.hideName());
-//                showNameCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
-//            }
-//
-//            this.showPercentageCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.show_percentage"));
-//            showPercentageCheckBox.checked(config.showPercentage());
-//            showPercentageCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
-//
-//            if (stack.getItem() instanceof UpgradeablePanelItem) {
-//                this.hideUpgradesCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.hide_upgrades"));
-//                hideUpgradesCheckBox.checked(config.hideUpgrades());
-//                hideUpgradesCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
-//            }
-//
-//            this.hideButtonsCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.hide_buttons"));
-//            hideButtonsCheckBox.checked(config.hideButtons());
-//            hideButtonsCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
-//
-//            this.ignoreTemplatingCheckBox = Components.smallCheckbox(Text.translatable("ui.chowl-industries.config_panel.ignore_templating"));
-//            ignoreTemplatingCheckBox.checked(config.ignoreTemplating());
-//            ignoreTemplatingCheckBox.onChanged().subscribe(nowChecked -> resendConfig());
-//        }
-
-        var inventoryFlow = Containers.grid(Sizing.content(), Sizing.content(), 4, 9)
-                .<GridLayout>configure(gridLayout -> {
-                    gridLayout.margins(Insets.top(7));
-                    for (int i = 0; i < handler.inventory.main.size(); i++) {
-                        var slot = this.slotAsComponent(i);
-                        slot.margins(Insets.of(1));
-                        if (i > 26) slot.margins(Insets.of(1).withTop(5));
-                        gridLayout.child(slot, i / 9, i % 9);
-                        gridLayout.surface(Surface.tiled(id("textures/gui/container/inventory.png"), 162, 76));
-                    }
-                });
-
         var configFlow = Containers.stack(Sizing.fixed(160), Sizing.fixed(160))
                 .<StackLayout>configure(layout -> {
                     layout.alignment(HorizontalAlignment.CENTER, VerticalAlignment.CENTER);
                     layout.child(Components.item(stack.getItem().getDefaultStack()).sizing(Sizing.fixed(120)));
 
                     var upgradesFlow = Containers.horizontalFlow(Sizing.fill(), Sizing.fixed(20));
+                    upgradesFlow.surface((context, component) -> {
+                        RenderSystem.enableBlend();
+                        Surface.tiled(id("textures/gui/container/upgrades.png"), 160, 20).draw(context, component);
+                    });
                     for (int i = 0; i < 8; i++) {
-                        upgradesFlow.child(Components.texture(id("textures/gui/container/upgrade_slot.png"), 0, 0, 18, 18, 18,18).blend(true).margins(Insets.of(1)));
+                        var slot = this.slotAsComponent(i).margins(Insets.of(2));
+                        upgradesFlow.child(slot);
                     }
 
                     layout.child(upgradesFlow);
@@ -137,6 +52,17 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                     layout.surface(Surface.tiled(id("textures/block/frame.png"), 160, 160));
                 });
 
+        var inventoryFlow = Containers.grid(Sizing.content(), Sizing.content(), 4, 9)
+                .<GridLayout>configure(gridLayout -> {
+                    gridLayout.margins(Insets.top(7));
+                    for (int i = 0; i < handler.playerInventory.main.size(); i++) {
+                        var slot = this.slotAsComponent(i + 8);
+                        slot.margins(Insets.of(1));
+                        if (i > 26) slot.margins(Insets.of(1).withTop(5));
+                        gridLayout.child(slot, i / 9, i % 9);
+                        gridLayout.surface(Surface.tiled(id("textures/gui/container/inventory.png"), 162, 76));
+                    }
+                });
 
         var verticalFlow = (FlowLayout) Containers.verticalFlow(Sizing.content(), Sizing.content())
                 .<FlowLayout>configure(flowLayout -> {
@@ -155,37 +81,6 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                             .horizontalAlignment(HorizontalAlignment.CENTER));
                 });
 
-
-//        handler.stack.observe(newStack -> {
-//            try {
-//                ignoreChanges = true;
-//
-//                if (newStack.getItem() instanceof FilteringPanelItem filtering) {
-//                    filterSlot.stack(filtering.currentFilter(newStack).toStack());
-//
-//                    if (newStack.getItem() instanceof LockablePanelItem lockable) {
-//                        lockedCheckbox.checked(lockable.locked(newStack));
-//                        lockedCheckbox.disabled(filtering.currentFilter(newStack).isBlank());
-//                    }
-//                }
-//
-//                if (stack.getItem() instanceof DisplayingPanelItem) {
-//                    var newConfig = DisplayingPanelItem.getConfig(newStack);
-//
-//                    showCountCheckBox.checked(!newConfig.hideCount());
-//                    showCapacityCheckBox.checked(!newConfig.hideCapacity());
-//                    showItemCheckBox.checked(!newConfig.hideItem());
-//                    showNameCheckBox.checked(!newConfig.hideName());
-//                    showPercentageCheckBox.checked(newConfig.showPercentage());
-//                    hideUpgradesCheckBox.checked(newConfig.hideUpgrades());
-//                    hideButtonsCheckBox.checked(newConfig.hideButtons());
-//                    ignoreTemplatingCheckBox.checked(newConfig.ignoreTemplating());
-//                }
-//            } finally {
-//                ignoreChanges = false;
-//            }
-//        });
-
         rootComponent.child(Containers.verticalFlow(Sizing.fill(100), Sizing.fill(100))
                 .child(verticalFlow)
                 .surface(Surface.VANILLA_TRANSLUCENT)
@@ -194,25 +89,25 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
         );
     }
 
-    private void resendConfig() {
-        if (ignoreChanges) return;
-
-        var displayConfig = new DisplayingPanelConfig.Builder();
-        boolean locked = false;
-
-        if (lockedCheckbox != null) locked = lockedCheckbox.checked();
-        if (showCountCheckBox != null) displayConfig.hideCount(!showCountCheckBox.checked());
-        if (showCapacityCheckBox != null) displayConfig.hideCapacity(!showCapacityCheckBox.checked());
-        if (showItemCheckBox != null) displayConfig.hideItem(!showItemCheckBox.checked());
-        if (showNameCheckBox != null) displayConfig.hideName(!showNameCheckBox.checked());
-        if (showPercentageCheckBox != null) displayConfig.showPercentage(showPercentageCheckBox.checked());
-        if (hideUpgradesCheckBox != null) displayConfig.hideUpgrades(hideUpgradesCheckBox.checked());
-        if (hideButtonsCheckBox != null) displayConfig.hideButtons(hideButtonsCheckBox.checked());
-        if (ignoreTemplatingCheckBox != null) displayConfig.ignoreTemplating(ignoreTemplatingCheckBox.checked());
-
-
-        handler.sendMessage(new PanelConfigScreenHandler.ConfigConfig(displayConfig.build(), locked));
-    }
+//    private void resendConfig() {
+//        if (ignoreChanges) return;
+//
+//        var displayConfig = new DisplayingPanelConfig.Builder();
+//        boolean locked = false;
+//
+//        if (lockedCheckbox != null) locked = lockedCheckbox.checked();
+//        if (showCountCheckBox != null) displayConfig.hideCount(!showCountCheckBox.checked());
+//        if (showCapacityCheckBox != null) displayConfig.hideCapacity(!showCapacityCheckBox.checked());
+//        if (showItemCheckBox != null) displayConfig.hideItem(!showItemCheckBox.checked());
+//        if (showNameCheckBox != null) displayConfig.hideName(!showNameCheckBox.checked());
+//        if (showPercentageCheckBox != null) displayConfig.showPercentage(showPercentageCheckBox.checked());
+//        if (hideUpgradesCheckBox != null) displayConfig.hideUpgrades(hideUpgradesCheckBox.checked());
+//        if (hideButtonsCheckBox != null) displayConfig.hideButtons(hideButtonsCheckBox.checked());
+//        if (ignoreTemplatingCheckBox != null) displayConfig.ignoreTemplating(ignoreTemplatingCheckBox.checked());
+//
+//
+//        handler.sendMessage(new PanelConfigScreenHandler.ConfigConfig(displayConfig.build(), locked));
+//    }
 
     @Override
     public boolean shouldPause() {
