@@ -16,6 +16,10 @@ import static com.chyzman.chowl.industries.Chowl.CHOWL_CONFIG;
 
 public final class FormatUtil {
 
+    //TODO add config to make it put commas where they should be
+    //TODO make count also formatted with it's own config (decide if it should have it's own format)
+    //TODO make it so holding shift or something disables formatting in tooltips idk
+
     public static String formatCount(BigInteger count) {
         var digits = BigIntUtils.decimalDigits(count);
 
