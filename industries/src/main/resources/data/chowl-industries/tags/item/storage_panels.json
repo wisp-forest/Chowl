@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "chowl-industries:drawer_panel",
+    "chowl-industries:compressing_panel",
+    "chowl-industries:packing_panel"
+  ]
+}

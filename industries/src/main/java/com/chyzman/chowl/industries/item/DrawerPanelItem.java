@@ -84,7 +84,7 @@ public class DrawerPanelItem extends BasePanelItem implements PanelItem, Filteri
 
     @Override
     public BigInteger baseCapacity() {
-        return new BigInteger(CHOWL_CONFIG.base_panel_capacity());
+        return new BigInteger(CHOWL_CONFIG.base_capacity.drawer());
     }
 
     @Override

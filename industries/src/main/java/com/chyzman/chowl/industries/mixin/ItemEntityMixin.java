@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static com.chyzman.chowl.industries.Chowl.BLAST_PROOF_UPGRADE_TAG;
-import static com.chyzman.chowl.industries.Chowl.NETHERITE_UPGRADE_TAG;
+import static com.chyzman.chowl.industries.Chowl.FIREPROOF_UPGRADE_TAG;
 
 @Mixin(ItemEntity.class)
 public abstract class ItemEntityMixin {
@@ -24,7 +24,7 @@ public abstract class ItemEntityMixin {
     @Inject(method = "isFireImmune", at = @At("HEAD"), cancellable = true)
     public void noBurny(CallbackInfoReturnable<Boolean> cir) {
         if (getStack().getItem() instanceof UpgradeablePanelItem panel) {
-            if (panel.hasUpgrade(getStack(), stack -> this.getStack().contains(DataComponentTypes.FIRE_RESISTANT) || stack.isIn(NETHERITE_UPGRADE_TAG))) cir.setReturnValue(true);
+            if (panel.hasUpgrade(getStack(), stack -> this.getStack().contains(DataComponentTypes.FIRE_RESISTANT) || stack.isIn(FIREPROOF_UPGRADE_TAG))) cir.setReturnValue(true);
         }
     }
 

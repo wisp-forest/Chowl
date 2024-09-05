@@ -2,6 +2,7 @@ package com.chyzman.chowl.industries.block;
 
 import com.chyzman.chowl.core.ext.*;
 import com.chyzman.chowl.core.registry.ChowlCoreComponents;
+import com.chyzman.chowl.industries.Chowl;
 import com.chyzman.chowl.industries.block.button.BlockButton;
 import com.chyzman.chowl.industries.block.button.BlockButtonProvider;
 import com.chyzman.chowl.industries.block.button.ButtonRenderCondition;
@@ -58,8 +59,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.ToIntFunction;
 
+import static com.chyzman.chowl.industries.Chowl.*;
 import static com.chyzman.chowl.industries.item.component.LockablePanelItem.LOCK_BUTTON;
-import static com.chyzman.chowl.industries.Chowl.id;
 
 public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, BlockButtonProvider, AttackInteractionReceiver, DoubleClickableBlock, SidedComparatorOutput, ExtendedParticleSpriteBlock, ExtendedSoundGroupBlock, BreakProgressMaskingBlock {
 
@@ -96,7 +97,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
     public static final BlockButton DEFAULT_PANEL_BUTTON = PanelItem.buttonBuilder(2, 2, 14, 14)
             .onUse((world, drawerFrame, side, stack, player) -> {
                 var stacks = drawerFrame.stacks;
-                var stackInHand = player.getStackInHand(Hand.MAIN_HAND);
+                var stackInHand = player.getStackInHand(player.getActiveHand());
 
                 if (stackInHand.isEmpty()) return ActionResult.PASS;
                 if (!stack.isEmpty()) return ActionResult.PASS;
@@ -153,7 +154,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
                 var side = BlockSideUtils.getSide(hit);
                 var stackInHand = player.getStackInHand(player.getActiveHand());
-                if (stackInHand.getItem() instanceof PanelItem) {
+                if (stackInHand.isIn(REPLACES_BLANK_PANEL_TAG)) {
                     if (!world.isClient) {
                         var temp = stackInHand.copy();
                         temp.setCount(1);
@@ -359,9 +360,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        if (context.isHolding(asItem())) return VoxelShapes.fullCube();
-        if (((ShapeContextExtended) context).isHolding(stack -> stack.getItem() instanceof PanelItem)
-                && !context.isDescending()) return VoxelShapes.fullCube();
+        if (((ShapeContextExtended) context).isHolding(stack -> stack.isIn(PLACEABLE_ON_FRAMES_TAG)) && !context.isDescending()) return VoxelShapes.fullCube();
 
         if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame)) return BASE;
 
@@ -393,7 +392,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (player.getStackInHand(Hand.MAIN_HAND).isOf(asItem())) return ActionResult.PASS;
+        if (player.getStackInHand(Hand.MAIN_HAND).isIn(IGNORES_PANELS_TAG)) return ActionResult.PASS;
 
         var side = BlockSideUtils.getSide(hit);
         var orientation = 0;
@@ -450,6 +449,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
         List<BlockButton> buttons = new ArrayList<>();
 
         if (selected.isBlank()) {
+            //TODO figure out how to make this change if the player is holding something in replaces_blank_panel
             buttons.add(BLANK_PANEL_BUTTON);
         } else if (selected.stack().isOf(ChowlItems.PHANTOM_PANEL)) {
             buttons.add(FULL_REMOVE_BUTTON);

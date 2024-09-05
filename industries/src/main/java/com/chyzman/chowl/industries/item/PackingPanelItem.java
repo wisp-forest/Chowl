@@ -23,6 +23,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntryList;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.ActionResult;
@@ -34,6 +35,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,7 +54,7 @@ public class PackingPanelItem extends BasePanelItem implements PanelItem, Displa
         } else {
             List<Storage> storages = new ArrayList<>(items.entries().size());
 
-            for (Item item : items.entries().keySet()) storages.add(new Storage(ctx, item));
+            for (Item item : items.entries().keySet().stream().sorted(Comparator.comparing(Registries.ITEM::getRawId)).toList()) storages.add(new Storage(ctx, item));
 
             return new CombinedSlottedStorage<>(storages);
         }
@@ -75,7 +77,7 @@ public class PackingPanelItem extends BasePanelItem implements PanelItem, Displa
 
     @Override
     public BigInteger baseCapacity() {
-        return new BigInteger(CHOWL_CONFIG.base_panel_capacity());
+        return new BigInteger(CHOWL_CONFIG.base_capacity.packing());
     }
 
     @SuppressWarnings({"unchecked", "deprecation"})
@@ -178,8 +180,6 @@ public class PackingPanelItem extends BasePanelItem implements PanelItem, Displa
         }
 
         @Override
-        public BigInteger bigCapacity() {
-            return PackingPanelItem.this.capacity(ctx.stack());
-        }
+        public BigInteger bigCapacity() {return PackingPanelItem.this.capacity(ctx.stack());}
     }
 }

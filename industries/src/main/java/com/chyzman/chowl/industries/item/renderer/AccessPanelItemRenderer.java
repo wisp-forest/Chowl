@@ -32,7 +32,7 @@ public class AccessPanelItemRenderer extends GenericPanelItemRenderer {
     }
 
     @Override
-    protected void drawDisplay(ItemStack stack, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    protected void drawDisplays(ItemStack stack, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         var customization = DisplayingPanelItem.getConfig(stack);
         if (customization.hideCount() && customization.hideCapacity() && !customization.showPercentage()) return;
 

@@ -29,14 +29,22 @@ public class Chowl implements ModInitializer {
     public static final String MODID = "chowl-industries";
     public static final ChowlIndustriesConfig CHOWL_CONFIG = ChowlIndustriesConfig.createAndLoad();
 
-    public static final TagKey<Item> EXPLOSIVE_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("explosive_panel_upgrade"));
-    public static final TagKey<Item> FIERY_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("fiery_panel_upgrade"));
-    public static final TagKey<Item> HOPPER_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("hopper_panel_upgrade"));
-    public static final TagKey<Item> LAVA_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("lava_voiding_panel_upgrade"));
-    public static final TagKey<Item> NETHERITE_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("netherite_panel_upgrade"));
-    public static final TagKey<Item> VOID_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("true_voiding_panel_upgrade"));
-    public static final TagKey<Item> GLOWING_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("glowing_panel_upgrade"));
-    public static final TagKey<Item> BLAST_PROOF_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("blast_proof_panel_upgrade"));
+    public static final TagKey<Item> PANELS_TAG = TagKey.of(RegistryKeys.ITEM, id("panels"));
+    public static final TagKey<Item> STORAGE_PANELS_TAG = TagKey.of(RegistryKeys.ITEM, id("storage_panels"));
+    public static final TagKey<Item> INTERFACING_PANELS_TAG = TagKey.of(RegistryKeys.ITEM, id("interfacing_panels"));
+    public static final TagKey<Item> COSMETIC_PANELS_TAG = TagKey.of(RegistryKeys.ITEM, id("cosmetic_panels"));
+
+    public static final TagKey<Item> EXPLOSIVE_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("panel_upgrade/explosive"));
+    public static final TagKey<Item> FIERY_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("panel_upgrade/fiery"));
+    public static final TagKey<Item> LAVA_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("panel_upgrade/lava_voiding"));
+    public static final TagKey<Item> FIREPROOF_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("panel_upgrade/fireproof"));
+    public static final TagKey<Item> VOID_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("panel_upgrade/true_voiding"));
+    public static final TagKey<Item> GLOWING_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("panel_upgrade/glowing"));
+    public static final TagKey<Item> BLAST_PROOF_UPGRADE_TAG = TagKey.of(RegistryKeys.ITEM, id("panel_upgrade/blast_proof"));
+
+    public static final TagKey<Item> PLACEABLE_ON_FRAMES_TAG = TagKey.of(RegistryKeys.ITEM, id("placeable_on_frames"));
+    public static final TagKey<Item> IGNORES_PANELS_TAG = TagKey.of(RegistryKeys.ITEM, id("ignores_panels"));
+    public static final TagKey<Item> REPLACES_BLANK_PANEL_TAG = TagKey.of(RegistryKeys.ITEM, id("replaces_blank_panel"));
 
 
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(ChannelUtil.getChannelId(MODID))

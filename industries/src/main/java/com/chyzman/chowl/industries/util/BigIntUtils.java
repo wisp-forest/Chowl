@@ -36,13 +36,6 @@ public final class BigIntUtils {
         return CAPACITY_CACHE.getUnchecked(new Pair<>(exponent, multiplier));
     }
 
-    public static BigInteger decimalDigitsLog2(BigInteger log2) {
-        return new BigDecimal(log2)
-            .multiply(LOG10_OF_2)
-            .toBigInteger()
-            .add(BigInteger.valueOf(1));
-    }
-
     public static BigInteger pow(BigInteger base, BigInteger exponent) {
         BigInteger result = BigInteger.ONE;
         while (exponent.signum() > 0) {
@@ -51,5 +44,9 @@ public final class BigIntUtils {
             exponent = exponent.shiftRight(1);
         }
         return result;
+    }
+
+    public static int decimalDigits(BigInteger bigInteger) {
+        return bigInteger.abs().toString().length();
     }
 }

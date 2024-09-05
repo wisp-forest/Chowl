@@ -24,14 +24,39 @@
   "text.config.chowl-industries.title": "Chowl Industries",
   "text.config.chowl-industries.section.Client": "Client",
   "text.config.chowl-industries.section.Server": "Server",
-  "text.config.chowl-industries.option.max_digits_before_exponents": "Maximum digits to display before using exponents",
-  "text.config.chowl-industries.option.max_digits_before_exponents.tooltip": "The maximum number of digits that will be displayed as a capacity before using exponents",
+
+  "text.config.chowl-industries.option.abbreviation_mode": "Abbreviation Mode",
+
+  "text.config.chowl-industries.enum.abbreviationMode.letters": "Letters",
+  "text.config.chowl-industries.enum.abbreviationMode.letters.tooltip": "Abbreviate with letters/ne.g. 1k, 1M",
+
+  "text.config.chowl-industries.enum.abbreviationMode.exponents": "Exponents",
+  "text.config.chowl-industries.enum.abbreviationMode.exponents.tooltip": "Abbreviate with exponents/ne.g. 2^11, 2^64",
+
+  "text.config.chowl-industries.enum.abbreviationMode.scientific": "Scientific",
+  "text.config.chowl-industries.enum.abbreviationMode.scientific.tooltip": "Abbreviate with scientific notation/ne.g. 1.0e3, 1.0e6",
+
+  "text.config.chowl-industries.enum.abbreviationMode.none": "None",
+  "text.config.chowl-industries.enum.abbreviationMode.none.tooltip": "Do not abbreviate",
+
+
+  "text.config.chowl-industries.option.remove_panels_when_empty": "Remove panels when empty",
+  "text.config.chowl-industries.option.remove_panels_when_empty.tooltip": "Removes panels when attempting to extract from an empty panel",
+
   "text.config.chowl-industries.option.cringe_ahh_book": "Cringe ahh book",
   "text.config.chowl-industries.option.cringe_ahh_book.tooltip": "Switches the book to default Lavender rendering",
-  "text.config.chowl-industries.option.base_panel_capacity": "Base panel capacity",
-  "text.config.chowl-industries.option.base_panel_capacity.tooltip": "The base capacity of drawer panels",
-  "text.config.chowl-industries.option.base_compressing_panel_capacity": "Base panel capacity",
-  "text.config.chowl-industries.option.base_compressing_panel_capacity.tooltip": "The base capacity of compressing panels",
+
+  "text.config.chowl-industries.category.base_capacity": "Base Capacity",
+
+  "text.config.chowl-industries.option.base_capacity.drawer": "Base Panel capacity",
+  "text.config.chowl-industries.option.base_capacity.drawer.tooltip": "The base capacity of drawer panels",
+
+  "text.config.chowl-industries.option.base_capacity.compressing": "Base Compressing Panel Capacity",
+  "text.config.chowl-industries.option.base_capacity.compressing.tooltip": "The base capacity of compressing panels",
+
+  "text.config.chowl-industries.option.base_capacity.packing": "Base Packing Panel Capacity",
+  "text.config.chowl-industries.option.base_capacity.packing.tooltip": "The base capacity of packing panels",
+
   "text.config.chowl-industries.option.double_click_templating": "Double click templating",
   "text.config.chowl-industries.option.double_click_templating.tooltip": "Allows double clicking frames to apply a template to the entire network",
   "advancements.chowl-industries.root.title": "Chowl Industries",

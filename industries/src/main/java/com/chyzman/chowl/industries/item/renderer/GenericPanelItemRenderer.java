@@ -2,8 +2,11 @@ package com.chyzman.chowl.industries.item.renderer;
 
 import com.chyzman.chowl.core.client.util.RenderCounter;
 import com.chyzman.chowl.industries.client.RenderGlobals;
+import com.chyzman.chowl.industries.item.PackingPanelItem;
+import com.chyzman.chowl.industries.item.component.BareItemsComponent;
 import com.chyzman.chowl.industries.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.industries.item.component.UpgradeablePanelItem;
+import com.chyzman.chowl.industries.registry.ChowlComponents;
 import com.chyzman.chowl.industries.transfer.BigStorageView;
 import com.chyzman.chowl.industries.transfer.FakeStorageView;
 import com.chyzman.chowl.industries.transfer.PanelStorageContext;
@@ -28,7 +31,6 @@ import net.minecraft.util.Colors;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
-import org.apache.logging.log4j.core.config.plugins.convert.TypeConverters;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -73,11 +75,11 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                 client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, baseModel);
             }
 
-            drawDisplay(stack, mode, matrices, vertexConsumers, light, overlay);
+            drawDisplays(stack, mode, matrices, vertexConsumers, light, overlay);
         }
     }
 
-    protected void drawDisplay(ItemStack stack, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+    protected void drawDisplays(ItemStack stack, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         var client = MinecraftClient.getInstance();
 
         if (!(stack.getItem() instanceof DisplayingPanelItem panel)) return;
@@ -109,6 +111,8 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
             }
         }
 
+        var totalCount = stack.getOrDefault(ChowlComponents.BARE_ITEMS, BareItemsComponent.DEFAULT).totalCount();
+
         for (int i = 0; i < slots.size(); i++) {
             StorageView<ItemVariant> slot = slots.get(i);
 
@@ -125,7 +129,6 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
 //            var count = panel.displayedCount(stack, RenderGlobals.DRAWER_FRAME.get(), RenderGlobals.FRAME_SIDE.get());
 
             BigInteger count = BigStorageView.bigAmount(slot);
-
 
             if (!slot.isResourceBlank()) {
                 ItemStack displayStack = slot.getResource().toStack();
@@ -163,10 +166,12 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                         countText.append(count);
                     }
 
+                    var capacity = BigStorageView.bigCapacity(slot).subtract(totalCount).add(count);
+
                     if (!customization.hideCapacity()) {
                         if (!customization.hideCount()) countText.append("/");
 
-                        countText.append(formatCount(BigStorageView.bigCapacity(slot)));
+                        countText.append(formatCount(capacity));
                     }
 
                     var amountWidth = client.textRenderer.getWidth(countText.toString());
@@ -176,7 +181,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
 
                     //TODO make this not hardcoded/jank
                     var color = Colors.WHITE;
-                    var space = BigStorageView.bigCapacity(slot).subtract(count);
+                    var space = capacity.subtract(count);
                     if (space.compareTo(BigInteger.valueOf(displayStack.getMaxCount())) <= 0) color = DyeColor.ORANGE.getSignColor();
                     if (space.compareTo(BigInteger.ZERO) <= 0) color = DyeColor.RED.getSignColor();
 
