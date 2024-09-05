@@ -1,5 +1,7 @@
 package com.chyzman.chowl.industries.screen;
 
+import com.chyzman.chowl.industries.item.component.LockablePanelItem;
+import com.chyzman.chowl.industries.item.component.UpgradeablePanelItem;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.component.Components;
@@ -36,18 +38,33 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                     layout.alignment(HorizontalAlignment.CENTER, VerticalAlignment.CENTER);
                     layout.child(Components.item(stack.getItem().getDefaultStack()).sizing(Sizing.fixed(120)));
 
-                    var upgradesFlow = Containers.horizontalFlow(Sizing.fill(), Sizing.fixed(20));
-                    upgradesFlow.surface((context, component) -> {
-                        RenderSystem.enableBlend();
-                        Surface.tiled(id("textures/gui/container/upgrades.png"), 160, 20).draw(context, component);
-                    });
-                    for (int i = 0; i < 8; i++) {
-                        var slot = this.slotAsComponent(i).margins(Insets.of(2));
-                        upgradesFlow.child(slot);
+                    var upperRightFlow = Containers.horizontalFlow(Sizing.content(), Sizing.fixed(20));
+                    upperRightFlow.child(Components.texture(id("textures/item/cog.png"), 0, 0, 16, 16, 16, 16).sizing(Sizing.fixed(20)));
+                    upperRightFlow.child(Components.texture(id("textures/item/remove.png"), 0, 0, 16, 16, 16, 16).sizing(Sizing.fixed(20)));
+                    layout.child(upperRightFlow);
+                    upperRightFlow.positioning(Positioning.relative(100, 0));
+
+
+                    if (stack.getItem() instanceof LockablePanelItem) {
+                        var locked = ((LockablePanelItem) stack.getItem()).locked(stack);
+                        layout.child(Components.label(Text.literal(locked ? "Locked" : "Unlocked")).positioning(Positioning.relative(0, 0)));
                     }
 
-                    layout.child(upgradesFlow);
-                    upgradesFlow.positioning(Positioning.relative(0, 100));
+
+                    if (stack.getItem() instanceof UpgradeablePanelItem) {
+                        var upgradesFlow = Containers.horizontalFlow(Sizing.fill(), Sizing.fixed(20));
+                        upgradesFlow.surface((context, component) -> {
+                            RenderSystem.enableBlend();
+                            Surface.tiled(id("textures/gui/container/upgrades.png"), 160, 20).draw(context, component);
+                        });
+                        for (int i = 0; i < 8; i++) {
+                            var slot = this.slotAsComponent(i).margins(Insets.of(2));
+                            upgradesFlow.child(slot);
+                        }
+
+                        layout.child(upgradesFlow);
+                        upgradesFlow.positioning(Positioning.relative(0, 100));
+                    }
 
                     layout.surface(Surface.tiled(id("textures/block/frame.png"), 160, 160));
                 });

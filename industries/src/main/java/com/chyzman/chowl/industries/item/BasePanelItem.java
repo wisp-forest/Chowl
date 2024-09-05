@@ -58,4 +58,9 @@ public abstract class BasePanelItem extends Item implements PanelItem {
     public boolean canBeNested() {
         return false;
     }
+
+    @Override
+    public boolean allowComponentsUpdateAnimation(PlayerEntity player, Hand hand, ItemStack oldStack, ItemStack newStack) {
+        return false;
+    }
 }

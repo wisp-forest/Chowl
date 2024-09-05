@@ -2,6 +2,7 @@
   "credit": "made by chyzman",
   "parent": "chowl-industries:item/panel_base",
   "textures": {
-    "0": "chowl-industries:item/compressing_panel"
+    "0": "chowl-industries:item/compressing_panel",
+    "1": "chowl-industries:item/drawer_panel_back"
   }
 }

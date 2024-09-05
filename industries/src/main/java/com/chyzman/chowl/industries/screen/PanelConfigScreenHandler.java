@@ -26,9 +26,11 @@ public class PanelConfigScreenHandler extends ScreenHandler {
 
     public PanelConfigScreenHandler(int syncId, PlayerInventory playerInventory, ItemStack stack, @Nullable Consumer<ItemStack> updater) {
         super(TYPE, syncId);
-        this.playerInventory = playerInventory;
-        this.upgradesInventory = new UpgradesInventory();
         this.stack = this.createProperty(ItemStack.class, stack);
+        this.playerInventory = playerInventory;
+        if (stack.getItem() instanceof UpgradeablePanelItem upgradeable) {
+            this.upgradesInventory = upgradeable.getUpgradesInventory(stack);
+        }
 
         ServerBoundPackets.addEndecs(endecBuilder());
 
@@ -60,7 +62,7 @@ public class PanelConfigScreenHandler extends ScreenHandler {
 
         var generator = SlotGenerator.begin(this::addSlot, 8, 84);
 
-        if (stack.getItem() instanceof UpgradeablePanelItem upgradeable) {
+        if (stack.getItem() instanceof UpgradeablePanelItem) {
             generator.slotFactory(UpgradeSlot::new);
             generator.grid(upgradesInventory, 0, 8, 1);
             generator.defaultSlotFactory();

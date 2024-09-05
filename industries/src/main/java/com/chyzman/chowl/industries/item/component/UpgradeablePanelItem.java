@@ -5,6 +5,7 @@ import com.chyzman.chowl.industries.block.button.ButtonRenderCondition;
 import com.chyzman.chowl.industries.block.button.ButtonRenderer;
 import com.chyzman.chowl.industries.event.UpgradeInteractionEvents;
 import com.chyzman.chowl.industries.registry.ChowlComponents;
+import com.chyzman.chowl.industries.screen.UpgradesInventory;
 import io.wispforest.owo.ops.ItemOps;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -87,5 +88,19 @@ public interface UpgradeablePanelItem extends DisplayingPanelItem {
                     .build()
             );
         }
+    }
+
+    default UpgradesInventory getUpgradesInventory(ItemStack stack) {
+        var inventory = new UpgradesInventory();
+        for (int i = 0; i < 8; i++) {
+            inventory.setStack(i, upgrades(stack).get(i));
+        }
+        inventory.addListener((inv) -> modifyUpgrades(stack, stacks -> {
+            for (int i = 0; i < 8; i++) {
+                stacks.set(i, inv.getStack(i));
+            }
+            return stacks;
+        }));
+        return inventory;
     }
 }
