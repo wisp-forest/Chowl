@@ -80,7 +80,7 @@ public class AccessPanelItemRenderer extends GenericPanelItemRenderer {
             StringBuilder countText = new StringBuilder();
 
             if (!customization.hideCount()) {
-                countText.append(count);
+                countText.append(formatCount(count));
             }
 
             if (!customization.hideCapacity()) {

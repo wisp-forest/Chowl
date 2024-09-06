@@ -163,7 +163,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                     StringBuilder countText = new StringBuilder();
 
                     if (!customization.hideCount()) {
-                        countText.append(count);
+                        countText.append(formatCount(count));
                     }
 
                     var capacity = BigStorageView.bigCapacity(slot);

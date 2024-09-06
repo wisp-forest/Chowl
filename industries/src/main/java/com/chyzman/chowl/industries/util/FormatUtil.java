@@ -26,7 +26,7 @@ public final class FormatUtil {
         var digits = BigIntUtils.decimalDigits(count);
 
         String formatted;
-        if (digits > CHOWL_CONFIG.digits_before_abbreviation()) {
+        if (digits > CHOWL_CONFIG.digits_before_abbreviation() && count.compareTo(BigInteger.ZERO) != 0) {
             formatted = switch (CHOWL_CONFIG.abbreviation_mode()) {
                 case LETTERS -> letterAbbreviation(count);
                 case EXPONENTS -> "2^" + (BigIntegerMath.log2(count, RoundingMode.HALF_UP));
@@ -65,9 +65,9 @@ public final class FormatUtil {
 
     public static @Nullable String siAbbreviation(BigInteger count) {
         var digits = BigIntUtils.decimalDigits(count);
-        var abv = List.of("M", "G", "T", "P", "E", "Z", "Y", "R", "Q");
-        if (digits < 7) return null;
-        if (digits < 34) return getShownDigits(count) + abv.get((digits - 1) / 3 - 2);
+        var abv = List.of("K","M", "G", "T", "P", "E", "Z", "Y", "R", "Q");
+        if (digits < 4) return null;
+        if (digits < 34) return getShownDigits(count) + abv.get((digits - 1) / 3 - 1);
         return "";
     }
 
