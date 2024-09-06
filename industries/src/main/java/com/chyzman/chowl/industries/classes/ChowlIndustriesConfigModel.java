@@ -12,17 +12,21 @@ public class ChowlIndustriesConfigModel {
     @SectionHeader("Client")
 
     @Sync(Option.SyncMode.NONE)
-    public AbbreviationMode abbreviation_mode = AbbreviationMode.EXPONENTS;
-
-    @Sync(Option.SyncMode.NONE)
-    public int digits_before_abbreviation = 16;
+    public AbbreviationMode abbreviation_mode = AbbreviationMode.LETTERS;
 
     public enum AbbreviationMode {
         LETTERS,
         EXPONENTS,
         SCIENTIFIC,
+        SI,
         NONE
     }
+
+    @Sync(Option.SyncMode.NONE)
+    public int digits_before_abbreviation = 16;
+
+    @Sync(Option.SyncMode.NONE)
+    public boolean use_commas = true;
 
     @Sync(Option.SyncMode.NONE)
     public boolean remove_panels_when_empty = false;

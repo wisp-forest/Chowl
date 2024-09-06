@@ -36,9 +36,17 @@
   "text.config.chowl-industries.enum.abbreviationMode.scientific": "Scientific",
   "text.config.chowl-industries.enum.abbreviationMode.scientific.tooltip": "Abbreviate with scientific notation/ne.g. 1.0e3, 1.0e6",
 
+  "text.config.chowl-industries.enum.abbreviationMode.si": "SI",
+  "text.config.chowl-industries.enum.abbreviationMode.si.tooltip": "Abbreviate with SI prefixes/ne.g. 1M, 1G",
+
   "text.config.chowl-industries.enum.abbreviationMode.none": "None",
   "text.config.chowl-industries.enum.abbreviationMode.none.tooltip": "Do not abbreviate",
 
+  "text.config.chowl-industries.option.digits_before_abbreviation": "Digits Before Abbreviation",
+  "text.config.chowl-industries.option.digits_before_abbreviation.tooltip": "The number of digits before abbreviating",
+
+  "text.config.chowl-industries.option.use_commas": "Use Commas?",
+  "text.config.chowl-industries.option.use_commas.tooltip": "Should commas be used to separate digits?",
 
   "text.config.chowl-industries.option.remove_panels_when_empty": "Remove panels when empty",
   "text.config.chowl-industries.option.remove_panels_when_empty.tooltip": "Removes panels when attempting to extract from an empty panel",

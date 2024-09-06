@@ -166,7 +166,9 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
                         countText.append(count);
                     }
 
-                    var capacity = BigStorageView.bigCapacity(slot).subtract(totalCount).add(count);
+                    var capacity = BigStorageView.bigCapacity(slot);
+
+                    if (stack.getItem() instanceof PackingPanelItem) capacity = capacity.subtract(totalCount).add(count);
 
                     if (!customization.hideCapacity()) {
                         if (!customization.hideCount()) countText.append("/");

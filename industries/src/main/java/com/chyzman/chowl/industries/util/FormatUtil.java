@@ -2,6 +2,7 @@ package com.chyzman.chowl.industries.util;
 
 import com.chyzman.chowl.industries.classes.ChowlIndustriesConfigModel;
 import com.google.common.math.BigIntegerMath;
+import org.jetbrains.annotations.Nullable;
 
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -16,31 +17,41 @@ import static com.chyzman.chowl.industries.Chowl.CHOWL_CONFIG;
 
 public final class FormatUtil {
 
-    //TODO add config to make it put commas where they should be
+    public static final DecimalFormat SCIENTIFIC_FORMATI = new DecimalFormat("0.######E0", DecimalFormatSymbols.getInstance(Locale.ROOT));
+
     //TODO make count also formatted with it's own config (decide if it should have it's own format)
     //TODO make it so holding shift or something disables formatting in tooltips idk
 
     public static String formatCount(BigInteger count) {
         var digits = BigIntUtils.decimalDigits(count);
 
-        if (CHOWL_CONFIG.abbreviation_mode().equals(ChowlIndustriesConfigModel.AbbreviationMode.NONE) || digits <= CHOWL_CONFIG.digits_before_abbreviation()) return count.toString();
-        return switch (CHOWL_CONFIG.abbreviation_mode()) {
-            case LETTERS -> letterAbbreviation(count);
-            case EXPONENTS -> "2^" + (BigIntegerMath.log2(count, RoundingMode.HALF_UP));
-            case SCIENTIFIC -> scientificNotationAbbreviation(count);
-            default -> count.toString();
-        };
+        String formatted;
+        if (digits > CHOWL_CONFIG.digits_before_abbreviation()) {
+            formatted = switch (CHOWL_CONFIG.abbreviation_mode()) {
+                case LETTERS -> letterAbbreviation(count);
+                case EXPONENTS -> "2^" + (BigIntegerMath.log2(count, RoundingMode.HALF_UP));
+                case SCIENTIFIC -> SCIENTIFIC_FORMATI.format(count);
+                case SI -> siAbbreviation(count);
+                default -> null;
+            };
+        } else formatted = null;
+        if (formatted == null) {
+            return CHOWL_CONFIG.use_commas() ? NumberFormat.getNumberInstance(Locale.US).format(count) : count.toString();
+        } else if (formatted.isBlank()) {
+            return "A lot";
+        } else {
+            return formatted;
+        }
     }
 
-    public static String letterAbbreviation(BigInteger count) {
+    public static @Nullable String letterAbbreviation(BigInteger count) {
         var digits = BigIntUtils.decimalDigits(count);
-        var strung = count.toString();
         var abv = List.of("K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No");
         var abvOnes = List.of("", "U", "D", "T", "Qq", "Qd", "Sx", "St", "Oc", "Nm");
         var abvTens = List.of("Dc", "Vg", "Tg");
 
-        if (digits < 4) return strung;
-        var shownDigits = String.valueOf(Double.parseDouble(strung.substring(0, ((digits - 1) % 3 + 1 - (count.signum() < 0 ? 1 : 0) + 1))) / 10).replace(".0", "");
+        if (digits < 4) return null;
+        var shownDigits = getShownDigits(count);
         if (digits < 34) {
             return shownDigits + abv.get((digits - 1) / 3 - 1);
         } else if (digits < 100) {
@@ -48,12 +59,22 @@ public final class FormatUtil {
             var ones = (digits - 34) / 3 % 10;
             return shownDigits + abvOnes.get(ones) + (ones > 0 ? abvTens.get(tens).toLowerCase(Locale.ROOT) : abvTens.get(tens));
         } else if (digits < 103) {
-            return shownDigits + "Googol";
-        } else return "A lot";
+            return (shownDigits.equals("1") ? "" : shownDigits) + "Googol";
+        } else return "";
     }
 
-    public static String scientificNotationAbbreviation(BigInteger count) {
-        NumberFormat formatter = new DecimalFormat("0.######E0", DecimalFormatSymbols.getInstance(Locale.ROOT));
-        return formatter.format(count);
+    public static @Nullable String siAbbreviation(BigInteger count) {
+        var digits = BigIntUtils.decimalDigits(count);
+        var abv = List.of("M", "G", "T", "P", "E", "Z", "Y", "R", "Q");
+        if (digits < 7) return null;
+        if (digits < 34) return getShownDigits(count) + abv.get((digits - 1) / 3 - 2);
+        return "";
+    }
+
+
+    public static String getShownDigits(BigInteger count) {
+        var digits = BigIntUtils.decimalDigits(count);
+        var strung = count.toString();
+        return String.valueOf(Double.parseDouble(strung.substring(0, ((digits - 1) % 3 + 1 - (count.signum() < 0 ? 1 : 0) + 1))) / 10).replace(".0", "");
     }
 }
