@@ -1,6 +1,15 @@
 {
     "values": [
-        "#minecraft:corals",
+        "minecraft:brain_coral",
+        "minecraft:bubble_coral",
+        "minecraft:fire_coral",
+        "minecraft:horn_coral",
+        "minecraft:tube_coral",
+        "minecraft:brain_coral_fan",
+        "minecraft:bubble_coral_fan",
+        "minecraft:fire_coral_fan",
+        "minecraft:horn_coral_fan",
+        "minecraft:tube_coral_fan",
         "minecraft:dead_brain_coral",
         "minecraft:dead_bubble_coral",
         "minecraft:dead_fire_coral",
