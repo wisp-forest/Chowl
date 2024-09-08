@@ -360,7 +360,7 @@ public class DrawerFrameBlock extends BlockWithEntity implements Waterloggable, 
 
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        if (((ShapeContextExtended) context).isHolding(stack -> stack.isIn(PLACEABLE_ON_FRAMES_TAG)) && !context.isDescending()) return VoxelShapes.fullCube();
+        if (((ShapeContextExtended) context).isHolding(stack -> stack != null && stack.isIn(PLACEABLE_ON_FRAMES_TAG)) && !context.isDescending()) return VoxelShapes.fullCube();
 
         if (!(world.getBlockEntity(pos) instanceof DrawerFrameBlockEntity frame)) return BASE;
 
