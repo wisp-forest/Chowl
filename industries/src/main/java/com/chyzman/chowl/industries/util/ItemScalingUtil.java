@@ -110,7 +110,7 @@ public final class ItemScalingUtil {
         scale = (12 / 16f);
         matrices.scale(scale, scale, scale);
         modifications.accept(matrices);
-        matrices.scale(4/3f, 4/3f, 4/3f);
+        if (flatten) matrices.scale(4/3f, 4/3f, 4/3f);
         matrices.translate(-properties.offset().x, -properties.offset().y, Math.abs(properties.offset().z) > 0.5 ? -properties.offset().z : 0);
         if (flatten) {
             matrices.scale(1, 1, 1 / 512f);

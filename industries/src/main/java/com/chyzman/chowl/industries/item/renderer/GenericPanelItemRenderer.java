@@ -137,7 +137,6 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
 
             if (!slot.isResourceBlank()) {
                 ItemStack displayStack = slot.getResource().toStack();
-                var properties = ItemScalingUtil.getItemModelProperties(displayStack);
 
                 if (!customization.hideName()) {
                     matrices.push();
