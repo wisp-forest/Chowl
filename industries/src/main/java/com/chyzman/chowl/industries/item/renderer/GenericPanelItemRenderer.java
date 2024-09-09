@@ -16,7 +16,6 @@ import io.wispforest.owo.ui.component.Components;
 import io.wispforest.owo.ui.container.Containers;
 import io.wispforest.owo.ui.core.OwoUIAdapter;
 import io.wispforest.owo.ui.core.Sizing;
-import io.wispforest.owo.ui.core.Surface;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
@@ -66,6 +65,7 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
             var client = MinecraftClient.getInstance();
 
             matrices.translate(0.5, 0.5, 0.5);
+            matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(180));
             if (!RenderGlobals.IN_FRAME) {
                 if (stack.contains(DataComponentTypes.CUSTOM_NAME)) {
                     var easterEgg = EasterEggUtil.EasterEgg.findEasterEgg(stack.getName().getString());
@@ -77,54 +77,12 @@ public class GenericPanelItemRenderer implements BuiltinItemRendererRegistry.Dyn
 
             var baseModel = client.getBakedModelManager().getModel(baseModelId);
             if (baseModel != null && RenderGlobals.BAKED.get() != Boolean.TRUE) {
-                matrices.push();
-                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
                 client.getItemRenderer().renderItem(stack, ModelTransformationMode.FIXED, false, matrices, vertexConsumers, light, overlay, baseModel);
-                matrices.pop();
             }
-            matrices.push();
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180));
-            matrices.translate(-0.5, -0.5, -1 / 16f - 1 / 512f);
-            drawUI(stack, mode, matrices, vertexConsumers, light, overlay);
-            matrices.pop();
+
+            drawDisplays(stack, mode, matrices, vertexConsumers, light, overlay);
         }
     }
-
-    protected void drawUI(ItemStack panelStack, ModelTransformationMode panelTransformationMode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        var client = MinecraftClient.getInstance();
-
-        if (!(panelStack.getItem() instanceof DisplayingPanelItem panel)) return;
-
-        var storage = panel.getStorage(PanelStorageContext.forRendering(panelStack));
-
-        if (storage == null) return;
-
-        matrices.push();
-
-        List<StorageView<ItemVariant>> slots = new ArrayList<>(storage.getSlots());
-        slots.removeIf(x -> (x instanceof FakeStorageView fake && !fake.countInDisplay()));
-
-        var size = 256;
-        var adapter = OwoUIAdapter.createWithoutScreen(0, 0, size, size, (sizing, sizing2) -> Containers.verticalFlow(Sizing.fixed(size), Sizing.fixed(size)));
-
-        adapter.rootComponent
-                .child(Components.label(Text.literal("test")))
-                .child(Components.item(slots.getFirst().getResource().toStack()))
-                .child(Components.label(Text.literal("test")))
-                .allowOverflow(true);
-
-        var drawContext = new DrawContext(client, client.getBufferBuilders().getEntityVertexConsumers());
-        drawContext.multiplyPositionMatrix(matrices.peek().getPositionMatrix());
-        drawContext.scale((float) 1 / size, (float) 1 / size, -(float) 1 / size / size);
-        adapter.inflateAndMount();
-        adapter.toggleInspector();
-        adapter.toggleGlobalInspector();
-        adapter.render(drawContext, 0, 0, client.getRenderTickCounter().getTickDelta(true));
-        drawContext.draw();
-        adapter.dispose();
-        matrices.pop();
-    }
-
 
     protected void drawDisplays(ItemStack stack, ModelTransformationMode mode, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         var client = MinecraftClient.getInstance();
