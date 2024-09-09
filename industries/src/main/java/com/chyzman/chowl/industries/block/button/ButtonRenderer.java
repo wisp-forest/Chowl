@@ -1,6 +1,7 @@
 package com.chyzman.chowl.industries.block.button;
 
 import com.chyzman.chowl.industries.block.DrawerFrameBlockEntity;
+import com.chyzman.chowl.industries.util.ItemScalingUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -28,16 +29,7 @@ public interface ButtonRenderer {
             @Override
             public void render(MinecraftClient client, DrawerFrameBlockEntity entity, BlockHitResult hitResult, VertexConsumerProvider vertexConsumers, MatrixStack matrices, int light, int overlay) {
                 matrices.scale(1, 1, 1 / 8f);
-                client.getItemRenderer().renderItem(
-                        stack,
-                        ModelTransformationMode.FIXED,
-                        false,
-                        matrices,
-                        vertexConsumers,
-                        light,
-                        overlay,
-                        client.getItemRenderer().getModels().getModel(stack)
-                );
+                ItemScalingUtil.renderScaledItem(stack, matrices, vertexConsumers, light, overlay);
                 matrices.scale(1, 1, 8);
             }
         };

@@ -48,6 +48,9 @@
   "text.config.chowl-industries.option.use_commas": "Use Commas?",
   "text.config.chowl-industries.option.use_commas.tooltip": "Should commas be used to separate digits?",
 
+  "text.config.chowl-industries.option.flatten_contents": "Flatten Contents",
+  "text.config.chowl-industries.option.flatten_contents.tooltip": "Render the contents of panels in 2 dimensions",
+
   "text.config.chowl-industries.option.remove_panels_when_empty": "Remove panels when empty",
   "text.config.chowl-industries.option.remove_panels_when_empty.tooltip": "Removes panels when attempting to extract from an empty panel",
 
@@ -88,7 +91,7 @@
   "advancements.chowl-industries.witnessed_nuclear_blasting.title": "Nuclear",
   "advancements.chowl-industries.witnessed_nuclear_blasting.description": "World-ending.",
   "advancements.chowl-industries.labeling_upgrade.title": "Nice and Organized",
-  "advancements.chowl-industries.labeling_upgrade.description": "Rename a panel with a Name Tag",
+  "advancements.chowl-industries.labeling_upgrade.description": "Rename a panel",
   "advancements.chowl-industries.fired.title": "Fired!",
   "advancements.chowl-industries.fired.description": "Finally found the perpetrator...",
   "advancements.chowl-industries.not_a_secret.title": "Not A Secret",

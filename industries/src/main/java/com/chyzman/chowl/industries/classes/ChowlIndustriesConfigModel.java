@@ -29,6 +29,9 @@ public class ChowlIndustriesConfigModel {
     public boolean use_commas = true;
 
     @Sync(Option.SyncMode.NONE)
+    public boolean flatten_contents = false;
+
+    @Sync(Option.SyncMode.NONE)
     public boolean remove_panels_when_empty = false;
 
     @Sync(Option.SyncMode.NONE)

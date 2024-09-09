@@ -2,6 +2,7 @@ package com.chyzman.chowl.industries.screen;
 
 import com.chyzman.chowl.industries.item.component.LockablePanelItem;
 import com.chyzman.chowl.industries.item.component.UpgradeablePanelItem;
+import com.chyzman.chowl.industries.screen.component.TexturedCheckboxComponent;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.wispforest.owo.ui.base.BaseOwoHandledScreen;
 import io.wispforest.owo.ui.component.Components;
@@ -47,7 +48,9 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
 
                     if (stack.getItem() instanceof LockablePanelItem) {
                         var locked = ((LockablePanelItem) stack.getItem()).locked(stack);
-                        layout.child(Components.label(Text.literal(locked ? "Locked" : "Unlocked")).positioning(Positioning.relative(0, 0)));
+                        layout.child(new TexturedCheckboxComponent(id("textures/item/unlocked.png"), id("textures/item/lock.png"), locked)
+                                .sizing(Sizing.fixed(20))
+                                .positioning(Positioning.relative(0, 0)));
                     }
 
 
@@ -88,7 +91,7 @@ public class PanelConfigScreen extends BaseOwoHandledScreen<FlowLayout, PanelCon
                     flowLayout.horizontalAlignment(HorizontalAlignment.CENTER);
 
                     flowLayout.child(
-                            Containers.stack(Sizing.content(4),Sizing.content(4))
+                            Containers.stack(Sizing.content(4), Sizing.content(4))
                                     .child(configFlow)
                                     .alignment(HorizontalAlignment.CENTER, VerticalAlignment.CENTER)
                                     .surface(Surface.PANEL_INSET));
