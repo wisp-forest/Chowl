@@ -45,6 +45,9 @@
   "text.config.chowl-industries.option.digits_before_abbreviation": "Digits Before Abbreviation",
   "text.config.chowl-industries.option.digits_before_abbreviation.tooltip": "The number of digits before abbreviating",
 
+  "text.config.chowl-industries.option.abbreviation_precision": "Abbreviation Precision",
+  "text.config.chowl-industries.option.abbreviation_precision.tooltip": "The number of decimal places to show when abbreviating\n(only applies to letter based abbreviation types)",
+
   "text.config.chowl-industries.option.use_commas": "Use Commas?",
   "text.config.chowl-industries.option.use_commas.tooltip": "Should commas be used to separate digits?",
 

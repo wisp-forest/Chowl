@@ -1,6 +1,5 @@
 package com.chyzman.chowl.industries.util;
 
-import com.chyzman.chowl.industries.classes.ChowlIndustriesConfigModel;
 import com.google.common.math.BigIntegerMath;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,7 +8,6 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -17,7 +15,7 @@ import static com.chyzman.chowl.industries.Chowl.CHOWL_CONFIG;
 
 public final class FormatUtil {
 
-    public static final DecimalFormat SCIENTIFIC_FORMATI = new DecimalFormat("0.######E0", DecimalFormatSymbols.getInstance(Locale.ROOT));
+    public static final DecimalFormat SCIENTIFIC_FORMAT = new DecimalFormat("0.######E0", DecimalFormatSymbols.getInstance(Locale.ROOT));
 
     //TODO make count also formatted with it's own config (decide if it should have it's own format)
     //TODO make it so holding shift or something disables formatting in tooltips idk
@@ -30,7 +28,7 @@ public final class FormatUtil {
             formatted = switch (CHOWL_CONFIG.abbreviation_mode()) {
                 case LETTERS -> letterAbbreviation(count);
                 case EXPONENTS -> "2^" + (BigIntegerMath.log2(count, RoundingMode.HALF_UP));
-                case SCIENTIFIC -> SCIENTIFIC_FORMATI.format(count);
+                case SCIENTIFIC -> SCIENTIFIC_FORMAT.format(count);
                 case SI -> siAbbreviation(count);
                 default -> null;
             };
@@ -74,7 +72,13 @@ public final class FormatUtil {
 
     public static String getShownDigits(BigInteger count) {
         var digits = BigIntUtils.decimalDigits(count);
+        if (digits < 4) return count.toString();
         var strung = count.toString();
-        return String.valueOf(Double.parseDouble(strung.substring(0, ((digits - 1) % 3 + 1 - (count.signum() < 0 ? 1 : 0) + 1))) / 10).replace(".0", "");
+        var decimals = CHOWL_CONFIG.abbreviation_precision();
+        var cutoff = (digits - 1) % 3 + 1 - (count.signum() < 0 ? 1 : 0);
+        var returned = strung.substring(0, cutoff);
+        if (decimals > 0) returned += "." + strung.substring(cutoff, Math.min(cutoff + decimals, strung.length()));
+        returned = returned.contains(".") ? returned.replaceAll("0*$","").replaceAll("\\.$","") : returned;
+        return returned;
     }
 }

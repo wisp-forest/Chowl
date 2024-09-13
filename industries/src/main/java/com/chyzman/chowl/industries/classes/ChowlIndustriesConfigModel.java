@@ -23,7 +23,10 @@ public class ChowlIndustriesConfigModel {
     }
 
     @Sync(Option.SyncMode.NONE)
-    public int digits_before_abbreviation = 16;
+    public int digits_before_abbreviation = 3;
+
+    @Sync(Option.SyncMode.NONE)
+    public int abbreviation_precision = 2;
 
     @Sync(Option.SyncMode.NONE)
     public boolean use_commas = true;
