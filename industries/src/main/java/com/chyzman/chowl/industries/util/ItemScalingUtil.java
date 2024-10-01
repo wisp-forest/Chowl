@@ -115,7 +115,7 @@ public final class ItemScalingUtil {
         if (flatten) {
             matrices.scale(1, 1, 1 / 512f);
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180));
-            if (!model.isSideLit()) DiffuseLighting.disableGuiDepthLighting();
+//            if (!model.isSideLit()) DiffuseLighting.disableGuiDepthLighting();
         }
         renderer.renderItem(
                 stack,
@@ -127,7 +127,7 @@ public final class ItemScalingUtil {
                 overlay,
                 model
         );
-        if (flatten && !model.isSideLit()) DiffuseLighting.enableGuiDepthLighting();
+//        if (flatten && !model.isSideLit()) DiffuseLighting.enableGuiDepthLighting();
         matrices.pop();
     }
 

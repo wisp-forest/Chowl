@@ -4,7 +4,7 @@ import com.chyzman.chowl.industries.block.button.BlockButton;
 import com.chyzman.chowl.industries.block.button.ButtonRenderCondition;
 import com.chyzman.chowl.industries.block.button.ButtonRenderer;
 import com.chyzman.chowl.industries.event.UpgradeInteractionEvents;
-import com.chyzman.chowl.industries.registry.ChowlComponents;
+import com.chyzman.chowl.core.registry.ChowlComponents;
 import com.chyzman.chowl.industries.screen.UpgradesInventory;
 import io.wispforest.owo.ops.ItemOps;
 import net.minecraft.item.ItemStack;

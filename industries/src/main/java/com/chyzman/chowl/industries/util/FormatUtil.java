@@ -1,5 +1,6 @@
 package com.chyzman.chowl.industries.util;
 
+import com.chyzman.chowl.core.util.BigIntUtils;
 import com.google.common.math.BigIntegerMath;
 import org.jetbrains.annotations.Nullable;
 

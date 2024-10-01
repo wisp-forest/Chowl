@@ -1,6 +1,7 @@
 package com.chyzman.chowl.industries;
 
 import com.chyzman.chowl.core.ChowlItemGroup;
+import com.chyzman.chowl.core.registry.ChowlComponents;
 import com.chyzman.chowl.core.util.ChannelUtil;
 import com.chyzman.chowl.industries.classes.ChowlIndustriesConfig;
 import com.chyzman.chowl.industries.commands.DebugCommands;

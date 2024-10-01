@@ -1,10 +1,11 @@
 package com.chyzman.chowl.industries.block;
 
+import com.chyzman.chowl.core.blockentity.FrameBlockEntity;
 import com.chyzman.chowl.core.blockentity.TemplatableBlockEntity;
 import com.chyzman.chowl.industries.item.component.DisplayingPanelItem;
 import com.chyzman.chowl.industries.item.component.PanelItem;
 import com.chyzman.chowl.industries.registry.ChowlBlocks;
-import com.chyzman.chowl.industries.registry.ChowlComponents;
+import com.chyzman.chowl.core.registry.ChowlComponents;
 import com.chyzman.chowl.industries.registry.ChowlItems;
 import com.chyzman.chowl.industries.transfer.PanelStorageContext;
 import com.google.common.cache.CacheBuilder;
@@ -40,7 +41,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DrawerFrameBlockEntity extends TemplatableBlockEntity implements SidedStorageBlockEntity {
+public class DrawerFrameBlockEntity extends FrameBlockEntity implements SidedStorageBlockEntity {
     public List<DrawerFrameSideState> stacks = new ArrayList<>(DefaultedList.ofSize(6, DrawerFrameSideState.empty()).stream().toList());
     public VoxelShape outlineShape = DrawerFrameBlock.BASE;
     public VoxelShape collisionShape = DrawerFrameBlock.BASE;

@@ -1,4 +1,4 @@
-package com.chyzman.chowl.industries.util;
+package com.chyzman.chowl.core.util;
 
 import io.wispforest.endec.*;
 

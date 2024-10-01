@@ -1,5 +1,6 @@
 package com.chyzman.chowl.industries.registry;
 
+import com.chyzman.chowl.core.registry.ChowlComponents;
 import com.chyzman.chowl.industries.item.*;
 import com.chyzman.chowl.industries.item.component.DisplayingPanelConfig;
 import io.wispforest.lavender.book.LavenderBookItem;
@@ -16,7 +17,8 @@ public class ChowlItems implements ItemRegistryContainer {
 
     public static final Item ACCESS_PANEL = new AccessPanelItem(new Item.Settings()
         .maxCount(1)
-        .component(ChowlComponents.DISPLAYING_CONFIG,
+        .component(
+                ChowlComponents.DISPLAYING_CONFIG,
             DisplayingPanelConfig.DEFAULT.toBuilder()
                 .hideCapacity(true)
                 .hideCount(true)

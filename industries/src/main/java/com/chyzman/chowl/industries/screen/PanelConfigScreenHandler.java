@@ -1,7 +1,7 @@
 package com.chyzman.chowl.industries.screen;
 
 import com.chyzman.chowl.industries.item.component.*;
-import com.chyzman.chowl.industries.registry.ChowlComponents;
+import com.chyzman.chowl.core.registry.ChowlComponents;
 import com.chyzman.chowl.industries.registry.ServerBoundPackets;
 import io.wispforest.owo.client.screens.ScreenUtils;
 import io.wispforest.owo.client.screens.SlotGenerator;

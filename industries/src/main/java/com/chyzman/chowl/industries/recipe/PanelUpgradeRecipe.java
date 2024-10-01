@@ -3,7 +3,7 @@ package com.chyzman.chowl.industries.recipe;
 import com.chyzman.chowl.industries.item.component.CapacityLimitedPanelItem;
 import com.chyzman.chowl.industries.item.component.StoragePanelItem;
 import com.chyzman.chowl.industries.item.component.UpgradeListComponent;
-import com.chyzman.chowl.industries.registry.ChowlComponents;
+import com.chyzman.chowl.core.registry.ChowlComponents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeSerializer;

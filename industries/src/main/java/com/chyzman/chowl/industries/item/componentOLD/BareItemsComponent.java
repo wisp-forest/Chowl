@@ -1,6 +1,6 @@
 package com.chyzman.chowl.industries.item.component;
 
-import com.chyzman.chowl.industries.util.ChowlEndecs;
+import com.chyzman.chowl.core.util.ChowlEndecs;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
@@ -43,14 +43,14 @@ public record BareItemsComponent(@Unmodifiable Map<Item, BigInteger> entries) {
 
     public BigInteger totalCount() {
         BigInteger counter = BigInteger.ZERO;
-        
+
         for (BigInteger count : entries.values()) {
             counter = counter.add(count);
         }
-        
+
         return counter;
     }
-    
+
     public BareItemsComponent copyAndInsert(Item item, BigInteger count) {
         var newMap = new LinkedHashMap<>(entries);
         newMap.merge(item, count, BigInteger::add);

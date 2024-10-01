@@ -1,6 +1,6 @@
 package com.chyzman.chowl.industries.transfer;
 
-import com.chyzman.chowl.industries.util.BigIntUtils;
+import com.chyzman.chowl.core.util.BigIntUtils;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;

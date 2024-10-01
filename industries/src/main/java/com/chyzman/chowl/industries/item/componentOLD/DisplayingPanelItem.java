@@ -1,6 +1,6 @@
 package com.chyzman.chowl.industries.item.component;
 
-import com.chyzman.chowl.industries.registry.ChowlComponents;
+import com.chyzman.chowl.core.registry.ChowlComponents;
 import com.chyzman.chowl.industries.util.EasterEggUtil;
 import io.wispforest.owo.ui.core.Color;
 import net.minecraft.component.DataComponentTypes;

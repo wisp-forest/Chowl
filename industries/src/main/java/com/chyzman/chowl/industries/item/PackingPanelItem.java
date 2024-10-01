@@ -1,36 +1,24 @@
 package com.chyzman.chowl.industries.item;
 
 import com.chyzman.chowl.industries.block.DrawerFrameBlockEntity;
-import com.chyzman.chowl.industries.block.DrawerFrameSideState;
 import com.chyzman.chowl.industries.block.button.BlockButton;
 import com.chyzman.chowl.industries.item.component.*;
 import com.chyzman.chowl.industries.mixin.RegistryEntryReferenceAccessor;
-import com.chyzman.chowl.industries.registry.ChowlComponents;
-import com.chyzman.chowl.industries.registry.ChowlStats;
+import com.chyzman.chowl.core.registry.ChowlComponents;
 import com.chyzman.chowl.industries.transfer.BigSingleSlotStorage;
 import com.chyzman.chowl.industries.transfer.PanelStorage;
 import com.chyzman.chowl.industries.transfer.PanelStorageContext;
 import com.chyzman.chowl.industries.util.VariantUtils;
-import com.mojang.datafixers.util.Pair;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
-import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntryList;
 import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Unit;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigInteger;
