@@ -27,9 +27,7 @@ subprojects {
 
         modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-        annotationProcessor modImplementation("io.wispforest:owo-lib:${project.owo_version}") {
-            exclude group: "net.fabricmc.fabric-api"
-        }
+        annotationProcessor modImplementation("io.wispforest:owo-lib:${project.owo_version}")
 
         include modImplementation("com.kneelawk.graphlib:graphlib-core-fabric:${project.graphlib_version}")
         modLocalRuntime("com.kneelawk.graphlib:graphlib-debugrender-fabric:${project.graphlib_version}")

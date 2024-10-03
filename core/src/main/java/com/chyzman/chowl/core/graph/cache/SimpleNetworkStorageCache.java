@@ -1,5 +1,6 @@
 package com.chyzman.chowl.core.graph.cache;
 
+import com.chyzman.chowl.core.blockentity.FrameBlockEntity;
 import com.kneelawk.graphlib.api.graph.BlockGraph;
 import com.kneelawk.graphlib.api.graph.GraphEntityContext;
 import com.kneelawk.graphlib.api.graph.NodeHolder;
@@ -24,48 +25,32 @@ import java.util.Map;
 
 public class SimpleNetworkStorageCache implements NetworkStorageCache {
     private GraphEntityContext context;
-    @Nullable
-    private CombinedStorage<ItemVariant, DrawerStorage> cachedStorage = null;
 
-    public static class DummyStorage {
-        private final Map<Class<? extends TransferVariant<?>>, CombinedStorage<? extends TransferVariant<?>, ? extends Storage<? extends TransferVariant<?>>>> map = new HashMap<>();
-
-        @Nullable
-        public <T, V extends TransferVariant<T>, S extends Storage<V>> CombinedStorage<V, S> getStorage(Class<V> variantClass, Class<S> storageClass) {
-            return (CombinedStorage<V, S>) map.get(variantClass);
-        }
-
-        public <T, V extends TransferVariant<T>, S extends Storage<V>> void setStorage(Class<V> variantClass, CombinedStorage<V, S> storage) {
-            map.put(variantClass, storage);
-        }
-    }
-
+    private final Map<Class<? extends TransferVariant<?>>, CombinedStorage<? extends TransferVariant<?>, ? extends Storage<? extends TransferVariant<?>>>> cachedStorage = new HashMap<>();
 
     private boolean updating = false;
 
     @Override
-    public CombinedStorage<ItemVariant, DrawerStorage> get() {
-        if (cachedStorage == null) update();
-        return cachedStorage;
+    public <T, V extends TransferVariant<T>, S extends Storage<V>> CombinedStorage<V, S> get(Class<V> variantClass, Class<S> storageClass) {
+        if (cachedStorage.isEmpty()) update();
+        return (CombinedStorage<V, S>) cachedStorage.get(variantClass);
     }
 
     private void clear() {
-        if (updating) {
-            return;
-        }
-        cachedStorage = null;
+        if (updating) return;
+        cachedStorage.clear();
     }
 
     @Override
     public void update() {
         try {
             updating = true;
-            cachedStorage = new CombinedStorage<>(new ArrayList<>());
+            cachedStorage.clear();
             context.getGraph()
                     .getNodes()
                     .forEach(node -> {
-                        if (node.getBlockEntity() instanceof StorageDrawerBlockEntity drawer) {
-                            drawer.streamStorages().forEach(storage -> cachedStorage.parts.add(storage));
+                        if (node.getBlockEntity() instanceof FrameBlockEntity frame) {
+                            frame.streamStorages().forEach(storage -> cachedStorage..add(storage));
                         }
                     });
             cachedStorage.parts.sort(null);
