@@ -1,4 +1,4 @@
-package com.chyzman.chowl.core.blockentity;
+package com.chyzman.chowl.core.blockentity.api;
 
 import com.chyzman.chowl.core.client.ChowlCoreClient;
 import com.chyzman.chowl.core.registry.ChowlCoreComponents;

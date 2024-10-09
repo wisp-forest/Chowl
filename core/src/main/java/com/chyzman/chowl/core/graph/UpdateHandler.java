@@ -1,7 +1,6 @@
 package com.chyzman.chowl.core.graph;
 
 import com.chyzman.chowl.core.graph.cache.NetworkStorageCache;
-import com.chyzman.chowl.core.graph.node.ChowlNetworkBlockNode;
 import com.kneelawk.graphlib.api.graph.GraphEntityContext;
 import com.kneelawk.graphlib.api.graph.user.GraphEntity;
 import com.kneelawk.graphlib.api.graph.user.GraphEntityType;
@@ -40,9 +39,9 @@ public class UpdateHandler implements GraphEntity<UpdateHandler> {
         context.getGraph()
                 .getNodes()
                 .forEach(node -> {
-                    if (node.getNode() instanceof ChowlNetworkBlockNode drawerNode) {
-                        drawerNode.update(world, node);
-                    }
+//                    if (node.getNode() instanceof PanelHolderNode drawerNode) {
+//                        drawerNode.update(world, node);
+//                    }
                 });
         queuedUpdate = null;
     }

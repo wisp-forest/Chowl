@@ -1,6 +1,6 @@
 package com.chyzman.chowl.core.graph.cache;
 
-import com.chyzman.chowl.core.blockentity.FrameBlockEntity;
+import com.chyzman.chowl.core.blockentity.api.PanelHolderBlockEntity;
 import com.kneelawk.graphlib.api.graph.BlockGraph;
 import com.kneelawk.graphlib.api.graph.GraphEntityContext;
 import com.kneelawk.graphlib.api.graph.NodeHolder;
@@ -8,7 +8,6 @@ import com.kneelawk.graphlib.api.graph.user.BlockNode;
 import com.kneelawk.graphlib.api.graph.user.LinkEntity;
 import com.kneelawk.graphlib.api.graph.user.NodeEntity;
 import com.kneelawk.graphlib.api.util.LinkPos;
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
@@ -49,11 +48,11 @@ public class SimpleNetworkStorageCache implements NetworkStorageCache {
             context.getGraph()
                     .getNodes()
                     .forEach(node -> {
-                        if (node.getBlockEntity() instanceof FrameBlockEntity frame) {
-                            frame.streamStorages().forEach(storage -> cachedStorage..add(storage));
-                        }
+//                        if (node.getBlockEntity() instanceof PanelHolderBlockEntity frame) {
+//                            frame.streamStorages().forEach(storage -> cachedStorage..add(storage));
+//                        }
                     });
-            cachedStorage.parts.sort(null);
+//            cachedStorage.parts.sort(null);
         } finally {
             updating = false;
         }
@@ -66,8 +65,7 @@ public class SimpleNetworkStorageCache implements NetworkStorageCache {
 
     @Override
     public void onSortingChanged() {
-        if (cachedStorage != null)
-            cachedStorage.parts.sort(null);
+//        if (cachedStorage != null) cachedStorage.parts.sort(null);
     }
 
     @Override

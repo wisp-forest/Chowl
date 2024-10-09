@@ -1,6 +1,8 @@
 package com.chyzman.chowl.core;
 
+import com.chyzman.chowl.core.graph.NetworkRegistry;
 import com.chyzman.chowl.core.network.ChowlCoreNetworking;
+import com.chyzman.chowl.core.registry.ChowlCoreBlocks;
 import com.chyzman.chowl.core.registry.ChowlCoreComponents;
 import com.chyzman.chowl.core.util.ChowlCoreConfig;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
@@ -15,6 +17,9 @@ public class ChowlCore implements ModInitializer {
     @Override
     public void onInitialize() {
         FieldRegistrationHandler.register(ChowlCoreComponents.class, MODID, true);
+        FieldRegistrationHandler.register(ChowlCoreBlocks.class, MODID, true);
+
+        NetworkRegistry.init();
 
         ChowlCoreNetworking.init();
     }

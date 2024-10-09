@@ -1,23 +1,16 @@
 package com.chyzman.chowl.visage.block;
 
-import com.chyzman.chowl.core.blockentity.TemplatableBlockEntity;
 import com.chyzman.chowl.core.client.ChowlCoreClient;
 import com.chyzman.chowl.core.registry.ChowlCoreComponents;
 import com.chyzman.chowl.visage.registry.VisageBlocks;
-import io.wispforest.owo.ops.WorldOps;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.component.ComponentMap;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import org.jetbrains.annotations.Nullable;
 
 public class TrueVisageBlockEntity extends VisageBlockEntity {

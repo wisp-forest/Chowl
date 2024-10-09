@@ -2,10 +2,14 @@ package com.chyzman.chowl.core.graph;
 
 import com.chyzman.chowl.core.graph.cache.NetworkStorageCache;
 import com.chyzman.chowl.core.graph.cache.SimpleNetworkStorageCache;
+import com.chyzman.chowl.core.graph.node.PanelHolderNode;
+import com.chyzman.chowl.core.graph.node.PanelNode;
 import com.kneelawk.graphlib.api.graph.GraphUniverse;
 import com.kneelawk.graphlib.api.graph.user.GraphEntityType;
 import com.kneelawk.graphlib.api.world.SaveMode;
 import com.mojang.serialization.Codec;
+
+import java.util.List;
 
 import static com.chyzman.chowl.core.ChowlCore.id;
 
@@ -25,8 +29,17 @@ public class NetworkRegistry {
 
     public static void init() {
         UNIVERSE.register();
-        UNIVERSE.addDiscoverer();
-
+        UNIVERSE.addNodeTypes(
+                PanelHolderNode.TYPE,
+                PanelNode.TYPE
+        );
         UNIVERSE.addGraphEntityTypes(STORAGE_CACHE_TYPE, UPDATE_HANDLER_TYPE);
+
+        UNIVERSE.addDiscoverer((serverWorld, blockPos) -> {
+            if (serverWorld.getBlockEntity(blockPos) instanceof NetworkMember member) {
+                return member.getNodes();
+            }
+            return List.of();
+        });
     }
 }

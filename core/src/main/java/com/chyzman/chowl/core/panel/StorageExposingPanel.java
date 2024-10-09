@@ -1,6 +1,5 @@
 package com.chyzman.chowl.core.panel;
 
-import com.chyzman.chowl.core.registry.ChowlComponents;
 import net.minecraft.item.ItemStack;
 
 import java.math.BigInteger;
