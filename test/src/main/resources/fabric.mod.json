@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "chowl-test",
+  "version": "${version}",
+  "name": "Chowl TestMod",
+  "description": "Enterprise™ testing",
+  "authors": [
+    "chyzman"
+  ],
+  "contact": {
+    "issues": "https://github.com/wisp-forest/Chowl/issues",
+    "sources": "https://github.com/wisp-forest/Chowl"
+  },
+  "license": "LGPL-3.0-only",
+  "icon": "assets/chowl-test/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [],
+    "main": []
+  },
+  "mixins": [],
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://wispforest.io/discord"
+      }
+    }
+  }
+}
