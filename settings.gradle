@@ -1,15 +1,16 @@
 pluginManagement {
     repositories {
         maven {
-            name = 'Fabric'
-            url = 'https://maven.fabricmc.net/'
+            name = "Fabric"
+            url = "https://maven.fabricmc.net/"
         }
         gradlePluginPortal()
     }
 }
 
-include 'core'
-include 'industries'
-include 'logistics'
-include 'visage'
-include 'test'
+include "core", "industries", "logistics", "visage", "test"
+project(":core").projectDir = file("modules/core")
+project(":industries").projectDir = file("modules/industries")
+project(":logistics").projectDir = file("modules/logistics")
+project(":visage").projectDir = file("modules/visage")
+project(":test").projectDir = file("modules/test")

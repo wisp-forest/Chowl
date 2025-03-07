@@ -58,7 +58,7 @@ subprojects {
     }
 
     base {
-        archivesName = "chowl-${project.module_name}"
+            archivesName = "chowl-${project.module_name}"
     }
 
     java {
