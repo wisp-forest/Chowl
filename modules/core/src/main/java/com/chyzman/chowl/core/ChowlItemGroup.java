@@ -15,7 +15,7 @@ public class ChowlItemGroup {
     private static Supplier<Icon> CURRENT_ICON = () -> Icon.of(Items.SPONGE);
     private static int ICON_PRIORITY = -1;
 
-    private static final TreeSet<Pair<Consumer<OwoItemGroup>, Integer>> INITIALIZERS = new TreeSet<>(Comparator.comparing(Pair::getRight));
+    private static final TreeSet<Pair<Consumer<OwoItemGroup>, Integer>> INITIALIZERS = new TreeSet<>(Comparator.comparing(pair -> -pair.getRight()));
 
     private static final OwoItemGroup GROUP = OwoItemGroup.builder(Chowl.id("group"), ChowlItemGroup::getIcon)
         .initializer(group -> {

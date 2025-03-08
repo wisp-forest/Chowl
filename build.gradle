@@ -33,7 +33,7 @@ subprojects {
         modImplementation("io.wispforest:lavender:${project.lavender_version}+${project.wispforest_mc_version}")
 
         include modImplementation("com.kneelawk.graphlib:graphlib-core-fabric:${project.graphlib_version}")
-        modLocalRuntime("com.kneelawk.graphlib:graphlib-debugrender-fabric:${project.graphlib_version}")
+//        modLocalRuntime("com.kneelawk.graphlib:graphlib-debugrender-fabric:${project.graphlib_version}")
 
         modImplementation("eu.pb4:common-protection-api:${project.cpa_version}")
     }
@@ -42,12 +42,14 @@ subprojects {
         inputs.property "version", project.version
         inputs.property "minecraft_version_dep", project.minecraft_version_dep
         inputs.property "loader_version", project.loader_version
+        inputs.property "owo_version", project.owo_version
         filteringCharset = "UTF-8"
 
         filesMatching("fabric.mod.json") {
             expand "version": project.version,
                     "minecraft_version_dep": project.minecraft_version_dep,
-                    "loader_version": project.loader_version
+                    "loader_version": project.loader_version,
+                    "owo_version": project.owo_version
         }
     }
 
@@ -74,7 +76,7 @@ subprojects {
             configureEach {
                 ideConfigGenerated true
                 environmentVariable("NOUVEAU_USE_ZINK", "1")
-                runDir "../run"
+                runDir "../../run"
             }
         }
     }

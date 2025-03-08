@@ -1,6 +1,6 @@
 dependencies {
-    implementation project(path: ":core", configuration: "namedElements")
-    implementation project(path: ":industries", configuration: "namedElements")
-    implementation project(path: ":logistics", configuration: "namedElements")
-    implementation project(path: ":visage", configuration: "namedElements")
+    gradle.extensions.chowlModules.each { module ->
+        if (module == "test") return
+        implementation project(path: ":$module", configuration: "namedElements")
+    }
 }
