@@ -6,6 +6,8 @@ import net.minecraft.util.Identifier;
 public class Chowl implements ModInitializer {
     public static final String MODID = "chowl-core";
 
+
+
 //    public static final ChowlCoreConfig CONFIG = ChowlCoreConfig.createAndLoad();
 
     @Override
