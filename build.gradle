@@ -32,7 +32,7 @@ subprojects {
 
         modImplementation("io.wispforest:lavender:${project.lavender_version}+${project.wispforest_mc_version}")
 
-        include modImplementation("com.kneelawk.graphlib:graphlib-core-fabric:${project.graphlib_version}")
+        modImplementation include("com.kneelawk.graphlib:graphlib-core-fabric:${project.graphlib_version}")
 //        modLocalRuntime("com.kneelawk.graphlib:graphlib-debugrender-fabric:${project.graphlib_version}")
 
         modImplementation("eu.pb4:common-protection-api:${project.cpa_version}")

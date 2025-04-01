@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "group": "chowl-oddities:caution_block",
+  "pattern": [
+    "byb",
+    "yiy",
+    "byb"
+  ],
+  "key": {
+    "y": "#c:dyes/yellow",
+    "b": "#c:dyes/black",
+    "i": "#c:ingots/iron"
+  },
+  "result": {
+    "id": "chowl-oddities:caution_block",
+    "count": 4
+  }
+}

@@ -3,7 +3,7 @@
   "id": "chowl-industries",
   "version": "${version}",
   "name": "Chowl Industries",
-  "description": "Enterprise™ mass storage",
+  "description": "Enterprise™ Mass Storage",
   "authors": ["chyzman", "BasiqueEvangelist"],
   "contact": {
     "issues": "https://github.com/wisp-forest/Chowl/issues",

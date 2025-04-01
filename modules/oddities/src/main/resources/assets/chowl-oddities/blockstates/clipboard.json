@@ -1,0 +1,57 @@
+{
+  "variants": {
+    "orientation=down_east": {
+      "model": "chowl-oddities:block/clipboard",
+      "x": 270,
+      "y": 270
+    },
+    "orientation=down_north": {
+      "model": "chowl-oddities:block/clipboard",
+      "x": 270,
+      "y": 180
+    },
+    "orientation=down_south": {
+      "model": "chowl-oddities:block/clipboard",
+      "x": 270
+    },
+    "orientation=down_west": {
+      "model": "chowl-oddities:block/clipboard",
+      "x": 270,
+      "y": 90
+    },
+    "orientation=east_up": {
+      "model": "chowl-oddities:block/clipboard",
+      "y": 270
+    },
+    "orientation=north_up": {
+      "model": "chowl-oddities:block/clipboard",
+      "y": 180
+    },
+    "orientation=south_up": {
+      "model": "chowl-oddities:block/clipboard"
+    },
+    "orientation=up_east": {
+      "model": "chowl-oddities:block/clipboard",
+      "x": 90,
+      "y": 90
+    },
+    "orientation=up_north": {
+      "model": "chowl-oddities:block/clipboard",
+      "x": 90
+    },
+    "orientation=up_south": {
+      "model": "chowl-oddities:block/clipboard",
+      "x": 90,
+      "y": 180
+    },
+    "orientation=up_west": {
+      "model": "chowl-oddities:block/clipboard",
+      "x": 90,
+      "y": 270
+    },
+    "orientation=west_up": {
+      "model": "chowl-oddities:block/clipboard",
+      "y": 90
+    }
+  }
+}

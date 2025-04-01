@@ -1,0 +1,8 @@
+{
+  "block.knocker.click": {
+    "sounds": [
+      "random/click"
+    ],
+    "subtitle": "subtitles.block.chowl-oddities.knocker.click"
+  }
+}

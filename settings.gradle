@@ -9,11 +9,13 @@ pluginManagement {
 }
 
 gradle.extensions.chowlModules = [
-    "core",
-    "industries",
-    "logistics",
-    "visage",
-    "test"
+        "core",
+        "industries",
+        "logistics",
+        "visage",
+        "electromechanics",
+        "oddities",
+        "test"
 ]
 
 gradle.extensions.chowlModules.each { module ->

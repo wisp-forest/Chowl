@@ -1,7 +1,8 @@
 package com.chyzman.chowl.core.blockentity.api;
 
-import com.chyzman.chowl.core.client.ChowlCoreClient;
-import com.chyzman.chowl.core.registry.ChowlCoreComponents;
+import com.chyzman.chowl.core.client.ChowlClient;
+import com.chyzman.chowl.core.registry.ChowlComponents;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
@@ -10,6 +11,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryEntryLookup;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.state.property.Properties;
@@ -32,13 +35,14 @@ public abstract class TemplatableBlockEntity extends BlockEntity {
         super.readNbt(nbt, registryLookup);
 
         if (nbt.contains("TemplateState", NbtElement.COMPOUND_TYPE)) {
-            templateState = NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), nbt.getCompound("TemplateState"));
+            RegistryEntryLookup<Block> registryEntryLookup = this.world != null ? this.world.createCommandRegistryWrapper(RegistryKeys.BLOCK) : Registries.BLOCK;
+            templateState = NbtHelper.toBlockState(registryEntryLookup, nbt.getCompound("TemplateState"));
         } else {
             templateState = null;
         }
 
         if (world != null && world.isClient) {
-            ChowlCoreClient.reloadPos(world, pos);
+            ChowlClient.reloadPos(world, pos);
         }
     }
 
@@ -62,20 +66,21 @@ public abstract class TemplatableBlockEntity extends BlockEntity {
     @Override
     protected void addComponents(ComponentMap.Builder components) {
         if (templateState != null) {
-            components.add(ChowlCoreComponents.TEMPLATE_STATE, templateState);
+            components.add(ChowlComponents.TEMPLATE_STATE, templateState);
         }
     }
 
     @MustBeInvokedByOverriders
     @Override
     protected void readComponents(ComponentsAccess components) {
-        templateState = components.get(ChowlCoreComponents.TEMPLATE_STATE);
+        templateState = components.get(ChowlComponents.TEMPLATE_STATE);
     }
 
     @MustBeInvokedByOverriders
     @SuppressWarnings("deprecation")
     @Override
     public void removeFromCopiedStackNbt(NbtCompound nbt) {
+        super.removeFromCopiedStackNbt(nbt);
         nbt.remove("TemplateState");
     }
 
@@ -92,7 +97,7 @@ public abstract class TemplatableBlockEntity extends BlockEntity {
             markDirty();
 
             if (world.isClient) {
-                ChowlCoreClient.reloadPos(world, pos);
+                ChowlClient.reloadPos(world, pos);
             } else {
                 if (getCachedState().contains(LIGHT_LEVEL)) {
                     world.setBlockState(pos, getCachedState()

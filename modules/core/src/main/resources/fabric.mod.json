@@ -3,7 +3,7 @@
   "id": "chowl-core",
   "version": "${version}",
   "name": "Chowl Core",
-  "description": "Enterprise™ enterprising",
+  "description": "Enterprise™ Enterprising",
   "authors": ["chyzman", "BasiqueEvangelist"],
   "contact": {
     "issues": "https://github.com/wisp-forest/Chowl/issues",

@@ -18,12 +18,13 @@ public class ChowlItemGroup {
     private static final TreeSet<Pair<Consumer<OwoItemGroup>, Integer>> INITIALIZERS = new TreeSet<>(Comparator.comparing(pair -> -pair.getRight()));
 
     private static final OwoItemGroup GROUP = OwoItemGroup.builder(Chowl.id("group"), ChowlItemGroup::getIcon)
-        .initializer(group -> {
-            for (var entry : INITIALIZERS) {
-                entry.getLeft().accept(group);
-            }
-        })
-        .build();
+            .initializer(group -> {
+                for (var entry : INITIALIZERS) {
+                    entry.getLeft().accept(group);
+                }
+            })
+            .tabStackHeight(5)
+            .build();
 
     static {
         OwoFreezer.checkRegister("The Chowl item group");

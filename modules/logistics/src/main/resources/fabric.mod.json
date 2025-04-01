@@ -3,7 +3,7 @@
   "id": "chowl-logistics",
   "version": "${version}",
   "name": "Chowl Logistics",
-  "description": "Enterprise™ logistics",
+  "description": "Enterprise™ Logistics",
   "authors": ["chyzman", "BasiqueEvangelist"],
   "contact": {
     "issues": "https://github.com/wisp-forest/Chowl/issues",

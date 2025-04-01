@@ -1,0 +1,12 @@
+{
+  "itemGroup.chowl-core.group.tab.oddities": "Oddities",
+
+  "item.chowl-oddities.caution_block": "Caution Block",
+  "item.chowl-oddities.clipboard": "Clipboard",
+  "item.chowl-oddities.watcher": "Watcher",
+  "item.chowl-oddities.knocker": "Knocker",
+  "item.chowl-oddities.sticky_note": "Sticky Note",
+  "item.chowl-oddities.pin": "Pin",
+
+  "subtitles.block.chowl-oddities.knocker.click": "Knocker Clicks"
+}
