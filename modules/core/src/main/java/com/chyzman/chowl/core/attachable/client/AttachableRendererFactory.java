@@ -1,6 +1,7 @@
 package com.chyzman.chowl.core.attachable.client;
 
 import com.chyzman.chowl.core.attachable.Attachable;
+import com.chyzman.chowl.core.attachable.AttachableContainer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.font.TextRenderer;

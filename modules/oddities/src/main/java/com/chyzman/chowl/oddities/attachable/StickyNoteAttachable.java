@@ -1,32 +1,38 @@
 package com.chyzman.chowl.oddities.attachable;
 
-import com.chyzman.chowl.core.attachable.Attachable;
-import com.chyzman.chowl.core.attachable.AttachableType;
-import com.chyzman.chowl.core.registry.ChowlRegistries;
+import com.chyzman.chowl.core.attachable.*;
 import com.chyzman.chowl.oddities.registry.OdditiesAttachables;
-import io.wispforest.endec.Endec;
+import com.chyzman.chowl.oddities.registry.OdditiesItems;
 import io.wispforest.endec.StructEndec;
-import io.wispforest.endec.impl.BuiltInEndecs;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
+import io.wispforest.owo.util.Wisdom;
+import net.minecraft.block.Block;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.dynamic.Codecs;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
-import java.util.List;
+import java.util.*;
 
 public class StickyNoteAttachable extends Attachable {
+    private static final VoxelShape SHAPE = Attachable.createAttachableCuboid(
+            -8, -8, -0.5,
+            8, 8, 0.5,
+            1 / 16f
+    );
+
     private Vec3d pos = Vec3d.ZERO;
     private Quaternionf rotation = new Quaternionf();
     private Text text = Text.empty();
@@ -82,12 +88,65 @@ public class StickyNoteAttachable extends Attachable {
     //endregion
 
     @Override
-    public Vec3d getClosestPoint(Vec3d point) {
-        return this.pos;
+    public Set<ChunkPos> getChunksOccupied() {
+        var offsetPos = pos.add(new Vec3d(rotation.transform(new Vector3f(0, 0.01f, 0))));
+        return new HashSet<>(List.of(
+                new ChunkPos((int) (Math.round(this.pos.x) >> 4), (int) Math.round(this.pos.z) >> 4),
+                new ChunkPos((int) (Math.round(offsetPos.x) >> 4), (int) Math.round(offsetPos.z) >> 4)
+        ));
     }
 
     @Override
-    public boolean collides(Vec3d pos, double margin) {
-        return this.pos.distanceTo(pos) <= margin;
+    protected TranformedVoxelShape createShape() {
+        return new TranformedVoxelShape(Block.createCuboidShape(
+                -8 / 4f, -8 / 4f - 1.6, -1 / 5f,
+                8 / 4f, 8 / 4f - 1.6, 1 / 20f
+        ), new Quaternionf(this.rotation).rotateX((float) Math.toRadians(-85f)));
+    }
+
+    @Override
+    public boolean isSupported(World world) {
+        return Attachable.checkForSupport(this, world, this.pos, this.rotation);
+    }
+
+    @Override
+    public @Nullable Vec3d raycast(Vec3d start, Vec3d end) {
+        return this.getShape().raycast(start, end, this.pos);
+    }
+
+    @Override
+    public ActionResult onUse(World world, PlayerEntity player, Hand hand, AttachableHitResult hit) {
+        if (world.isClient) return ActionResult.SUCCESS;
+        player.sendMessage(Text.literal(Wisdom.ALL_THE_WISDOM.get(new Random(this.pos().hashCode()).nextInt(Wisdom.ALL_THE_WISDOM.size()))), false);
+        return ActionResult.SUCCESS;
+    }
+
+    @Override
+    public void onBroken(World world, Vec3d pos) {
+        ItemScatterer.spawn(
+                world,
+                pos.x,
+                pos.y,
+                pos.z,
+                OdditiesItems.STICKY_NOTE.getDefaultStack()
+        );
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                this.pos,
+                this.rotation,
+                this.text
+        );
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof StickyNoteAttachable that)) return false;
+        if (!Objects.equals(this.pos, that.pos)) return false;
+        if (!Objects.equals(this.rotation, that.rotation)) return false;
+        if (!Objects.equals(this.text, that.text)) return false;
+        return super.equals(obj);
     }
 }

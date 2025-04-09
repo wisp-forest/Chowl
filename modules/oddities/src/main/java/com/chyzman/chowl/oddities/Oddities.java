@@ -39,6 +39,8 @@ public class Oddities implements ModInitializer {
                 entries.add(OdditiesItems.KNOCKER);
                 entries.add(OdditiesItems.STICKY_NOTE);
                 entries.add(OdditiesItems.PIN);
+                entries.add(OdditiesItems.STRING);
+                entries.add(OdditiesItems.CLOCK);
             }, false);
         }, 60);
     }

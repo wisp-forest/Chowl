@@ -2,23 +2,18 @@ package com.chyzman.chowl.core.attachable.client;
 
 import com.chyzman.chowl.core.attachable.Attachable;
 import com.chyzman.chowl.core.attachable.AttachableType;
+import com.chyzman.chowl.core.registry.ChowlRegistries;
 import com.google.common.collect.ImmutableMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.item.ItemModelManager;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.client.render.entity.model.LoadedEntityModels;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.resource.ResourceManager;
@@ -64,8 +59,8 @@ public class AttachableRenderDispatcher implements SynchronousResourceReloader {
     }
 
     @Nullable
-    public <A extends Attachable> AttachableRenderer<A> get(A attachable) {
-        return (AttachableRenderer<A>) this.renderers.get(attachable.getType());
+    public <A extends Attachable> AttachableRenderer<A> get(A attachableState) {
+        return (AttachableRenderer<A>) this.renderers.get(attachableState.getType());
     }
 
     public void configure(World world, Camera camera, HitResult crosshairTarget) {
@@ -91,16 +86,33 @@ public class AttachableRenderDispatcher implements SynchronousResourceReloader {
                 } catch (Throwable throwable) {
                     CrashReport crashReport = CrashReport.create(throwable, "Rendering Attachable");
                     CrashReportSection crashReportSection = crashReport.addElement("Attachable Details");
-                    attachable.populateCrashReport(crashReportSection);
+                    crashReportSection.add("Name", ChowlRegistries.ATTACHABLE_TYPE.getId(attachable.getType()) + " // " + attachable.getClass().getCanonicalName());
                     throw new CrashException(crashReport);
                 }
             }
         }
     }
 
+    public <A extends Attachable> void renderOutline(
+            A attachable,
+            Camera camera,
+            VertexConsumerProvider.Immediate vertexConsumers,
+            MatrixStack matrices
+    ) {
+        var attachableRenderer = this.get(attachable);
+        if (attachableRenderer != null) {
+            attachableRenderer.renderOutline(
+                    attachable,
+                    camera,
+                    vertexConsumers,
+                    matrices
+            );
+        }
+    }
+
     private static <T extends Attachable> void render(
             AttachableRenderer<T> renderer,
-            T attachable,
+            T attachableState,
             float tickDelta,
             MatrixStack matrices,
             VertexConsumerProvider vertexConsumers
@@ -113,7 +125,7 @@ public class AttachableRenderDispatcher implements SynchronousResourceReloader {
 //            i = 15728880;
 //        }
 
-        renderer.render(attachable, tickDelta, matrices, vertexConsumers, 15728880, OverlayTexture.DEFAULT_UV);
+        renderer.render(attachableState, tickDelta, matrices, vertexConsumers, 15728880, OverlayTexture.DEFAULT_UV);
     }
 
     public void setWorld(@Nullable World world) {

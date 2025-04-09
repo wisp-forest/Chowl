@@ -1,11 +1,7 @@
 package com.chyzman.chowl.core.attachable;
 
-import com.chyzman.chowl.core.attachable.client.AttachableRenderer;
 import com.chyzman.chowl.core.registry.ChowlRegistries;
 import io.wispforest.endec.StructEndec;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.SpawnReason;
 import net.minecraft.registry.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.entry.RegistryEntryList;
@@ -16,6 +12,7 @@ import net.minecraft.util.Util;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class AttachableType<T extends Attachable> implements TypeFilter<Attachable, T> {
@@ -53,7 +50,7 @@ public class AttachableType<T extends Attachable> implements TypeFilter<Attachab
 
         var attachableHolder = world.getAttachedOrCreate(AttachableHolder.TYPE);
 
-        attachableHolder.attachables.put(attachable.uuid, attachable);
+        attachableHolder.addAttachable(attachable);
 
         world.setAttached(AttachableHolder.TYPE, attachableHolder);
 
@@ -103,4 +100,14 @@ public class AttachableType<T extends Attachable> implements TypeFilter<Attachab
         T create(AttachableType<T> type);
     }
 
+    @Override
+    public int hashCode() {
+        return this.registryEntry.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof AttachableType<?> that)) return false;
+        return Objects.equals(this.registryEntry, that.registryEntry);
+    }
 }

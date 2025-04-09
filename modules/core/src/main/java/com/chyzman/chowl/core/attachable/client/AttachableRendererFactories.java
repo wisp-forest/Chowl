@@ -1,6 +1,7 @@
 package com.chyzman.chowl.core.attachable.client;
 
 import com.chyzman.chowl.core.attachable.Attachable;
+import com.chyzman.chowl.core.attachable.AttachableContainer;
 import com.chyzman.chowl.core.attachable.AttachableType;
 import com.chyzman.chowl.core.registry.ChowlRegistries;
 import com.google.common.collect.ImmutableMap;

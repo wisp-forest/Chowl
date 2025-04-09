@@ -1,13 +1,16 @@
 package com.chyzman.chowl.oddities.registry;
 
 import com.chyzman.chowl.core.attachable.Attachable;
+import com.chyzman.chowl.core.attachable.AttachableContainer;
 import com.chyzman.chowl.core.attachable.AttachableType;
 import com.chyzman.chowl.core.attachable.client.AttachableRendererFactories;
 import com.chyzman.chowl.oddities.Oddities;
 import com.chyzman.chowl.oddities.attachable.PinAttachable;
 import com.chyzman.chowl.oddities.attachable.StickyNoteAttachable;
+import com.chyzman.chowl.oddities.attachable.StringAttachable;
 import com.chyzman.chowl.oddities.attachable.renderer.PinRenderer;
 import com.chyzman.chowl.oddities.attachable.renderer.StickyNoteRenderer;
+import com.chyzman.chowl.oddities.attachable.renderer.StringRenderer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -29,6 +32,14 @@ public class OdditiesAttachables {
             )
     );
 
+    public static final AttachableType<StringAttachable> STRING = register(
+            "string",
+            new AttachableType.Builder<>(
+                    type -> new StringAttachable(),
+                    StringAttachable.ENDEC
+            )
+    );
+
     public static <T extends Attachable> AttachableType<T> register(String id, AttachableType.Builder<T> type) {
         return AttachableType.register(Oddities.id(id), type);
     }
@@ -38,7 +49,8 @@ public class OdditiesAttachables {
 
     @Environment(EnvType.CLIENT)
     public static void clientInit() {
-        AttachableRendererFactories.register(OdditiesAttachables.STICKY_NOTE, ctx -> new StickyNoteRenderer());
+        AttachableRendererFactories.register(OdditiesAttachables.STICKY_NOTE, StickyNoteRenderer::new);
         AttachableRendererFactories.register(OdditiesAttachables.PIN, ctx -> new PinRenderer());
+        AttachableRendererFactories.register(OdditiesAttachables.STRING, ctx -> new StringRenderer());
     }
 }

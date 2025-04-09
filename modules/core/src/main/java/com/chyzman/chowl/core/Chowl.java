@@ -1,5 +1,6 @@
 package com.chyzman.chowl.core;
 
+import com.chyzman.chowl.core.network.ChowlPackets;
 import com.chyzman.chowl.core.registry.ChowlComponents;
 import com.chyzman.chowl.core.registry.ChowlRegistries;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
@@ -18,6 +19,7 @@ public class Chowl implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        ChowlPackets.registerCommon();
         ChowlRegistries.init();
 
         FieldRegistrationHandler.register(ChowlComponents.class, MODID, true);

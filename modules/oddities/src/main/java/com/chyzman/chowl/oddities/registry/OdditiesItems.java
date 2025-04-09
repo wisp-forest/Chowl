@@ -3,6 +3,7 @@ package com.chyzman.chowl.oddities.registry;
 import com.chyzman.chowl.oddities.Oddities;
 import com.chyzman.chowl.oddities.item.PinItem;
 import com.chyzman.chowl.oddities.item.StickyNoteItem;
+import com.chyzman.chowl.oddities.item.StringItem;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -52,6 +53,18 @@ public class OdditiesItems {
             "pin",
             new Item.Settings(),
             PinItem::new
+    );
+
+    public static final Item STRING = register(
+            "string",
+            new Item.Settings(),
+            StringItem::new
+    );
+
+    public static final Item CLOCK = register(
+            "clock",
+            new Item.Settings(),
+            settings -> new BlockItem(OdditiesBlocks.CLOCK, settings)
     );
 
     private static Item register(String id, Item.Settings settings, Function<Item.Settings, Item> factory) {

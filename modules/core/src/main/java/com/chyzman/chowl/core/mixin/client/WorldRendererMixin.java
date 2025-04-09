@@ -1,14 +1,17 @@
 package com.chyzman.chowl.core.mixin.client;
 
+import com.chyzman.chowl.core.attachable.AttachableHolder;
+import com.chyzman.chowl.core.pond.HitResultDuck;
 import com.chyzman.chowl.core.pond.MinecraftClientDuck;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.client.render.*;
 import net.minecraft.client.util.ObjectAllocator;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.util.hit.BlockHitResult;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,6 +24,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class WorldRendererMixin {
     @Shadow @Final private MinecraftClient client;
 
+    @Shadow private @Nullable ClientWorld world;
+
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/block/entity/BlockEntityRenderDispatcher;configure(Lnet/minecraft/world/World;Lnet/minecraft/client/render/Camera;Lnet/minecraft/util/hit/HitResult;)V"))
     private void configureAttachableRenderDispatcher(
             ObjectAllocator allocator,
@@ -32,7 +37,7 @@ public class WorldRendererMixin {
             Matrix4f projectionMatrix,
             CallbackInfo ci
     ) {
-        ((MinecraftClientDuck)this.client).chowl$getAttachableRenderDispatcher().configure(
+        ((MinecraftClientDuck) this.client).chowl$getAttachableRenderDispatcher().configure(
                 this.client.world,
                 camera,
                 this.client.crosshairTarget
@@ -44,6 +49,40 @@ public class WorldRendererMixin {
     private void setAttachableRenderDispatcherWorld(
             ClientWorld world, CallbackInfo ci
     ) {
-        ((MinecraftClientDuck)this.client).chowl$getAttachableRenderDispatcher().setWorld(world);
+        ((MinecraftClientDuck) this.client).chowl$getAttachableRenderDispatcher().setWorld(world);
+    }
+
+    @Inject(method = "renderTargetBlockOutline", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/hit/BlockHitResult;getType()Lnet/minecraft/util/hit/HitResult$Type;"), cancellable = true)
+    private void renderTargetAttachableOutline(
+            Camera camera,
+            VertexConsumerProvider.Immediate vertexConsumers,
+            MatrixStack matrices,
+            boolean translucent,
+            CallbackInfo ci,
+            @Local BlockHitResult hitResult
+    ) {
+        var targetAttachable = ((HitResultDuck) hitResult).chowl$getHitAttachable();
+        if (targetAttachable == null) return;
+
+        var dispatcher = ((MinecraftClientDuck) client).chowl$getAttachableRenderDispatcher();
+
+//        world.getAttachedOrCreate(AttachableHolder.TYPE).attachables.forEach((uuid, container) -> {
+//            dispatcher.renderOutline(
+//                    container.getContained(),
+//                    camera,
+//                    vertexConsumers,
+//                    matrices
+//            );
+//        });
+
+        dispatcher.renderOutline(
+                targetAttachable.getContained(),
+                camera,
+                vertexConsumers,
+                matrices
+        );
+
+        ci.cancel();
+
     }
 }

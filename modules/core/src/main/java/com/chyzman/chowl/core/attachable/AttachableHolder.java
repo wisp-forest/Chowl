@@ -1,6 +1,8 @@
 package com.chyzman.chowl.core.attachable;
 
 import com.chyzman.chowl.core.Chowl;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.impl.BuiltInEndecs;
 import io.wispforest.endec.impl.StructEndecBuilder;
@@ -8,32 +10,43 @@ import io.wispforest.owo.serialization.CodecUtils;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @SuppressWarnings("UnstableApiUsage")
 public class AttachableHolder {
-    public final Map<UUID,Attachable> attachables = new HashMap<>();
+    public final Map<UUID, AttachableContainer> attachables = new ConcurrentHashMap<>();
+    public final Multimap<ChunkPos, UUID> chunkPosToAttachables = HashMultimap.create();
 
     public AttachableHolder() {}
 
-    public AttachableHolder(Map<UUID, Attachable> attachables) {
-        this.attachables.putAll(attachables);
-    }
+    //region ENDEC STUFF
 
     public static final Endec<AttachableHolder> ENDEC = StructEndecBuilder.of(
-            Endec.map(BuiltInEndecs.UUID, Attachable.ENDEC).fieldOf("attachables", o -> o.attachables),
+            AttachableContainer.ENDEC.listOf().fieldOf("attachables", o -> o.attachables.values().stream().toList()),
             AttachableHolder::new
     );
+
+    private AttachableHolder(List<AttachableContainer> attachables) {
+        for (AttachableContainer container : attachables) {
+            this.attachables.put(container.uuid, container);
+            for (ChunkPos chunkPos : container.chunksOccupied) {
+                this.chunkPosToAttachables.put(chunkPos, container.uuid);
+            }
+        }
+    }
+
+    //endregion
 
     public static AttachmentType<AttachableHolder> TYPE = AttachmentRegistry.create(
             Chowl.id("attachables"),
@@ -43,7 +56,25 @@ public class AttachableHolder {
                     .initializer(AttachableHolder::new)
     );
 
+    public AttachableContainer addAttachable(@NotNull Attachable attachable) {
+        AttachableContainer container = new AttachableContainer(attachable);
 
+        this.attachables.put(container.uuid, container);
+
+        for (ChunkPos chunkPos : container.chunksOccupied) {
+            this.chunkPosToAttachables.put(chunkPos, container.uuid);
+        }
+
+        return container;
+    }
+
+    public void removeAttachable(@NotNull UUID uuid) {
+        AttachableContainer container = this.attachables.remove(uuid);
+
+        for (ChunkPos chunkPos : container.chunksOccupied) {
+            this.chunkPosToAttachables.remove(chunkPos, uuid);
+        }
+    }
 
     static <T, C> T raycast(Vec3d start, Vec3d end, C context, BiFunction<C, BlockPos, T> blockHitFactory, Function<C, T> missFactory) {
         if (start.equals(end)) {
@@ -58,15 +89,15 @@ public class AttachableHolder {
             int flooredX = MathHelper.floor(endX);
             int flooredY = MathHelper.floor(endY);
             int flooredZ = MathHelper.floor(endZ);
-            BlockPos.Mutable mutable = new BlockPos.Mutable(flooredX, flooredY, flooredZ);
-            T hitResult = blockHitFactory.apply(context, mutable);
-            if (hitResult != null) {
-                return hitResult;
+            BlockPos.Mutable targetPos = new BlockPos.Mutable(flooredX, flooredY, flooredZ);
+            T firstHit = blockHitFactory.apply(context, targetPos);
+            if (firstHit != null) {
+                return firstHit;
             } else {
                 double xDist = startX - endX;
                 double yDist = startY - endY;
                 double zDist = startZ - endZ;
-                //sign = 1 if positive -1 if negative, 0 if zero
+                //"sign" = 1 if positive -1 if negative, 0 if zero
                 int xSign = MathHelper.sign(xDist);
                 int ySign = MathHelper.sign(yDist);
                 int zSign = MathHelper.sign(zDist);
@@ -94,15 +125,26 @@ public class AttachableHolder {
                         x += u;
                     }
 
-                    T object2 = (T)blockHitFactory.apply(context, mutable.set(flooredX, flooredY, flooredZ));
-                    if (object2 != null) {
-                        return object2;
-                    }
+                    T secondHit = blockHitFactory.apply(context, targetPos.set(flooredX, flooredY, flooredZ));
+                    if (secondHit != null) return secondHit;
                 }
 
-                return (T)missFactory.apply(context);
+                return missFactory.apply(context);
             }
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.attachables);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof AttachableHolder that)) return false;
+        if (!Objects.equals(this.attachables, that.attachables)) return false;
+        if (!Objects.equals(this.chunkPosToAttachables, that.chunkPosToAttachables)) return false;
+        return true;
     }
 }
 

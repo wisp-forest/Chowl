@@ -4,12 +4,11 @@ import com.chyzman.chowl.oddities.registry.OdditiesAttachables;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.math.Direction;
-import org.joml.AxisAngle4f;
+import net.minecraft.util.math.Vec3d;
 import org.joml.Quaternionf;
 
-public class PinItem extends Item {
-    public PinItem(Settings settings) {
+public class StringItem extends Item {
+    public StringItem(Settings settings) {
         super(settings);
     }
 
@@ -32,11 +31,13 @@ public class PinItem extends Item {
             rotation.set(yawQuat).mul(pitchQuat);
         }
 
-        OdditiesAttachables.PIN.create(
+        OdditiesAttachables.STRING.create(
                 ctx.getWorld(),
                 pin -> pin
                         .pos(ctx.getHitPos())
                         .rotation(rotation)
+                        .endPos(ctx.getHitPos().multiply(-1, 1, -1))
+                        .endRotation(new Quaternionf(rotation).rotateY((float) Math.toRadians(180)))
         );
 
         return ActionResult.CONSUME;

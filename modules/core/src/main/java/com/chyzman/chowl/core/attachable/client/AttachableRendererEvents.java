@@ -1,33 +1,49 @@
 package com.chyzman.chowl.core.attachable.client;
 
-import com.chyzman.chowl.core.attachable.Attachable;
+import com.chyzman.chowl.core.attachable.AttachableContainer;
 import com.chyzman.chowl.core.attachable.AttachableHolder;
 import com.chyzman.chowl.core.pond.MinecraftClientDuck;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.*;
-import net.minecraft.client.render.chunk.ChunkBuilder;
-import net.minecraft.client.render.model.ModelBaker;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.player.BlockBreakingInfo;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.util.math.Vec3d;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedSet;
+import java.util.Set;
 
 @SuppressWarnings("UnstableApiUsage")
 @Environment(EnvType.CLIENT)
 public class AttachableRendererEvents {
+    public static final List<Vec3d> DEBUG_POSITIONS = new ArrayList<>();
+
     public static void init() {
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register(ctx -> {
             var client = MinecraftClient.getInstance();
 
             var world = ctx.world();
             if (world == null) return;
+
+
+            if (client.options.hudHidden) {
+                DEBUG_POSITIONS.clear();
+            } else {
+                var buffer = ctx.consumers().getBuffer(RenderLayer.getDebugLineStrip(10));
+                Vec3d previousPos = null;
+                for (Vec3d debugPosition : DEBUG_POSITIONS) {
+                    if (previousPos == null) {
+                        previousPos = debugPosition;
+                        continue;
+                    }
+                    var start = previousPos.subtract(ctx.camera().getPos());
+                    var end = debugPosition.subtract(ctx.camera().getPos());
+                    buffer.vertex(ctx.matrixStack().peek(), start.toVector3f()).normal(0, 0, 1).color(1f, 1f, 0, 1);
+                    buffer.vertex(ctx.matrixStack().peek(), end.toVector3f()).normal(0, 0, 1).color(1f, 1, 0, 1);
+                    previousPos = debugPosition;
+                }
+            }
 
             var attachables = world.getAttachedOrCreate(AttachableHolder.TYPE).attachables;
             if (attachables.isEmpty()) return;
@@ -37,12 +53,12 @@ public class AttachableRendererEvents {
             var matrices = ctx.matrixStack();
             if (matrices == null) return;
 
-            for (Attachable attachable : attachables.values()) {
+            for (AttachableContainer container : attachables.values()) {
                 matrices.push();
 
                 matrices.translate( ctx.camera().getPos().multiply(-1));
 
-                dispatcher.render(attachable, ctx.tickCounter().getTickDelta(false), matrices, ctx.consumers());
+                dispatcher.render(container.getContained(), ctx.tickCounter().getTickDelta(false), matrices, ctx.consumers());
 
                 matrices.pop();
             }

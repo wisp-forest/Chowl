@@ -3,7 +3,6 @@ package com.chyzman.chowl.oddities.item;
 import com.chyzman.chowl.oddities.registry.OdditiesAttachables;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemUsageContext;
-import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.Direction;
 
@@ -20,11 +19,11 @@ public class StickyNoteItem extends Item {
 
         var side = ctx.getSide();
 
-        final var rotation = side.getRotationQuaternion();
+        final var rotation = side.getOpposite().getRotationQuaternion();
 
         if (side.getAxis() == Direction.Axis.Y) {
-            var rot = (float) Math.toRadians(ctx.getPlayerYaw() + 180F);
-            rotation.rotateY(rot * (side == Direction.DOWN ? 1 : -1));
+            var rot = (float) Math.toRadians(ctx.getPlayerYaw());
+            rotation.rotateY(rot * (side == Direction.UP ? 1 : -1));
         }
 
         OdditiesAttachables.STICKY_NOTE.create(

@@ -2,6 +2,7 @@ package com.chyzman.chowl.oddities.registry;
 
 import com.chyzman.chowl.oddities.Oddities;
 import com.chyzman.chowl.oddities.block.ClipboardBlock;
+import com.chyzman.chowl.oddities.block.ClockBlock;
 import com.chyzman.chowl.oddities.block.KnockerBlock;
 import com.chyzman.chowl.oddities.block.WatcherBlock;
 import net.minecraft.block.AbstractBlock;
@@ -28,9 +29,17 @@ public class OdditiesBlocks {
     public static final Block CLIPBOARD = register(
             "clipboard",
             AbstractBlock.Settings
-                    .copy(OAK_PRESSURE_PLATE)
-                    .solid(),
+                    .copy(OAK_PRESSURE_PLATE),
             ClipboardBlock::new
+    );
+
+    public static final Block CLOCK = register(
+            "clock",
+            AbstractBlock.Settings
+                    .copy(IRON_BLOCK)
+                    .nonOpaque()
+                    .mapColor(DyeColor.BLACK),
+            ClockBlock::new
     );
 
     public static final Block WATCHER = register(
