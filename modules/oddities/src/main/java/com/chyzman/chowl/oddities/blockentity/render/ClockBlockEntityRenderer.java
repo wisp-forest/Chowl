@@ -2,19 +2,28 @@ package com.chyzman.chowl.oddities.blockentity.render;
 
 import com.chyzman.chowl.oddities.block.ClockBlock;
 import com.chyzman.chowl.oddities.blockentity.ClockBlockEntity;
+import com.chyzman.chowl.oddities.mixin.access.WorldRendererAccessor;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gl.ShaderProgramKey;
+import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.ModelTransformationMode;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
+import org.joml.Vector4f;
+import org.lwjgl.opengl.GL11;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ClockBlockEntityRenderer implements BlockEntityRenderer<ClockBlockEntity> {
     private final TextRenderer textRenderer;
@@ -105,5 +114,51 @@ public class ClockBlockEntityRenderer implements BlockEntityRenderer<ClockBlockE
         );
 
         matrices.pop();
+
+        matrices.push();
+
+        matrices.translate(0.5, 0.5, 0.5);
+
+        matrices.translate(0, 3.5f, 0);
+
+        var scale = 1 / 64f;
+        matrices.scale(scale, scale, scale);
+
+        var client = MinecraftClient.getInstance();
+        var world = entity.getWorld();
+
+        var skyAngle = world.getSkyAngle(tickDelta);
+        var moonPhase = world.getMoonPhase();
+        var fog = BackgroundRenderer.applyFog(
+                client.gameRenderer.getCamera(),
+                BackgroundRenderer.FogType.FOG_SKY,
+                new Vector4f(0, 0, 0, 0),
+                10,
+                false,
+                tickDelta
+        );
+
+        var culling = GL11.glIsEnabled(GL11.GL_CULL_FACE);
+
+        RenderSystem.disableCull();
+
+        ((WorldRendererAccessor) client.worldRenderer).chowlOddities$getSkyRendering().renderCelestialBodies(
+                matrices,
+                (VertexConsumerProvider.Immediate) vertexConsumers,
+                skyAngle,
+                moonPhase,
+                1,
+                1,
+                fog
+        );
+
+        if (culling) RenderSystem.enableCull();
+
+        matrices.pop();
+    }
+
+    private boolean is24HourFormat() {
+        String output = SimpleDateFormat.getTimeInstance(DateFormat.SHORT).format(new Date());
+        return !output.contains(" AM") && !output.contains(" PM");
     }
 }

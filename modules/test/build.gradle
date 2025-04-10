@@ -1,6 +1,0 @@
-dependencies {
-    gradle.extensions.chowlModules.each { module ->
-        if (module == "test") return
-        implementation project(path: ":$module", configuration: "namedElements")
-    }
-}

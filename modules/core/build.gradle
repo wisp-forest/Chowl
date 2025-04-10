@@ -1,7 +1,0 @@
-dependencies {
-    modCompileOnly "maven.modrinth:sodium:${project.sodium_version}"
-}
-
-loom {
-    accessWidenerPath = file("src/main/resources/chowl-core.accesswidener")
-}

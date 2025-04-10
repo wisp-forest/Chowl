@@ -9,6 +9,7 @@
     "access.ObserverBlockAccessor"
   ],
   "client": [
+    "access.WorldRendererAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

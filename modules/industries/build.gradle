@@ -1,8 +1,0 @@
-dependencies {
-    api project(path: ":core", configuration: "namedElements")
-    include project(":core")
-}
-
-loom {
-    accessWidenerPath = file("src/main/resources/chowl-industries.accesswidener")
-}
