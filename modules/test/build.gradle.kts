@@ -1,5 +1,5 @@
 plugins {
-    id("chowl-base")
+    id("chowl-testable")
 }
 
 dependencies {
