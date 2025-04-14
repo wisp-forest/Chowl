@@ -1,15 +1,11 @@
 package com.chyzman.chowl.oddities;
 
 import com.chyzman.chowl.core.ChowlItemGroup;
-import com.chyzman.chowl.core.attachable.AttachableHolder;
 import com.chyzman.chowl.oddities.registry.*;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.util.Identifier;
-
-import static net.minecraft.item.Items.ENDER_EYE;
 
 public class Oddities implements ModInitializer {
     public static final String MODID = "chowl-oddities";
@@ -41,7 +37,11 @@ public class Oddities implements ModInitializer {
                 entries.add(OdditiesItems.PIN);
                 entries.add(OdditiesItems.STRING);
                 entries.add(OdditiesItems.CLOCK);
+                entries.add(OdditiesItems.CALENDAR);
+                entries.add(OdditiesItems.BIG_DIRT);
             }, false);
         }, 60);
     }
 }
+
+//TODO: do block buttons by using shape context's entity to determine if it's the client then use cursorTarget to find closest button

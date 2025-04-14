@@ -1,6 +1,3 @@
-import net.fabricmc.loom.task.GenerateSourcesTask
-import org.gradle.internal.impldep.bsh.commands.dir
-
 plugins {
     id("fabric-loom")
     id("maven-publish")
@@ -71,39 +68,36 @@ loom {
         configureEach {
             ideConfigGenerated(false)
             runDir("../../run")
-            source(sourceSets["main"])
+            source(project.sourceSets["main"])
         }
     }
 }
 
-rootProject.subprojects.forEach {
-    loom.mods.register(it.name) {
-        sourceSet(it.sourceSets["main"])
-    }
-}
-
-tasks.processResources {
-    inputs.property("version", project.version)
-    inputs.property("minecraft_version_dep", rootProject.property("minecraft_version_dep"))
-    inputs.property("loader_version", rootProject.property("loader_version"))
-    inputs.property("owo_version", rootProject.property("owo_version"))
-    filteringCharset = "UTF-8"
-
-    filesMatching("fabric.mod.json") {
-        expand(
-            "version" to project.version,
-            "minecraft_version_dep" to rootProject.property("minecraft_version_dep"),
-            "loader_version" to rootProject.property("loader_version"),
-            "owo_version" to rootProject.property("owo_version")
-        )
-    }
-}
-
-//jar {
-//    from("LICENSE") {
-//        rename { "${it}_${project.base.archivesName}" }
+//rootProject.subprojects.forEach {
+//    loom.mods.register(it.name) {x
+//        sourceSet(it.sourceSets["main"])
 //    }
 //}
+
+tasks.processResources {
+    filteringCharset = "UTF-8"
+
+    val properties = mapOf(
+        "version" to project.version,
+        "minecraft_version_dep" to rootProject.property("minecraft_version_dep"),
+        "loader_version" to rootProject.property("loader_version"),
+        "owo_version" to rootProject.property("owo_version")
+    )
+
+    inputs.properties(properties)
+    filesMatching("fabric.mod.json") { expand(properties) }
+}
+
+tasks.jar {
+    from("LICENSE") {
+        rename { "${it}_${project.base.archivesName}" }
+    }
+}
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"

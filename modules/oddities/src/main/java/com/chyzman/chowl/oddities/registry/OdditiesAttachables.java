@@ -1,9 +1,8 @@
 package com.chyzman.chowl.oddities.registry;
 
-import com.chyzman.chowl.core.attachable.Attachable;
-import com.chyzman.chowl.core.attachable.AttachableContainer;
-import com.chyzman.chowl.core.attachable.AttachableType;
-import com.chyzman.chowl.core.attachable.client.AttachableRendererFactories;
+import com.chyzman.chowl.core.attachables.api.Attachable;
+import com.chyzman.chowl.core.attachables.api.AttachableType;
+import com.chyzman.chowl.core.attachables.api.client.AttachableRendererFactories;
 import com.chyzman.chowl.oddities.Oddities;
 import com.chyzman.chowl.oddities.attachable.PinAttachable;
 import com.chyzman.chowl.oddities.attachable.StickyNoteAttachable;

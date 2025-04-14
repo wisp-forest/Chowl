@@ -1,6 +1,6 @@
 package com.chyzman.chowl.core.client;
 
-import com.chyzman.chowl.core.attachable.client.AttachableRendererEvents;
+import com.chyzman.chowl.core.attachables.impl.AttachablesEvents;
 import com.chyzman.chowl.core.network.ChowlPackets;
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.MinecraftClient;
@@ -11,7 +11,7 @@ public class ChowlClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ChowlPackets.registerClient();
-        AttachableRendererEvents.init();
+        AttachablesEvents.clientInit();
     }
 
     public static void reloadPos(World world, BlockPos pos) {

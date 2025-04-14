@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.chyzman.chowl.core.attachables.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "BlockViewMixin",
+    "HitResultMixin",
+    "ServerWorldMixin"
+  ],
+  "client": [
+    "client.MinecraftClientMixin",
+    "client.WorldRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,7 +1,7 @@
 package com.chyzman.chowl.oddities.attachable.renderer;
 
-import com.chyzman.chowl.core.attachable.client.AttachableRenderer;
-import com.chyzman.chowl.core.attachable.client.AttachableRendererFactory;
+import com.chyzman.chowl.core.attachables.api.client.AttachableRenderer;
+import com.chyzman.chowl.core.attachables.api.client.AttachableRendererFactory;
 import com.chyzman.chowl.oddities.attachable.StickyNoteAttachable;
 import com.chyzman.chowl.oddities.registry.OdditiesItems;
 import io.wispforest.owo.util.Wisdom;

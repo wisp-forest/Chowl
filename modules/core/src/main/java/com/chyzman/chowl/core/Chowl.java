@@ -23,11 +23,6 @@ public class Chowl implements ModInitializer {
         ChowlRegistries.init();
 
         FieldRegistrationHandler.register(ChowlComponents.class, MODID, true);
-//        FieldRegistrationHandler.register(ChowlCoreBlocks.class, MODID, true);
-//
-//        NetworkRegistry.init();
-//
-//        ChowlCoreNetworking.init();
     }
 
     public static Identifier id(String path) {

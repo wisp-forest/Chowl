@@ -64,6 +64,7 @@ loom {
                     .asIterable()
                     .firstOrNull { it.name == "sponge-mixin" }
                 if (sponge != null) {
+                    @Suppress("DEPRECATION")
                     mixin = this.configurations.compileClasspath.get().files(sponge).first().path
                     println("[Info]: Mixin HotSwapping should work")
                 } else {

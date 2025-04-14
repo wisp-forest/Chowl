@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "chowl-oddities:block/info_display/wall",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "chowl-oddities:block/info_display/wall"
+    },
+    "facing=south": {
+      "model": "chowl-oddities:block/info_display/wall",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "chowl-oddities:block/info_display/wall",
+      "y": 270
+    }
+  }
+}

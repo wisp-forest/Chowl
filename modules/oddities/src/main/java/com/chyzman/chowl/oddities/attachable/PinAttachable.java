@@ -1,7 +1,7 @@
 package com.chyzman.chowl.oddities.attachable;
 
-import com.chyzman.chowl.core.attachable.Attachable;
-import com.chyzman.chowl.core.attachable.TranformedVoxelShape;
+import com.chyzman.chowl.core.attachables.api.Attachable;
+import com.chyzman.chowl.core.attachables.impl.TranformedVoxelShape;
 import com.chyzman.chowl.oddities.registry.OdditiesAttachables;
 import com.chyzman.chowl.oddities.registry.OdditiesItems;
 import io.wispforest.endec.StructEndec;

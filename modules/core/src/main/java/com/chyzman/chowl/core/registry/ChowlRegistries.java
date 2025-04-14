@@ -1,7 +1,7 @@
 package com.chyzman.chowl.core.registry;
 
 import com.chyzman.chowl.core.Chowl;
-import com.chyzman.chowl.core.attachable.AttachableType;
+import com.chyzman.chowl.core.attachables.api.AttachableType;
 import com.mojang.serialization.Lifecycle;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.minecraft.registry.Registry;
