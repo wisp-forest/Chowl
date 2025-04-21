@@ -50,6 +50,7 @@ loom {
 
         configureEach {
             ideConfigGenerated(true)
+            vmArg("-XX:+AllowEnhancedClassRedefinition")
 //            runDir("../../run")
 //            source(sourceSets["main"])
 

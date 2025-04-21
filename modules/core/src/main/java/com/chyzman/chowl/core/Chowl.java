@@ -1,16 +1,12 @@
 package com.chyzman.chowl.core;
 
+import com.chyzman.chowl.core.debug.DebugCommand;
 import com.chyzman.chowl.core.network.ChowlPackets;
 import com.chyzman.chowl.core.registry.ChowlComponents;
 import com.chyzman.chowl.core.registry.ChowlRegistries;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.minecraft.entity.Attackable;
 import net.minecraft.util.Identifier;
-
-import java.util.List;
 
 public class Chowl implements ModInitializer {
     public static final String MODID = "chowl-core";
@@ -19,10 +15,12 @@ public class Chowl implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        ChowlPackets.registerCommon();
         ChowlRegistries.init();
+        ChowlPackets.registerCommon();
 
         FieldRegistrationHandler.register(ChowlComponents.class, MODID, true);
+
+        DebugCommand.register();
     }
 
     public static Identifier id(String path) {

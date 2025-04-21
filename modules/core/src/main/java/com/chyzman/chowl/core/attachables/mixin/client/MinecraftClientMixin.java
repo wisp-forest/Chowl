@@ -2,9 +2,9 @@ package com.chyzman.chowl.core.attachables.mixin.client;
 
 import com.chyzman.chowl.core.attachables.impl.AttachableHitResult;
 import com.chyzman.chowl.core.attachables.api.client.AttachableRenderDispatcher;
+import com.chyzman.chowl.core.attachables.network.C2S.C2SPlayerAttackAttachable;
+import com.chyzman.chowl.core.attachables.network.C2S.C2SPlayerInteractAttachable;
 import com.chyzman.chowl.core.mixin.client.access.InteractionManagerAccessor;
-import com.chyzman.chowl.core.network.C2S.C2SPlayerAttackAttachable;
-import com.chyzman.chowl.core.network.C2S.C2SPlayerInteractAttachable;
 import com.chyzman.chowl.core.attachables.pond.HitResultDuck;
 import com.chyzman.chowl.core.attachables.pond.MinecraftClientDuck;
 import com.llamalad7.mixinextras.sugar.Local;

@@ -7,10 +7,10 @@ plugins {
 }
 
 group = rootProject.property("maven_group")!!
-version = "${rootProject.property(project.name + "_version")}+${rootProject.property("minecraft_base_version")})}"
+version = "${rootProject.property(project.name + "_version")}+${rootProject.property("minecraft_base_version")}"
 
 base {
-    archivesName = if (rootProject.hasProperty("module_name")) "${rootProject.property("module_name")}" else "chowl-${project.name}"
+    archivesName = if (project.hasProperty("module_name")) "${project.property("module_name")}" else "chowl-${project.name}"
 }
 
 repositories {
@@ -34,7 +34,7 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${rootProject.property("fabric_version")}")
 
     annotationProcessor(modImplementation("io.wispforest:owo-lib:${rootProject.property("owo_version")}+${rootProject.property("wispforest_mc_version")}")!!)
-    include("io.wispforest:owo-sentinel:${rootProject.property("owo_version")}+${rootProject.property("wispforest_mc_version")}")
+//    include("io.wispforest:owo-sentinel:${rootProject.property("owo_version")}+${rootProject.property("wispforest_mc_version")}")
 
     modImplementation("io.wispforest:lavender:${rootProject.property("lavender_version")}+${rootProject.property("wispforest_mc_version")}")
 

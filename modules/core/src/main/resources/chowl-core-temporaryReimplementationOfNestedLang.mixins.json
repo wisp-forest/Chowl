@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.chyzman.chowl.core.temporaryReimplementationOfNestedLang.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "LanguageMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
