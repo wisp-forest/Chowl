@@ -2,6 +2,7 @@ package com.chyzman.chowl.core.attachables.api;
 
 import com.chyzman.chowl.core.attachables.impl.AttachableHolder;
 import com.chyzman.chowl.core.registry.ChowlRegistries;
+import com.chyzman.chowl.core.registry.ChowlRegistryKeys;
 import io.wispforest.endec.StructEndec;
 import net.minecraft.registry.*;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -34,7 +35,7 @@ public class AttachableType<T extends Attachable> implements TypeFilter<Attachab
     }
 
     public static <T extends Attachable> AttachableType<T> register(Identifier id, AttachableType.Builder<T> type) {
-        var key = RegistryKey.of(ChowlRegistries.ATTACHABLE_TYPE_KEY, id);
+        var key = RegistryKey.of(ChowlRegistryKeys.ATTACHABLE_TYPE, id);
         return Registry.register(ChowlRegistries.ATTACHABLE_TYPE, key, type.build(key));
     }
 
