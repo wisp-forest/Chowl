@@ -12,7 +12,7 @@ import net.fabricmc.api.ModInitializer;
 import net.minecraft.util.Identifier;
 
 public class Chowl implements ModInitializer {
-    public static final String MODID = "chowl-core";
+    public static final String MODID = "chowl";
 
 //    public static final ChowlCoreConfig CONFIG = ChowlCoreConfig.createAndLoad();
 

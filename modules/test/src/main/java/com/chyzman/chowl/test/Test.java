@@ -3,7 +3,7 @@ package com.chyzman.chowl.test;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.util.Identifier;
 
-public class ChowlTest implements ModInitializer {
+public class Test implements ModInitializer {
     public static final String MODID = "chowl-test";
 
     @Override

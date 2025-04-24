@@ -77,7 +77,7 @@ public class KnockerBlock extends ObserverBlock {
                 var attack = neighborState.get(PUNCH);
                 if (attack != isAttack) continue;
                 ((ObserverBlockAccessor) knockerBlock).chowlElectromechanics$callScheduleTick(world, world, neighbor);
-                if (!attack) return ActionResult.SUCCESS;
+                return ActionResult.SUCCESS;
             }
         }
         return ActionResult.PASS;
