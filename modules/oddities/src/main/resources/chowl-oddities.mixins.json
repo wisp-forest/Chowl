@@ -4,9 +4,7 @@
   "package": "com.chyzman.chowl.oddities.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "BlockEntityMixin",
-    "CollisionViewMixin",
-    "access.ObserverBlockAccessor"
+    "CollisionViewMixin"
   ],
   "client": [
     "access.WorldRendererAccessor"

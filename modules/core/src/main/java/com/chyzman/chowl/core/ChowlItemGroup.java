@@ -2,8 +2,12 @@ package com.chyzman.chowl.core;
 
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
+import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.util.OwoFreezer;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.Items;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.util.Pair;
 
 import java.util.Comparator;

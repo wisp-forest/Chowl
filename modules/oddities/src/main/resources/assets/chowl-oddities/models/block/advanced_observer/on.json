@@ -1,6 +1,0 @@
-{
-  "parent": "chowl-oddities:block/advanced_observer/off",
-  "textures": {
-    "bottom": "chowl-oddities:block/advanced_observer/back_on"
-  }
-}

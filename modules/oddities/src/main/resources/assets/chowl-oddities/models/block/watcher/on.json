@@ -1,6 +1,0 @@
-{
-  "parent": "chowl-oddities:block/watcher/off",
-  "textures": {
-    "bottom": "chowl-oddities:block/watcher/back_on"
-  }
-}

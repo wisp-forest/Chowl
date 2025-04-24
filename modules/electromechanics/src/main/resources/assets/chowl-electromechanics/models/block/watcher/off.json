@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:block/observer",
+  "textures": {
+    "bottom": "chowl-electromechanics:block/watcher/back",
+    "side": "chowl-electromechanics:block/watcher/side",
+    "top": "chowl-electromechanics:block/watcher/top",
+    "front": "chowl-electromechanics:block/watcher/front",
+    "particle": "chowl-electromechanics:block/watcher/front"
+  }
+}

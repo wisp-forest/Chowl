@@ -1,0 +1,6 @@
+{
+  "parent": "chowl-electromechanics:block/knocker/knock/off",
+  "textures": {
+    "bottom": "chowl-electromechanics:block/knocker/back_on"
+  }
+}

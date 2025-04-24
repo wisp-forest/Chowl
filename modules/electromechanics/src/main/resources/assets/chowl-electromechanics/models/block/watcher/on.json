@@ -1,0 +1,6 @@
+{
+  "parent": "chowl-electromechanics:block/watcher/off",
+  "textures": {
+    "bottom": "chowl-electromechanics:block/watcher/back_on"
+  }
+}

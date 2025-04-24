@@ -32,18 +32,6 @@ public class OdditiesItems {
             settings -> new BlockItem(OdditiesBlocks.CLIPBOARD, settings)
     );
 
-    public static final Item WATCHER = register(
-            "watcher",
-            new Item.Settings(),
-            settings -> new BlockItem(OdditiesBlocks.WATCHER, settings)
-    );
-
-    public static final Item KNOCKER = register(
-            "knocker",
-            new Item.Settings(),
-            settings -> new BlockItem(OdditiesBlocks.KNOCKER, settings)
-    );
-
     public static final Item STICKY_NOTE = register(
             "sticky_note",
             new Item.Settings(),

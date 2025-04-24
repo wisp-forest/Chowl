@@ -31,8 +31,6 @@ public class Oddities implements ModInitializer {
             group.addCustomTab(Icon.of(OdditiesItems.CAUTION_BLOCK), "oddities", (context, entries) -> {
                 entries.add(OdditiesItems.CAUTION_BLOCK);
                 entries.add(OdditiesItems.CLIPBOARD);
-                entries.add(OdditiesItems.WATCHER);
-                entries.add(OdditiesItems.KNOCKER);
                 entries.add(OdditiesItems.STICKY_NOTE);
                 entries.add(OdditiesItems.PIN);
                 entries.add(OdditiesItems.STRING);

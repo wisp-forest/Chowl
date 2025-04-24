@@ -3,8 +3,6 @@ package com.chyzman.chowl.oddities.registry;
 import com.chyzman.chowl.oddities.Oddities;
 import com.chyzman.chowl.oddities.block.BigBlock;
 import com.chyzman.chowl.oddities.block.ClipboardBlock;
-import com.chyzman.chowl.oddities.block.KnockerBlock;
-import com.chyzman.chowl.oddities.block.WatcherBlock;
 import com.chyzman.chowl.oddities.infoDisplay.block.InfoDisplayBlock;
 import com.chyzman.chowl.oddities.infoDisplay.block.WallInfoDisplayBlock;
 import net.minecraft.block.AbstractBlock;
@@ -33,20 +31,6 @@ public class OdditiesBlocks {
             AbstractBlock.Settings
                     .copy(OAK_PRESSURE_PLATE),
             ClipboardBlock::new
-    );
-
-    public static final Block WATCHER = register(
-            "watcher",
-            AbstractBlock.Settings
-                    .copy(OBSERVER),
-            WatcherBlock::new
-    );
-
-    public static final Block KNOCKER = register(
-            "knocker",
-            AbstractBlock.Settings
-                    .copy(OBSERVER),
-            KnockerBlock::new
     );
 
     private static final AbstractBlock.Settings infoDisplaySettings = AbstractBlock.Settings

@@ -1,0 +1,6 @@
+{
+  "parent": "chowl-electromechanics:block/advanced_watcher/off",
+  "textures": {
+    "bottom": "chowl-electromechanics:block/advanced_watcher/back_on"
+  }
+}

@@ -1,6 +1,0 @@
-{
-  "parent": "chowl-oddities:block/knocker/knock/off",
-  "textures": {
-    "bottom": "chowl-oddities:block/knocker/back_on"
-  }
-}

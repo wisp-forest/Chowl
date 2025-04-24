@@ -1,4 +1,4 @@
-package com.chyzman.chowl.oddities.block;
+package com.chyzman.chowl.electromechanics.block;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ObserverBlock;

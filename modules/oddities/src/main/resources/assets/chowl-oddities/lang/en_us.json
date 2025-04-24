@@ -3,15 +3,11 @@
 
   "item.chowl-oddities.caution_block": "Caution Block",
   "item.chowl-oddities.clipboard": "Clipboard",
-  "item.chowl-oddities.watcher": "Watcher",
-  "item.chowl-oddities.knocker": "Knocker",
   "item.chowl-oddities.sticky_note": "Sticky Note",
   "item.chowl-oddities.pin": "Pin",
   "item.chowl-oddities.clock": "Clock",
   "item.chowl-oddities.calendar": "Calendar",
 
   "attachable.chowl-oddities.sticky_note": "Sticky Note",
-  "attachable.chowl-oddities.pin": "Pin",
-
-  "subtitles.block.chowl-oddities.knocker.click": "Knocker Clicks"
+  "attachable.chowl-oddities.pin": "Pin"
 }

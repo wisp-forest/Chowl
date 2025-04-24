@@ -1,7 +1,7 @@
-package com.chyzman.chowl.oddities.mixin;
+package com.chyzman.chowl.electromechanics.mixin;
 
-import com.chyzman.chowl.oddities.block.WatcherBlock;
-import com.chyzman.chowl.oddities.mixin.access.ObserverBlockAccessor;
+import com.chyzman.chowl.electromechanics.block.WatcherBlock;
+import com.chyzman.chowl.electromechanics.mixin.access.ObserverBlockAccessor;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
@@ -22,7 +22,7 @@ public abstract class BlockEntityMixin {
             var neighborState = world.getBlockState(neighbor);
             if (!(neighborState.getBlock() instanceof WatcherBlock watcher)) continue;
             if (neighborState.get(WatcherBlock.FACING) != direction.getOpposite()) continue;
-            ((ObserverBlockAccessor) watcher).chowlOddities$callScheduleTick(world, world, neighbor);
+            ((ObserverBlockAccessor) watcher).chowlElectromechanics$callScheduleTick(world, world, neighbor);
         }
     }
 }

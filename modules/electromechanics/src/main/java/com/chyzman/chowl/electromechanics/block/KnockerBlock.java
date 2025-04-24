@@ -1,33 +1,25 @@
-package com.chyzman.chowl.oddities.block;
+package com.chyzman.chowl.electromechanics.block;
 
-import com.chyzman.chowl.oddities.mixin.access.ObserverBlockAccessor;
-import com.chyzman.chowl.oddities.registry.OdditiesSounds;
-import com.mojang.serialization.MapCodec;
+import com.chyzman.chowl.electromechanics.mixin.access.ObserverBlockAccessor;
+import com.chyzman.chowl.electromechanics.registry.ElectromechanicsSounds;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ObserverBlock;
-import net.minecraft.block.enums.ComparatorMode;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import net.minecraft.world.tick.ScheduledTickView;
-
-import javax.swing.*;
-import java.util.Arrays;
-import java.util.Comparator;
 
 public class KnockerBlock extends ObserverBlock {
     public static final BooleanProperty PUNCH = BooleanProperty.of("punch");
@@ -59,7 +51,7 @@ public class KnockerBlock extends ObserverBlock {
         if (!player.getAbilities().allowModifyWorld) return ActionResult.PASS;
         state = state.cycle(PUNCH);
         var pitch = state.get(PUNCH) ? 0.55F : 0.5F;
-        world.playSound(player, pos, OdditiesSounds.BLOCK_KNOCKER_CLICK, SoundCategory.BLOCKS, 0.3F, pitch);
+        world.playSound(player, pos, ElectromechanicsSounds.BLOCK_KNOCKER_CLICK, SoundCategory.BLOCKS, 0.3F, pitch);
         world.setBlockState(pos, state, Block.NOTIFY_ALL);
         return ActionResult.SUCCESS;
     }
@@ -84,7 +76,7 @@ public class KnockerBlock extends ObserverBlock {
                 if (neighborState.get(FACING) != dir.getOpposite()) continue;
                 var attack = neighborState.get(PUNCH);
                 if (attack != isAttack) continue;
-                ((ObserverBlockAccessor) knockerBlock).chowlOddities$callScheduleTick(world, world, neighbor);
+                ((ObserverBlockAccessor) knockerBlock).chowlElectromechanics$callScheduleTick(world, world, neighbor);
                 if (!attack) return ActionResult.SUCCESS;
             }
         }

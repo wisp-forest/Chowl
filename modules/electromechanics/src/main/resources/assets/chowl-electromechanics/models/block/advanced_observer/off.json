@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:block/observer",
+  "textures": {
+    "bottom": "chowl-electromechanics:block/advanced_observer/back",
+    "side": "chowl-electromechanics:block/advanced_observer/side",
+    "top": "chowl-electromechanics:block/advanced_observer/top",
+    "front": "chowl-electromechanics:block/advanced_observer/front",
+    "particle": "chowl-electromechanics:block/advanced_observer/front"
+  }
+}
