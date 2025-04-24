@@ -16,7 +16,7 @@
   "environment": "*",
   "entrypoints": {
     "client": [],
-    "main": []
+    "main": ["com.chyzman.chowl.test.ChowlTest"]
   },
   "mixins": [],
   "custom": {
