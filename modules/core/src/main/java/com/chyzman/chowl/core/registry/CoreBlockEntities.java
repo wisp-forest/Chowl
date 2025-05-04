@@ -1,26 +1,18 @@
 package com.chyzman.chowl.core.registry;
 
 import com.chyzman.chowl.core.Chowl;
-import com.chyzman.chowl.core.block.FrameBlock;
-import com.chyzman.chowl.core.blockentity.FrameBlockEntity;
+import com.chyzman.chowl.core.blockentity.MultipartBlockEntity;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 
 public class CoreBlockEntities {
-    public static final BlockEntityType<FrameBlockEntity> DRAWER_FRAME =
+    public static final BlockEntityType<MultipartBlockEntity> MULTIPART =
       register(
-        "drawer_frame",
-        FabricBlockEntityTypeBuilder.create(
-          FrameBlockEntity::new,
-          CoreBlocks.DRAWER_FRAME)
+        "multipart",
+        FabricBlockEntityTypeBuilder.create(MultipartBlockEntity::new)
       );
 
     private static <T extends BlockEntity> BlockEntityType<T> register(String id, FabricBlockEntityTypeBuilder<T> builder) {

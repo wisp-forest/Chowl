@@ -17,7 +17,7 @@
   "entrypoints": {
     "client": [],
     "main": [
-      "com.chyzman.chowl.test.Test"
+      "com.chyzman.chowl.test.ChowlTest"
     ]
   },
   "mixins": [],

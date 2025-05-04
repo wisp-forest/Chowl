@@ -1,24 +1,23 @@
-package com.chyzman.chowl.core.multipart.impl;
+package com.chyzman.chowl.test.multipart;
 
 import com.chyzman.chowl.core.multipart.api.Part;
-import com.chyzman.chowl.core.registry.CoreParts;
+import com.chyzman.chowl.test.registry.TestParts;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
+import net.minecraft.block.Block;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
-public class EmptyPart extends Part {
-    public static final EmptyPart INSTANCE = new EmptyPart();
-    public static final StructEndec<EmptyPart> ENDEC = Endec.unit(INSTANCE);
+public class TestPart extends Part {
+    public static final StructEndec<TestPart> ENDEC = Endec.unit(TestPart::new);
 
-    public EmptyPart() {
-        super(CoreParts.EMPTY);
+    public TestPart() {
+        super(TestParts.TEST_PART);
     }
 
     @Override
@@ -28,6 +27,6 @@ public class EmptyPart extends Part {
 
     @Override
     public VoxelShape getOutlineShape(Set<Part> parts, BlockView world, BlockPos pos, ShapeContext context) {
-        return VoxelShapes.empty();
+        return Block.createCuboidShape(6, 6, 6, 10, 10, 10);
     }
 }

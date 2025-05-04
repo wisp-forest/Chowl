@@ -1,1 +1,3 @@
-accessWidener	v1	named
+accessWidener v2 named
+
+accessible field net/minecraft/world/RaycastContext shapeContext Lnet/minecraft/block/ShapeContext;

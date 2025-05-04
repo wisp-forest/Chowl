@@ -50,7 +50,7 @@ dependencies {
 }
 
 loom {
-    val accessWidener = file("src/main/resources/${project.name}.accesswidener")
+    val accessWidener = file("src/main/resources/chowl-${project.name}.accesswidener")
     if (accessWidener.exists()) accessWidenerPath = accessWidener
 
     runtimeOnlyLog4j = true

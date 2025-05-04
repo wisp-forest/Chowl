@@ -2,7 +2,7 @@ package com.chyzman.chowl.core.registry;
 
 import com.chyzman.chowl.core.Chowl;
 import com.chyzman.chowl.core.attachables.api.AttachableType;
-import com.chyzman.chowl.core.multipart.PartType;
+import com.chyzman.chowl.core.multipart.api.PartType;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 

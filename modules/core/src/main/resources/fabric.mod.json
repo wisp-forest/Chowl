@@ -12,6 +12,7 @@
   "license": "LGPL-3.0-only",
   "icon": "assets/chowl-core/icon.png",
   "environment": "*",
+  "accessWidener": "chowl-core.accesswidener",
   "entrypoints": {
     "client": [
       "com.chyzman.chowl.core.client.ChowlClient"

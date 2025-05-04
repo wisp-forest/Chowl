@@ -4,10 +4,15 @@
   "package": "com.chyzman.chowl.core.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "BlockViewMixin",
+    "EntityShapeContextMixin",
+    "HitResultMixin",
+    "ShapeContextMixin"
   ],
   "client": [
     "client.ParticleManagerMixin",
     "client.WorldEventHandlerMixin",
+    "client.WorldRendererMixin",
     "client.access.InteractionManagerAccessor"
   ],
   "injectors": {

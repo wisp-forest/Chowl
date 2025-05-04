@@ -1,7 +1,7 @@
 package com.chyzman.chowl.core.registry;
 
 import com.chyzman.chowl.core.attachables.api.AttachableType;
-import com.chyzman.chowl.core.multipart.PartType;
+import com.chyzman.chowl.core.multipart.api.PartType;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.registry.*;
 

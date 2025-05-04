@@ -7,6 +7,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -30,7 +31,7 @@ public class CoreBlocks {
     private static Block register(String id, BlockFactory factory, AbstractBlock.Settings settings) {
         Identifier chowlId = Chowl.id(id);
         Block block = Registry.register(Registries.BLOCK, chowlId, factory.create(settings.registryKey(RegistryKey.of(RegistryKeys.BLOCK, chowlId))));
-        Registry.register(Registries.ITEM, chowlId, new BlockItem(block, new Item.Settings().registryKey(RegistryKey.of(RegistryKeys.ITEM, chowlId))));
+        Items.register(block);
         return block;
     }
 
