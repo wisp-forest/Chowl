@@ -1,6 +1,7 @@
 package com.chyzman.chowl.core.mixin;
 
 import com.chyzman.chowl.core.blockentity.api.MultipartHolderBlockEntity;
+import com.chyzman.chowl.core.multipart.api.Part;
 import com.chyzman.chowl.core.pond.MultipartHitResult;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.block.ShapeContext;
@@ -17,7 +18,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 @Mixin(BlockView.class)
 public interface BlockViewMixin {
@@ -41,10 +44,15 @@ public interface BlockViewMixin {
         BlockEntity hitEntity = world.getBlockEntity(hitPos);
         if (!(hitEntity instanceof MultipartHolderBlockEntity entity)) return original;
 
-        var candidates = entity.getParts().stream()
-          .map(part -> new Pair<>(part.raycast(start, end, shapeContext), part))
-          .filter(pair -> pair.getLeft() != null)
-          .toList();
+        List<Pair<Vec3d, Short>> candidates = new ArrayList<>();
+        List<Part> parts = entity.getParts();
+        for (short i = 0; i < parts.size(); i++) {
+            Part part = parts.get(i);
+            Vec3d raycast = part.raycast(start, end, shapeContext);
+            if (raycast != null) {
+                candidates.add(new Pair<>(raycast, i));
+            }
+        }
 
         if (candidates.isEmpty()) return original;
         var closest = candidates.stream().min(Comparator.comparing(pair -> pair.getLeft().distanceTo(start))).orElse(null);

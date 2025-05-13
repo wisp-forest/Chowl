@@ -25,11 +25,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.List;
 import java.util.Set;
 
 @Mixin(WorldRenderer.class)
 public class WorldRendererMixin {
-    @Shadow @Final private MinecraftClient client;
     @Shadow private @Nullable ClientWorld world;
 
     @WrapOperation(method = "renderTargetBlockOutline", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;drawBlockOutline(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;Lnet/minecraft/entity/Entity;DDDLnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)V"))
@@ -47,8 +47,8 @@ public class WorldRendererMixin {
       Operation<Void> original,
       @Local BlockHitResult hitResult
     ) {
-        Part part = ((MultipartHitResult) hitResult).chowl$getHitMultipart();
-        if (part == null || world == null) {
+        short partIndex = ((MultipartHitResult) hitResult).chowl$getHitMultipart();
+        if (partIndex == -1 || world == null) {
             original.call(instance, matrices, vertexConsumer, entity, cameraX, cameraY, cameraZ, pos, state, color);
             return;
         }
@@ -60,14 +60,14 @@ public class WorldRendererMixin {
             return;
         }
 
-        Set<Part> parts = multipartHolder.getParts();
-        drawBlockOutline(matrices, vertexConsumer, entity, cameraX, cameraY, cameraZ, pos, parts, part, color);
+        List<Part> parts = multipartHolder.getParts();
+        drawBlockOutline(matrices, vertexConsumer, entity, cameraX, cameraY, cameraZ, pos, parts, parts.get(partIndex), color);
     }
 
     @Unique
     private void drawBlockOutline(
       MatrixStack matrices, VertexConsumer vertexConsumer, Entity entity, double cameraX, double cameraY, double cameraZ,
-      BlockPos pos, Set<Part> parts, Part part, int color
+      BlockPos pos, List<Part> parts, Part part, int color
     ) {
         VertexRendering.drawOutline(
           matrices,

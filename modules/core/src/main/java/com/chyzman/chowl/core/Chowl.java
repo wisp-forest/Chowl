@@ -10,8 +10,11 @@ import com.chyzman.chowl.core.registry.CoreBlocks;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.util.Identifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Chowl implements ModInitializer {
+    public static final Logger LOGGER = LoggerFactory.getLogger("Chowl");
     public static final String MODID = "chowl";
 
 //    public static final ChowlCoreConfig CONFIG = ChowlCoreConfig.createAndLoad();

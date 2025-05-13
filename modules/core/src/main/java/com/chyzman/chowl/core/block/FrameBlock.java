@@ -3,7 +3,11 @@ package com.chyzman.chowl.core.block;
 import com.chyzman.chowl.core.multipart.api.Multipart;
 import com.chyzman.chowl.core.block.api.MultipartHolderBlockWithEntity;
 import com.chyzman.chowl.core.blockentity.MultipartBlockEntity;
+import com.chyzman.chowl.core.multipart.api.PartType;
+import com.chyzman.chowl.core.multipart.impl.EmptyPart;
+import com.chyzman.chowl.core.multipart.impl.FramePart;
 import com.chyzman.chowl.core.registry.CoreBlockEntities;
+import com.chyzman.chowl.core.registry.CoreParts;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
@@ -14,19 +18,12 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.World;
 
 import java.util.Optional;
 
-public class FrameBlock extends MultipartHolderBlockWithEntity /*implements MultipartBlock<EmptyPart>*/ {
+public class FrameBlock extends MultipartHolderBlockWithEntity implements Multipart<FramePart> {
     public static final MapCodec<FrameBlock> CODEC = createCodec(FrameBlock::new);
-    public static final VoxelShape OUTLINE = VoxelShapes.combine(VoxelShapes.fullCube(), VoxelShapes.union(
-      createCuboidShape(2, 0, 2, 14, 16, 14),
-      createCuboidShape(0, 2, 2, 16, 14, 14),
-      createCuboidShape(2, 2, 0, 14, 14, 16)
-    ), (a, b) -> a && !b);
 
     public FrameBlock(Settings settings) {
         super(MultipartBlockEntity::new, settings);
@@ -60,8 +57,8 @@ public class FrameBlock extends MultipartHolderBlockWithEntity /*implements Mult
         return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
     }
 
-    /*@Override
-    public PartType<EmptyPart> getPart() {
-        return CoreParts.EMPTY;
-    }*/
+    @Override
+    public PartType<FramePart> getPart() {
+        return CoreParts.FRAME;
+    }
 }

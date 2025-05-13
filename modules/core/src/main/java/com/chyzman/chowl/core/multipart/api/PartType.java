@@ -7,6 +7,10 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 
+import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
+
 public class PartType<T extends Part> {
     private final StructEndec<T> endec;
     private final PartFactory<T> factory;
@@ -17,12 +21,16 @@ public class PartType<T extends Part> {
         this.factory = factory;
     }
 
+    public PartType(StructEndec<T> endec, Supplier<T> factory) {
+        this(endec, (parts) -> factory.get());
+    }
+
     public StructEndec<T> getEndec() {
         return endec;
     }
 
     public T create(MultipartHolderBlockEntity holder) {
-        T part = this.factory.create();
+        T part = this.factory.create(holder.getParts());
         part.init(holder);
         return part;
     }
@@ -36,6 +44,6 @@ public class PartType<T extends Part> {
     }
 
     public interface PartFactory<T extends Part> {
-        T create();
+        T create(List<Part> parts);
     }
 }

@@ -5,7 +5,6 @@ import com.chyzman.chowl.core.registry.ChowlRegistries;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
@@ -16,14 +15,14 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
+import java.util.List;
 
-public abstract class Part implements Comparable<Part> {
-    public static final Endec<Set<Part>> SET_ENDEC = Endec.dispatchedStruct(
+public abstract class Part {
+    public static final Endec<List<Part>> SET_ENDEC = Endec.dispatchedStruct(
       Part::getPartEndec,
       Part::getId,
       MinecraftEndecs.IDENTIFIER
-    ).setOf();
+    ).listOf();
 
     private final PartType<?> type;
     private @Nullable BlockPos pos;
@@ -66,7 +65,7 @@ public abstract class Part implements Comparable<Part> {
         return hitResult.getPos();
     }
 
-    public abstract VoxelShape getOutlineShape(Set<Part> parts, BlockView world, BlockPos pos, ShapeContext context);
+    public abstract VoxelShape getOutlineShape(List<Part> parts, BlockView world, BlockPos pos, ShapeContext context);
 
     @SuppressWarnings("unchecked")
     private static StructEndec<Part> getPartEndec(Identifier identifier) {
