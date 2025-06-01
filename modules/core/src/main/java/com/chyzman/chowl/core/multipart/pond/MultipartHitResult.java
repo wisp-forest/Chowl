@@ -1,4 +1,4 @@
-package com.chyzman.chowl.core.pond;
+package com.chyzman.chowl.core.multipart.pond;
 
 import org.jetbrains.annotations.Nullable;
 

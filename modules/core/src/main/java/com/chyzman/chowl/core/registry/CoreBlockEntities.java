@@ -19,5 +19,7 @@ public class CoreBlockEntities {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Chowl.id(id), builder.build());
     }
 
-    public static void init() {}
+    public static void init() {
+
+    }
 }

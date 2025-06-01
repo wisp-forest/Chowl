@@ -3,20 +3,15 @@
   "minVersion": "0.8",
   "package": "com.chyzman.chowl.core.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [
-    "BlockViewMixin",
-    "EntityShapeContextMixin",
-    "HitResultMixin",
-    "PacketByteBufMixin",
-    "ShapeContextMixin"
-  ],
   "client": [
     "client.ParticleManagerMixin",
     "client.WorldEventHandlerMixin",
-    "client.WorldRendererMixin",
     "client.access.InteractionManagerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+    "FlowableFluidMixin"
+  ]
 }

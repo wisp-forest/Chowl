@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.chyzman.chowl.core.multipart.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "BlockViewMixin",
+    "ChunkMixin",
+    "EntityShapeContextMixin",
+    "HitResultMixin",
+    "PacketByteBufMixin",
+    "ShapeContextMixin",
+    "accessor.ChainRestrictedNeighborUpdaterAccessor",
+    "accessor.WorldAccessor"
+  ],
+  "client": [
+    "client.MinecraftClientMixin",
+    "client.WorldRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

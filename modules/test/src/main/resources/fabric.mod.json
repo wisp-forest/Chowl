@@ -15,7 +15,9 @@
   "icon": "assets/chowl-test/icon.png",
   "environment": "*",
   "entrypoints": {
-    "client": [],
+    "client": [
+      "com.chyzman.chowl.test.client.ChowlClientTest"
+    ],
     "main": [
       "com.chyzman.chowl.test.ChowlTest"
     ]

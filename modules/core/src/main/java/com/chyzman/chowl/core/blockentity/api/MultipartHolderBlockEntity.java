@@ -1,6 +1,7 @@
 package com.chyzman.chowl.core.blockentity.api;
 
 import com.chyzman.chowl.core.multipart.api.Part;
+import com.chyzman.chowl.core.multipart.api.client.PartRenderer;
 import io.wispforest.endec.SerializationContext;
 import io.wispforest.owo.serialization.format.nbt.NbtDeserializer;
 import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
@@ -10,11 +11,14 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.shape.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 public abstract class MultipartHolderBlockEntity extends BlockEntity {
-    // TODO: yay we have a sorted set of parts, now do magic stuff with it
+    private @Nullable VoxelShape shapeCache = null;
+    // TODO: yay we have a list of parts, now do magic stuff with it
     private final List<Part> parts = new ArrayList<>();
 
     public MultipartHolderBlockEntity(BlockEntityType<? extends MultipartHolderBlockEntity> type, BlockPos pos, BlockState state) {
@@ -26,7 +30,12 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
         super.readNbt(nbt, registries);
 
         parts.clear();
+        clearShapeCache();
         if (nbt.contains("chowl:multipart")) {
+            if (world != null && world.isClient) {
+                PartRenderer.Manager.markForRebuild(getPos());
+            }
+
             List<? extends Part> partMap = Part.SET_ENDEC.decode(SerializationContext.empty(), NbtDeserializer.of(nbt.get("chowl:multipart")));
             partMap.forEach(part -> part.init(this));
             parts.addAll(partMap);
@@ -52,9 +61,35 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
     public void addPart(Part part) {
         parts.add(part);
         markDirtyAndUpdateClients();
+        clearShapeCache();
+
+        if (world != null && world.isClient) {
+            PartRenderer.Manager.markForRebuild(getPos());
+        }
     }
 
     public List<Part> getParts() {
         return parts;
+    }
+
+    public @Nullable VoxelShape getShapeCache() {
+        return shapeCache;
+    }
+
+    public void setShapeCache(@Nullable VoxelShape shapeCache) {
+        this.shapeCache = shapeCache;
+    }
+
+    public void clearShapeCache() {
+        shapeCache = null;
+    }
+
+    @Override
+    public void markRemoved() {
+        if (world != null && world.isClient) {
+            PartRenderer.Manager.markForRebuild(getPos());
+        }
+
+        super.markRemoved();
     }
 }

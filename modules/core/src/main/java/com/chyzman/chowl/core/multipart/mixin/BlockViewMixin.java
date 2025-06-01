@@ -1,8 +1,8 @@
-package com.chyzman.chowl.core.mixin;
+package com.chyzman.chowl.core.multipart.mixin;
 
 import com.chyzman.chowl.core.blockentity.api.MultipartHolderBlockEntity;
 import com.chyzman.chowl.core.multipart.api.Part;
-import com.chyzman.chowl.core.pond.MultipartHitResult;
+import com.chyzman.chowl.core.multipart.pond.MultipartHitResult;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;

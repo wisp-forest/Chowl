@@ -5,14 +5,23 @@ import com.chyzman.chowl.core.registry.ChowlRegistries;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.crash.CrashCallable;
+import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.HeightLimitView;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -33,7 +42,15 @@ public abstract class Part {
         this.type = type;
     }
 
-    public void init(MultipartHolderBlockEntity holder) {
+    public boolean isInitialized() {
+        return holder != null;
+    }
+
+    public void init(@NotNull MultipartHolderBlockEntity holder) {
+        if (isInitialized()) {
+            throw new IllegalArgumentException("Can not initialize an initialized part!");
+        }
+
         this.holder = holder;
         this.pos = holder.getPos();
         this.world = holder.getWorld();
@@ -66,6 +83,18 @@ public abstract class Part {
     }
 
     public abstract VoxelShape getOutlineShape(List<Part> parts, BlockView world, BlockPos pos, ShapeContext context);
+
+    public void populateCrashReport(CrashReportSection crashReportSection) {
+        if (isInitialized()) {
+            holder.populateCrashReport(crashReportSection);
+        }
+
+        crashReportSection.add("(Chowl) Part Name", this::getNameForReport);
+    }
+
+    private String getNameForReport() {
+        return ChowlRegistries.PART.getId(this.getType()) + " // " + this.getClass().getCanonicalName();
+    }
 
     @SuppressWarnings("unchecked")
     private static StructEndec<Part> getPartEndec(Identifier identifier) {

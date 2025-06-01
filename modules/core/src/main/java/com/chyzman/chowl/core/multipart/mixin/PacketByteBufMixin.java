@@ -1,6 +1,6 @@
-package com.chyzman.chowl.core.mixin;
+package com.chyzman.chowl.core.multipart.mixin;
 
-import com.chyzman.chowl.core.pond.MultipartHitResult;
+import com.chyzman.chowl.core.multipart.pond.MultipartHitResult;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.hit.BlockHitResult;

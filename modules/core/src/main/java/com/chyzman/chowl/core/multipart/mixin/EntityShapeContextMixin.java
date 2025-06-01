@@ -1,4 +1,4 @@
-package com.chyzman.chowl.core.mixin;
+package com.chyzman.chowl.core.multipart.mixin;
 
 import com.chyzman.chowl.core.pond.ShapeContextExtended;
 import net.minecraft.block.EntityShapeContext;

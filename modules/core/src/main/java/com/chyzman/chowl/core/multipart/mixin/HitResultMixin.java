@@ -1,6 +1,6 @@
-package com.chyzman.chowl.core.mixin;
+package com.chyzman.chowl.core.multipart.mixin;
 
-import com.chyzman.chowl.core.pond.MultipartHitResult;
+import com.chyzman.chowl.core.multipart.pond.MultipartHitResult;
 import net.minecraft.util.hit.HitResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

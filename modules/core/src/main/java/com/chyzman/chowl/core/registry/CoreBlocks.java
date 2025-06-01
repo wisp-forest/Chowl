@@ -2,11 +2,10 @@ package com.chyzman.chowl.core.registry;
 
 import com.chyzman.chowl.core.Chowl;
 import com.chyzman.chowl.core.block.FrameBlock;
+import com.chyzman.chowl.core.block.api.FluidFillHandler;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
@@ -18,7 +17,7 @@ public class CoreBlocks {
     public static final Block DRAWER_FRAME = register(
       "drawer_frame",
       FrameBlock::new,
-      AbstractBlock.Settings.copy(Blocks.OAK_PLANKS)
+      AbstractBlock.Settings.copyShallow(Blocks.OAK_PLANKS)
         .nonOpaque()
         .dynamicBounds()
         .allowsSpawning(Blocks::never)
@@ -40,6 +39,7 @@ public class CoreBlocks {
     }
 
     public static void init() {
+        FluidFillHandler.canNotFill(state -> state.getBlock() instanceof FrameBlock);
     }
 
     @FunctionalInterface
