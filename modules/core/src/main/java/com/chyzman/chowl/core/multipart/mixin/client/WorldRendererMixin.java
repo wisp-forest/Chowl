@@ -1,9 +1,9 @@
 package com.chyzman.chowl.core.multipart.mixin.client;
 
 import com.chyzman.chowl.core.blockentity.api.MultipartHolderBlockEntity;
+import com.chyzman.chowl.core.multipart.api.MultipartHitResult;
 import com.chyzman.chowl.core.multipart.api.Part;
 import com.chyzman.chowl.core.multipart.pond.MinecraftClientDuck;
-import com.chyzman.chowl.core.multipart.pond.MultipartHitResult;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -50,8 +50,7 @@ public class WorldRendererMixin {
       Operation<Void> original,
       @Local BlockHitResult hitResult
     ) {
-        short partIndex = ((MultipartHitResult) hitResult).chowl$getHitMultipart();
-        if (partIndex == -1 || world == null) {
+        if (!(hitResult instanceof MultipartHitResult result) || world == null || result.getPart().length == 0) {
             original.call(instance, matrices, vertexConsumer, entity, cameraX, cameraY, cameraZ, pos, state, color);
             return;
         }
@@ -63,8 +62,16 @@ public class WorldRendererMixin {
             return;
         }
 
+        Part part = null;
         List<Part> parts = multipartHolder.getParts();
-        drawBlockOutline(matrices, vertexConsumer, entity, cameraX, cameraY, cameraZ, pos, parts, parts.get(partIndex), color);
+        List<Part> nextParts = multipartHolder.getParts();
+        for (byte partIndex : result.getPart()) {
+            part = nextParts.get(partIndex);
+            parts = nextParts;
+            nextParts = part.getSubParts();
+        }
+
+        drawBlockOutline(matrices, vertexConsumer, entity, cameraX, cameraY, cameraZ, pos, parts, part, color);
     }
 
     @Unique

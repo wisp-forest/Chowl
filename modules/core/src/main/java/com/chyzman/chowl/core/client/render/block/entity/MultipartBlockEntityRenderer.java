@@ -9,7 +9,6 @@ import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
 
-//TODO: get an oven (bake stuff)
 public class MultipartBlockEntityRenderer implements BlockEntityRenderer<MultipartBlockEntity> {
     public MultipartBlockEntityRenderer(BlockEntityRendererFactory.Context ignored) {}
 

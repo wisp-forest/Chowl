@@ -38,7 +38,7 @@ public class TestPart extends Part {
     }
 
     @Override
-    public VoxelShape getOutlineShape(List<Part> parts, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getPartOutlineShape(List<Part> otherParts, BlockView world, BlockPos pos, ShapeContext context) {
         Vec3i endPos = startPos.add(4, 4, 4);
         return Block.createCuboidShape(startPos.getX(), startPos.getY(), startPos.getZ(), endPos.getX(), endPos.getY(), endPos.getZ());
     }

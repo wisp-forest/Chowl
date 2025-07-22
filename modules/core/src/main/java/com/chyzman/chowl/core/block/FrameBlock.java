@@ -5,6 +5,7 @@ import com.chyzman.chowl.core.block.api.MultipartHolderBlockWithEntity;
 import com.chyzman.chowl.core.blockentity.MultipartBlockEntity;
 import com.chyzman.chowl.core.multipart.api.PartType;
 import com.chyzman.chowl.core.multipart.impl.FramePart;
+import com.chyzman.chowl.core.pond.ShapeContextExtended;
 import com.chyzman.chowl.core.registry.CoreBlockEntities;
 import com.chyzman.chowl.core.registry.CoreParts;
 import com.mojang.serialization.MapCodec;
@@ -23,11 +24,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,6 +53,20 @@ public class FrameBlock extends MultipartHolderBlockWithEntity implements Multip
     }
 
     @Override
+    protected VoxelShape getBlockOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+        return super.getBlockOutlineShape(state, world, pos, context);
+    }
+
+    @Override
+    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+        if (((ShapeContextExtended) context).chowl$isHolding(stack -> stack.getItem() instanceof Multipart<?>)) {
+            return VoxelShapes.fullCube();
+        }
+
+        return super.getOutlineShape(state, world, pos, context);
+    }
+
+    /*@Override
     protected ActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         Optional<MultipartBlockEntity> perhapsBE = world.getBlockEntity(pos, CoreBlockEntities.MULTIPART);
         if (perhapsBE.isEmpty()) {
@@ -64,13 +83,14 @@ public class FrameBlock extends MultipartHolderBlockWithEntity implements Multip
 
         if (multipart != null) {
             if (!world.isClient()) {
-                blockEntity.addPart(multipart.getPart().create(blockEntity));
+                player.sendMessage(Text.literal("test"), false);
+                //blockEntity.addPart(multipart.getPart().create(blockEntity));
             }
-            return ActionResult.CONSUME;
+            //return ActionResult.CONSUME;
         }
 
         return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
-    }
+    }*/
 
     @Override
     public @Nullable BlockState getPlacementState(ItemPlacementContext ctx) {

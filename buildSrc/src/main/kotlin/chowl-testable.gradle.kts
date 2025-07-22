@@ -4,55 +4,51 @@ plugins {
     id("base")
     id("java")
     id("java-library")
-    id("chowl-base")
+    //id("chowl-base")
 }
 
 loom {
     runs {
 
-        getByName("client") {
+        create("testmodClient") {
             client()
-            name("[${project.name}] Client")
-        }
-        getByName("server") {
-            server()
-            name("[${project.name}] Server")
-        }
-        create("datagen") {
-            client()
-            name("[${project.name}] DataGen")
-            vmArg("-Dfabric-api.datagen")
-            vmArg("-Dfabric-api.datagen.output-dir=${project.file("src/generated/resources")}")
-            vmArg("-Dfabric-api.datagen.modid=${project.name}")
+            ideConfigGenerated(true)
+            name = "[${project.name}] Testmod Client"
+            source(sourceSets["testmod"])
 
-            runDir("build/datagen")
+            //tasks.register("runTestmodClientRenderDoc", RenderDocRunTask::class, this)
         }
-        var renderDocPath = System.getenv("renderDocPath")
-        if (renderDocPath != null) {
-            create("clientRenderDoc") {
-                client()
-                name("[${project.name}] Client - (RenderDoc)")
-                vmArg("-Dowo.renderdocPath=${renderDocPath}")
-            }
-        } else {
-            println("[Warning]: renderDocPath is not set in environment variables, skipping RenderDoc client run.")
+
+        create("testmodServer") {
+            server()
+            ideConfigGenerated(true)
+            name = "[${project.name}] Testmod Server"
+            source(sourceSets["testmod"])
         }
+
+        /*maybeCreate("clientRenderDoc").apply {
+            ideConfigGenerated(true)
+            name("[${project.name}] Client - (RenderDoc)")
+        }*/
+
         var devUserInfo = System.getenv("minecraftDevUserInfo")
         if (devUserInfo == null) {
             println("[Warning]: minecraftDevUserInfo is not set in environment variables, skipping dev user info.")
         }
-        create("clientMixinDump") {
+
+        create("testmodClientMixinDump") {
             client()
-            name("[${project.name}] Client - (Mixin Dump)")
+            ideConfigGenerated(true)
+            name("[${project.name}] Testmod Client - (Mixin Dump)")
             vmArg("-Dfabric.log.disableAnsi=false")
             vmArg("-Dmixin.debug.export=true")
         }
 
         configureEach {
-            ideConfigGenerated(true)
+            if (!name.startsWith("testmod")) return@configureEach
+
             vmArg("-XX:+AllowEnhancedClassRedefinition")
-//            runDir("../../run")
-//            source(sourceSets["main"])
+            source(sourceSets.test.get())
 
             if (devUserInfo != null) programArg(devUserInfo)
         }
@@ -72,7 +68,7 @@ loom {
                     println("[Warning]: Unable to locate file path for Mixin Jar, HotSwapping will NOT work!")
                 }
             } catch (e: Exception) {
-                println("[Error]: Mixin HotSwap had a issue!")
+                println("[Error]: Mixin HotSwap had an issue!")
                 e.printStackTrace()
             }
             if (mixin != null) {

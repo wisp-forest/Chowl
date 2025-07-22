@@ -29,7 +29,7 @@ public class FramePart extends Part {
     }
 
     @Override
-    public VoxelShape getOutlineShape(List<Part> parts, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getPartOutlineShape(List<Part> otherParts, BlockView world, BlockPos pos, ShapeContext context) {
         return OUTLINE;
     }
 }

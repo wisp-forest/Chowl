@@ -10,7 +10,11 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.crash.CrashCallable;
 import net.minecraft.util.crash.CrashReportSection;
@@ -24,7 +28,9 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public abstract class Part {
     public static final Endec<List<Part>> SET_ENDEC = Endec.dispatchedStruct(
@@ -33,20 +39,38 @@ public abstract class Part {
       MinecraftEndecs.IDENTIFIER
     ).listOf();
 
-    private final PartType<?> type;
-    private @Nullable BlockPos pos;
-    private @Nullable MultipartHolderBlockEntity holder;
-    private @Nullable World world;
+    public static @Nullable Part findPart(byte[] index, List<Part> base) {
+        Part part = null;
+        for (byte i : index) {
+            part = base.get(i);
+            base = part.getSubParts();
+        }
 
-    protected Part(PartType<?> type) {
+        return part;
+    }
+
+    protected @Nullable final PartType<?> type;
+    protected final List<Part> subParts;
+    protected @Nullable BlockPos pos;
+    protected @Nullable MultipartHolderBlockEntity holder;
+    protected @Nullable World world;
+    protected @Nullable VoxelShape shapeCache = null;
+
+    /**
+     * The base constructor for a Multipart part
+     * @param type The {@link PartType} for this part. If the part is a
+     *             sub part that isn't registered this may be null.
+     */
+    protected Part(@Nullable PartType<?> type) {
         this.type = type;
+        this.subParts = new ArrayList<>();
     }
 
     public boolean isInitialized() {
         return holder != null;
     }
 
-    public void init(@NotNull MultipartHolderBlockEntity holder) {
+    public Part init(@NotNull MultipartHolderBlockEntity holder) {
         if (isInitialized()) {
             throw new IllegalArgumentException("Can not initialize an initialized part!");
         }
@@ -54,6 +78,8 @@ public abstract class Part {
         this.holder = holder;
         this.pos = holder.getPos();
         this.world = holder.getWorld();
+
+        return this;
     }
 
     public PartType<?> getType() {
@@ -76,13 +102,40 @@ public abstract class Part {
         return world;
     }
 
-    public @Nullable Vec3d raycast(Vec3d start, Vec3d end, ShapeContext context) {
-        BlockHitResult hitResult = this.getOutlineShape(holder.getParts(), world, pos, context).raycast(start, end, this.pos);
-        if (hitResult == null) return null;
-        return hitResult.getPos();
+    public void addSubPart(Part part) {
+        this.subParts.add(part);
+        this.shapeCache = null;
     }
 
-    public abstract VoxelShape getOutlineShape(List<Part> parts, BlockView world, BlockPos pos, ShapeContext context);
+    public @NotNull List<Part> getSubParts() {
+        return subParts;
+    }
+
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        return ActionResult.PASS;
+    }
+
+    public ActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        return ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;
+    }
+
+    public abstract VoxelShape getPartOutlineShape(List<Part> otherParts, BlockView world, BlockPos pos, ShapeContext context);
+
+    public VoxelShape getOutlineShape(List<Part> otherParts, BlockView world, BlockPos pos, ShapeContext context) {
+        if (shapeCache != null) return shapeCache;
+
+        List<VoxelShape> partsShapes = subParts.stream().map(part -> part.getOutlineShape(subParts, world, pos, context)).collect(Collectors.toList());
+        partsShapes.addFirst(getPartOutlineShape(otherParts, world, pos, context));
+
+        VoxelShape shape = new MultipartVoxelShape(partsShapes, true);
+        setShapeCache(shape);
+
+        return shape;
+    }
+
+    protected void setShapeCache(VoxelShape shape) {
+        this.shapeCache = shape;
+    }
 
     public void populateCrashReport(CrashReportSection crashReportSection) {
         if (isInitialized()) {

@@ -20,6 +20,10 @@ import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.crash.CrashCallable;
+import net.minecraft.util.crash.CrashException;
+import net.minecraft.util.crash.CrashReport;
+import net.minecraft.util.crash.CrashReportSection;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.profiler.Profiler;
@@ -28,11 +32,7 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public abstract class PartRenderer<T extends Part> {
     protected final PartRendererFactory.Context context;
@@ -112,12 +112,12 @@ public abstract class PartRenderer<T extends Part> {
             private final Reference2ReferenceMap<RenderLayer, BufferBuilder> builders = new Reference2ReferenceOpenHashMap<>();
 
             @Override
-            public VertexConsumer getBuffer(RenderLayer l) {
-                var allocator = allocators.computeIfAbsent(l, l1 -> new BufferAllocator(l.getExpectedBufferSize()));
-                return builders.computeIfAbsent(l, l1 -> new BufferBuilder(
-                  allocator,
-                  l.getDrawMode(),
-                  l.getVertexFormat()));
+            public VertexConsumer getBuffer(RenderLayer layer) {
+                return builders.computeIfAbsent(layer, ignored1 -> new BufferBuilder(
+                  allocators.computeIfAbsent(layer, ignored2 -> new BufferAllocator(layer.getExpectedBufferSize())),
+                  layer.getDrawMode(),
+                  layer.getVertexFormat())
+                );
             }
 
             /**
@@ -146,12 +146,12 @@ public abstract class PartRenderer<T extends Part> {
             private final Map<RenderLayer, VertexBuffer> layerBuffers = new Reference2ReferenceOpenHashMap<>();
             private final Set<RenderLayer> uploadedLayers = new ObjectOpenHashSet<>();
 
-            public void render(RenderLayer l, MatrixStack matrices, Matrix4f projectionMatrix) {
-                VertexBuffer buf = layerBuffers.get(l);
+            public void render(RenderLayer layer, MatrixStack matrices, Matrix4f projectionMatrix) {
+                VertexBuffer buf = layerBuffers.get(layer);
                 buf.bind();
-                l.startDrawing();
+                layer.startDrawing();
                 buf.draw(matrices.peek().getPositionMatrix(), projectionMatrix, RenderSystem.getShader());
-                l.endDrawing();
+                layer.endDrawing();
                 VertexBuffer.unbind();
             }
 
@@ -159,13 +159,16 @@ public abstract class PartRenderer<T extends Part> {
                 uploadedLayers.clear();
             }
 
-            public void upload(RenderLayer l, BufferBuilder newBuf) {
-                VertexBuffer buf = layerBuffers.computeIfAbsent(l, renderLayer -> getVertexBuffer());
+            public void upload(RenderLayer layer, BufferBuilder newBuf) {
+                VertexBuffer buf = layerBuffers.computeIfAbsent(layer, renderLayer -> getVertexBuffer());
                 buf.bind();
-                buf.upload(newBuf.end());
-                VertexBuffer.unbind();
+                BuiltBuffer builtBuffer = newBuf.endNullable();
+                if (builtBuffer != null) {
+                    buf.upload(builtBuffer);
+                    VertexBuffer.unbind();
 
-                uploadedLayers.add(l);
+                    uploadedLayers.add(layer);
+                }
             }
 
             public void release() {
@@ -191,8 +194,31 @@ public abstract class PartRenderer<T extends Part> {
             return Math.abs(rrp.x - ((int) cam.getX() >> REGION_SHIFT)) <= VIEW_RADIUS && Math.abs(rrp.z - ((int) cam.getZ() >> REGION_SHIFT)) <= VIEW_RADIUS;
         }
 
-        @SuppressWarnings("unchecked")
         public static void render(WorldRenderContext wrc) {
+            try {
+                renderInternal(wrc);
+            } catch (Exception e) {
+                CrashReport crashReport = CrashReport.create(e, "Baked Multipart Rendering");
+                CrashReportSection crashReportSection = crashReport.addElement("Multipart render details");
+                crashReportSection.add("VCP Builders", vcp.builders.size());
+                crashReportSection.add("VCP Allocators", vcp.allocators.size());
+                crashReportSection.add(
+                  "Needs Rebuild",
+                  needsRebuild.size() + " | " +
+                  Arrays.toString(needsRebuild.stream().map(pos -> "(" + pos.x + "," + pos.z + ")").toList().toArray())
+                );
+                crashReportSection.add(
+                  "Regions",
+                  regions.size() + " | " +
+                  Arrays.toString(regions.keySet().stream().map(pos -> "(" + pos.x + "," + pos.z + ")").toList().toArray())
+                );
+
+                throw new CrashException(crashReport);
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        private static void renderInternal(WorldRenderContext wrc) {
             Profiler profiler = Profilers.get();
             profiler.push("chowl:baked_part");
 

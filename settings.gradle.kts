@@ -5,17 +5,24 @@ pluginManagement {
     }
 }
 
-val modules = listOf(
-    "core",
+rootProject.name = "chowl"
+
+module("core")
+
+val focus: File = File("focus.txt");
+
+val modules = if (focus.exists()) focus.readLines() else listOf(
     "industries",
     "logistics",
     "visage",
     "electromechanics",
     "oddities",
-    "test"
+    "all"
 )
 
-modules.forEach { module ->
+modules.forEach { module(it) }
+
+fun module(module: String) {
     include(module)
     project(":$module").projectDir = file("modules/$module")
 }

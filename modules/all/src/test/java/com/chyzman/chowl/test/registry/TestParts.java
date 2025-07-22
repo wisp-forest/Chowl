@@ -4,6 +4,7 @@ import com.chyzman.chowl.core.multipart.api.Part;
 import com.chyzman.chowl.core.multipart.api.PartType;
 import com.chyzman.chowl.core.registry.ChowlRegistries;
 import com.chyzman.chowl.test.ChowlTest;
+import com.chyzman.chowl.test.multipart.FramePanel;
 import com.chyzman.chowl.test.multipart.TestPart;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.math.Vec3i;
@@ -22,6 +23,7 @@ public class TestParts {
             default -> throw new IllegalStateException("Unexpected value: " + parts.size() % 8);
         };
     }));
+    public static final PartType<FramePanel> FRAME_PANEL_PART = register("frame_panel", new PartType<>(FramePanel.ENDEC, FramePanel::new));
 
     private static <T extends Part> PartType<T> register(String id, PartType<T> partType) {
         return Registry.register(ChowlRegistries.PART, ChowlTest.id(id), partType);

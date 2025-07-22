@@ -9,5 +9,5 @@ repositories {
 }
 
 dependencies {
-    implementation("net.fabricmc:fabric-loom:1.10-SNAPSHOT")
+    implementation("net.fabricmc:fabric-loom:1.11-SNAPSHOT")
 }

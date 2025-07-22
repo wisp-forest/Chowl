@@ -4,6 +4,6 @@ plugins {
 
 dependencies {
     rootProject.subprojects.forEach {
-        if (it.name != "test") implementation(project(it.path, configuration = "namedElements"))
+        if (it.name != "all") useModule(it.name)
     }
 }

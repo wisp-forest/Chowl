@@ -1,27 +1,29 @@
 package com.chyzman.chowl.core.block.api;
 
-import com.chyzman.chowl.core.Chowl;
 import com.chyzman.chowl.core.blockentity.api.MultipartHolderBlockEntity;
+import com.chyzman.chowl.core.multipart.api.MultipartHitResult;
+import com.chyzman.chowl.core.multipart.api.MultipartVoxelShape;
 import com.chyzman.chowl.core.multipart.api.Part;
 import com.chyzman.chowl.core.multipart.api.PartType;
-import com.chyzman.chowl.core.multipart.pond.MultipartHitResult;
 import com.chyzman.chowl.core.registry.CoreBlockEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import java.util.*;
 
 public abstract class MultipartHolderBlockWithEntity extends BlockWithEntity {
     private final BlockEntityFactory<?> factory;
@@ -52,9 +54,15 @@ public abstract class MultipartHolderBlockWithEntity extends BlockWithEntity {
         T create(BlockPos pos, BlockState state);
     }
 
+    protected VoxelShape getBlockOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+        return VoxelShapes.fullCube();
+    }
+
     @Override
     protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        if (!(world.getBlockEntity(pos) instanceof MultipartHolderBlockEntity multipart)) return VoxelShapes.fullCube();
+        if (!(world.getBlockEntity(pos) instanceof MultipartHolderBlockEntity multipart)) {
+            return getBlockOutlineShape(state, world, pos, context);
+        }
 
         if (multipart.getShapeCache() != null) {
             return multipart.getShapeCache();
@@ -62,16 +70,50 @@ public abstract class MultipartHolderBlockWithEntity extends BlockWithEntity {
 
         // Copy the parts to a temp list so it doesn't ConcurrentModificationException
         ArrayList<Part> parts = new ArrayList<>(multipart.getParts());
-        Optional<VoxelShape> partsShape = parts.stream().map(part -> part.getOutlineShape(parts, world, pos, context)).reduce(VoxelShapes::union);
-        VoxelShape shape = partsShape.orElse(VoxelShapes.empty());
+        List<VoxelShape> partsShapes = parts.stream().map(part -> part.getOutlineShape(parts, world, pos, context)).toList();
+        VoxelShape shape = new MultipartVoxelShape(partsShapes);
         multipart.setShapeCache(shape);
 
         return shape;
     }
 
-    @Override
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        Chowl.LOGGER.info("Part: {} | Client: {}", ((MultipartHitResult) hit).chowl$getHitMultipart(), world.isClient());
+    protected ActionResult onNonPartUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         return super.onUse(state, world, pos, player, hit);
+    }
+
+    protected ActionResult onNonPartUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+    }
+
+    @Override
+    @ApiStatus.NonExtendable
+    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        if (hit instanceof MultipartHitResult hitResult && world.getBlockEntity(pos) instanceof MultipartHolderBlockEntity holder) {
+            Part part = Part.findPart(hitResult.getPart(), holder.getParts());
+            if (part != null) {
+                ActionResult result = part.onUse(state, world, pos, player, hit);
+                if (result.isAccepted()) {
+                    return result;
+                }
+            }
+        }
+
+        return onNonPartUse(state, world, pos, player, hit);
+    }
+
+    @Override
+    @ApiStatus.NonExtendable
+    protected ActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        if (hit instanceof MultipartHitResult hitResult && world.getBlockEntity(pos) instanceof MultipartHolderBlockEntity holder) {
+            Part part = Part.findPart(hitResult.getPart(), holder.getParts());
+            if (part != null) {
+                ActionResult result = part.onUseWithItem(stack, state, world, pos, player, hand, hit);
+                if (result.isAccepted()) {
+                    return result;
+                }
+            }
+        }
+
+        return onNonPartUseWithItem(stack, state, world, pos, player, hand, hit);
     }
 }

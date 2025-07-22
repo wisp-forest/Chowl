@@ -12,15 +12,20 @@ import net.minecraft.world.BlockView;
 import java.util.List;
 
 public class EmptyPart extends Part {
-    public static final EmptyPart INSTANCE = new EmptyPart();
-    public static final StructEndec<EmptyPart> ENDEC = Endec.unit(INSTANCE);
+    private static EmptyPart INSTANCE;
+    public static final StructEndec<EmptyPart> ENDEC = Endec.unit(EmptyPart::getInstance);
 
     public EmptyPart() {
         super(CoreParts.EMPTY);
     }
 
+    public static EmptyPart getInstance() {
+        if (INSTANCE == null) INSTANCE = new EmptyPart();
+        return INSTANCE;
+    }
+
     @Override
-    public VoxelShape getOutlineShape(List<Part> parts, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getPartOutlineShape(List<Part> otherParts, BlockView world, BlockPos pos, ShapeContext context) {
         return VoxelShapes.empty();
     }
 }
