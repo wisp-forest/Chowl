@@ -50,7 +50,7 @@ loom {
             vmArg("-XX:+AllowEnhancedClassRedefinition")
             source(sourceSets.test.get())
 
-            if (devUserInfo != null) programArg(devUserInfo)
+            if (devUserInfo != null) programArgs(devUserInfo.split(" "))
         }
 
         afterEvaluate {
