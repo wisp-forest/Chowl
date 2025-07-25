@@ -68,6 +68,26 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
         }
     }
 
+    public void removePart(Part part) {
+        parts.remove(part);
+        markDirtyAndUpdateClients();
+        clearShapeCache();
+
+        if (world != null && world.isClient) {
+            PartRenderer.Manager.markForRebuild(getPos());
+        }
+    }
+
+    public void removePart(int index) {
+        parts.remove(index);
+        markDirtyAndUpdateClients();
+        clearShapeCache();
+
+        if (world != null && world.isClient) {
+            PartRenderer.Manager.markForRebuild(getPos());
+        }
+    }
+
     public List<Part> getParts() {
         return parts;
     }

@@ -42,6 +42,8 @@ public abstract class Part {
     public static @Nullable Part findPart(byte[] index, List<Part> base) {
         Part part = null;
         for (byte i : index) {
+            if (i >= base.size()) return null;
+
             part = base.get(i);
             base = part.getSubParts();
         }

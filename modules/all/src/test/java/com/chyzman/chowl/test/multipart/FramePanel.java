@@ -114,7 +114,7 @@ public class FramePanel extends Part {
     }
 
     private class RemovePart extends Part {
-        private static final VoxelShape SHAPE = Block.createCuboidShape(2, 2, -1, 4, 4, 0);
+        private static final VoxelShape SHAPE = Block.createCuboidShape(2, 12, -0.25, 4, 14, 0);
 
         protected RemovePart() {
             super(null);
@@ -122,7 +122,7 @@ public class FramePanel extends Part {
 
         @Override
         public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-            FramePanel.this.getHolder().getParts().remove(FramePanel.this);
+            FramePanel.this.getHolder().removePart(FramePanel.this);
             return ActionResult.SUCCESS;
         }
 
