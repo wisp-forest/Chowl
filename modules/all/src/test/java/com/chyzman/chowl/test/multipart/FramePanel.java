@@ -56,7 +56,9 @@ public class FramePanel extends Part {
         super(TestParts.FRAME_PANEL_PART);
         this.face = face;
         this.item = item;
-        this.upgrades.addAll(upgrades);
+        for (int i = 0; i < upgrades.size(); i++) {
+            this.upgrades.set(i, upgrades.get(i));
+        }
         this.count = count;
         this.size = size;
 

@@ -66,6 +66,8 @@ public class WorldRendererMixin {
         List<Part> parts = multipartHolder.getParts();
         List<Part> nextParts = multipartHolder.getParts();
         for (byte partIndex : result.getPart()) {
+            if (nextParts.size() <= partIndex) return;
+
             part = nextParts.get(partIndex);
             parts = nextParts;
             nextParts = part.getSubParts();
@@ -82,7 +84,7 @@ public class WorldRendererMixin {
         VertexRendering.drawOutline(
           matrices,
           vertexConsumer,
-          part.getOutlineShape(parts, this.world, pos, ShapeContext.of(entity)),
+          part.getPartOutlineShape(parts, this.world, pos, ShapeContext.of(entity)),
           pos.getX() - cameraX,
           pos.getY() - cameraY,
           pos.getZ() - cameraZ,

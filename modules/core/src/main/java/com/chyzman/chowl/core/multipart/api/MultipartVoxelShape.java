@@ -40,7 +40,7 @@ public class MultipartVoxelShape extends VoxelShape {
 
     @Override
     public @Nullable BlockHitResult raycast(Vec3d start, Vec3d end, BlockPos pos) {
-        byte i = (byte) (hasBaseShape ? 0 : -1);
+        byte i = (byte) (hasBaseShape ? -1 : 0);
         BlockHitResult result = null;
         for (VoxelShape shape : shapes) {
             BlockHitResult raycastResult = shape.raycast(start, end, pos);

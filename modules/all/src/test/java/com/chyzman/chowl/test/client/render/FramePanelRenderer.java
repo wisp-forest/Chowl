@@ -28,7 +28,7 @@ public class FramePanelRenderer extends PartRenderer<FramePanel> {
     public void renderUnbaked(FramePanel part, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         matrixStack.push();
 
-        VoxelShape shape = part.getOutlineShape(null, null, null, null);
+        VoxelShape shape = part.getPartOutlineShape(null, null, null, null);
 
         //DebugRenderer.drawBox(matrices, vertexConsumers, pos, 0.02F, marker.getRed(), marker.getBlue(), marker.getGreen(), marker.getAlpha() * 0.75F);
         Box box = shape.getBoundingBox();
