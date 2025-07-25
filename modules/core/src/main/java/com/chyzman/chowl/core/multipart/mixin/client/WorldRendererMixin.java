@@ -66,7 +66,7 @@ public class WorldRendererMixin {
         List<Part> parts = multipartHolder.getParts();
         List<Part> nextParts = multipartHolder.getParts();
         for (byte partIndex : result.getPart()) {
-            if (nextParts.size() <= partIndex) return;
+            if (nextParts.size() <= partIndex) return; // Super advanced desync handling
 
             part = nextParts.get(partIndex);
             parts = nextParts;
