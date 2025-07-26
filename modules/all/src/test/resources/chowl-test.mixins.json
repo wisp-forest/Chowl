@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.chyzman.chowl.test.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [
+  ],
+  "client": [
+    "ItemRenderStateAccessor",
+    "ItemRenderStateAccessor$LayerRenderStateAccessor"
+  ]
+}

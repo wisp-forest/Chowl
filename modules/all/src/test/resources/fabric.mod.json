@@ -22,7 +22,9 @@
       "com.chyzman.chowl.test.ChowlTest"
     ]
   },
-  "mixins": [],
+  "mixins": [
+    "chowl-test.mixins.json"
+  ],
   "custom": {
     "modmenu": {
       "links": {

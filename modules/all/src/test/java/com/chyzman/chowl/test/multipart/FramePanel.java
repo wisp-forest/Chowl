@@ -15,6 +15,7 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.util.hit.BlockHitResult;
@@ -102,6 +103,34 @@ public class FramePanel extends Part {
     }
 
     @Override
+    public ActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        if (stack.isEmpty() && item.isEmpty()) {
+            return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+        }
+
+        if (stack.isEmpty()) {
+            setItem(ItemStack.EMPTY);
+            count = 0;
+            return ActionResult.SUCCESS;
+        }
+
+        if (count >= size) {
+            return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+        }
+
+        if (item.isEmpty()) {
+            setItem(stack.copyWithCount(1));
+        }
+
+        if (ItemStack.areItemsAndComponentsEqual(stack, item)) {
+            ItemStack split = stack.splitUnlessCreative(size - count, player);
+            count += split.getCount();
+        }
+
+        return ActionResult.SUCCESS;
+    }
+
+    @Override
     public VoxelShape getPartOutlineShape(List<Part> otherParts, BlockView world, BlockPos pos, ShapeContext context) {
         return switch (face) {
             case NORTH -> SHAPE;
@@ -113,8 +142,8 @@ public class FramePanel extends Part {
         };
     }
 
-    private class RemovePart extends Part {
-        private static final VoxelShape SHAPE = Block.createCuboidShape(2, 12, -0.25, 4, 14, 0);
+    public class RemovePart extends Part {
+        private static final VoxelShape SHAPE = Block.createCuboidShape(0, 14, -0.25, 2, 16, 0);
 
         protected RemovePart() {
             super(null);
