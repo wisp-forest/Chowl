@@ -5,12 +5,14 @@ import com.chyzman.chowl.core.attachables.impl.AttachableHitResult;
 import com.chyzman.chowl.core.attachables.impl.TranformedVoxelShape;
 import com.chyzman.chowl.oddities.registry.OdditiesAttachables;
 import com.chyzman.chowl.oddities.registry.OdditiesItems;
+import com.chyzman.chowl.oddities.screen.StickyNoteScreen;
 import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.CodecUtils;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
 import io.wispforest.owo.util.Wisdom;
 import net.minecraft.block.Block;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.text.Text;
@@ -118,8 +120,10 @@ public class StickyNoteAttachable extends Attachable {
 
     @Override
     public ActionResult onUse(World world, PlayerEntity player, Hand hand, AttachableHitResult hit) {
-        if (world.isClient) return ActionResult.SUCCESS;
-        player.sendMessage(Text.literal(Wisdom.ALL_THE_WISDOM.get(new Random(this.pos().hashCode()).nextInt(Wisdom.ALL_THE_WISDOM.size()))), false);
+        if (world.isClient) {
+            //I know this will crash on server in prod but im too lazy to fix it right now
+            MinecraftClient.getInstance().setScreen(new StickyNoteScreen(this));
+        }
         return ActionResult.SUCCESS;
     }
 

@@ -72,15 +72,15 @@ public class StickyNoteRenderer implements AttachableRenderer<StickyNoteAttachab
 
         matrices.scale(1.5f, 1.5f, 1.5f);
 
-        var fontSpacing = textRenderer.fontHeight + 3f;
+        var fontSpacing = textRenderer.fontHeight/* + 3f*/;
 
-        matrices.scale(1 / fontSpacing, -1 / fontSpacing, 1 / fontSpacing);
+        matrices.scale(1f / fontSpacing, -1f / fontSpacing, 1f / fontSpacing);
 
-        matrices.translate(0, fontSpacing * 2, 0);
+        matrices.translate(0, fontSpacing, 0);
 
-        var wrapped = textRenderer.wrapLines(Text.literal(Wisdom.ALL_THE_WISDOM.get(new Random(attachable.pos().hashCode()).nextInt(Wisdom.ALL_THE_WISDOM.size()))), 120);
+        var wrapped = textRenderer.wrapLines(attachable.text(), 90);
 
-        wrapped = wrapped.subList(0, Math.min(9, wrapped.size()));
+        wrapped = wrapped.subList(0, Math.min(10, wrapped.size()));
 
         var offset = 0;
         for (var orderedText : wrapped) {

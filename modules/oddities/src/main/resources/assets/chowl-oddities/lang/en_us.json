@@ -9,5 +9,7 @@
   "item.chowl-oddities.calendar": "Calendar",
 
   "attachable.chowl-oddities.sticky_note": "Sticky Note",
-  "attachable.chowl-oddities.pin": "Pin"
+  "attachable.chowl-oddities.pin": "Pin",
+
+  "ui.chowl-oddities.sticky_note.title": "Edit Sticky Note Message"
 }
