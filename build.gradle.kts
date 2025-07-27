@@ -89,10 +89,12 @@ allprojects {
         modImplementation("net.fabricmc:fabric-loader:${rootProject.property("loader_version")}")
         modImplementation("net.fabricmc.fabric-api:fabric-api:${rootProject.property("fabric_version")}")
 
-        annotationProcessor(modImplementation("io.wispforest:owo-lib:${rootProject.property("owo_version")}+${rootProject.property("wispforest_mc_version")}")!!)
-//        include("io.wispforest:owo-sentinel:${rootProject.property("owo_version")}+${rootProject.property("wispforest_mc_version")}")
+        annotationProcessor(modImplementation("io.wispforest:owo-lib:${rootProject.property("owo_version")}")!!)
+//        include("io.wispforest:owo-sentinel:${rootProject.property("owo_version")}")
 
-        modImplementation("io.wispforest:lavender:${rootProject.property("lavender_version")}+${rootProject.property("wispforest_mc_version")}")
+        modImplementation("io.wispforest:lavender:${rootProject.property("lavender_version")}") {
+            exclude(group = "io.wispforest", module = "owo-lib")
+        }
 
         modImplementation(include("com.kneelawk.graphlib:graphlib-core-fabric:${rootProject.property("graphlib_version")}")!!)
 //        modLocalRuntime("com.kneelawk.graphlib:graphlib-debugrender-fabric:${rootProject.property("graphlib_version")}")

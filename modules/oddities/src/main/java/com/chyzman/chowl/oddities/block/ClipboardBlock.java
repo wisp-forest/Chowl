@@ -1,7 +1,7 @@
 package com.chyzman.chowl.oddities.block;
 
 import com.chyzman.chowl.oddities.blockentity.ClipboardBlockEntity;
-import com.chyzman.chowl.oddities.screen.TestScreen;
+import com.chyzman.chowl.oddities.screen.ClipboardScreen;
 import com.google.common.collect.Maps;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.*;
@@ -163,7 +163,12 @@ public class ClipboardBlock extends BlockWithEntity implements Waterloggable {
 
     @Override
     protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        if (world.isClient) MinecraftClient.getInstance().setScreen(new TestScreen());
+        if (world.isClient) {
+            if (world.getBlockEntity(pos) instanceof ClipboardBlockEntity clipboard) {
+                MinecraftClient.getInstance().setScreen(new ClipboardScreen(clipboard));
+            }
+
+        }
         return ActionResult.SUCCESS;
     }
 }

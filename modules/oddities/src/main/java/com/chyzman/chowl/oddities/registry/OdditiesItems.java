@@ -15,6 +15,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Direction;
 
+import java.util.ArrayList;
 import java.util.function.Function;
 
 public class OdditiesItems {
@@ -28,7 +29,7 @@ public class OdditiesItems {
             "clipboard",
             new Item.Settings()
                     .maxCount(1)
-                    .component(OdditiesComponents.CLIPBOARD_CONTENT, Text.empty()),
+                    .component(OdditiesComponents.CLIPBOARD_CONTENT, new ArrayList<>()),
             settings -> new BlockItem(OdditiesBlocks.CLIPBOARD, settings)
     );
 

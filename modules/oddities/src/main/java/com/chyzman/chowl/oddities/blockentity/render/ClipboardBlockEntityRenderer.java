@@ -7,7 +7,6 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.OrderedText;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.RotationAxis;
 
@@ -54,12 +53,12 @@ public class ClipboardBlockEntityRenderer implements BlockEntityRenderer<Clipboa
 
         matrices.translate(0, fontSpacing * 2, 0);
 
-        var wrapped = textRenderer.wrapLines(entity.content, 110);
+//        var wrapped = textRenderer.wrapLines(entity.content, 110);
 
         var offset = 2;
-        for (OrderedText orderedText : wrapped) {
+        for (var line : entity.contents) {
             textRenderer.draw(
-                    orderedText,
+                    line.text,
                     0,
                     offset,
                     0,
