@@ -19,16 +19,20 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -132,6 +136,22 @@ public class ClipboardBlockEntity extends MultipartHolderBlockEntity {
                 Block.createCuboidShape(3, 13 - index, 1, 4, 14 - index, 1.5),
                 clipboard.get(ClipboardBlock.ORIENTATION)
             );
+        }
+
+        @Override
+        public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+            if (player.getStackInHand(player.getActiveHand()).isEmpty()) {
+                var blockEntity = world.getBlockEntity(pos);
+                if (blockEntity instanceof ClipboardBlockEntity clipboard) {
+                    if (clipboard.contents.size() > index) {
+                        var line = clipboard.contents.get(index);
+                        line.checked = !line.checked;
+                        clipboard.markDirty();
+                        return ActionResult.SUCCESS;
+                    }
+                }
+            }
+            return ActionResult.PASS;
         }
     }
 }

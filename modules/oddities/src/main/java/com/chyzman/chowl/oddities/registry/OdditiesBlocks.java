@@ -20,7 +20,7 @@ public class OdditiesBlocks {
 
     public static final Block CAUTION_BLOCK = register(
             "caution_block",
-            net.minecraft.block.AbstractBlock.Settings
+            AbstractBlock.Settings
                     .copy(IRON_BLOCK)
                     .mapColor(DyeColor.YELLOW),
             Block::new

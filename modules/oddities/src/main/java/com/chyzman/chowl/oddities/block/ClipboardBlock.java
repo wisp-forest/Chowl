@@ -116,7 +116,7 @@ public class ClipboardBlock extends MultipartHolderBlockWithEntity implements Wa
     }
 
     @Override
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+    protected ActionResult onNonPartUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         if (world.isClient) {
             if (world.getBlockEntity(pos) instanceof ClipboardBlockEntity clipboard) {
                 MinecraftClient.getInstance().setScreen(new ClipboardScreen(clipboard));
