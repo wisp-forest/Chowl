@@ -1,8 +1,6 @@
 package com.chyzman.chowl.oddities.block;
 
 import com.chyzman.chowl.core.block.api.MultipartHolderBlockWithEntity;
-import com.chyzman.chowl.core.blockentity.MultipartBlockEntity;
-import com.chyzman.chowl.core.multipart.api.Part;
 import com.chyzman.chowl.core.util.VoxelShapeHelper;
 import com.chyzman.chowl.oddities.blockentity.ClipboardBlockEntity;
 import com.chyzman.chowl.oddities.screen.ClipboardScreen;
@@ -98,7 +96,7 @@ public class ClipboardBlock extends MultipartHolderBlockWithEntity implements Wa
     }
 
     @Override
-    protected VoxelShape getBlockOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getBlockOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return SHAPES.get(state.get(ORIENTATION));
     }
 

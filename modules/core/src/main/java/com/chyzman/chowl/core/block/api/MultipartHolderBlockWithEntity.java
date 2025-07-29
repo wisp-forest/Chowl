@@ -60,7 +60,7 @@ public abstract class MultipartHolderBlockWithEntity extends BlockWithEntity {
         T create(BlockPos pos, BlockState state);
     }
 
-    protected VoxelShape getBlockOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getBlockOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return UNSET;
     }
 

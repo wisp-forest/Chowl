@@ -1,5 +1,6 @@
 package com.chyzman.chowl.core.multipart.mixin.client;
 
+import com.chyzman.chowl.core.block.api.MultipartHolderBlockWithEntity;
 import com.chyzman.chowl.core.blockentity.api.MultipartHolderBlockEntity;
 import com.chyzman.chowl.core.multipart.api.MultipartHitResult;
 import com.chyzman.chowl.core.multipart.api.Part;
@@ -18,6 +19,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.shape.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
@@ -50,14 +52,13 @@ public class WorldRendererMixin {
       Operation<Void> original,
       @Local BlockHitResult hitResult
     ) {
-        if (!(hitResult instanceof MultipartHitResult result) || world == null || result.getPart().length == 0) {
+        if (!(hitResult instanceof MultipartHitResult result) || world == null) {
             original.call(instance, matrices, vertexConsumer, entity, cameraX, cameraY, cameraZ, pos, state, color);
             return;
         }
 
-        //TODO: store in the hit result
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (!(blockEntity instanceof MultipartHolderBlockEntity multipartHolder)) {
+        BlockEntity blockEntity = world.getBlockEntity(pos); // TODO: Not check for MultipartHolderBlockWithEntity but a more open interface instead
+        if (!(blockEntity instanceof MultipartHolderBlockEntity multipartHolder) || !(state.getBlock() instanceof MultipartHolderBlockWithEntity multipartBlock)) {
             original.call(instance, matrices, vertexConsumer, entity, cameraX, cameraY, cameraZ, pos, state, color);
             return;
         }
@@ -73,18 +74,17 @@ public class WorldRendererMixin {
             nextParts = part.getSubParts();
         }
 
-        drawBlockOutline(matrices, vertexConsumer, entity, cameraX, cameraY, cameraZ, pos, parts, part, color);
-    }
+        VoxelShape shape;
+        if (part != null) {
+            shape = part.getPartOutlineShape(parts, this.world, pos, ShapeContext.of(entity));
+        } else {
+            shape = multipartBlock.getBlockOutlineShape(state, this.world, pos, ShapeContext.of(entity));
+        }
 
-    @Unique
-    private void drawBlockOutline(
-      MatrixStack matrices, VertexConsumer vertexConsumer, Entity entity, double cameraX, double cameraY, double cameraZ,
-      BlockPos pos, List<Part> parts, Part part, int color
-    ) {
         VertexRendering.drawOutline(
           matrices,
           vertexConsumer,
-          part.getPartOutlineShape(parts, this.world, pos, ShapeContext.of(entity)),
+          shape,
           pos.getX() - cameraX,
           pos.getY() - cameraY,
           pos.getZ() - cameraZ,
