@@ -21,6 +21,7 @@ public class Oddities implements ModInitializer {
         OdditiesBlockEntities.init();
         OdditiesEventListeners.init();
         OdditiesAttachables.init();
+        com.chyzman.chowl.oddities.registry.OdditiesParts.init();
         FieldRegistrationHandler.register(OdditiesComponents.class, MODID, false);
         FieldRegistrationHandler.register(OdditiesSounds.class, MODID, false);
 

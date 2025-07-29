@@ -1,5 +1,9 @@
 package com.chyzman.chowl.oddities.block;
 
+import com.chyzman.chowl.core.block.api.MultipartHolderBlockWithEntity;
+import com.chyzman.chowl.core.blockentity.MultipartBlockEntity;
+import com.chyzman.chowl.core.multipart.api.Part;
+import com.chyzman.chowl.core.util.VoxelShapeHelper;
 import com.chyzman.chowl.oddities.blockentity.ClipboardBlockEntity;
 import com.chyzman.chowl.oddities.screen.ClipboardScreen;
 import com.google.common.collect.Maps;
@@ -32,66 +36,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public class ClipboardBlock extends BlockWithEntity implements Waterloggable {
+public class ClipboardBlock extends MultipartHolderBlockWithEntity implements Waterloggable {
     public static final EnumProperty<Orientation> ORIENTATION = Properties.ORIENTATION;
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 
+    protected static final VoxelShape SHAPE = VoxelShapes.union(
+        Block.createCuboidShape(2, 0, 0, 14, 15, 1),
+        Block.createCuboidShape(6, 15, 0, 10, 16, 1)
+    );
+
     private static final Map<Orientation, VoxelShape> SHAPES = Util.make(Maps.newEnumMap(Orientation.class), (map) -> {
-        map.put(Orientation.DOWN_EAST, VoxelShapes.union(
-                Block.createCuboidShape(0, 15, 2, 15, 16, 14),
-                Block.createCuboidShape(14, 15, 6, 16, 16, 10)
-        ));
-        map.put(Orientation.DOWN_WEST, VoxelShapes.union(
-                Block.createCuboidShape(1,15, 2, 16, 16, 14),
-                Block.createCuboidShape(0, 15, 6, 2, 16, 10)
-        ));
-
-        map.put(Orientation.DOWN_NORTH, VoxelShapes.union(
-                Block.createCuboidShape(2, 15, 1, 14, 16, 16),
-                Block.createCuboidShape(6, 15, 0, 10, 16, 1)
-        ));
-        map.put(Orientation.DOWN_SOUTH, VoxelShapes.union(
-                Block.createCuboidShape(2, 15, 0, 14, 16, 15),
-                Block.createCuboidShape(6, 15, 15, 10, 16, 16)
-        ));
-
-        map.put(Orientation.UP_EAST, VoxelShapes.union(
-                Block.createCuboidShape(0, 0, 2, 15, 1, 14),
-                Block.createCuboidShape(14, 0, 6, 16, 1, 10)
-        ));
-        map.put(Orientation.UP_WEST, VoxelShapes.union(
-                Block.createCuboidShape(1,0, 2, 16, 1, 14),
-                Block.createCuboidShape(0, 0, 6, 2, 1, 10)
-        ));
-
-        map.put(Orientation.UP_NORTH, VoxelShapes.union(
-                Block.createCuboidShape(2, 0, 1, 14, 1, 16),
-                Block.createCuboidShape(6, 0, 0, 10, 1, 1)
-        ));
-        map.put(Orientation.UP_SOUTH, VoxelShapes.union(
-                Block.createCuboidShape(2, 0, 0, 14, 1, 15),
-                Block.createCuboidShape(6, 0, 15, 10, 1, 16)
-        ));
-
-        map.put(Orientation.EAST_UP, VoxelShapes.union(
-                Block.createCuboidShape(0, 0, 2, 1, 15, 14),
-                Block.createCuboidShape(0, 15, 6, 1, 16, 10)
-        ));
-
-        map.put(Orientation.WEST_UP, VoxelShapes.union(
-                Block.createCuboidShape(15, 0, 2, 16, 15, 14),
-                Block.createCuboidShape(15, 15, 6, 16, 16, 10)
-        ));
-
-        map.put(Orientation.NORTH_UP, VoxelShapes.union(
-                Block.createCuboidShape(2, 0, 15, 14, 15, 16),
-                Block.createCuboidShape(6, 15, 15, 10, 16, 16)
-        ));
-
-        map.put(Orientation.SOUTH_UP, VoxelShapes.union(
-                Block.createCuboidShape(2, 0, 0, 14, 15, 1),
-                Block.createCuboidShape(6, 15, 0, 10, 16, 1)
-        ));
+        for (Orientation orientation : Orientation.values()) map.put(orientation, VoxelShapeHelper.rotate(SHAPE, orientation));
     });
 
     @Override
@@ -100,11 +55,11 @@ public class ClipboardBlock extends BlockWithEntity implements Waterloggable {
     }
 
     public ClipboardBlock(Settings settings) {
-        super(settings);
+        super(ClipboardBlockEntity::new, settings);
         this.setDefaultState(
-                this.getDefaultState()
-                        .with(ORIENTATION, Orientation.NORTH_UP)
-                        .with(WATERLOGGED, false)
+            this.getDefaultState()
+                .with(ORIENTATION, Orientation.NORTH_UP)
+                .with(WATERLOGGED, false)
         );
     }
 
@@ -127,8 +82,7 @@ public class ClipboardBlock extends BlockWithEntity implements Waterloggable {
             var facing = direction.getOpposite();
             Direction rotation;
             if (facing.getAxis() == Direction.Axis.Y) {
-                rotation = ctx.getHorizontalPlayerFacing();
-                if (facing.equals(Direction.DOWN)) rotation = rotation.getOpposite();
+                rotation = ctx.getHorizontalPlayerFacing().getOpposite();
             } else {
                 rotation = Direction.UP;
             }
@@ -144,7 +98,7 @@ public class ClipboardBlock extends BlockWithEntity implements Waterloggable {
     }
 
     @Override
-    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    protected VoxelShape getBlockOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return SHAPES.get(state.get(ORIENTATION));
     }
 
@@ -157,8 +111,8 @@ public class ClipboardBlock extends BlockWithEntity implements Waterloggable {
     protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
         if (state.get(WATERLOGGED)) tickView.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
         return direction == state.get(ORIENTATION).getFacing().getOpposite() && !state.canPlaceAt(world, pos)
-                ? Blocks.AIR.getDefaultState()
-                : super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
+            ? Blocks.AIR.getDefaultState()
+            : super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
     }
 
     @Override

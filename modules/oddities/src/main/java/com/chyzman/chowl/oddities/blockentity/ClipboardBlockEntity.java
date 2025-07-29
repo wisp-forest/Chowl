@@ -1,13 +1,21 @@
 package com.chyzman.chowl.oddities.blockentity;
 
 
+import com.chyzman.chowl.core.blockentity.api.MultipartHolderBlockEntity;
+import com.chyzman.chowl.core.multipart.api.Part;
+import com.chyzman.chowl.core.util.VoxelShapeHelper;
+import com.chyzman.chowl.oddities.block.ClipboardBlock;
 import com.chyzman.chowl.oddities.registry.OdditiesBlockEntities;
 import com.chyzman.chowl.oddities.registry.OdditiesComponents;
+import com.chyzman.chowl.oddities.registry.OdditiesParts;
 import io.wispforest.endec.Endec;
+import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.impl.KeyedEndec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.ops.WorldOps;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
@@ -18,12 +26,15 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClipboardBlockEntity extends BlockEntity {
+public class ClipboardBlockEntity extends MultipartHolderBlockEntity {
 
     public String title = "";
     public List<ClipboardLine> contents = defaultContents();
@@ -34,6 +45,7 @@ public class ClipboardBlockEntity extends BlockEntity {
 
     public ClipboardBlockEntity(BlockPos pos, BlockState state) {
         super(OdditiesBlockEntities.CLIPBOARD, pos, state);
+        for (int i = 0; i < 12; i++) this.addPart(new CheckboxPart(i));
     }
 
     public static List<ClipboardLine> defaultContents() {
@@ -102,5 +114,24 @@ public class ClipboardBlockEntity extends BlockEntity {
             Endec.BOOLEAN.fieldOf("checked", o -> o.checked),
             ClipboardLine::new
         );
+    }
+
+    public static class CheckboxPart extends Part {
+        private final int index;
+
+        public CheckboxPart(int index) {
+            super(null);
+            this.index = index;
+        }
+
+        @Override
+        public VoxelShape getPartOutlineShape(List<Part> otherParts, BlockView world, BlockPos pos, ShapeContext context) {
+            var clipboard = world.getBlockState(pos);
+            if (!(clipboard.getBlock() instanceof ClipboardBlock)) return VoxelShapes.empty();
+            return VoxelShapeHelper.rotate(
+                Block.createCuboidShape(3, 13 - index, 1, 4, 14 - index, 1.5),
+                clipboard.get(ClipboardBlock.ORIENTATION)
+            );
+        }
     }
 }

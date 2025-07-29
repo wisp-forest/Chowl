@@ -132,14 +132,7 @@ public class FramePanel extends Part {
 
     @Override
     public VoxelShape getPartOutlineShape(List<Part> otherParts, BlockView world, BlockPos pos, ShapeContext context) {
-        return switch (face) {
-            case NORTH -> SHAPE;
-            case SOUTH -> VoxelShapeHelper.rotate(SHAPE, Direction.Axis.Y, 2);
-            case WEST -> VoxelShapeHelper.rotate(SHAPE, Direction.Axis.Y, 1);
-            case EAST -> VoxelShapeHelper.rotate(SHAPE, Direction.Axis.Y, -1);
-            case UP -> VoxelShapeHelper.rotate(SHAPE, Direction.Axis.X, -1);
-            case DOWN -> VoxelShapeHelper.rotate(SHAPE, Direction.Axis.X, 1);
-        };
+        return VoxelShapeHelper.rotate(SHAPE, face);
     }
 
     public class RemovePart extends Part {
@@ -157,14 +150,7 @@ public class FramePanel extends Part {
 
         @Override
         public VoxelShape getPartOutlineShape(List<Part> otherParts, BlockView world, BlockPos pos, ShapeContext context) {
-            return switch (face) {
-                case NORTH -> SHAPE;
-                case SOUTH -> VoxelShapeHelper.rotate(SHAPE, Direction.Axis.Y, 2);
-                case WEST -> VoxelShapeHelper.rotate(SHAPE, Direction.Axis.Y, 1);
-                case EAST -> VoxelShapeHelper.rotate(SHAPE, Direction.Axis.Y, -1);
-                case UP -> VoxelShapeHelper.rotate(SHAPE, Direction.Axis.X, -1);
-                case DOWN -> VoxelShapeHelper.rotate(SHAPE, Direction.Axis.X, 1);
-            };
+            return VoxelShapeHelper.rotate(SHAPE, face);
         }
     }
 }
