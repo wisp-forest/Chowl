@@ -13,6 +13,7 @@ import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.impl.KeyedEndec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.ops.WorldOps;
+import io.wispforest.owo.ui.util.UISounds;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
@@ -146,6 +147,7 @@ public class ClipboardBlockEntity extends MultipartHolderBlockEntity {
                     if (clipboard.contents.size() > index) {
                         var line = clipboard.contents.get(index);
                         line.checked = !line.checked;
+                        UISounds.playButtonSound();
                         clipboard.markDirty();
                         return ActionResult.SUCCESS;
                     }

@@ -2,7 +2,7 @@ package com.chyzman.chowl.core.pond;
 
 import net.minecraft.item.ItemStack;
 
-public interface ShapeContextExtended {
+public interface ExtendedShapeContext {
     boolean chowl$isHolding(StackPredicate predicate);
 
     // Intentionally a separate interface to curb any worries about signature collisions

@@ -1,8 +1,8 @@
-package com.chyzman.chowl.core.block;
+package com.chyzman.chowl.core.frame.block;
 
-import com.chyzman.chowl.core.multipart.api.Multipart;
 import com.chyzman.chowl.core.block.api.MultipartHolderBlockWithEntity;
 import com.chyzman.chowl.core.blockentity.MultipartBlockEntity;
+import com.chyzman.chowl.core.multipart.api.Multipart;
 import com.chyzman.chowl.core.pond.ExtendedShapeContext;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
@@ -24,11 +24,16 @@ import org.jetbrains.annotations.Nullable;
 public class FrameBlock extends MultipartHolderBlockWithEntity {
     public static final MapCodec<FrameBlock> CODEC = createCodec(FrameBlock::new);
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
-    public static final VoxelShape OUTLINE = VoxelShapes.combine(VoxelShapes.fullCube(), VoxelShapes.union(
-      Block.createCuboidShape(2, 0, 2, 14, 16, 14),
-      Block.createCuboidShape(0, 2, 2, 16, 14, 14),
-      Block.createCuboidShape(2, 2, 0, 14, 14, 16)
-    ), (a, b) -> a && !b);
+
+    public static final VoxelShape OUTLINE = VoxelShapes.combine(
+        VoxelShapes.fullCube(),
+        VoxelShapes.union(
+            Block.createCuboidShape(2, 0, 2, 14, 16, 14),
+            Block.createCuboidShape(0, 2, 2, 16, 14, 14),
+            Block.createCuboidShape(2, 2, 0, 14, 14, 16)
+        ),
+        (a, b) -> a && !b
+    );
 
     public FrameBlock(Settings settings) {
         super(MultipartBlockEntity::new, settings);
