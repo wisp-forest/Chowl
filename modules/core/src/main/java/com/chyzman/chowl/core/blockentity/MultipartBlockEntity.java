@@ -1,11 +1,11 @@
 package com.chyzman.chowl.core.blockentity;
 
-import com.chyzman.chowl.core.block.api.MultipartHolderBlockWithEntity;
 import com.chyzman.chowl.core.blockentity.api.MultipartHolderBlockEntity;
 import com.chyzman.chowl.core.graph.NetworkMember;
 import com.chyzman.chowl.core.registry.CoreBlockEntities;
 import com.kneelawk.graphlib.api.graph.user.BlockNode;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
@@ -17,8 +17,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class MultipartBlockEntity extends MultipartHolderBlockEntity implements NetworkMember {
+    public MultipartBlockEntity(BlockEntityType<? extends MultipartBlockEntity> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
+
     public MultipartBlockEntity(BlockPos pos, BlockState state) {
-        super(CoreBlockEntities.MULTIPART, pos, state);
+        this(CoreBlockEntities.MULTIPART, pos, state);
     }
 
     @Override

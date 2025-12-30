@@ -1,6 +1,7 @@
 package com.chyzman.chowl.core.registry;
 
 import com.chyzman.chowl.core.Chowl;
+import com.chyzman.chowl.core.blockentity.FrameBlockEntity;
 import com.chyzman.chowl.core.blockentity.MultipartBlockEntity;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.entity.BlockEntity;
@@ -14,6 +15,12 @@ public class CoreBlockEntities {
         "multipart",
         FabricBlockEntityTypeBuilder.create(MultipartBlockEntity::new)
       );
+
+    public static final BlockEntityType<FrameBlockEntity> FRAME =
+        register(
+            "frame",
+            FabricBlockEntityTypeBuilder.create(FrameBlockEntity::new)
+        );
 
     private static <T extends BlockEntity> BlockEntityType<T> register(String id, FabricBlockEntityTypeBuilder<T> builder) {
         return Registry.register(Registries.BLOCK_ENTITY_TYPE, Chowl.id(id), builder.build());

@@ -1,5 +1,7 @@
 package com.chyzman.chowl.core.block;
 
+import com.chyzman.chowl.core.blockentity.FrameBlockEntity;
+import com.chyzman.chowl.core.graph.NetworkRegistry;
 import com.chyzman.chowl.core.multipart.api.Multipart;
 import com.chyzman.chowl.core.block.api.MultipartHolderBlockWithEntity;
 import com.chyzman.chowl.core.blockentity.MultipartBlockEntity;
@@ -12,6 +14,7 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
@@ -19,6 +22,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 public class FrameBlock extends MultipartHolderBlockWithEntity {
@@ -31,8 +35,24 @@ public class FrameBlock extends MultipartHolderBlockWithEntity {
     ), (a, b) -> a && !b);
 
     public FrameBlock(Settings settings) {
-        super(MultipartBlockEntity::new, settings);
+        super(FrameBlockEntity::new, settings);
         this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, false));
+    }
+
+    @Override
+    protected void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
+        super.onBlockAdded(state, world, pos, oldState, notify);
+
+        if (world instanceof ServerWorld sw)
+            NetworkRegistry.UNIVERSE.getGraphWorld(sw).updateNodes(pos);
+    }
+
+    @Override
+    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+        super.onStateReplaced(state, world, pos, newState, moved);
+
+        if (world instanceof ServerWorld sw)
+            NetworkRegistry.UNIVERSE.getGraphWorld(sw).updateNodes(pos);
     }
 
     @Override
