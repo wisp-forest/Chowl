@@ -37,20 +37,20 @@ public class VoxelShapeHelper {
         }).add(0.5, 0.5, 0.5);
     }
 
-    public static VoxelShape rotate(VoxelShape southShape, Direction direction) {
+    public static VoxelShape rotate(VoxelShape northShape, Direction direction) {
         return switch (direction) {
-            case SOUTH -> southShape;
-            case NORTH -> rotate(southShape, Direction.Axis.Y, 2);
-            case EAST -> rotate(southShape, Direction.Axis.Y, 1);
-            case WEST -> rotate(southShape, Direction.Axis.Y, -1);
-            case UP -> rotate(southShape, Direction.Axis.X, 1);
-            case DOWN -> rotate(southShape, Direction.Axis.X, -1);
+            case NORTH -> northShape;
+            case SOUTH -> rotate(northShape, Direction.Axis.Y, 2);
+            case WEST -> rotate(northShape, Direction.Axis.Y, 1);
+            case EAST -> rotate(northShape, Direction.Axis.Y, -1);
+            case DOWN -> rotate(northShape, Direction.Axis.X, 1);
+            case UP -> rotate(northShape, Direction.Axis.X, -1);
             default -> throw new IllegalArgumentException("Invalid direction: " + direction);
         };
     }
 
-    public static VoxelShape rotate(VoxelShape southUpShape, Orientation orientation) {
-        var facing = rotate(southUpShape, orientation.getFacing());
+    public static VoxelShape rotate(VoxelShape northUpShape, Orientation orientation) {
+        var facing = rotate(northUpShape, orientation.getFacing());
         if (orientation.getRotation() == Direction.UP) return facing;
         return rotate(facing ,orientation.getRotation());
     }
