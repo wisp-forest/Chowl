@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class AttachableType<T extends Attachable> implements TypeFilter<Attachable, T> {
     private final RegistryEntry.Reference<AttachableType<?>> registryEntry = ChowlRegistries.ATTACHABLE_TYPE.createEntry(this);
@@ -81,7 +82,7 @@ public class AttachableType<T extends Attachable> implements TypeFilter<Attachab
     public static class Builder<T extends Attachable> {
         private final AttachableType.AttachableFactory<T> factory;
         private final StructEndec<T> endec;
-        private RegistryKeyedValue<AttachableType<?>, String> translationKey = registryKey -> Util.createTranslationKey("attachable", registryKey.getValue());
+        private Function<RegistryKey<AttachableType<?>>, String> translationKey = registryKey -> Util.createTranslationKey("attachable", registryKey.getValue());
 
         public Builder(AttachableType.AttachableFactory<T> factory, StructEndec<T> endec) {
             this.factory = factory;
@@ -92,7 +93,7 @@ public class AttachableType<T extends Attachable> implements TypeFilter<Attachab
             return new AttachableType<>(
                     factory,
                     endec,
-                    this.translationKey.get(registryKey)
+                    this.translationKey.apply(registryKey)
             );
         }
     }

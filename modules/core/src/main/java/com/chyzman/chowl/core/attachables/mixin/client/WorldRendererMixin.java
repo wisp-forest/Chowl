@@ -23,11 +23,11 @@ public class WorldRendererMixin {
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/block/entity/BlockEntityRenderDispatcher;configure(Lnet/minecraft/world/World;Lnet/minecraft/client/render/Camera;Lnet/minecraft/util/hit/HitResult;)V"))
     private void configureAttachableRenderDispatcher(
-            ObjectAllocator allocator,
             RenderTickCounter tickCounter,
             boolean renderBlockOutline,
             Camera camera,
             GameRenderer gameRenderer,
+            LightmapTextureManager lightmapTextureManager,
             Matrix4f positionMatrix,
             Matrix4f projectionMatrix,
             CallbackInfo ci
