@@ -7,7 +7,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.VertexRendering;
+import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -34,7 +35,7 @@ public interface AttachableRenderer<T extends Attachable> {
 
     static void drawDebugVector(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vec3d pos, Quaternionf rotation) {
         if (!MinecraftClient.getInstance().getEntityRenderDispatcher().shouldRenderHitboxes()) return;
-        VertexRendering.drawVector(
+        EntityRenderDispatcher.drawVector(
                 matrices,
                 vertexConsumers.getBuffer(RenderLayer.getLines()),
                 pos.toVector3f(),
@@ -46,9 +47,9 @@ public interface AttachableRenderer<T extends Attachable> {
     static void drawDebugBoundingBox(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vec3d pos, Quaternionf rotation, Box shape) {
         if (!MinecraftClient.getInstance().getEntityRenderDispatcher().shouldRenderHitboxes()) return;
         matrices.push();
-        matrices.translate(pos);
+        matrices.translate(pos.x, pos.y, pos.z);
         matrices.multiply(rotation);
-        VertexRendering.drawBox(
+        WorldRenderer.drawBox(
                 matrices,
                 vertexConsumers.getBuffer(RenderLayer.getLines()),
                 shape,

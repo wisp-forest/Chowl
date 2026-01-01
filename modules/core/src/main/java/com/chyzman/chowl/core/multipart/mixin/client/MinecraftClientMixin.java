@@ -5,7 +5,6 @@ import com.chyzman.chowl.core.multipart.pond.MinecraftClientDuck;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.RunArgs;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.item.ItemModelManager;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.item.ItemRenderer;
@@ -25,7 +24,7 @@ public abstract class MinecraftClientMixin implements MinecraftClientDuck {
 
     @Shadow @Final public TextRenderer textRenderer;
     @Shadow @Final private ItemRenderer itemRenderer;
-    @Shadow @Final private ItemModelManager itemModelManager;
+    @Shadow @Final private ItemModel itemModelManager;
     @Shadow @Final private BlockRenderManager blockRenderManager;
     @Shadow @Final private EntityRenderDispatcher entityRenderDispatcher;
     @Shadow @Final private ReloadableResourceManagerImpl resourceManager;
