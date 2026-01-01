@@ -13,7 +13,6 @@
     "mixins": [
         "chowl-core.mixins.json",
         "chowl-core-attachables.mixins.json",
-        "chowl-core-megaBlock.mixins.json",
         "chowl-core-multipart.mixins.json"
     ],
     "custom": {

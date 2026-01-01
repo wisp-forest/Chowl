@@ -37,7 +37,6 @@ public class Oddities implements ModInitializer {
                 entries.add(OdditiesItems.STRING);
                 entries.add(OdditiesItems.CLOCK);
                 entries.add(OdditiesItems.CALENDAR);
-                entries.add(OdditiesItems.BIG_DIRT);
             }, false);
         }, 60);
     }

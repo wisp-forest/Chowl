@@ -1,30 +1,30 @@
 {
   "itemGroup.chowl.group": "Chowl™",
 
-  "chowl...": {
-    "format...": {
-      "number...": {
+  "chowl.{}": {
+    "format.{}": {
+      "number.{}": {
         "nan": "NaN",
         "infinity": "∞",
-        "separator...": {
+        "separator.{}": {
           "group": ",",
           "decimal": "."
         },
-        "dynamic...": {
-          "letter...": {
+        "dynamic.{}": {
+          "letter.{}": {
             "thousand": "k",
-            "special...0": ["M", "B", "T", "Qu", "Qn", "Sx", "Sp", "Oc", "No"],
-            "unit...0": ["U", "D", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "Nv"],
-            "ten...0": ["Dc", "Vg", "Tg", "Qd", "Qi", "Sg", "St", "Ot", "Nn"],
-            "hundred...0": ["C", "Dc", "Tc", "Qr", "Qn", "Ss", "Sn", "Og", "Ng"],
+            "special.{0}": ["M", "B", "T", "Qu", "Qn", "Sx", "Sp", "Oc", "No"],
+            "unit.{0}": ["U", "D", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "Nv"],
+            "ten.{0}": ["Dc", "Vg", "Tg", "Qd", "Qi", "Sg", "St", "Ot", "Nn"],
+            "hundred.{0}": ["C", "Dc", "Tc", "Qr", "Qn", "Ss", "Sn", "Og", "Ng"],
             "millia": "M"
           },
-          "word...": {
+          "word.{}": {
             "thousand": "thousand",
-            "special...0": ["mi", "bi", "tri", "quadri", "quin", "sex", "sept", "oct", "non"],
-            "unit...0": ["un", "duo", "tre", "quattuor", "quin", "sex", "septen", "octo", "novem"],
-            "ten...0": ["dec", "vigin", "trigin", "quadragin", "quinquagin", "sexagin", "septuagin", "octogin", "nonagin"],
-            "hundred...0": ["cen", "duocen", "trecen", "quadringen", "quingen", "sescen", "septingen", "octingen", "nongen"],
+            "special.{0}": ["mi", "bi", "tri", "quadri", "quin", "sex", "sept", "oct", "non"],
+            "unit.{0}": ["un", "duo", "tre", "quattuor", "quin", "sex", "septen", "octo", "novem"],
+            "ten.{0}": ["dec", "vigin", "trigin", "quadragin", "quinquagin", "sexagin", "septuagin", "octogin", "nonagin"],
+            "hundred.{0}": ["cen", "duocen", "trecen", "quadringen", "quingen", "sescen", "septingen", "octingen", "nongen"],
             "millia": "millia",
             "prefix": " ",
             "suffix": "llion",
@@ -32,12 +32,12 @@
             "tillion": "ti"
           }
         },
-        "scaled...": {
-          "si...": {
+        "scaled.{}": {
+          "si.{}": {
             "3": "k", "6": "M", "9": "G", "12": "T", "15": "P", "18": "E", "21": "Z", "24": "Y", "27": "R", "30": "Q",
             "-3": "m", "-6": "μ", "-9": "n", "-12": "p", "-15": "f", "-18": "a", "-21": "z", "-24": "y", "-27": "r", "-30": "q"
           },
-          "full_si...": {
+          "full_si.{}": {
             "3": "kilo", "6": "mega", "9": "giga", "12": "tera", "15": "peta", "18": "exa", "21": "zetta", "24": "yotta", "27": "ronna", "30": "quetta",
             "-3": "milli", "-6": "micro", "-9": "nano", "-12": "pico", "-15": "femto", "-18": "atto", "-21": "zepto", "-24": "yocto", "-27": "ronto", "-30": "quecto"
           }

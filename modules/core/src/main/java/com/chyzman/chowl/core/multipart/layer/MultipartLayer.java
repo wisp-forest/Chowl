@@ -10,12 +10,12 @@ import net.minecraft.entity.boss.dragon.EnderDragonPart;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.item.FuelRegistry;
 import net.minecraft.item.map.MapState;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.recipe.BrewingRecipeRegistry;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.scoreboard.Scoreboard;
@@ -32,7 +32,6 @@ import net.minecraft.world.block.ChainRestrictedNeighborUpdater;
 import net.minecraft.world.chunk.ChunkManager;
 import net.minecraft.world.entity.EntityLookup;
 import net.minecraft.world.event.GameEvent;
-import net.minecraft.world.explosion.Explosion;
 import net.minecraft.world.explosion.ExplosionBehavior;
 import net.minecraft.world.tick.QueryableTickScheduler;
 import net.minecraft.world.tick.TickManager;
@@ -52,8 +51,7 @@ public class MultipartLayer extends World {
           mainWorld.getRegistryKey(),
           mainWorld.getRegistryManager(),
           mainWorld.getDimensionEntry(),
-          mainWorld.getProfilerSupplier(),
-          mainWorld.isClient,
+          mainWorld.isClient(),
           mainWorld.isDebugWorld(),
           0L,
           ((WorldAccessor) mainWorld).getNeighborUpdater() instanceof ChainRestrictedNeighborUpdater ?
@@ -75,6 +73,9 @@ public class MultipartLayer extends World {
     public void playSoundFromEntity(@Nullable PlayerEntity source, Entity entity, RegistryEntry<SoundEvent> sound, SoundCategory category, float volume, float pitch, long seed) {}
 
     @Override
+    public void createExplosion(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionBehavior behavior, double x, double y, double z, float power, boolean createFire, ExplosionSourceType explosionSourceType, ParticleEffect smallParticle, ParticleEffect largeParticle, RegistryEntry<SoundEvent> soundEvent) {}
+
+    @Override
     public String asString() {
         return "";
     }
@@ -82,6 +83,11 @@ public class MultipartLayer extends World {
     @Override
     public @Nullable Entity getEntityById(int id) {
         return null;
+    }
+
+    @Override
+    public Collection<EnderDragonPart> getEnderDragonParts() {
+        return List.of();
     }
 
     @Override
@@ -128,6 +134,11 @@ public class MultipartLayer extends World {
     }
 
     @Override
+    public FuelRegistry getFuelRegistry() {
+        return mainWorld.getFuelRegistry();
+    }
+
+    @Override
     public ChunkManager getChunkManager() {
         return chunkManager;
     }
@@ -145,7 +156,7 @@ public class MultipartLayer extends World {
 
     @Override
     public RegistryEntry<Biome> getGeneratorStoredBiome(int biomeX, int biomeY, int biomeZ) {
-        return mainWorld.getRegistryManager().get(RegistryKeys.BIOME).getEntry(BiomeKeys.THE_VOID)
+        return mainWorld.getRegistryManager().getOptionalEntry(BiomeKeys.THE_VOID)
           .map(biomes -> (RegistryEntry<Biome>) biomes) // Map to RegistryEntry so I can use orElse
           .orElse(mainWorld.getGeneratorStoredBiome(biomeX, biomeY, biomeZ));
     }

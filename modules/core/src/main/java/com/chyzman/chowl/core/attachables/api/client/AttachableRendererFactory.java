@@ -4,11 +4,11 @@ import com.chyzman.chowl.core.attachables.api.Attachable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.item.ItemModelManager;
 import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.render.model.BakedModelManager;
 
 @FunctionalInterface
 @Environment(EnvType.CLIENT)
@@ -19,7 +19,7 @@ public interface AttachableRendererFactory<T extends Attachable> {
     class Context {
         private final AttachableRenderDispatcher renderDispatcher;
         private final ItemRenderer itemRenderer;
-        private final BakedModelManager bakedModelManager;
+        private final ItemModelManager itemModelManager;
         private final BlockRenderManager blockRenderManager;
         private final BlockEntityRenderDispatcher blockEntityRenderDispatcher;
         private final EntityRenderDispatcher entityRenderDispatcher;
@@ -28,7 +28,7 @@ public interface AttachableRendererFactory<T extends Attachable> {
         public Context(
                 AttachableRenderDispatcher renderDispatcher,
                 ItemRenderer itemRenderer,
-                BakedModelManager bakedModelManager,
+                ItemModelManager itemModelManager,
                 BlockRenderManager blockRenderManager,
                 EntityRenderDispatcher entityRenderDispatcher,
                 BlockEntityRenderDispatcher blockEntityRenderDispatcher,
@@ -36,7 +36,7 @@ public interface AttachableRendererFactory<T extends Attachable> {
         ) {
             this.renderDispatcher = renderDispatcher;
             this.itemRenderer = itemRenderer;
-            this.bakedModelManager = bakedModelManager;
+            this.itemModelManager = itemModelManager;
             this.blockRenderManager = blockRenderManager;
             this.entityRenderDispatcher = entityRenderDispatcher;
             this.blockEntityRenderDispatcher = blockEntityRenderDispatcher;
@@ -51,8 +51,8 @@ public interface AttachableRendererFactory<T extends Attachable> {
             return this.itemRenderer;
         }
 
-        public BakedModelManager itemModelManager() {
-            return this.bakedModelManager;
+        public ItemModelManager itemModelManager() {
+            return this.itemModelManager;
         }
 
         public BlockRenderManager blockRenderManager() {

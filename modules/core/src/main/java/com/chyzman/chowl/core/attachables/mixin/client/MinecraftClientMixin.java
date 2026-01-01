@@ -11,6 +11,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.RunArgs;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.item.ItemModelManager;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.render.GameRenderer;
@@ -18,7 +19,6 @@ import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.render.model.BakedModelManager;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.ItemStack;
 import net.minecraft.resource.ReloadableResourceManagerImpl;
@@ -43,7 +43,7 @@ public abstract class MinecraftClientMixin implements MinecraftClientDuck {
 
     @Shadow @Final private ItemRenderer itemRenderer;
 
-    @Shadow @Final private BakedModelManager bakedModelManager;
+    @Shadow @Final private ItemModelManager itemModelManager;
 
     @Shadow @Final private BlockRenderManager blockRenderManager;
 
@@ -68,14 +68,14 @@ public abstract class MinecraftClientMixin implements MinecraftClientDuck {
 
     @Shadow @Final public GameRenderer gameRenderer;
 
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/block/entity/BlockEntityRenderDispatcher;<init>(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/client/render/entity/model/EntityModelLoader;Ljava/util/function/Supplier;Ljava/util/function/Supplier;Ljava/util/function/Supplier;)V"))
+    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/block/entity/BlockEntityRenderDispatcher;<init>(Lnet/minecraft/client/font/TextRenderer;Ljava/util/function/Supplier;Lnet/minecraft/client/render/block/BlockRenderManager;Lnet/minecraft/client/item/ItemModelManager;Lnet/minecraft/client/render/item/ItemRenderer;Lnet/minecraft/client/render/entity/EntityRenderDispatcher;)V"))
     private void createAttachableRenderDispatcher(
             RunArgs args,
             CallbackInfo ci
     ) {
         this.attachableRenderDispatcher = new AttachableRenderDispatcher(
                 itemRenderer,
-            bakedModelManager,
+                itemModelManager,
                 blockRenderManager,
                 blockEntityRenderDispatcher,
                 entityRenderDispatcher,
@@ -112,8 +112,8 @@ public abstract class MinecraftClientMixin implements MinecraftClientDuck {
                 hand,
                 new AttachableHitResult(crosshairTarget.getPos(), targetAttachable)
         );
-        if (result.isAccepted()) {
-            if (result.shouldSwingHand()) {
+        if (result instanceof ActionResult.Success success) {
+            if (success.swingSource() == ActionResult.SwingSource.CLIENT) {
                 this.player.swingHand(hand);
                 if (!itemStack.isEmpty() && (itemStack.getCount() != count || interactionManager.hasCreativeInventory())) {
                     gameRenderer.firstPersonRenderer.resetEquipProgress(hand);
@@ -121,7 +121,7 @@ public abstract class MinecraftClientMixin implements MinecraftClientDuck {
             }
             ci.cancel();
         }
-        if (result == ActionResult.FAIL) ci.cancel();
+        if (result instanceof ActionResult.Fail) ci.cancel();
     }
 
     @Inject(method = "doAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/hit/HitResult;getType()Lnet/minecraft/util/hit/HitResult$Type;"), cancellable = true)
@@ -141,8 +141,8 @@ public abstract class MinecraftClientMixin implements MinecraftClientDuck {
                 player,
                 new AttachableHitResult(crosshairTarget.getPos(), targetAttachable)
         );
-        if (result.isAccepted()) {
-            if (result.shouldSwingHand()) {
+        if (result instanceof ActionResult.Success success) {
+            if (success.swingSource() == ActionResult.SwingSource.CLIENT) {
                 this.player.swingHand(Hand.MAIN_HAND);
                 if (!stack.isEmpty() && (stack.getCount() != count || interactionManager.hasCreativeInventory())) {
                     gameRenderer.firstPersonRenderer.resetEquipProgress(Hand.MAIN_HAND);
@@ -151,7 +151,7 @@ public abstract class MinecraftClientMixin implements MinecraftClientDuck {
             cir.setReturnValue(true);
             return;
         }
-        if (result == ActionResult.FAIL) {
+        if (result instanceof ActionResult.Fail) {
             cir.setReturnValue(true);
             return;
         }

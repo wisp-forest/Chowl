@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.item.ItemModelManager;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -14,7 +15,6 @@ import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.render.model.BakedModelManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SynchronousResourceReloader;
@@ -36,7 +36,7 @@ public class AttachableRenderDispatcher implements SynchronousResourceReloader {
     public HitResult crosshairTarget;
 
     private final ItemRenderer itemRenderer;
-    private final BakedModelManager itemModelManager;
+    private final ItemModelManager itemModelManager;
     private final BlockRenderManager blockRenderManager;
     private final BlockEntityRenderDispatcher blockEntityRenderDispatcher;
     private final EntityRenderDispatcher entityRenderDispatcher;
@@ -44,7 +44,7 @@ public class AttachableRenderDispatcher implements SynchronousResourceReloader {
 
     public AttachableRenderDispatcher(
             ItemRenderer itemRenderer,
-            BakedModelManager itemModelManager,
+            ItemModelManager itemModelManager,
             BlockRenderManager blockRenderManager,
             BlockEntityRenderDispatcher blockEntityRenderDispatcher,
             EntityRenderDispatcher entityRenderDispatcher,

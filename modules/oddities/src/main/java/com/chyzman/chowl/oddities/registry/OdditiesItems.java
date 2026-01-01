@@ -1,7 +1,5 @@
 package com.chyzman.chowl.oddities.registry;
 
-import com.chyzman.chowl.core.megaBlock.api.MegaBlock;
-import com.chyzman.chowl.core.megaBlock.api.MegaBlockItem;
 import com.chyzman.chowl.oddities.Oddities;
 import com.chyzman.chowl.oddities.item.PinItem;
 import com.chyzman.chowl.oddities.item.StickyNoteItem;
@@ -12,7 +10,6 @@ import net.minecraft.item.Items;
 import net.minecraft.item.VerticallyAttachableBlockItem;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.Direction;
 
 import java.util.ArrayList;
@@ -71,12 +68,6 @@ public class OdditiesItems {
                     Direction.DOWN,
                     settings
             )
-    );
-
-    public static final Item BIG_DIRT = register(
-            "big_dirt",
-            new Item.Settings(),
-            settings -> new MegaBlockItem((MegaBlock) OdditiesBlocks.BIG_DIRT, settings)
     );
 
     private static Item register(String id, Item.Settings settings, Function<Item.Settings, Item> factory) {

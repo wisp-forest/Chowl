@@ -1,7 +1,6 @@
 package com.chyzman.chowl.oddities.registry;
 
 import com.chyzman.chowl.oddities.Oddities;
-import com.chyzman.chowl.oddities.block.BigBlock;
 import com.chyzman.chowl.oddities.block.ClipboardBlock;
 import com.chyzman.chowl.oddities.infoDisplay.block.InfoDisplayBlock;
 import com.chyzman.chowl.oddities.infoDisplay.block.WallInfoDisplayBlock;
@@ -60,13 +59,6 @@ public class OdditiesBlocks {
             "wall_calendar",
             infoDisplaySettings,
             settings -> new WallInfoDisplayBlock<>(OdditiesBlockEntities.CALENDAR, settings)
-    );
-
-    public static final Block BIG_DIRT = register(
-            "big_dirt",
-            AbstractBlock.Settings
-                    .copy(DIRT),
-            BigBlock::new
     );
 
     private static Block register(String id, Block.Settings settings, Function<AbstractBlock.Settings, Block> factory) {
