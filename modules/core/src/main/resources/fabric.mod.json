@@ -1,47 +1,29 @@
 {
-  "schemaVersion": 1,
-  "id": "chowl-core",
-  "version": "${version}",
-  "name": "Chowl Core",
-  "description": "Enterprise™ Enterprising",
-  "authors": ["chyzman", "BasiqueEvangelist"],
-  "contact": {
-    "issues": "https://github.com/wisp-forest/Chowl/issues",
-    "sources": "https://github.com/wisp-forest/Chowl"
-  },
-  "license": "LGPL-3.0-only",
-  "icon": "assets/chowl-core/icon.png",
-  "environment": "*",
-  "accessWidener": "chowl-core.accesswidener",
-  "entrypoints": {
-    "client": [
-      "com.chyzman.chowl.core.client.ChowlClient"
+    "name": "Chowl Core",
+    "description": "Enterprise™ Enterprising",
+    "accessWidener": "chowl-core.accesswidener",
+    "entrypoints": {
+        "client": [
+            "com.chyzman.chowl.core.client.ChowlClient"
+        ],
+        "main": [
+            "com.chyzman.chowl.core.Chowl"
+        ]
+    },
+    "mixins": [
+        "chowl-core.mixins.json",
+        "chowl-core-attachables.mixins.json",
+        "chowl-core-megaBlock.mixins.json",
+        "chowl-core-multipart.mixins.json"
     ],
-    "main": [
-      "com.chyzman.chowl.core.Chowl"
-    ]
-  },
-  "mixins": [
-    "chowl-core.mixins.json",
-    "chowl-core-attachables.mixins.json",
-    "chowl-core-megaBlock.mixins.json",
-    "chowl-core-multipart.mixins.json",
-    "chowl-core-temporaryReimplementationOfNestedLang.mixins.json"
-  ],
-  "depends": {
-    "fabricloader": ">=${loader_version}",
-    "fabric": "*",
-    "minecraft": "${minecraft_version_dep}",
-    "owo": ">=${owo_version}"
-  },
-  "custom": {
-    "modmenu": {
-      "links": {
-        "modmenu.discord": "https://wispforest.io/discord"
-      },
-      "badges": [
-        "library"
-      ]
+    "custom": {
+        "modmenu": {
+            "links": {
+                "modmenu.discord": "https://wispforest.io/discord"
+            },
+            "badges": [
+                "library"
+            ]
+        }
     }
-  }
 }

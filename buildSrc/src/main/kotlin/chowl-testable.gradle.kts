@@ -1,34 +1,28 @@
 plugins {
     id("fabric-loom")
-    id("maven-publish")
-    id("base")
-    id("java")
-    id("java-library")
-    //id("chowl-base")
 }
 
 loom {
     runs {
-
         create("testmodClient") {
             client()
             ideConfigGenerated(true)
-            name = "[${project.name}] Testmod Client"
+            name = "Testmod Client"
+            runDir("../../run")
             source(sourceSets["testmod"])
-
-            //tasks.register("runTestmodClientRenderDoc", RenderDocRunTask::class, this)
         }
 
         create("testmodServer") {
             server()
             ideConfigGenerated(true)
-            name = "[${project.name}] Testmod Server"
+            name = "Testmod Server"
+            runDir("../../run")
             source(sourceSets["testmod"])
         }
 
         /*maybeCreate("clientRenderDoc").apply {
             ideConfigGenerated(true)
-            name("[${project.name}] Client - (RenderDoc)")
+            name("Client - (RenderDoc)")
         }*/
 
         var devUserInfo = System.getenv("minecraftDevUserInfo")
@@ -39,9 +33,11 @@ loom {
         create("testmodClientMixinDump") {
             client()
             ideConfigGenerated(true)
-            name("[${project.name}] Testmod Client - (Mixin Dump)")
+            name("Testmod Client - (Mixin Dump)")
             vmArg("-Dfabric.log.disableAnsi=false")
             vmArg("-Dmixin.debug.export=true")
+            runDir("../../run")
+            source(sourceSets["testmod"])
         }
 
         configureEach {
@@ -54,7 +50,7 @@ loom {
         }
 
         afterEvaluate {
-            var mixin: String? = null;
+            var mixin: String? = null
             try {
                 var sponge = this.configurations.compileClasspath.get()
                     .allDependencies
