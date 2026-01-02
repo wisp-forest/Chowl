@@ -37,11 +37,9 @@ public abstract class NetworkBlock extends Block {
     }
 
     @Override
-    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        super.onStateReplaced(state, world, pos, newState, moved);
-        if (world instanceof ServerWorld serverWorld) {
-            NetworkRegistry.UNIVERSE.getGraphWorld(serverWorld).updateNodes(pos);
-        }
+    public void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
+        super.onStateReplaced(state, world, pos, moved);
+        NetworkRegistry.UNIVERSE.getGraphWorld(world).updateNodes(pos);
     }
 
 }

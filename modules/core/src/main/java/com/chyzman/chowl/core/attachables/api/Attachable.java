@@ -73,7 +73,7 @@ public abstract class Attachable {
     }
 
     public ActionResult onAttack(World world, PlayerEntity player, AttachableHitResult hit) {
-        if (world.isClient) return ActionResult.SUCCESS;
+        if (world.isClient()) return ActionResult.SUCCESS;
 
         var attachableHolder = world.getAttachedOrCreate(AttachableHolder.TYPE);
         attachableHolder.removeAttachable(hit.getContainer().getUuid());

@@ -20,10 +20,10 @@ public class AttachablesPackets {
         CHANNEL.registerServerbound(C2SPlayerInteractAttachable.class, (message, access) -> {
             var player = access.player();
             if (player == null) return;
-            var world = player.getWorld();
+            var world = player.getEntityWorld();
             if (world == null) return;
 
-            var attachableHolder = access.player().getWorld().getAttachedOrCreate(AttachableHolder.TYPE);
+            var attachableHolder = access.player().getEntityWorld().getAttachedOrCreate(AttachableHolder.TYPE);
 
             var container = attachableHolder.attachables.get(message.attachableUuid());
             if (container == null) return;
@@ -37,10 +37,10 @@ public class AttachablesPackets {
         CHANNEL.registerServerbound(C2SPlayerAttackAttachable.class, (message, access) -> {
             var player = access.player();
             if (player == null) return;
-            var world = player.getWorld();
+            var world = player.getEntityWorld();
             if (world == null) return;
 
-            var attachableHolder = access.player().getWorld().getAttachedOrCreate(AttachableHolder.TYPE);
+            var attachableHolder = access.player().getEntityWorld().getAttachedOrCreate(AttachableHolder.TYPE);
 
             var container = attachableHolder.attachables.get(message.attachableUuid());
             if (container == null) return;

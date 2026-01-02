@@ -32,5 +32,7 @@ public class ChowlClient implements ClientModInitializer {
         if (world == client.world) {
             client.worldRenderer.scheduleBlockRenders(pos.getX(), pos.getY(), pos.getZ(), pos.getX(), pos.getY(), pos.getZ());
         }
+
+
     }
 }

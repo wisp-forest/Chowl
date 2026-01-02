@@ -43,16 +43,14 @@ public class FrameBlock extends MultipartHolderBlockWithEntity {
     protected void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
         super.onBlockAdded(state, world, pos, oldState, notify);
 
-        if (world instanceof ServerWorld sw)
-            NetworkRegistry.UNIVERSE.getGraphWorld(sw).updateNodes(pos);
+        if (world instanceof ServerWorld sw) NetworkRegistry.UNIVERSE.getGraphWorld(sw).updateNodes(pos);
     }
 
     @Override
-    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        super.onStateReplaced(state, world, pos, newState, moved);
+    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
+        super.onStateReplaced(state, world, pos, moved);
 
-        if (world instanceof ServerWorld sw)
-            NetworkRegistry.UNIVERSE.getGraphWorld(sw).updateNodes(pos);
+        NetworkRegistry.UNIVERSE.getGraphWorld(world).updateNodes(pos);
     }
 
     @Override
