@@ -17,7 +17,7 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.EntityRenderManager;
 import net.minecraft.client.render.entity.model.LoadedEntityModels;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -41,19 +41,19 @@ public class PartRenderDispatcher implements SynchronousResourceReloader {
     private final BlockRenderManager blockRenderManager;
     private final ItemModelManager itemModelManager;
     private final ItemRenderer itemRenderer;
-    private final EntityRenderDispatcher entityRenderDispatcher;
+    private final EntityRenderManager entityRenderManager;
 
     public PartRenderDispatcher(
-      TextRenderer textRenderer,
-      Supplier<LoadedEntityModels> entityModelsGetter,
-      BlockRenderManager blockRenderManager,
-      ItemModelManager itemModelManager,
-      ItemRenderer itemRenderer,
-      EntityRenderDispatcher entityRenderDispatcher
+        TextRenderer textRenderer,
+        Supplier<LoadedEntityModels> entityModelsGetter,
+        BlockRenderManager blockRenderManager,
+        ItemModelManager itemModelManager,
+        ItemRenderer itemRenderer,
+        EntityRenderManager entityRenderManager
     ) {
         this.itemRenderer = itemRenderer;
         this.itemModelManager = itemModelManager;
-        this.entityRenderDispatcher = entityRenderDispatcher;
+        this.entityRenderManager = entityRenderManager;
         this.textRenderer = textRenderer;
         this.entityModelsGetter = entityModelsGetter;
         this.blockRenderManager = blockRenderManager;
@@ -90,7 +90,7 @@ public class PartRenderDispatcher implements SynchronousResourceReloader {
     }
 
     private static <T extends Part> void render(
-      PartRenderer<T> renderer, T blockEntity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers
+        PartRenderer<T> renderer, T blockEntity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers
     ) {
         World world = blockEntity.getWorld();
         int i;
@@ -113,13 +113,13 @@ public class PartRenderDispatcher implements SynchronousResourceReloader {
     @Override
     public void reload(ResourceManager manager) {
         PartRendererFactory.Context context = new PartRendererFactory.Context(
-          this,
-          this.blockRenderManager,
-          this.itemModelManager,
-          this.itemRenderer,
-          this.entityRenderDispatcher,
-          (LoadedEntityModels) this.entityModelsGetter.get(),
-          this.textRenderer
+            this,
+            this.blockRenderManager,
+            this.itemModelManager,
+            this.itemRenderer,
+            this.entityRenderManager,
+            this.entityModelsGetter.get(),
+            this.textRenderer
         );
         this.renderers = PartRendererFactories.reload(context);
     }

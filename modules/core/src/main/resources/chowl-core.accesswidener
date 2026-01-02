@@ -4,5 +4,3 @@ accessible method net/minecraft/util/shape/SimpleVoxelShape <init> (Lnet/minecra
 
 accessible field net/minecraft/world/RaycastContext shapeContext Lnet/minecraft/block/ShapeContext;
 accessible field net/minecraft/util/shape/VoxelShape voxels Lnet/minecraft/util/shape/VoxelSet;
-
-accessible method net/minecraft/client/render/entity/EntityRenderDispatcher drawVector (Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;Lorg/joml/Vector3f;Lnet/minecraft/util/math/Vec3d;I)V

@@ -7,7 +7,7 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.item.ItemModelManager;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.EntityRenderManager;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.render.entity.model.LoadedEntityModels;
 import net.minecraft.client.render.item.ItemRenderer;
@@ -23,7 +23,7 @@ public interface PartRendererFactory<T extends Part> {
         private final BlockRenderManager renderManager;
         private final ItemModelManager itemModelManager;
         private final ItemRenderer itemRenderer;
-        private final EntityRenderDispatcher entityRenderDispatcher;
+        private final EntityRenderManager entityRenderManager;
         private final LoadedEntityModels loadedEntityModels;
         private final TextRenderer textRenderer;
 
@@ -32,7 +32,7 @@ public interface PartRendererFactory<T extends Part> {
           BlockRenderManager renderManager,
           ItemModelManager itemModelManager,
           ItemRenderer itemRenderer,
-          EntityRenderDispatcher entityRenderDispatcher,
+          EntityRenderManager entityRenderManager,
           LoadedEntityModels layerRenderDispatcher,
           TextRenderer textRenderer
         ) {
@@ -40,7 +40,7 @@ public interface PartRendererFactory<T extends Part> {
             this.renderManager = renderManager;
             this.itemModelManager = itemModelManager;
             this.itemRenderer = itemRenderer;
-            this.entityRenderDispatcher = entityRenderDispatcher;
+            this.entityRenderManager = entityRenderManager;
             this.loadedEntityModels = layerRenderDispatcher;
             this.textRenderer = textRenderer;
         }
@@ -53,8 +53,8 @@ public interface PartRendererFactory<T extends Part> {
             return this.renderManager;
         }
 
-        public EntityRenderDispatcher getEntityRenderDispatcher() {
-            return this.entityRenderDispatcher;
+        public EntityRenderManager getEntityRenderManager() {
+            return this.entityRenderManager;
         }
 
         public ItemModelManager getItemModelManager() {

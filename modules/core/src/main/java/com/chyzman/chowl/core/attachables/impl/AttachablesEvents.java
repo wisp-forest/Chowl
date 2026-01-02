@@ -3,8 +3,7 @@ package com.chyzman.chowl.core.attachables.impl;
 import com.chyzman.chowl.core.attachables.pond.MinecraftClientDuck;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.minecraft.client.MinecraftClient;
+import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
 
 @SuppressWarnings("UnstableApiUsage")
 public class AttachablesEvents {
@@ -12,9 +11,10 @@ public class AttachablesEvents {
     @Environment(EnvType.CLIENT)
     public static void clientInit() {
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register(ctx -> {
-            var client = MinecraftClient.getInstance();
+            var gameRenderer = ctx.gameRenderer();
+            var client = gameRenderer.getClient();
 
-            var world = ctx.world();
+            var world = client.world;
             if (world == null) return;
 
             var attachables = world.getAttachedOrCreate(AttachableHolder.TYPE).attachables;
@@ -22,15 +22,15 @@ public class AttachablesEvents {
 
             var dispatcher = ((MinecraftClientDuck) client).chowl$getAttachableRenderDispatcher();
 
-            var matrices = ctx.matrixStack();
-            if (matrices == null) return;
+            var matrices = ctx.matrices();
 
             for (AttachableContainer container : attachables.values()) {
                 matrices.push();
 
-                matrices.translate( ctx.camera().getPos().multiply(-1));
+                matrices.translate(gameRenderer.getCamera().getCameraPos().multiply(-1));
 
-                dispatcher.render(container.getContained(), ctx.tickCounter().getTickDelta(false), matrices, ctx.consumers());
+                //TODO: idk if this should be fixed or dynamic
+                dispatcher.render(container.getContained(), client.getRenderTickCounter().getFixedDeltaTicks(), matrices, ctx.consumers());
 
                 matrices.pop();
             }

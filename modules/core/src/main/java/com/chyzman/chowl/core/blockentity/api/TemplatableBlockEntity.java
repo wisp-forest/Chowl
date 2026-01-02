@@ -7,6 +7,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.component.ComponentMap;
+import net.minecraft.component.ComponentsAccess;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
@@ -16,6 +17,8 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.state.property.Properties;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.MustBeInvokedByOverriders;
 import org.jetbrains.annotations.Nullable;
@@ -31,30 +34,20 @@ public abstract class TemplatableBlockEntity extends BlockEntity {
 
     @MustBeInvokedByOverriders
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.readNbt(nbt, registryLookup);
+    protected void readData(ReadView view) {
+        super.readData(view);
 
-        if (nbt.contains("TemplateState", NbtElement.COMPOUND_TYPE)) {
-            RegistryEntryLookup<Block> registryEntryLookup = this.world != null ? this.world.createCommandRegistryWrapper(RegistryKeys.BLOCK) : Registries.BLOCK;
-            templateState = NbtHelper.toBlockState(registryEntryLookup, nbt.getCompound("TemplateState"));
-        } else {
-            templateState = null;
-        }
+        templateState = view.read("TemplateState", BlockState.CODEC).orElse(null);
 
-        if (world != null && world.isClient) {
-            ChowlClient.reloadPos(world, pos);
-        }
+        if (world != null && world.isClient()) ChowlClient.reloadPos(world, pos);
     }
 
     @MustBeInvokedByOverriders
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
-        super.writeNbt(nbt, registryLookup);
+    protected void writeData(WriteView view) {
+        super.writeData(view);
 
-        if (templateState != null)
-            nbt.put("TemplateState", NbtHelper.fromBlockState(templateState));
-        else
-            nbt.putString("TemplateState", "me when mojang code");
+        if (templateState != null) view.put("TemplateState", BlockState.CODEC, templateState);
     }
 
     @Override
@@ -79,9 +72,9 @@ public abstract class TemplatableBlockEntity extends BlockEntity {
     @MustBeInvokedByOverriders
     @SuppressWarnings("deprecation")
     @Override
-    public void removeFromCopiedStackNbt(NbtCompound nbt) {
-        super.removeFromCopiedStackNbt(nbt);
-        nbt.remove("TemplateState");
+    public void removeFromCopiedStackData(WriteView view) {
+        super.removeFromCopiedStackData(view);
+        view.remove("TemplateState");
     }
 
     public BlockState templateState() {
@@ -96,7 +89,7 @@ public abstract class TemplatableBlockEntity extends BlockEntity {
         if (old != templateState) {
             markDirty();
 
-            if (world.isClient) {
+            if (world.isClient()) {
                 ChowlClient.reloadPos(world, pos);
             } else {
                 if (getCachedState().contains(LIGHT_LEVEL)) {

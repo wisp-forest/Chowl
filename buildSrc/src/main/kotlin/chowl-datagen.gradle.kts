@@ -1,3 +1,5 @@
+import net.fabricmc.loom.api.LoomGradleExtensionAPI
+
 plugins {
     id("fabric-loom")
     id("maven-publish")
@@ -7,11 +9,11 @@ plugins {
     //id("chowl-base")
 }
 
-loom {
+extensions.configure<LoomGradleExtensionAPI> {
     runs {
         create("datagen") {
             client()
-            name("[${project.name}] DataGen")
+            name = "[${project.name}] DataGen"
             vmArg("-Dfabric-api.datagen")
             vmArg("-Dfabric-api.datagen.output-dir=${project.file("src/generated/resources")}")
             vmArg("-Dfabric-api.datagen.modid=${project.name}")

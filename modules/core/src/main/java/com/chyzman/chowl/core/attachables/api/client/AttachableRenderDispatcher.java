@@ -12,8 +12,8 @@ import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.block.entity.BlockEntityRenderManager;
+import net.minecraft.client.render.entity.EntityRenderManager;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.resource.ResourceManager;
@@ -38,23 +38,23 @@ public class AttachableRenderDispatcher implements SynchronousResourceReloader {
     private final ItemRenderer itemRenderer;
     private final ItemModelManager itemModelManager;
     private final BlockRenderManager blockRenderManager;
-    private final BlockEntityRenderDispatcher blockEntityRenderDispatcher;
-    private final EntityRenderDispatcher entityRenderDispatcher;
+    private final BlockEntityRenderManager blockEntityRenderManager;
+    private final EntityRenderManager entityRenderManager;
     private final TextRenderer textRenderer;
 
     public AttachableRenderDispatcher(
-            ItemRenderer itemRenderer,
-            ItemModelManager itemModelManager,
-            BlockRenderManager blockRenderManager,
-            BlockEntityRenderDispatcher blockEntityRenderDispatcher,
-            EntityRenderDispatcher entityRenderDispatcher,
-            TextRenderer textRenderer
+        ItemRenderer itemRenderer,
+        ItemModelManager itemModelManager,
+        BlockRenderManager blockRenderManager,
+        BlockEntityRenderManager blockEntityRenderManager,
+        EntityRenderManager entityRenderManager,
+        TextRenderer textRenderer
     ) {
         this.itemRenderer = itemRenderer;
         this.itemModelManager = itemModelManager;
         this.blockRenderManager = blockRenderManager;
-        this.blockEntityRenderDispatcher = blockEntityRenderDispatcher;
-        this.entityRenderDispatcher = entityRenderDispatcher;
+        this.blockEntityRenderManager = blockEntityRenderManager;
+        this.entityRenderManager = entityRenderManager;
         this.textRenderer = textRenderer;
     }
 
@@ -73,14 +73,14 @@ public class AttachableRenderDispatcher implements SynchronousResourceReloader {
     }
 
     public <A extends Attachable> void render(
-            A attachable,
-            float tickDelta,
-            MatrixStack matrices,
-            VertexConsumerProvider vertexConsumers
+        A attachable,
+        float tickDelta,
+        MatrixStack matrices,
+        VertexConsumerProvider vertexConsumers
     ) {
         var attachableRenderer = this.get(attachable);
         if (attachableRenderer != null) {
-            if (attachableRenderer.isInRenderDistance(attachable, this.camera.getPos())) {
+            if (attachableRenderer.isInRenderDistance(attachable, this.camera.getCameraPos())) {
                 try {
                     render(attachableRenderer, attachable, tickDelta, matrices, vertexConsumers);
                 } catch (Throwable throwable) {
@@ -94,28 +94,28 @@ public class AttachableRenderDispatcher implements SynchronousResourceReloader {
     }
 
     public <A extends Attachable> void renderOutline(
-            A attachable,
-            Camera camera,
-            VertexConsumerProvider.Immediate vertexConsumers,
-            MatrixStack matrices
+        A attachable,
+        Camera camera,
+        VertexConsumerProvider.Immediate vertexConsumers,
+        MatrixStack matrices
     ) {
         var attachableRenderer = this.get(attachable);
         if (attachableRenderer != null) {
             attachableRenderer.renderOutline(
-                    attachable,
-                    camera,
-                    vertexConsumers,
-                    matrices
+                attachable,
+                camera,
+                vertexConsumers,
+                matrices
             );
         }
     }
 
     private static <T extends Attachable> void render(
-            AttachableRenderer<T> renderer,
-            T attachableState,
-            float tickDelta,
-            MatrixStack matrices,
-            VertexConsumerProvider vertexConsumers
+        AttachableRenderer<T> renderer,
+        T attachableState,
+        float tickDelta,
+        MatrixStack matrices,
+        VertexConsumerProvider vertexConsumers
     ) {
 //        World world = attachable.getWorld();
 //        int i;
@@ -139,13 +139,13 @@ public class AttachableRenderDispatcher implements SynchronousResourceReloader {
     @Override
     public void reload(ResourceManager manager) {
         AttachableRendererFactory.Context context = new AttachableRendererFactory.Context(
-                this,
-                this.itemRenderer,
-                this.itemModelManager,
-                this.blockRenderManager,
-                this.entityRenderDispatcher,
-                this.blockEntityRenderDispatcher,
-                this.textRenderer
+            this,
+            this.itemRenderer,
+            this.itemModelManager,
+            this.blockRenderManager,
+            this.entityRenderManager,
+            this.blockEntityRenderManager,
+            this.textRenderer
         );
         this.renderers = AttachableRendererFactories.reload(context);
     }

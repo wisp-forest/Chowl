@@ -1,23 +1,27 @@
+import net.fabricmc.loom.api.LoomGradleExtensionAPI
+
 plugins {
     id("fabric-loom")
+    id("java")
+    id("java-library")
 }
 
-loom {
+extensions.configure<LoomGradleExtensionAPI> {
     runs {
         create("testmodClient") {
             client()
             ideConfigGenerated(true)
-            name = "Testmod Client"
+            name("Testmod Client")
             runDir("../../run")
-            source(sourceSets["testmod"])
+            source("testmod")
         }
 
         create("testmodServer") {
             server()
             ideConfigGenerated(true)
-            name = "Testmod Server"
+            name("Testmod Server")
             runDir("../../run")
-            source(sourceSets["testmod"])
+            source("testmod")
         }
 
         /*maybeCreate("clientRenderDoc").apply {
@@ -37,14 +41,14 @@ loom {
             vmArg("-Dfabric.log.disableAnsi=false")
             vmArg("-Dmixin.debug.export=true")
             runDir("../../run")
-            source(sourceSets["testmod"])
+            source("testmod")
         }
 
         configureEach {
             if (!name.startsWith("testmod")) return@configureEach
 
             vmArg("-XX:+AllowEnhancedClassRedefinition")
-            source(sourceSets.test.get())
+            source("test")
 
             if (devUserInfo != null) programArgs(devUserInfo.split(" "))
         }
@@ -52,13 +56,11 @@ loom {
         afterEvaluate {
             var mixin: String? = null
             try {
-                var sponge = this.configurations.compileClasspath.get()
-                    .allDependencies
-                    .asIterable()
-                    .firstOrNull { it.name == "sponge-mixin" }
-                if (sponge != null) {
-                    @Suppress("DEPRECATION")
-                    mixin = this.configurations.compileClasspath.get().files(sponge).first().path
+                val compileClasspath = project.configurations.getByName("compileClasspath")
+                val resolved = compileClasspath.resolvedConfiguration.resolvedArtifacts
+                val artifact = resolved.firstOrNull { it.name == "sponge-mixin" }
+                if (artifact != null) {
+                    mixin = artifact.file.absolutePath
                     println("[Info]: Mixin HotSwapping should work")
                 } else {
                     println("[Warning]: Unable to locate file path for Mixin Jar, HotSwapping will NOT work!")
@@ -69,7 +71,7 @@ loom {
             }
             if (mixin != null) {
                 configureEach {
-                    vmArg("-javaagent:\"$mixin\"")
+                    vmArg("-javaagent=\"$mixin\"")
                 }
             }
         }

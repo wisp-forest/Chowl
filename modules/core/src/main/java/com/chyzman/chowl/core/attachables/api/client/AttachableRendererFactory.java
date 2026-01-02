@@ -6,8 +6,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.item.ItemModelManager;
 import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.block.entity.BlockEntityRenderManager;
+import net.minecraft.client.render.entity.EntityRenderManager;
 import net.minecraft.client.render.item.ItemRenderer;
 
 @FunctionalInterface
@@ -21,8 +21,8 @@ public interface AttachableRendererFactory<T extends Attachable> {
         private final ItemRenderer itemRenderer;
         private final ItemModelManager itemModelManager;
         private final BlockRenderManager blockRenderManager;
-        private final BlockEntityRenderDispatcher blockEntityRenderDispatcher;
-        private final EntityRenderDispatcher entityRenderDispatcher;
+        private final BlockEntityRenderManager blockEntityRenderManager;
+        private final EntityRenderManager entityRenderManager;
         private final TextRenderer textRenderer;
 
         public Context(
@@ -30,16 +30,16 @@ public interface AttachableRendererFactory<T extends Attachable> {
                 ItemRenderer itemRenderer,
                 ItemModelManager itemModelManager,
                 BlockRenderManager blockRenderManager,
-                EntityRenderDispatcher entityRenderDispatcher,
-                BlockEntityRenderDispatcher blockEntityRenderDispatcher,
+                EntityRenderManager entityRenderManager,
+                BlockEntityRenderManager blockEntityRenderManager,
                 TextRenderer textRenderer
         ) {
             this.renderDispatcher = renderDispatcher;
             this.itemRenderer = itemRenderer;
             this.itemModelManager = itemModelManager;
             this.blockRenderManager = blockRenderManager;
-            this.entityRenderDispatcher = entityRenderDispatcher;
-            this.blockEntityRenderDispatcher = blockEntityRenderDispatcher;
+            this.entityRenderManager = entityRenderManager;
+            this.blockEntityRenderManager = blockEntityRenderManager;
             this.textRenderer = textRenderer;
         }
 
@@ -59,12 +59,12 @@ public interface AttachableRendererFactory<T extends Attachable> {
             return this.blockRenderManager;
         }
 
-        public BlockEntityRenderDispatcher blockEntityRenderDispatcher() {
-            return this.blockEntityRenderDispatcher;
+        public BlockEntityRenderManager blockEntityRenderDispatcher() {
+            return this.blockEntityRenderManager;
         }
 
-        public EntityRenderDispatcher entityRenderDispatcher() {
-            return this.entityRenderDispatcher;
+        public EntityRenderManager entityRenderDispatcher() {
+            return this.entityRenderManager;
         }
 
         public TextRenderer textRenderer() {

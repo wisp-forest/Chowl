@@ -7,7 +7,7 @@ import net.minecraft.client.RunArgs;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.item.ItemModelManager;
 import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.EntityRenderManager;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.render.model.BakedModelManager;
 import net.minecraft.resource.ReloadableResourceManagerImpl;
@@ -27,11 +27,11 @@ public abstract class MinecraftClientMixin implements MinecraftClientDuck {
     @Shadow @Final private ItemRenderer itemRenderer;
     @Shadow @Final private ItemModelManager itemModelManager;
     @Shadow @Final private BlockRenderManager blockRenderManager;
-    @Shadow @Final private EntityRenderDispatcher entityRenderDispatcher;
+    @Shadow @Final private EntityRenderManager entityRenderManager;
     @Shadow @Final private ReloadableResourceManagerImpl resourceManager;
     @Shadow @Final private BakedModelManager bakedModelManager;
 
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/block/entity/BlockEntityRenderDispatcher;<init>(Lnet/minecraft/client/font/TextRenderer;Ljava/util/function/Supplier;Lnet/minecraft/client/render/block/BlockRenderManager;Lnet/minecraft/client/item/ItemModelManager;Lnet/minecraft/client/render/item/ItemRenderer;Lnet/minecraft/client/render/entity/EntityRenderDispatcher;)V"))
+    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/EntityRenderManager;<init>(Lnet/minecraft/client/MinecraftClient;Lnet/minecraft/client/texture/TextureManager;Lnet/minecraft/client/item/ItemModelManager;Lnet/minecraft/client/render/MapRenderer;Lnet/minecraft/client/render/block/BlockRenderManager;Lnet/minecraft/client/texture/AtlasManager;Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/client/option/GameOptions;Ljava/util/function/Supplier;Lnet/minecraft/client/render/entity/equipment/EquipmentModelLoader;Lnet/minecraft/client/texture/PlayerSkinCache;)V"))
     private void createAttachableRenderDispatcher(
             RunArgs args,
             CallbackInfo ci
@@ -42,7 +42,7 @@ public abstract class MinecraftClientMixin implements MinecraftClientDuck {
           this.blockRenderManager,
           this.itemModelManager,
           this.itemRenderer,
-          this.entityRenderDispatcher
+          this.entityRenderManager
         );
         resourceManager.registerReloader(this.partRenderDispatcher);
     }

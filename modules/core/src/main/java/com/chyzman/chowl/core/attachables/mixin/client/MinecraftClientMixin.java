@@ -16,8 +16,8 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.block.entity.BlockEntityRenderManager;
+import net.minecraft.client.render.entity.EntityRenderManager;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.ItemStack;
@@ -47,9 +47,9 @@ public abstract class MinecraftClientMixin implements MinecraftClientDuck {
 
     @Shadow @Final private BlockRenderManager blockRenderManager;
 
-    @Shadow @Final private BlockEntityRenderDispatcher blockEntityRenderDispatcher;
+    @Shadow @Final private BlockEntityRenderManager blockEntityRenderManager;
 
-    @Shadow @Final private EntityRenderDispatcher entityRenderDispatcher;
+    @Shadow @Final private EntityRenderManager entityRenderManager;
 
     @Shadow @Final public TextRenderer textRenderer;
 
@@ -68,18 +68,24 @@ public abstract class MinecraftClientMixin implements MinecraftClientDuck {
 
     @Shadow @Final public GameRenderer gameRenderer;
 
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/block/entity/BlockEntityRenderDispatcher;<init>(Lnet/minecraft/client/font/TextRenderer;Ljava/util/function/Supplier;Lnet/minecraft/client/render/block/BlockRenderManager;Lnet/minecraft/client/item/ItemModelManager;Lnet/minecraft/client/render/item/ItemRenderer;Lnet/minecraft/client/render/entity/EntityRenderDispatcher;)V"))
+    @Inject(
+        method = "<init>",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/render/block/entity/BlockEntityRenderManager;<init>(Lnet/minecraft/client/font/TextRenderer;Ljava/util/function/Supplier;Lnet/minecraft/client/render/block/BlockRenderManager;Lnet/minecraft/client/item/ItemModelManager;Lnet/minecraft/client/render/item/ItemRenderer;Lnet/minecraft/client/render/entity/EntityRenderManager;Lnet/minecraft/client/texture/SpriteHolder;Lnet/minecraft/client/texture/PlayerSkinCache;)V"
+        )
+    )
     private void createAttachableRenderDispatcher(
-            RunArgs args,
-            CallbackInfo ci
+        RunArgs args,
+        CallbackInfo ci
     ) {
         this.attachableRenderDispatcher = new AttachableRenderDispatcher(
-                itemRenderer,
-                itemModelManager,
-                blockRenderManager,
-                blockEntityRenderDispatcher,
-                entityRenderDispatcher,
-                textRenderer
+            itemRenderer,
+            itemModelManager,
+            blockRenderManager,
+            blockEntityRenderManager,
+            entityRenderManager,
+            textRenderer
         );
         resourceManager.registerReloader(this.attachableRenderDispatcher);
     }
@@ -91,31 +97,31 @@ public abstract class MinecraftClientMixin implements MinecraftClientDuck {
 
     @Inject(method = "doItemUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/hit/HitResult;getType()Lnet/minecraft/util/hit/HitResult$Type;"), cancellable = true)
     private void interactWithAttachables(
-            CallbackInfo ci,
-            @Local Hand hand,
-            @Local ItemStack itemStack
+        CallbackInfo ci,
+        @Local Hand hand,
+        @Local ItemStack itemStack
     ) {
         if (crosshairTarget.getType() != HitResult.Type.MISS) return;
         var targetAttachable = ((HitResultDuck) crosshairTarget).chowl$getHitAttachable();
         if (targetAttachable == null) return;
         var count = itemStack.getCount();
 
-        ((InteractionManagerAccessor)interactionManager).chowl$syncSelectedSlot();
+        ((InteractionManagerAccessor) interactionManager).chowl$syncSelectedSlot();
         CHANNEL.clientHandle().send(new C2SPlayerInteractAttachable(
-                hand,
-                targetAttachable.getUuid(),
-                crosshairTarget.getPos()
+            hand,
+            targetAttachable.getUuid(),
+            crosshairTarget.getPos()
         ));
         var result = targetAttachable.getContained().onUse(
-                world,
-                player,
-                hand,
-                new AttachableHitResult(crosshairTarget.getPos(), targetAttachable)
+            world,
+            player,
+            hand,
+            new AttachableHitResult(crosshairTarget.getPos(), targetAttachable)
         );
         if (result instanceof ActionResult.Success success) {
             if (success.swingSource() == ActionResult.SwingSource.CLIENT) {
                 this.player.swingHand(hand);
-                if (!itemStack.isEmpty() && (itemStack.getCount() != count || interactionManager.hasCreativeInventory())) {
+                if (!itemStack.isEmpty() && (itemStack.getCount() != count || this.player.isInCreativeMode())) {
                     gameRenderer.firstPersonRenderer.resetEquipProgress(hand);
                 }
             }
@@ -133,18 +139,18 @@ public abstract class MinecraftClientMixin implements MinecraftClientDuck {
         var count = stack.getCount();
 
         CHANNEL.clientHandle().send(new C2SPlayerAttackAttachable(
-                targetAttachable.getUuid(),
-                crosshairTarget.getPos()
+            targetAttachable.getUuid(),
+            crosshairTarget.getPos()
         ));
         var result = targetAttachable.getContained().onAttack(
-                world,
-                player,
-                new AttachableHitResult(crosshairTarget.getPos(), targetAttachable)
+            world,
+            player,
+            new AttachableHitResult(crosshairTarget.getPos(), targetAttachable)
         );
         if (result instanceof ActionResult.Success success) {
             if (success.swingSource() == ActionResult.SwingSource.CLIENT) {
                 this.player.swingHand(Hand.MAIN_HAND);
-                if (!stack.isEmpty() && (stack.getCount() != count || interactionManager.hasCreativeInventory())) {
+                if (!stack.isEmpty() && (stack.getCount() != count || this.player.isInCreativeMode())) {
                     gameRenderer.firstPersonRenderer.resetEquipProgress(Hand.MAIN_HAND);
                 }
             }

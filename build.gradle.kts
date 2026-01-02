@@ -1,10 +1,6 @@
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import net.fabricmc.loom.task.GenerateSourcesTask
-import org.gradle.internal.fingerprint.classpath.impl.ClasspathFingerprintingStrategy.compileClasspath
-import org.gradle.internal.fingerprint.classpath.impl.ClasspathFingerprintingStrategy.runtimeClasspath
-import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.exclude
-import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.include
 
 plugins {
     id("java-library")
@@ -112,9 +108,9 @@ allprojects {
         annotationProcessor(modImplementation("io.wispforest:owo-lib:${rootProject.property("owo_version")}")!!)
 //        include("io.wispforest:owo-sentinel:${rootProject.property("owo_version")}")
 
-        modImplementation("io.wispforest:lavender:${rootProject.property("lavender_version")}") {
-            exclude(group = "io.wispforest", module = "owo-lib")
-        }
+//        modImplementation("io.wispforest:lavender:${rootProject.property("lavender_version")}") {
+//            exclude(group = "io.wispforest", module = "owo-lib")
+//        }
 
         modImplementation(include("com.kneelawk.graphlib:graphlib-core-fabric:${rootProject.property("graphlib_version")}")!!)
 //        modLocalRuntime("com.kneelawk.graphlib:graphlib-debugrender-fabric:${rootProject.property("graphlib_version")}")
