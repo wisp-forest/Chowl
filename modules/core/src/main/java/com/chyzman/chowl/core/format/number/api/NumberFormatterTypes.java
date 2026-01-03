@@ -1,6 +1,7 @@
 package com.chyzman.chowl.core.format.number.api;
 
 import com.chyzman.chowl.core.format.number.impl.DynamicNumberFormatterType;
+import com.chyzman.chowl.core.format.number.impl.ScalingNumberFormatterType;
 import com.chyzman.chowl.core.format.number.impl.ScientificNumberFormatterType;
 
 public enum NumberFormatterTypes {
@@ -8,8 +9,8 @@ public enum NumberFormatterTypes {
     WORD(new DynamicNumberFormatterType("word")),
     SCIENTIFIC(new ScientificNumberFormatterType()),
     EXPONENT(null),
-    SI(new DynamicNumberFormatterType("si")),
-    FULL_SCI(new DynamicNumberFormatterType("full_sci")),
+    SI(new ScalingNumberFormatterType("si")),
+    FULL_SCI(new ScalingNumberFormatterType("full_sci")),
     NONE(null);
 
     public final NumberFormatterType type;

@@ -2,12 +2,16 @@ package com.chyzman.chowl.core.format.number;
 
 import com.chyzman.chowl.core.format.number.api.NumberAbbreviationMode;
 import com.chyzman.chowl.core.format.number.api.NumberFormatterTypes;
-import io.wispforest.owo.command.EnumArgumentType;
-import net.minecraft.util.Language;
+ import net.minecraft.text.Text;
 
 import java.util.regex.Pattern;
 
+import static com.chyzman.chowl.core.Chowl.MODID;
+
 public class NumberFormatter {
+    public static final String BASE_KEY = MODID + ".format.number.";
+
+    public static final  Text ZERO = Text.literal("0");
     private static final Pattern NUMBER_PATTERN = Pattern.compile("^-?\\d+(\\.\\d+)?$");
 
     //TODO: make these into config options
@@ -17,7 +21,7 @@ public class NumberFormatter {
     public static boolean use_separators = true;
 
 
-    public static String format(String number, NumberFormatterTypes type) {
+    public static Text format(String number, NumberFormatterTypes type) {
         if (!NUMBER_PATTERN.matcher(number).matches()) {
             throw new IllegalArgumentException("Number must be a valid number");
         }
@@ -28,30 +32,30 @@ public class NumberFormatter {
         return formatter.format(number);
     }
 
-    public String formatUnchecked(String number, NumberFormatterTypes type) {
+    public Text formatUnchecked(String number, NumberFormatterTypes type) {
         try {
             return format(number, type);
         } catch (Exception ignored) {
-            return number;
+            return Text.literal(number);
         }
     }
 
-    public static String addSeparators(String number) {
+    public static Text addSeparators(String number) {
         var decimal = number.indexOf('.');
         var plain = decimal == -1 ? number : number.substring(0, decimal);
-        var result = new StringBuilder();
+        var result = Text.empty();
 
-        var separator = Language.getInstance().get("chowl.format.number.separator.group", ",");
+        var separator = Text.translatableWithFallback(BASE_KEY + "separator.group", ",");
 
         for (int i = 0; i < plain.length(); i++) {
             if (i > 0 && (plain.length() - i) % 3 == 0) {
                 result.append(separator);
             }
-            result.append(plain.charAt(i));
+            result.append(Text.literal(Character.toString(plain.charAt(i))));
         }
 
         if (decimal != -1) result.append(number.substring(decimal));
 
-        return result.toString();
+        return result;
     }
 }

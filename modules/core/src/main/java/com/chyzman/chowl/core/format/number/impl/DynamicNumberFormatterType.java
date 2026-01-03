@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.chyzman.chowl.core.format.number.NumberFormatter.ZERO;
+
 public class DynamicNumberFormatterType implements NumberFormatterType {
     private final Text thousand;
 
@@ -31,42 +33,42 @@ public class DynamicNumberFormatterType implements NumberFormatterType {
     private final @Nullable Text tillion;
 
     public DynamicNumberFormatterType(String typeName) {
-        var base = Chowl.MODID + ".format.number.dynamic." + typeName + ".";
+        var baseKey = NumberFormatter.BASE_KEY + typeName + ".";
 
-        this.thousand = Text.translatable(base + "thousand");
+        this.thousand = Text.translatable(baseKey + "thousand");
         this.units = new ArrayList<>();
         this.tens = new ArrayList<>();
         this.hundreds = new ArrayList<>();
         this.specials = new ArrayList<>();
 
         for (int i = 0; i < 9; i++) {
-            this.specials.add(Text.translatable(base + "special." + i));
-            this.units.add(Text.translatable(base + "unit." + i));
-            this.tens.add(Text.translatable(base + "ten." + i));
-            this.hundreds.add(Text.translatable(base + "hundred." + i));
+            this.specials.add(Text.translatable(baseKey + "special." + i));
+            this.units.add(Text.translatable(baseKey + "unit." + i));
+            this.tens.add(Text.translatable(baseKey + "ten." + i));
+            this.hundreds.add(Text.translatable(baseKey + "hundred." + i));
         }
-        this.millia = Text.translatable(base + "millia");
+        this.millia = Text.translatable(baseKey + "millia");
 
-        this.prefix = Text.translatableWithFallback(base + "prefix", "");
-        this.suffix = Text.translatableWithFallback(base + "suffix", "");
-        this.illion = Text.translatableWithFallback(base + "illion", "");
-        this.tillion = Text.translatableWithFallback(base + "tillion", "");
+        this.prefix = Text.translatableWithFallback(baseKey + "prefix", "");
+        this.suffix = Text.translatableWithFallback(baseKey + "suffix", "");
+        this.illion = Text.translatableWithFallback(baseKey + "illion", "");
+        this.tillion = Text.translatableWithFallback(baseKey + "tillion", "");
     }
 
     @Override
-    public String format(String number) {
+    public Text format(String number) {
         var plain = new BigDecimal(number).toPlainString();
 
         var decimal = plain.indexOf('.');
         plain = plain.substring(0, decimal == -1 ? plain.length() : decimal);
 
-        if (plain.isEmpty()) return "0";
+        if (plain.isEmpty()) return NumberFormatter.ZERO;
 
         var mod = plain.length() % 3;
         if (mod == 0) mod = 3;
         var shown = plain.substring(0, mod);
 
-        return NumberFormatter.addSeparators(shown) + Objects.requireNonNullElse(this.getKiloName((plain.length() - mod) / 3), "");
+        return Text.empty().append(NumberFormatter.addSeparators(shown)).append(this.getKiloName((plain.length() - mod) / 3));
     }
 
     private List<String> splitKilos(String s) {
