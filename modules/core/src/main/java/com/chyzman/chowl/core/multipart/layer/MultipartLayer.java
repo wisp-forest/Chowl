@@ -12,6 +12,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.FuelRegistry;
 import net.minecraft.item.map.MapState;
+import net.minecraft.particle.BlockParticleEffect;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.recipe.BrewingRecipeRegistry;
 import net.minecraft.recipe.RecipeManager;
@@ -21,14 +22,18 @@ import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.util.collection.Pool;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.MutableWorldProperties;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldProperties;
+import net.minecraft.world.attribute.WorldEnvironmentAttributeAccess;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.block.ChainRestrictedNeighborUpdater;
+import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.ChunkManager;
 import net.minecraft.world.entity.EntityLookup;
 import net.minecraft.world.event.GameEvent;
@@ -67,17 +72,27 @@ public class MultipartLayer extends World {
     public void updateListeners(BlockPos pos, BlockState oldState, BlockState newState, int flags) {}
 
     @Override
-    public void playSound(@Nullable PlayerEntity source, double x, double y, double z, RegistryEntry<SoundEvent> sound, SoundCategory category, float volume, float pitch, long seed) {}
+    public void playSound(@Nullable Entity source, double x, double y, double z, RegistryEntry<SoundEvent> sound, SoundCategory category, float volume, float pitch, long seed) {}
 
     @Override
-    public void playSoundFromEntity(@Nullable PlayerEntity source, Entity entity, RegistryEntry<SoundEvent> sound, SoundCategory category, float volume, float pitch, long seed) {}
+    public void playSoundFromEntity(@Nullable Entity source, Entity entity, RegistryEntry<SoundEvent> sound, SoundCategory category, float volume, float pitch, long seed) {}
 
     @Override
-    public void createExplosion(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionBehavior behavior, double x, double y, double z, float power, boolean createFire, ExplosionSourceType explosionSourceType, ParticleEffect smallParticle, ParticleEffect largeParticle, RegistryEntry<SoundEvent> soundEvent) {}
+    public void createExplosion(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionBehavior behavior, double x, double y, double z, float power, boolean createFire, ExplosionSourceType explosionSourceType, ParticleEffect smallParticle, ParticleEffect largeParticle, Pool<BlockParticleEffect> blockParticles, RegistryEntry<SoundEvent> soundEvent) {}
 
     @Override
     public String asString() {
         return "";
+    }
+
+    @Override
+    public void setSpawnPoint(WorldProperties.SpawnPoint spawnPoint) {
+
+    }
+
+    @Override
+    public WorldProperties.SpawnPoint getSpawnPoint() {
+        return null;
     }
 
     @Override
@@ -101,14 +116,6 @@ public class MultipartLayer extends World {
     }
 
     @Override
-    public void putMapState(MapIdComponent id, MapState state) {}
-
-    @Override
-    public MapIdComponent increaseAndGetMapId() {
-        return mainWorld.increaseAndGetMapId();
-    }
-
-    @Override
     public void setBlockBreakingInfo(int entityId, BlockPos pos, int progress) {
 
     }
@@ -129,6 +136,11 @@ public class MultipartLayer extends World {
     }
 
     @Override
+    public WorldEnvironmentAttributeAccess getEnvironmentAttributes() {
+        return null;
+    }
+
+    @Override
     public BrewingRecipeRegistry getBrewingRecipeRegistry() {
         return mainWorld.getBrewingRecipeRegistry();
     }
@@ -144,7 +156,7 @@ public class MultipartLayer extends World {
     }
 
     @Override
-    public void syncWorldEvent(@Nullable PlayerEntity player, int eventId, BlockPos pos, int data) {}
+    public void syncWorldEvent(@org.jspecify.annotations.Nullable Entity source, int eventId, BlockPos pos, int data) {}
 
     @Override
     public void emitGameEvent(RegistryEntry<GameEvent> event, Vec3d emitterPos, GameEvent.Emitter emitter) {}
@@ -184,5 +196,10 @@ public class MultipartLayer extends World {
     @Override
     public QueryableTickScheduler<Fluid> getFluidTickScheduler() {
         return mainWorld.getFluidTickScheduler();
+    }
+
+    @Override
+    public WorldBorder getWorldBorder() {
+        return null;
     }
 }

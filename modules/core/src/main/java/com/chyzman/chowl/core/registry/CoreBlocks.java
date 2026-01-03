@@ -15,15 +15,16 @@ import net.minecraft.util.Identifier;
 
 public class CoreBlocks {
     public static final Block DRAWER_FRAME = register(
-      "drawer_frame",
-      FrameBlock::new,
-      AbstractBlock.Settings.copyShallow(Blocks.OAK_PLANKS)
-        .nonOpaque()
-        .dynamicBounds()
-        .allowsSpawning(Blocks::never)
-        .solidBlock(Blocks::never)
-        .suffocates(Blocks::never)
-        .blockVision(Blocks::never)
+        "drawer_frame",
+        FrameBlock::new,
+        //TODO: changed copyshallow to copy, make sure this is ok
+        AbstractBlock.Settings.copy(Blocks.OAK_PLANKS)
+            .nonOpaque()
+            .dynamicBounds()
+            .allowsSpawning(Blocks::never)
+            .solidBlock(Blocks::never)
+            .suffocates(Blocks::never)
+            .blockVision(Blocks::never)
 //      .luminance(FrameBlock.STATE_TO_LUMINANCE)
     );
 

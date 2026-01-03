@@ -9,6 +9,7 @@ import com.kneelawk.graphlib.api.graph.GraphUniverse;
 import com.kneelawk.graphlib.api.graph.user.GraphEntityType;
 import com.kneelawk.graphlib.api.world.SaveMode;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class NetworkRegistry {
     public static final GraphUniverse UNIVERSE = GraphUniverse.builder().saveMode(SaveMode.INCREMENTAL).build(Chowl.id("networks"));
 
     public static final GraphEntityType<NetworkStorageCache> STORAGE_CACHE_TYPE = GraphEntityType.of(
-            Chowl.id("storage_cache"), Codec.unit(SimpleNetworkStorageCache::new), SimpleNetworkStorageCache::new, NetworkStorageCache::split);
+            Chowl.id("storage_cache"), MapCodec.unitCodec(SimpleNetworkStorageCache::new), SimpleNetworkStorageCache::new, NetworkStorageCache::split);
 
     public static final GraphEntityType<UpdateHandler> UPDATE_HANDLER_TYPE = GraphEntityType.of(Chowl.id("update_handler"), UpdateHandler::new);
 
