@@ -5,7 +5,9 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "client.ParticleManagerMixin",
-    "client.access.InteractionManagerAccessor"
+    "client.access.GameRendererAccessor",
+    "client.access.InteractionManagerAccessor",
+    "client.access.WorldRendererAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

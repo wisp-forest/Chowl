@@ -1,9 +1,12 @@
 package com.chyzman.chowl.core.multipart.api.client;
 
 import com.chyzman.chowl.core.blockentity.api.MultipartHolderBlockEntity;
+import com.chyzman.chowl.core.mixin.client.access.GameRendererAccessor;
+import com.chyzman.chowl.core.mixin.client.access.WorldRendererAccessor;
 import com.chyzman.chowl.core.multipart.api.Part;
 import com.chyzman.chowl.core.multipart.pond.MinecraftClientDuck;
 import com.google.common.collect.Sets;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
@@ -11,14 +14,15 @@ import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.*;
+import net.minecraft.client.render.chunk.Buffers;
+import net.minecraft.client.render.fog.FogRenderer;
 import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.crash.CrashCallable;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.crash.CrashException;
 import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.crash.CrashReportSection;
@@ -27,7 +31,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.profiler.Profilers;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Matrix4f;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -99,13 +102,10 @@ public abstract class PartRenderer<T extends Part> {
         public static final int MAX_XZ_IN_REGION = (16 << REGION_FROMCHUNK_SHIFT) - 1;
         public static final int VIEW_RADIUS = 3;
 
-        private static final ReferenceArrayList<VertexBuffer> USEABLE_VERTEX_BUFFERS = new ReferenceArrayList<>(256);
-
         private static final Object2ReferenceMap<RenderRegionPos, RegionBuffer> regions = new Object2ReferenceOpenHashMap<>();
         private static final Set<RenderRegionPos> needsRebuild = Sets.newHashSet();
 
         private static class CachedVertexConsumerProvider implements VertexConsumerProvider {
-
             private final Reference2ReferenceMap<RenderLayer, BufferAllocator> allocators = new Reference2ReferenceOpenHashMap<>();
             private final Reference2ReferenceMap<RenderLayer, BufferBuilder> builders = new Reference2ReferenceOpenHashMap<>();
 
@@ -131,46 +131,163 @@ public abstract class PartRenderer<T extends Part> {
 
         private static final Logger LOGGER = LogUtils.getLogger();
 
-        private static VertexBuffer getVertexBuffer() {
-            if (!USEABLE_VERTEX_BUFFERS.isEmpty()) return USEABLE_VERTEX_BUFFERS.pop();
-            return new VertexBuffer(GlUsage.STATIC_WRITE);
-        }
-
-        private static void releaseVertexBuffer(VertexBuffer buf) {
-            USEABLE_VERTEX_BUFFERS.add(buf);
-        }
-
         private static class RegionBuffer {
-            private final Map<RenderLayer, VertexBuffer> layerBuffers = new Reference2ReferenceOpenHashMap<>();
+            private final Map<RenderLayer, Buffers> layerBuffers = new Reference2ReferenceOpenHashMap<>();
             private final Set<RenderLayer> uploadedLayers = new ObjectOpenHashSet<>();
 
-            public void render(RenderLayer layer, MatrixStack matrices, Matrix4f projectionMatrix) {
-                VertexBuffer buf = layerBuffers.get(layer);
-                buf.bind();
-                layer.startDrawing();
-                buf.draw(matrices.peek().getPositionMatrix(), projectionMatrix, RenderSystem.getShader());
-                layer.endDrawing();
-                VertexBuffer.unbind();
-            }
 
-            public void reset() {
-                uploadedLayers.clear();
+            // FIXME: send help
+            public void render(RenderLayer layer, MatrixStack matrices) {
+                /*Framebuffer framebuffer;
+                if (layer instanceof RenderLayer.MultiPhase) {
+                    framebuffer = ((RenderLayerMultiPhaseParametersAccessor) (Object) ((MultiPhaseRenderLayerAccessor) layer).getPhases()).getTarget().get();
+                } else {
+                    framebuffer = MinecraftClient.getInstance().getFramebuffer();
+                }
+
+                RenderPipeline pipeline;
+                if (layer instanceof RenderLayer.MultiPhase) {
+                    pipeline = ((MultiPhaseRenderLayerAccessor) layer).getPipeline();
+                } else {
+                    pipeline = RenderPipelines.SOLID;
+                }
+
+                layer.startDrawing();
+                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
+                  .write(
+                    matrices.peek().getPositionMatrix(),
+                    new Vector4f(1.0F, 1.0F, 1.0F, 1.0F),
+                    RenderSystem.getModelOffset(),
+                    RenderSystem.getTextureMatrix(),
+                    RenderSystem.getShaderLineWidth()
+                  );
+
+                try (RenderPass renderPass = RenderSystem.getDevice()
+                  .createCommandEncoder()
+                  .createRenderPass(
+                    () -> "Glowcase baked BER section layers",
+                    framebuffer.getColorAttachmentView(),
+                    OptionalInt.empty(),
+                    framebuffer.getDepthAttachmentView(),
+                    OptionalDouble.empty()
+                  )) {
+                    Buffers buffers = layerBuffers.get(layer);
+
+                    GpuBuffer indexBuffer;
+                    VertexFormat.IndexType indexType;
+                    if (buffers.getIndexBuffer() == null) {
+                        RenderSystem.ShapeIndexBuffer shapeIndexBuffer = RenderSystem.getSequentialBuffer(layer.getDrawMode());
+                        indexBuffer = shapeIndexBuffer.getIndexBuffer(buffers.getIndexCount());
+                        indexType = shapeIndexBuffer.getIndexType();
+                    } else {
+                        indexBuffer = buffers.getIndexBuffer();
+                        indexType = buffers.getIndexType();
+                    }
+
+                    ScissorState scissorState = RenderSystem.getScissorStateForRenderTypeDraws();
+                    if (scissorState.method_72091()) {
+                        renderPass.enableScissor(scissorState.method_72092(), scissorState.method_72093(), scissorState.method_72094(), scissorState.method_72095());
+                    }
+
+                    for (int j = 0; j < 12; j++) {
+                        GpuTextureView gpuTextureView3 = RenderSystem.getShaderTexture(j);
+                        if (gpuTextureView3 != null) {
+                            renderPass.bindSampler("Sampler" + j, gpuTextureView3);
+                        }
+                    }
+
+                    renderPass.setPipeline(pipeline);
+                    renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
+                    renderPass.setVertexBuffer(0, buffers.getVertexBuffer());
+                    renderPass.setIndexBuffer(indexBuffer, indexType);
+                    RenderSystem.bindDefaultUniforms(renderPass);
+
+                    renderPass.drawIndexed(0, 0, buffers.getIndexCount(), 1);
+                }
+                layer.endDrawing();
+
+                //VertexBuffer buf = layerBuffers.get(layer);
+                //buf.bind();
+                //layer.startDrawing();
+                //buf.draw(matrices.peek().getPositionMatrix(), projectionMatrix, RenderSystem.getShader());
+                //layer.endDrawing();
+                //VertexBuffer.unbind();*/
             }
 
             public void upload(RenderLayer layer, BufferBuilder newBuf) {
-                VertexBuffer buf = layerBuffers.computeIfAbsent(layer, renderLayer -> getVertexBuffer());
-                buf.bind();
-                BuiltBuffer builtBuffer = newBuf.endNullable();
-                if (builtBuffer != null) {
-                    buf.upload(builtBuffer);
-                    VertexBuffer.unbind();
+                try (BuiltBuffer buffer = newBuf.endNullable()) {
+                    /*if (buffer == null) return;
 
-                    uploadedLayers.add(layer);
+                    CommandEncoder commandEncoder = RenderSystem.getDevice().createCommandEncoder();
+                    Buffers oldBuffers = this.layerBuffers.get(layer);
+                    if (oldBuffers != null) {
+                        if (oldBuffers.getVertexBuffer().size() < buffer.getBuffer().remaining()) {
+                            oldBuffers.getVertexBuffer().close();
+                            oldBuffers.setVertexBuffer(
+                              RenderSystem.getDevice()
+                                .createBuffer(
+                                  () -> "Glowcase Region vertex buffer - layer: " + layer.getName(),
+                                  GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_COPY_DST,
+                                  buffer.getBuffer()
+                                )
+                            );
+                        } else if (!oldBuffers.getVertexBuffer().isClosed()) {
+                            commandEncoder.writeToBuffer(oldBuffers.getVertexBuffer().slice(), buffer.getBuffer());
+                        }
+
+                        ByteBuffer byteBuffer = buffer.getSortedBuffer();
+                        if (byteBuffer != null) {
+                            if (oldBuffers.getIndexBuffer() != null && oldBuffers.getIndexBuffer().size() >= byteBuffer.remaining()) {
+                                if (!oldBuffers.getIndexBuffer().isClosed()) {
+                                    commandEncoder.writeToBuffer(oldBuffers.getIndexBuffer().slice(), byteBuffer);
+                                }
+                            } else {
+                                if (oldBuffers.getIndexBuffer() != null) {
+                                    oldBuffers.getIndexBuffer().close();
+                                }
+
+                                oldBuffers.setIndexBuffer(
+                                  RenderSystem.getDevice()
+                                    .createBuffer(
+                                      () -> "Glowcase Region index buffer - layer: " + layer.getName(),
+                                      GpuBuffer.USAGE_INDEX | GpuBuffer.USAGE_COPY_DST,
+                                      byteBuffer
+                                    )
+                                );
+                            }
+                        } else if (oldBuffers.getIndexBuffer() != null) {
+                            oldBuffers.getIndexBuffer().close();
+                            oldBuffers.setIndexBuffer(null);
+                        }
+
+                        oldBuffers.setIndexCount(buffer.getDrawParameters().indexCount());
+                        oldBuffers.setIndexType(buffer.getDrawParameters().indexType());
+                    } else {
+                        GpuBuffer vertexBuffer = RenderSystem.getDevice()
+                          .createBuffer(
+                            () -> "Glowcase Region vertex buffer - layer: " + layer.getName(),
+                            GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_COPY_DST,
+                            buffer.getBuffer()
+                          );
+                        ByteBuffer sortedBuffer = buffer.getSortedBuffer();
+                        GpuBuffer indexBuffer = sortedBuffer != null
+                          ? RenderSystem.getDevice()
+                          .createBuffer(
+                            () -> "Glowcase Region index buffer - layer: " + layer.getName(),
+                            GpuBuffer.USAGE_INDEX | GpuBuffer.USAGE_COPY_DST,
+                            sortedBuffer
+                          )
+                          : null;
+                        this.layerBuffers.put(layer, new Buffers(vertexBuffer, indexBuffer, buffer.getDrawParameters().indexCount(), buffer.getDrawParameters().indexType()));
+                    }
+
+                    this.uploadedLayers.add(layer);*/
                 }
             }
 
-            public void release() {
-                layerBuffers.values().forEach(Manager::releaseVertexBuffer);
+            public void reset() {
+                layerBuffers.values().forEach(Buffers::close);
+                layerBuffers.clear();
                 uploadedLayers.clear();
             }
         }
@@ -186,12 +303,11 @@ public abstract class PartRenderer<T extends Part> {
             needsRebuild.add(new RenderRegionPos(pos));
         }
 
-        // TODO: move chunk baking off-thread?
-
         private static boolean isVisiblePos(RenderRegionPos rrp, Vec3d cam) {
             return Math.abs(rrp.x - ((int) cam.getX() >> REGION_SHIFT)) <= VIEW_RADIUS && Math.abs(rrp.z - ((int) cam.getZ() >> REGION_SHIFT)) <= VIEW_RADIUS;
         }
 
+        // FIXME: This is absolutely cooked and needs to be redone in some parts
         public static void render(WorldRenderContext wrc) {
             try {
                 renderInternal(wrc);
@@ -216,11 +332,12 @@ public abstract class PartRenderer<T extends Part> {
         }
 
         @SuppressWarnings("unchecked")
-        private static void renderInternal(WorldRenderContext wrc) {
+        private static void renderInternal(WorldRenderContext context) {
             Profiler profiler = Profilers.get();
             profiler.push("chowl:baked_part");
 
-            Vec3d cam = wrc.camera().getPos();
+            ClientWorld world = ((WorldRendererAccessor) context.worldRenderer()).getWorld();
+            Vec3d cameraPos = context.gameRenderer().getCamera().getCameraPos();
 
             if (!needsRebuild.isEmpty()) {
                 profiler.push("rebuild");
@@ -230,12 +347,12 @@ public abstract class PartRenderer<T extends Part> {
                 List<Part> parts = new ArrayList<>();
                 MatrixStack bakeMatrices = new MatrixStack();
                 for (RenderRegionPos rrp : needsRebuild) {
-                    if (isVisiblePos(rrp, cam)) {
+                    if (isVisiblePos(rrp, cameraPos)) {
                         // For the current region, rebuild each render layer using the buffer builders
                         // Find all block entities in this region
                         for (int chunkX = rrp.x << REGION_FROMCHUNK_SHIFT; chunkX < (rrp.x + 1) << REGION_FROMCHUNK_SHIFT; chunkX++) {
                             for (int chunkZ = rrp.z << REGION_FROMCHUNK_SHIFT; chunkZ < (rrp.z + 1) << REGION_FROMCHUNK_SHIFT; chunkZ++) {
-                                for (BlockEntity blockEntity : wrc.world().getChunk(chunkX, chunkZ).getBlockEntities().values()) {
+                                for (BlockEntity blockEntity : world.getChunk(chunkX, chunkZ).getBlockEntities().values()) {
                                     if (blockEntity instanceof MultipartHolderBlockEntity holder) {
                                         parts.addAll(holder.getParts());
                                     }
@@ -249,10 +366,12 @@ public abstract class PartRenderer<T extends Part> {
                             for (Part part : parts) {
                                 if (((MinecraftClientDuck) MinecraftClient.getInstance()).chowl$getPartRenderDispatcher().get(part) instanceof PartRenderer renderer && renderer.shouldBake(part)) {
                                     BlockPos pos = part.getPos();
+                                    assert pos != null;
+
                                     bakeMatrices.push();
                                     bakeMatrices.translate(pos.getX() & MAX_XZ_IN_REGION, pos.getY(), pos.getZ() & MAX_XZ_IN_REGION);
                                     try {
-                                        renderer.renderBaked(part, bakeMatrices, vcp, WorldRenderer.getLightmapCoordinates(wrc.world(), pos), OverlayTexture.DEFAULT_UV);
+                                        renderer.renderBaked(part, bakeMatrices, vcp, WorldRenderer.getLightmapCoordinates(world, pos), OverlayTexture.DEFAULT_UV);
                                         bakedAnything = true;
                                     } catch (Throwable t) {
                                         LOGGER.error("Block entity renderer threw exception during baking : ", t);
@@ -260,6 +379,7 @@ public abstract class PartRenderer<T extends Part> {
                                     bakeMatrices.pop();
                                 }
                             }
+
                             parts.clear();
 
                             if (bakedAnything) {
@@ -275,13 +395,14 @@ public abstract class PartRenderer<T extends Part> {
                         }
                     }
                 }
+
                 // We've processed all pending rebuilds now
                 needsRebuild.clear();
                 // These regions no longer contain anything
                 removing.forEach(rrp -> {
                     RegionBuffer buf = regions.get(rrp);
                     if (buf != null) {
-                        buf.release();
+                        buf.reset();
                         regions.remove(rrp, buf);
                     }
                 });
@@ -296,27 +417,28 @@ public abstract class PartRenderer<T extends Part> {
                  * Set the fog end to an extremely high value, this is a total hack but.
                  * It's needed to make fog not bleed into text blocks
                  */
-                Fog originalFog = RenderSystem.getShaderFog();
-                RenderSystem.setShaderFog(new Fog(originalFog.start(), Float.MAX_VALUE, originalFog.shape(), originalFog.red(), originalFog.green(), originalFog.blue(), originalFog.alpha()));
+                GpuBufferSlice originalFog = RenderSystem.getShaderFog();
+                RenderSystem.setShaderFog(((GameRendererAccessor) context.gameRenderer()).getFogRenderer().getFogBuffer(FogRenderer.FogType.NONE));
                 // Iterate over all RegionBuffers, render visible and remove non-visible RegionBuffers
-                MatrixStack matrices = wrc.matrixStack();
+                MatrixStack matrices = context.matrices();
                 matrices.push();
-                matrices.multiplyPositionMatrix(wrc.positionMatrix());
-                matrices.translate(-cam.x, -cam.y, -cam.z);
+                // matrices.multiplyPositionMatrix(context.positionMatrix());
+                matrices.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
                 var iter = regions.object2ReferenceEntrySet().iterator();
                 while (iter.hasNext()) {
                     var entry = iter.next();
                     RenderRegionPos rrp = entry.getKey();
                     RegionBuffer regionBuffer = entry.getValue();
-                    if (isVisiblePos(entry.getKey(), cam)) {
+                    if (isVisiblePos(entry.getKey(), cameraPos)) {
                         // Iterate over used render layers in the region, render them
                         matrices.push();
                         matrices.translate(rrp.origin.getX(), rrp.origin.getY(), rrp.origin.getZ());
-                        for (RenderLayer l : regionBuffer.uploadedLayers)
-                            regionBuffer.render(l, matrices, wrc.projectionMatrix());
+                        for (RenderLayer l : regionBuffer.uploadedLayers) {
+                            regionBuffer.render(l, matrices);
+                        }
                         matrices.pop();
                     } else {
-                        regionBuffer.release();
+                        regionBuffer.reset();
                         iter.remove();
                     }
                 }
@@ -326,7 +448,7 @@ public abstract class PartRenderer<T extends Part> {
                 profiler.pop();
             }
 
-            RenderSystem.setShaderColor(1, 1, 1, 1);
+            // RenderSystem.setShaderColor(1, 1, 1, 1);
 
             profiler.pop();
         }
@@ -339,7 +461,7 @@ public abstract class PartRenderer<T extends Part> {
         }
 
         public static void reset() {
-            regions.values().forEach(RegionBuffer::release);
+            regions.values().forEach(RegionBuffer::reset);
             regions.clear();
             needsRebuild.clear();
         }

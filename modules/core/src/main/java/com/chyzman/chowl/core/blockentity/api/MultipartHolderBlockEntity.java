@@ -2,14 +2,11 @@ package com.chyzman.chowl.core.blockentity.api;
 
 import com.chyzman.chowl.core.multipart.api.Part;
 import com.chyzman.chowl.core.multipart.api.client.PartRenderer;
-import io.wispforest.endec.SerializationContext;
-import io.wispforest.owo.serialization.format.nbt.NbtDeserializer;
-import io.wispforest.owo.serialization.format.nbt.NbtSerializer;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -26,29 +23,27 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
+    protected void readData(ReadView view) {
+        super.readData(view);
 
         parts.clear();
         clearShapeCache();
-        if (nbt.contains("chowl:multipart")) {
-            if (world != null && world.isClient) {
+        if (view.contains("chowl:multipart")) {
+            if (world != null && world.isClient()) {
                 PartRenderer.Manager.markForRebuild(getPos());
             }
 
-            List<? extends Part> partMap = Part.SET_ENDEC.decode(SerializationContext.empty(), NbtDeserializer.of(nbt.get("chowl:multipart")));
+            List<? extends Part> partMap = view.get(Part.SET_ENDEC.keyed("chowl:multipart", Collections.emptyList()));
             partMap.forEach(part -> part.init(this));
             parts.addAll(partMap);
         }
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.writeNbt(nbt, registries);
+    protected void writeData(WriteView view) {
+        super.writeData(view);
 
-        NbtSerializer serializer = NbtSerializer.of();
-        Part.SET_ENDEC.encode(SerializationContext.empty(), serializer, parts);
-        nbt.put("chowl:multipart", serializer.result());
+        view.put(Part.SET_ENDEC.keyed("chowl:multipart", Collections.emptyList()), parts);
     }
 
     public void markDirtyAndUpdateClients() {
@@ -63,7 +58,7 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
         markDirtyAndUpdateClients();
         clearShapeCache();
 
-        if (world != null && world.isClient) {
+        if (world != null && world.isClient()) {
             PartRenderer.Manager.markForRebuild(getPos());
         }
     }
@@ -73,7 +68,7 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
         markDirtyAndUpdateClients();
         clearShapeCache();
 
-        if (world != null && world.isClient) {
+        if (world != null && world.isClient()) {
             PartRenderer.Manager.markForRebuild(getPos());
         }
     }
@@ -83,7 +78,7 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
         markDirtyAndUpdateClients();
         clearShapeCache();
 
-        if (world != null && world.isClient) {
+        if (world != null && world.isClient()) {
             PartRenderer.Manager.markForRebuild(getPos());
         }
     }
@@ -106,7 +101,7 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
 
     @Override
     public void markRemoved() {
-        if (world != null && world.isClient) {
+        if (world != null && world.isClient()) {
             PartRenderer.Manager.markForRebuild(getPos());
         }
 

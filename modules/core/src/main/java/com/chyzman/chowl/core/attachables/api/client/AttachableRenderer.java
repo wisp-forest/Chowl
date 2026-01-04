@@ -33,18 +33,20 @@ public interface AttachableRenderer<T extends Attachable> {
     }
 
     static void drawDebugVector(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vec3d pos, Quaternionf rotation) {
-        if (!MinecraftClient.getInstance().getEntityRenderDispatcher().shouldRenderHitboxes()) return;
+        // FIXME: I'm too tired to figure this one out today
+        /*if (!MinecraftClient.getInstance().getEntityRenderDispatcher().shouldRenderHitboxes()) return;
         VertexRendering.drawVector(
                 matrices,
                 vertexConsumers.getBuffer(RenderLayer.getLines()),
                 pos.toVector3f(),
                 new Vec3d(rotation.transform(new Vector3f(0, 0.01f, 0))),
                 -16776961
-        );
+        );*/
     }
 
     static void drawDebugBoundingBox(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vec3d pos, Quaternionf rotation, Box shape) {
-        if (!MinecraftClient.getInstance().getEntityRenderDispatcher().shouldRenderHitboxes()) return;
+        // FIXME: I'm too tired to figure this one out today
+        /*if (!MinecraftClient.getInstance().getEntityRenderDispatcher().shouldRenderHitboxes()) return;
         matrices.push();
         matrices.translate(pos);
         matrices.multiply(rotation);
@@ -57,6 +59,6 @@ public interface AttachableRenderer<T extends Attachable> {
                 1.0f,
                 1.0f
         );
-        matrices.pop();
+        matrices.pop();*/
     }
 }

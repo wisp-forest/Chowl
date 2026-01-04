@@ -1,5 +1,6 @@
 package com.chyzman.chowl.core.multipart.api;
 
+import com.chyzman.chowl.core.network.codecs.MorePacketCodecs;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
@@ -7,12 +8,11 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import org.joml.Vector3f;
 
 public class MultipartHitResult extends BlockHitResult {
     public static final PacketCodec<ByteBuf, MultipartHitResult> PACKET_CODEC = PacketCodec.tuple(
-      PacketCodecs.VECTOR_3F,
-      MultipartHitResult::getOffset,
+      MorePacketCodecs.VEC_3D,
+      MultipartHitResult::getPos,
       Direction.PACKET_CODEC,
       MultipartHitResult::getSide,
       BlockPos.PACKET_CODEC,
@@ -41,15 +41,7 @@ public class MultipartHitResult extends BlockHitResult {
         this.part = part;
     }
 
-    private MultipartHitResult(Vector3f offset, Direction side, BlockPos blockPos, byte[] part, boolean insideBlock, boolean againstWorldBorder) {
-        this(new Vec3d(offset.add(blockPos.getX(), blockPos.getY(), blockPos.getZ())), side, blockPos, part, insideBlock, againstWorldBorder);
-    }
-
     public byte[] getPart() {
         return part;
-    }
-
-    public Vector3f getOffset() {
-        return this.pos.subtract(getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ()).toVector3f();
     }
 }
