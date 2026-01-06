@@ -59,9 +59,7 @@ public class MultipartLayer extends World {
           mainWorld.isClient(),
           mainWorld.isDebugWorld(),
           0L,
-          ((WorldAccessor) mainWorld).getNeighborUpdater() instanceof ChainRestrictedNeighborUpdater ?
-            ((ChainRestrictedNeighborUpdaterAccessor) (((WorldAccessor) mainWorld).getNeighborUpdater())).getMaxChainDepth() :
-            100000
+          ((ChainRestrictedNeighborUpdaterAccessor) (((WorldAccessor) mainWorld).getNeighborUpdater())).getMaxChainDepth()
         );
         this.mainWorld = mainWorld;
         this.chunkManager = new MultipartChunkManager(mainWorld.getChunkManager());

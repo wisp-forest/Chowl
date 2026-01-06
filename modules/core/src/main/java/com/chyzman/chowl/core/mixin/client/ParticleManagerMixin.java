@@ -14,10 +14,11 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 public class ParticleManagerMixin {
     @Shadow protected ClientWorld world;
 
-    @ModifyArgs(method = {"addBlockBreakingParticles", "method_34020"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/BlockDustParticle;<init>(Lnet/minecraft/client/world/ClientWorld;DDDDDDLnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)V"))
+    // FIXME
+    /*@ModifyArgs(method = {"addBlockBreakingParticles", "method_34020"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/BlockDustParticle;<init>(Lnet/minecraft/client/world/ClientWorld;DDDDDDLnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)V"))
     private void applyExtendedParticles(Args args) {
         if (args.<BlockState>get(7).getBlock() instanceof ExtendedParticleSpriteBlock block) {
             args.set(7, block.getParticleState(this.world, args.get(8), args.get(7)));
         }
-    }
+    }*/
 }

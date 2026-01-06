@@ -12,6 +12,8 @@ public class AttachablesEvents {
     public static void clientInit() {
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register(ctx -> {
             var gameRenderer = ctx.gameRenderer();
+            if (gameRenderer == null) return;
+
             var client = gameRenderer.getClient();
 
             var world = client.world;

@@ -20,6 +20,7 @@ public class CoreBlockEntities {
         register(
             "frame",
             FabricBlockEntityTypeBuilder.create(FrameBlockEntity::new)
+              .addBlock(CoreBlocks.DRAWER_FRAME)
         );
 
     private static <T extends BlockEntity> BlockEntityType<T> register(String id, FabricBlockEntityTypeBuilder<T> builder) {

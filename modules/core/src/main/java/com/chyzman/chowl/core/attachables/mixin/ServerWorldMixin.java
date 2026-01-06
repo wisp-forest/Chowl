@@ -16,7 +16,7 @@ import java.util.Objects;
 @SuppressWarnings("UnstableApiUsage")
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin {
-    @Inject(method = "onBlockChanged", at = @At(value = "HEAD"))
+    @Inject(method = "onBlockStateChanged", at = @At(value = "HEAD"))
     private void updateAttachables(BlockPos pos, BlockState oldBlock, BlockState newBlock, CallbackInfo ci) {
         var attachableHolder = ((ServerWorld) (Object) this).getAttachedOrCreate(AttachableHolder.TYPE);
 

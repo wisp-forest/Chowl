@@ -4,14 +4,9 @@ import com.chyzman.chowl.core.multipart.api.client.render.PartRenderer;
 import com.chyzman.chowl.core.multipart.api.client.PartRendererFactory;
 import com.chyzman.chowl.core.multipart.api.client.render.state.PartRenderState;
 import com.chyzman.chowl.test.multipart.TestPart;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.state.CameraRenderState;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.registry.Registries;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.NotNull;
 
