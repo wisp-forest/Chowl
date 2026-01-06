@@ -11,6 +11,7 @@ import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -66,9 +67,20 @@ public class DynamicNumberFormatterType implements NumberFormatterType {
 
         var mod = plain.length() % 3;
         if (mod == 0) mod = 3;
-        var shown = plain.substring(0, mod);
+        var power = (plain.length() - mod) / 3;
 
-        return Text.empty().append(NumberFormatter.addSeparators(shown)).append(this.getKiloName((plain.length() - mod) / 3));
+        if (power <= 0) {
+            return NumberFormatter.addSeparators(plain);
+        }
+
+        var scaled = new BigDecimal(plain).movePointLeft(power * 3);
+        var mantissa = scaled
+            .setScale(NumberFormatter.abbreviation_precision, RoundingMode.DOWN)
+            .stripTrailingZeros()
+            .toPlainString();
+
+        var kiloName = this.getKiloName(power);
+        return kiloName == null ? Text.literal(mantissa) : Text.literal(mantissa).append(kiloName);
     }
 
     private List<String> splitKilos(String s) {
