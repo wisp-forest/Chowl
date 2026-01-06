@@ -33,7 +33,7 @@ public class DynamicNumberFormatterType implements NumberFormatterType {
     private final @Nullable Text tillion;
 
     public DynamicNumberFormatterType(String typeName) {
-        var baseKey = NumberFormatter.BASE_KEY + typeName + ".";
+        var baseKey = NumberFormatter.BASE_KEY + "dynamic." + typeName + ".";
 
         this.thousand = Text.translatable(baseKey + "thousand");
         this.units = new ArrayList<>();

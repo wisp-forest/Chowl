@@ -1,0 +1,19 @@
+{
+  "itemGroup.chowl.group.tab.oddities": "Oddities",
+
+  "item.chowl-oddities.{}" : {
+    "caution_block": "Caution Block",
+    "clipboard": "Clipboard",
+    "sticky_note": "Sticky Note",
+    "pin": "Pin",
+    "clock": "Clock",
+    "calendar": "Calendar"
+  },
+
+  "attachable.chowl-oddities.{}": {
+    "sticky_note": "Sticky Note",
+    "pin": "Pin"
+  },
+
+  "ui.chowl-oddities.sticky_note.title": "Edit Sticky Note Message"
+}

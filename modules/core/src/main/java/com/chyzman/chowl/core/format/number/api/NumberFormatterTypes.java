@@ -10,7 +10,7 @@ public enum NumberFormatterTypes {
     SCIENTIFIC(new ScientificNumberFormatterType()),
     EXPONENT(null),
     SI(new ScalingNumberFormatterType("si")),
-    FULL_SCI(new ScalingNumberFormatterType("full_sci")),
+    FULL_SI(new ScalingNumberFormatterType("full_si")),
     NONE(null);
 
     public final NumberFormatterType type;

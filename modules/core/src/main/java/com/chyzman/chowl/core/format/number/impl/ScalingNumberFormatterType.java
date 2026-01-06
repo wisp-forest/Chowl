@@ -23,7 +23,7 @@ public class ScalingNumberFormatterType implements NumberFormatterType {
         .build();
 
     public ScalingNumberFormatterType(String typeName) {
-        this.baseKey = NumberFormatter.BASE_KEY + typeName + ".";
+        this.baseKey = NumberFormatter.BASE_KEY + "scaling." + typeName + ".";
     }
 
     @Override
@@ -60,7 +60,7 @@ public class ScalingNumberFormatterType implements NumberFormatterType {
         Text foundLabel = null;
         Integer foundScale = null;
 
-        for (int i = scale; i >= MAX_SEARCH; i--) {
+        for (int i = scale; i >= scale - MAX_SEARCH; i--) {
             traversed.add(i);
             String target = baseKey + i;
             Text label = Text.translatableWithFallback(target, "");
