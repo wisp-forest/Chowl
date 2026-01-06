@@ -1,7 +1,7 @@
 package com.chyzman.chowl.test.mixin;
 
 import net.minecraft.client.render.item.ItemRenderState;
-import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.item.model.special.SpecialModelRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
@@ -11,6 +11,6 @@ public interface ItemRenderStateAccessor {
 
     @Mixin(ItemRenderState.LayerRenderState.class)
     interface LayerRenderStateAccessor {
-        @Accessor BakedModel getModel();
+        @Accessor SpecialModelRenderer<Object> getSpecialModelType();
     }
 }

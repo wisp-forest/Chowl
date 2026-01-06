@@ -1,6 +1,6 @@
 package com.chyzman.chowl.core.multipart.pond;
 
-import com.chyzman.chowl.core.multipart.api.client.PartRenderDispatcher;
+import com.chyzman.chowl.core.multipart.api.client.render.PartRenderDispatcher;
 
 public interface MinecraftClientDuck {
     default PartRenderDispatcher chowl$getPartRenderDispatcher() {

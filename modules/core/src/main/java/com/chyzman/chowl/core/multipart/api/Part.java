@@ -84,7 +84,7 @@ public abstract class Part {
         return this;
     }
 
-    public PartType<?> getType() {
+    public @Nullable PartType<?> getType() {
         return type;
     }
 
@@ -102,6 +102,10 @@ public abstract class Part {
 
     public @Nullable World getWorld() {
         return world;
+    }
+
+    public boolean hasWorld() {
+        return world != null;
     }
 
     public void addSubPart(Part part) {
@@ -147,7 +151,7 @@ public abstract class Part {
         crashReportSection.add("(Chowl) Part Name", this::getNameForReport);
     }
 
-    private String getNameForReport() {
+    private @NotNull String getNameForReport() {
         return ChowlRegistries.PART.getId(this.getType()) + " // " + this.getClass().getCanonicalName();
     }
 

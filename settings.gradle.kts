@@ -16,7 +16,7 @@ val modules = if (focus.exists()) focus.readLines() else listOf(
     "logistics",
     "visage",
     "electromechanics",
-    "oddities",
+    // "oddities",
     "test"
 )
 

@@ -1,7 +1,6 @@
 package com.chyzman.chowl.test.multipart;
 
 import com.chyzman.chowl.core.multipart.api.Part;
-import com.chyzman.chowl.core.multipart.api.PartType;
 import com.chyzman.chowl.core.util.VoxelShapeHelper;
 import com.chyzman.chowl.test.registry.TestParts;
 import com.mojang.serialization.Codec;
@@ -16,35 +15,38 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.HeldItemContext;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
 import java.util.List;
 import java.util.Optional;
 
-public class FramePanel extends Part {
+public class FramePanel extends Part implements HeldItemContext {
     private static final VoxelShape SHAPE = Block.createCuboidShape(2, 2, 0, 14, 14, 2);
     public static final Codec<ItemStack> OPTIONAL_UNCOUNTED_CODEC = Codecs.optional(ItemStack.UNCOUNTED_CODEC).xmap(optional -> optional.orElse(ItemStack.EMPTY), stack -> stack.isEmpty() ? Optional.empty() : Optional.of(stack));
     public static final StructEndec<FramePanel> ENDEC = StructEndecBuilder.of(
       CodecUtils.toEndec(Direction.CODEC).fieldOf("face", FramePanel::getFace),
       CodecUtils.toEndec(OPTIONAL_UNCOUNTED_CODEC).fieldOf("item", FramePanel::getItem),
-      CodecUtils.toEndec(ItemStack.OPTIONAL_CODEC.sizeLimitedListOf(5)).fieldOf("upgrades", FramePanel::getUpgrades),
+      CodecUtils.toEndec(ItemStack.OPTIONAL_CODEC.sizeLimitedListOf(8)).fieldOf("upgrades", FramePanel::getUpgrades),
       Endec.INT.fieldOf("count", FramePanel::getCount),
       Endec.INT.fieldOf("size", FramePanel::getSize),
       FramePanel::new
     );
 
+    // This is to allow for rendering the item on the player's hand while keeping the rendering smooth
+    private HeldItemContext heldItemContext;
+
     private final Direction face;
     private ItemStack item = ItemStack.EMPTY;
-    private final DefaultedList<ItemStack> upgrades = DefaultedList.ofSize(5, ItemStack.EMPTY);
+    private final DefaultedList<ItemStack> upgrades = DefaultedList.ofSize(8, ItemStack.EMPTY);
     private int count = 0;
     private int size = 64;
 
@@ -64,6 +66,14 @@ public class FramePanel extends Part {
         this.size = size;
 
         this.addSubPart(new RemovePart());
+    }
+
+    public void setHeldItemContext(HeldItemContext heldItemContext) {
+        this.heldItemContext = heldItemContext;
+    }
+
+    public HeldItemContext getHeldItemContext() {
+        return heldItemContext == null ? this : heldItemContext;
     }
 
     public Direction getFace() {
@@ -133,6 +143,22 @@ public class FramePanel extends Part {
     @Override
     public VoxelShape getPartOutlineShape(List<Part> otherParts, BlockView world, BlockPos pos, ShapeContext context) {
         return VoxelShapeHelper.rotate(SHAPE, face);
+    }
+
+    @Override
+    public World getEntityWorld() {
+        return world;
+    }
+
+    @Override
+    public Vec3d getEntityPos() {
+        assert pos != null;
+        return pos.toCenterPos();
+    }
+
+    @Override
+    public float getBodyYaw() {
+        return face.getPositiveHorizontalDegrees();
     }
 
     public class RemovePart extends Part {

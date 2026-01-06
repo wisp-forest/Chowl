@@ -1,7 +1,8 @@
 package com.chyzman.chowl.core.blockentity.api;
 
 import com.chyzman.chowl.core.multipart.api.Part;
-import com.chyzman.chowl.core.multipart.api.client.PartRenderer;
+import com.chyzman.chowl.core.multipart.api.client.render.PartRenderManager;
+import com.chyzman.chowl.core.multipart.api.client.render.PartRenderer;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
@@ -30,7 +31,7 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
         clearShapeCache();
         if (view.contains("chowl:multipart")) {
             if (world != null && world.isClient()) {
-                PartRenderer.Manager.markForRebuild(getPos());
+                PartRenderManager.markForRebuild(getPos());
             }
 
             List<? extends Part> partMap = view.get(Part.SET_ENDEC.keyed("chowl:multipart", Collections.emptyList()));
@@ -59,7 +60,7 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
         clearShapeCache();
 
         if (world != null && world.isClient()) {
-            PartRenderer.Manager.markForRebuild(getPos());
+            PartRenderManager.markForRebuild(getPos());
         }
     }
 
@@ -69,7 +70,7 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
         clearShapeCache();
 
         if (world != null && world.isClient()) {
-            PartRenderer.Manager.markForRebuild(getPos());
+            PartRenderManager.markForRebuild(getPos());
         }
     }
 
@@ -79,7 +80,7 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
         clearShapeCache();
 
         if (world != null && world.isClient()) {
-            PartRenderer.Manager.markForRebuild(getPos());
+            PartRenderManager.markForRebuild(getPos());
         }
     }
 
@@ -102,7 +103,7 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
     @Override
     public void markRemoved() {
         if (world != null && world.isClient()) {
-            PartRenderer.Manager.markForRebuild(getPos());
+            PartRenderManager.markForRebuild(getPos());
         }
 
         super.markRemoved();

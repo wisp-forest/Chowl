@@ -1,23 +1,35 @@
 package com.chyzman.chowl.test.client.render;
 
-import com.chyzman.chowl.core.multipart.api.client.PartRenderer;
+import com.chyzman.chowl.core.multipart.api.client.render.PartRenderer;
 import com.chyzman.chowl.core.multipart.api.client.PartRendererFactory;
+import com.chyzman.chowl.core.multipart.api.client.render.state.PartRenderState;
 import com.chyzman.chowl.test.multipart.TestPart;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
+import net.minecraft.client.render.state.CameraRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.registry.Registries;
+import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.NotNull;
 
-public class TestPartRenderer extends PartRenderer<TestPart> {
+public class TestPartRenderer implements PartRenderer<TestPart, PartRenderState> {
+    private final PartRendererFactory.Context context;
+
     public TestPartRenderer(PartRendererFactory.Context context) {
-        super(context);
+        this.context = context;
     }
 
     @Override
-    public void renderBaked(TestPart part, MatrixStack matrixStack, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-        matrixStack.push();
+    public @NotNull PartRenderState createRenderState() {
+        return new PartRenderState();
+    }
+
+    @Override
+    public void renderBaked(PartRenderState renderState, MatrixStack matrices, OrderedRenderCommandQueue queue) {
+        /*matrixStack.push();
         matrixStack.scale(0.25f, 0.25f, 0.25f);
         matrixStack.translate(part.getStartPos().getX() / 4f, part.getStartPos().getY() / 4f, part.getStartPos().getZ() / 4f);
 
@@ -35,14 +47,16 @@ public class TestPartRenderer extends PartRenderer<TestPart> {
             );
         }
 
-        matrixStack.pop();
+        matrixStack.pop();*/
     }
 
     @Override
-    public void renderUnbaked(TestPart entity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {}
+    public void renderUnbaked(PartRenderState renderState, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraRenderState) {
+
+    }
 
     @Override
-    public boolean shouldBake(TestPart entity) {
+    public boolean shouldBake(TestPart part, float tickProgress, Vec3d cameraPos) {
         return true;
     }
 }
