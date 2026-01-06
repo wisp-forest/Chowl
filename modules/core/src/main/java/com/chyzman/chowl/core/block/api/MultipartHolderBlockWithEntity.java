@@ -39,7 +39,7 @@ public abstract class MultipartHolderBlockWithEntity extends BlockWithEntity {
         super(settings);
         this.factory = factory;
         this.initialPart = initialPart;
-        CoreBlockEntities.MULTIPART.addSupportedBlock(this);
+//        CoreBlockEntities.MULTIPART.addSupportedBlock(this);
     }
 
     protected MultipartHolderBlockWithEntity(BlockEntityFactory<?> factory, Settings settings) {
