@@ -8,30 +8,32 @@ import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.impl.StructEndecBuilder;
 import io.wispforest.owo.serialization.CodecUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.HeldItemContext;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.dynamic.Codecs;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.ItemOwner;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
+import javax.swing.text.html.BlockView;
 import java.util.List;
 import java.util.Optional;
 
-public class FramePanel extends Part implements HeldItemContext {
-    private static final VoxelShape SHAPE = Block.createCuboidShape(2, 2, 0, 14, 14, 2);
-    public static final Codec<ItemStack> OPTIONAL_UNCOUNTED_CODEC = Codecs.optional(ItemStack.UNCOUNTED_CODEC).xmap(optional -> optional.orElse(ItemStack.EMPTY), stack -> stack.isEmpty() ? Optional.empty() : Optional.of(stack));
+public class FramePanel extends Part implements ItemOwner {
+    private static final VoxelShape SHAPE = Block.box(2, 2, 0, 14, 14, 2);
+    public static final Codec<ItemStack> OPTIONAL_UNCOUNTED_CODEC = ExtraCodecs.optionalEmptyMap(ItemStack.SINGLE_ITEM_CODEC).xmap(optional -> optional.orElse(ItemStack.EMPTY), stack -> stack.isEmpty() ? Optional.empty() : Optional.of(stack));
     public static final StructEndec<FramePanel> ENDEC = StructEndecBuilder.of(
       CodecUtils.toEndec(Direction.CODEC).fieldOf("face", FramePanel::getFace),
       CodecUtils.toEndec(OPTIONAL_UNCOUNTED_CODEC).fieldOf("item", FramePanel::getItem),
@@ -42,11 +44,11 @@ public class FramePanel extends Part implements HeldItemContext {
     );
 
     // This is to allow for rendering the item on the player's hand while keeping the rendering smooth
-    private HeldItemContext heldItemContext;
+    private ItemOwner itemOwner;
 
     private final Direction face;
     private ItemStack item = ItemStack.EMPTY;
-    private final DefaultedList<ItemStack> upgrades = DefaultedList.ofSize(8, ItemStack.EMPTY);
+    private final NonNullList<ItemStack> upgrades = NonNullList.withSize(8, ItemStack.EMPTY);
     private int count = 0;
     private int size = 64;
 
@@ -68,12 +70,12 @@ public class FramePanel extends Part implements HeldItemContext {
         this.addSubPart(new RemovePart());
     }
 
-    public void setHeldItemContext(HeldItemContext heldItemContext) {
-        this.heldItemContext = heldItemContext;
+    public void setItemOwner(ItemOwner itemOwner) {
+        this.itemOwner = itemOwner;
     }
 
-    public HeldItemContext getHeldItemContext() {
-        return heldItemContext == null ? this : heldItemContext;
+    public ItemOwner getItemOwner() {
+        return itemOwner == null ? this : itemOwner;
     }
 
     public Direction getFace() {
@@ -88,7 +90,7 @@ public class FramePanel extends Part implements HeldItemContext {
         this.item = item;
     }
 
-    public DefaultedList<ItemStack> getUpgrades() {
+    public NonNullList<ItemStack> getUpgrades() {
         return upgrades;
     }
 
@@ -113,69 +115,71 @@ public class FramePanel extends Part implements HeldItemContext {
     }
 
     @Override
-    public ActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    public InteractionResult onUseWithItem(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (stack.isEmpty() && item.isEmpty()) {
-            return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+            return super.onUseWithItem(stack, state, level, pos, player, hand, hit);
         }
 
         if (stack.isEmpty()) {
             setItem(ItemStack.EMPTY);
             count = 0;
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
         if (count >= size) {
-            return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+            return super.onUseWithItem(stack, state, level, pos, player, hand, hit);
         }
 
         if (item.isEmpty()) {
             setItem(stack.copyWithCount(1));
         }
 
-        if (ItemStack.areItemsAndComponentsEqual(stack, item)) {
-            ItemStack split = stack.splitUnlessCreative(size - count, player);
+        if (ItemStack.isSameItem(stack, item)) {
+            ItemStack split = stack.consumeAndReturn(size - count, player);
             count += split.getCount();
         }
 
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public VoxelShape getPartOutlineShape(List<Part> otherParts, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getPartOutlineShape(List<Part> otherParts, BlockGetter world, BlockPos pos, CollisionContext context) {
         return VoxelShapeHelper.rotate(SHAPE, face);
+
+    }
+
+
+    @Override
+    public Level level() {
+        return level;
     }
 
     @Override
-    public World getEntityWorld() {
-        return world;
+    public Vec3 position() {
+        return pos.getCenter();
     }
 
     @Override
-    public Vec3d getEntityPos() {
-        assert pos != null;
-        return pos.toCenterPos();
-    }
-
-    @Override
-    public float getBodyYaw() {
-        return face.getPositiveHorizontalDegrees();
+    public float getVisualRotationYInDegrees() {
+        return face.toYRot();
     }
 
     public class RemovePart extends Part {
-        private static final VoxelShape SHAPE = Block.createCuboidShape(0, 14, -0.25, 2, 16, 0);
+        private static final VoxelShape SHAPE = Block.box(0, 14, -0.25, 2, 16, 0);
 
         protected RemovePart() {
             super(null);
         }
 
+
         @Override
-        public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        public InteractionResult onUse(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
             FramePanel.this.getHolder().removePart(FramePanel.this);
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
         @Override
-        public VoxelShape getPartOutlineShape(List<Part> otherParts, BlockView world, BlockPos pos, ShapeContext context) {
+        public VoxelShape getPartOutlineShape(List<Part> otherParts, BlockGetter world, BlockPos pos, CollisionContext context) {
             return VoxelShapeHelper.rotate(SHAPE, face);
         }
     }

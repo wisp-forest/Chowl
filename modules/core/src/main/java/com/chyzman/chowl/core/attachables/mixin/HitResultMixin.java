@@ -2,7 +2,7 @@ package com.chyzman.chowl.core.attachables.mixin;
 
 import com.chyzman.chowl.core.attachables.impl.AttachableContainer;
 import com.chyzman.chowl.core.attachables.pond.HitResultDuck;
-import net.minecraft.util.hit.HitResult;
+import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;

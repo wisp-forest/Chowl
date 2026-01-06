@@ -4,11 +4,11 @@ import com.chyzman.chowl.core.multipart.api.Multipart;
 import com.chyzman.chowl.core.multipart.api.PartType;
 import com.chyzman.chowl.test.multipart.TestPart;
 import com.chyzman.chowl.test.registry.TestParts;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.Block;
 
 public class TestMultipartBlock extends Block implements Multipart<TestPart> {
-    public TestMultipartBlock(Settings settings) {
-        super(settings);
+    public TestMultipartBlock(Properties properties) {
+        super(properties);
     }
 
     @Override

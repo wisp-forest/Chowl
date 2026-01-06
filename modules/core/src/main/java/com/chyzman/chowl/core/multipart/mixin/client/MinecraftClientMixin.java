@@ -2,18 +2,18 @@ package com.chyzman.chowl.core.multipart.mixin.client;
 
 import com.chyzman.chowl.core.multipart.api.client.render.PartRenderDispatcher;
 import com.chyzman.chowl.core.multipart.pond.MinecraftClientDuck;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.RunArgs;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.item.ItemModelManager;
-import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.render.block.entity.BlockEntityRenderManager;
-import net.minecraft.client.render.entity.EntityRenderManager;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.render.model.BakedModelManager;
-import net.minecraft.client.texture.AtlasManager;
-import net.minecraft.client.texture.PlayerSkinCache;
-import net.minecraft.resource.ReloadableResourceManagerImpl;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.main.GameConfig;
+import net.minecraft.client.renderer.PlayerSkinRenderCache;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.resources.model.AtlasManager;
+import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,38 +22,38 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(MinecraftClient.class)
+@Mixin(Minecraft.class)
 public abstract class MinecraftClientMixin implements MinecraftClientDuck {
     @Unique public PartRenderDispatcher partRenderDispatcher;
 
-    @Shadow @Final public TextRenderer textRenderer;
+    @Shadow @Final public Font font;
     @Shadow @Final private ItemRenderer itemRenderer;
-    @Shadow @Final private ItemModelManager itemModelManager;
-    @Shadow @Final private BlockRenderManager blockRenderManager;
-    @Shadow @Final private BlockEntityRenderManager blockEntityRenderManager;
-    @Shadow @Final private EntityRenderManager entityRenderManager;
-    @Shadow @Final private ReloadableResourceManagerImpl resourceManager;
-    @Shadow @Final private BakedModelManager bakedModelManager;
+    @Shadow @Final private ItemModelResolver itemModelResolver;
+    @Shadow @Final private BlockRenderDispatcher blockRenderer;
+    @Shadow @Final private BlockEntityRenderDispatcher blockEntityRenderDispatcher;
+    @Shadow @Final private EntityRenderDispatcher entityRenderDispatcher;
+    @Shadow @Final private ReloadableResourceManager resourceManager;
+    @Shadow @Final private ModelManager modelManager;
     @Shadow @Final private AtlasManager atlasManager;
-    @Shadow @Final private PlayerSkinCache playerSkinCache;
+    @Shadow @Final private PlayerSkinRenderCache playerSkinRenderCache;
 
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/block/entity/BlockEntityRenderManager;<init>(Lnet/minecraft/client/font/TextRenderer;Ljava/util/function/Supplier;Lnet/minecraft/client/render/block/BlockRenderManager;Lnet/minecraft/client/item/ItemModelManager;Lnet/minecraft/client/render/item/ItemRenderer;Lnet/minecraft/client/render/entity/EntityRenderManager;Lnet/minecraft/client/texture/SpriteHolder;Lnet/minecraft/client/texture/PlayerSkinCache;)V"))
+    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderDispatcher;<init>(Lnet/minecraft/client/gui/Font;Ljava/util/function/Supplier;Lnet/minecraft/client/renderer/block/BlockRenderDispatcher;Lnet/minecraft/client/renderer/item/ItemModelResolver;Lnet/minecraft/client/renderer/entity/ItemRenderer;Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;Lnet/minecraft/client/resources/model/MaterialSet;Lnet/minecraft/client/renderer/PlayerSkinRenderCache;)V"))
     private void createAttachableRenderDispatcher(
-            RunArgs args,
+            GameConfig args,
             CallbackInfo ci
     ) {
         this.partRenderDispatcher = new PartRenderDispatcher(
-          this.textRenderer,
-          this.bakedModelManager.getEntityModelsSupplier(),
-          this.blockRenderManager,
-          this.blockEntityRenderManager,
-          this.itemModelManager,
+          this.font,
+          this.modelManager.entityModels(),
+          this.blockRenderer,
+          this.blockEntityRenderDispatcher,
+          this.itemModelResolver,
           this.itemRenderer,
-          this.entityRenderManager,
+          this.entityRenderDispatcher,
           this.atlasManager,
-          this.playerSkinCache
+          this.playerSkinRenderCache
         );
-        resourceManager.registerReloader(this.partRenderDispatcher);
+        resourceManager.registerReloadListener(this.partRenderDispatcher);
     }
 
     @Override

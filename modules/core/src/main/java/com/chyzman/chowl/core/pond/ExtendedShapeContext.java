@@ -1,6 +1,6 @@
 package com.chyzman.chowl.core.pond;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public interface ExtendedShapeContext {
     boolean chowl$isHolding(StackPredicate predicate);

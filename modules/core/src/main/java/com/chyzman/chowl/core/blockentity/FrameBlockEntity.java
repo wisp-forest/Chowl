@@ -4,11 +4,10 @@ import com.chyzman.chowl.core.graph.NetworkMember;
 import com.chyzman.chowl.core.graph.node.PanelHolderNode;
 import com.chyzman.chowl.core.registry.CoreBlockEntities;
 import com.kneelawk.graphlib.api.graph.user.BlockNode;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class FrameBlockEntity extends MultipartBlockEntity implements NetworkMember {
     public FrameBlockEntity(BlockPos pos, BlockState state) {

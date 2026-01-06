@@ -6,69 +6,57 @@ import com.chyzman.chowl.core.multipart.api.client.PartRendererFactories;
 import com.chyzman.chowl.core.multipart.api.client.PartRendererFactory;
 import com.chyzman.chowl.core.multipart.api.client.render.state.PartRenderState;
 import com.google.common.collect.ImmutableMap;
-
+import com.mojang.blaze3d.vertex.PoseStack;
 import java.util.Map;
 import java.util.function.Supplier;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.item.ItemModelManager;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.LightmapTextureManager;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.render.block.entity.BlockEntityRenderManager;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.block.entity.state.BlockEntityRenderState;
-import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.entity.EntityRenderManager;
-import net.minecraft.client.render.entity.model.LoadedEntityModels;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.texture.PlayerSkinCache;
-import net.minecraft.client.texture.SpriteHolder;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.SynchronousResourceReloader;
-import net.minecraft.util.crash.CrashException;
-import net.minecraft.util.crash.CrashReport;
-import net.minecraft.util.crash.CrashReportSection;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
+import net.minecraft.client.Camera;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.renderer.PlayerSkinRenderCache;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.resources.model.MaterialSet;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 @Environment(EnvType.CLIENT)
-public class PartRenderDispatcher implements SynchronousResourceReloader {
+public class PartRenderDispatcher implements ResourceManagerReloadListener {
     private Map<PartType<?>, PartRenderer<?, ?>> renderers = ImmutableMap.of();
-    private final TextRenderer font;
-    private final Supplier<LoadedEntityModels> entityModelSet;
-    private Vec3d cameraPos;
-    private final BlockRenderManager blockRenderDispatcher;
-    private final BlockEntityRenderManager blockEntityRenderDispatcher;
-    private final ItemModelManager itemModelResolver;
+    private final Font font;
+    private final Supplier<EntityModelSet> entityModelSet;
+    private Vec3 cameraPos;
+    private final BlockRenderDispatcher blockRenderDispatcher;
+    private final BlockEntityRenderDispatcher blockEntityRenderDispatcher;
+    private final ItemModelResolver itemModelResolver;
     private final ItemRenderer itemRenderer;
-    private final EntityRenderManager entityRenderer;
-    private final SpriteHolder materials;
-    private final PlayerSkinCache playerSkinRenderCache;
+    private final EntityRenderDispatcher entityRenderer;
+    private final MaterialSet materials;
+    private final PlayerSkinRenderCache playerSkinRenderCache;
 
     public PartRenderDispatcher(
-      TextRenderer font,
-      Supplier<LoadedEntityModels> entityModelSet,
-      BlockRenderManager blockRenderDispatcher,
-      BlockEntityRenderManager blockEntityRenderDispatcher,
-      ItemModelManager itemModelResolver,
+      Font font,
+      Supplier<EntityModelSet> entityModelSet,
+      BlockRenderDispatcher blockRenderDispatcher,
+      BlockEntityRenderDispatcher blockEntityRenderDispatcher,
+      ItemModelResolver itemModelResolver,
       ItemRenderer itemRenderer,
-      EntityRenderManager entityRenderer,
-      SpriteHolder materials,
-      PlayerSkinCache playerSkinRenderCache
+      EntityRenderDispatcher entityRenderer,
+      MaterialSet materials,
+      PlayerSkinRenderCache playerSkinRenderCache
     ) {
         this.font = font;
         this.entityModelSet = entityModelSet;
@@ -94,17 +82,17 @@ public class PartRenderDispatcher implements SynchronousResourceReloader {
     }
 
     public void configure(Camera camera) {
-        this.cameraPos = camera.getCameraPos();
+        this.cameraPos = camera.position();
     }
 
     @Nullable
-    public <E extends Part, S extends PartRenderState> S getRenderState(E part, float tickProgress, @Nullable ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlay) {
+    public <E extends Part, S extends PartRenderState> S getRenderState(E part, float tickProgress, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
         PartRenderer<E, S> partRenderer = this.get(part);
         if (partRenderer == null || !part.hasWorld()) {
             return null;
         }
 
-        Vec3d vec3d = this.cameraPos;
+        Vec3 vec3d = this.cameraPos;
         S blockEntityRenderState = partRenderer.createRenderState();
         partRenderer.updateRenderState(part, blockEntityRenderState, tickProgress, vec3d, crumblingOverlay);
         return blockEntityRenderState;
@@ -122,22 +110,22 @@ public class PartRenderDispatcher implements SynchronousResourceReloader {
         return blockEntityRenderState;
     }
 
-    public <S extends PartRenderState> void render(S renderState, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraRenderState) {
+    public <S extends PartRenderState> void render(S renderState, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraRenderState) {
         PartRenderer<?, S> partRenderer = this.getByRenderState(renderState);
         if (partRenderer != null) {
             try {
                 partRenderer.render(renderState, matrices, queue, cameraRenderState);
             } catch (Throwable var9) {
-                CrashReport crashReport = CrashReport.create(var9, "Rendering Part");
-                CrashReportSection crashReportSection = crashReport.addElement("Part Details");
+                CrashReport crashReport = CrashReport.forThrowable(var9, "Rendering Part");
+                CrashReportCategory crashReportSection = crashReport.addCategory("Part Details");
                 renderState.populateCrashReport(crashReportSection);
-                throw new CrashException(crashReport);
+                throw new ReportedException(crashReport);
             }
         }
     }
 
     @Override
-    public void reload(ResourceManager manager) {
+    public void onResourceManagerReload(ResourceManager manager) {
         PartRendererFactory.Context context = new PartRendererFactory.Context(
           this,
           this.blockRenderDispatcher,

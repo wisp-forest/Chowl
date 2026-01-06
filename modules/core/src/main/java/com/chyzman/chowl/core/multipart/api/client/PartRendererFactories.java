@@ -26,7 +26,7 @@ public class PartRendererFactories {
 			try {
 				builder.put(type, factory.create(args));
 			} catch (Exception e) {
-				throw new IllegalStateException("Failed to create model for " + ChowlRegistries.PART.getId(type), e);
+				throw new IllegalStateException("Failed to create model for " + ChowlRegistries.PART.getKey(type), e);
 			}
 		});
 		return builder.build();

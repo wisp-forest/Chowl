@@ -1,14 +1,14 @@
 package com.chyzman.chowl.core.attachables.impl;
 
 import com.chyzman.chowl.core.attachables.api.Attachable;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class AttachableHitResult extends HitResult {
     private final AttachableContainer container;
     private final Attachable attachable;
 
-    public AttachableHitResult(Vec3d pos, AttachableContainer container) {
+    public AttachableHitResult(Vec3 pos, AttachableContainer container) {
         super(pos);
         this.container = container;
         this.attachable = container.getContained();

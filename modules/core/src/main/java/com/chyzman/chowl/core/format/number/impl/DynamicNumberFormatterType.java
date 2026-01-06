@@ -3,11 +3,6 @@ package com.chyzman.chowl.core.format.number.impl;
 import com.chyzman.chowl.core.Chowl;
 import com.chyzman.chowl.core.format.number.NumberFormatter;
 import com.chyzman.chowl.core.format.number.api.NumberFormatterType;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
-import net.minecraft.util.Language;
-import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
@@ -16,48 +11,52 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Mth;
 
 import static com.chyzman.chowl.core.format.number.NumberFormatter.ZERO;
 
 public class DynamicNumberFormatterType implements NumberFormatterType {
-    private final Text thousand;
+    private final Component thousand;
 
-    private final List<Text> specials;
-    private final List<Text> units;
-    private final List<Text> tens;
-    private final List<Text> hundreds;
-    private final Text millia;
+    private final List<Component> specials;
+    private final List<Component> units;
+    private final List<Component> tens;
+    private final List<Component> hundreds;
+    private final Component millia;
 
-    private final @Nullable Text prefix;
-    private final @Nullable Text suffix;
-    private final @Nullable Text illion;
-    private final @Nullable Text tillion;
+    private final @Nullable Component prefix;
+    private final @Nullable Component suffix;
+    private final @Nullable Component illion;
+    private final @Nullable Component tillion;
 
     public DynamicNumberFormatterType(String typeName) {
         var baseKey = NumberFormatter.BASE_KEY + "dynamic." + typeName + ".";
 
-        this.thousand = Text.translatable(baseKey + "thousand");
+        this.thousand = Component.translatable(baseKey + "thousand");
         this.units = new ArrayList<>();
         this.tens = new ArrayList<>();
         this.hundreds = new ArrayList<>();
         this.specials = new ArrayList<>();
 
         for (int i = 0; i < 9; i++) {
-            this.specials.add(Text.translatable(baseKey + "special." + i));
-            this.units.add(Text.translatable(baseKey + "unit." + i));
-            this.tens.add(Text.translatable(baseKey + "ten." + i));
-            this.hundreds.add(Text.translatable(baseKey + "hundred." + i));
+            this.specials.add(Component.translatable(baseKey + "special." + i));
+            this.units.add(Component.translatable(baseKey + "unit." + i));
+            this.tens.add(Component.translatable(baseKey + "ten." + i));
+            this.hundreds.add(Component.translatable(baseKey + "hundred." + i));
         }
-        this.millia = Text.translatable(baseKey + "millia");
+        this.millia = Component.translatable(baseKey + "millia");
 
-        this.prefix = Text.translatableWithFallback(baseKey + "prefix", "");
-        this.suffix = Text.translatableWithFallback(baseKey + "suffix", "");
-        this.illion = Text.translatableWithFallback(baseKey + "illion", "");
-        this.tillion = Text.translatableWithFallback(baseKey + "tillion", "");
+        this.prefix = Component.translatableWithFallback(baseKey + "prefix", "");
+        this.suffix = Component.translatableWithFallback(baseKey + "suffix", "");
+        this.illion = Component.translatableWithFallback(baseKey + "illion", "");
+        this.tillion = Component.translatableWithFallback(baseKey + "tillion", "");
     }
 
     @Override
-    public Text format(String number) {
+    public Component format(String number) {
         var plain = new BigDecimal(number).toPlainString();
 
         var decimal = plain.indexOf('.');
@@ -80,7 +79,7 @@ public class DynamicNumberFormatterType implements NumberFormatterType {
             .toPlainString();
 
         var kiloName = this.getKiloName(power);
-        return kiloName == null ? Text.literal(mantissa) : Text.literal(mantissa).append(kiloName);
+        return kiloName == null ? Component.literal(mantissa) : Component.literal(mantissa).append(kiloName);
     }
 
     private List<String> splitKilos(String s) {
@@ -92,12 +91,12 @@ public class DynamicNumberFormatterType implements NumberFormatterType {
         return kiloKilos.reversed();
     }
 
-    private Text getKiloKilo(int latinPowerKilo, int milliaCount, List<Integer> kilos) {
+    private Component getKiloKilo(int latinPowerKilo, int milliaCount, List<Integer> kilos) {
         var kiloOnes = latinPowerKilo % 10;
-        var kiloTens = MathHelper.floor(latinPowerKilo / 10d) % 10;
-        var kiloHundreds = MathHelper.floor(latinPowerKilo / 100d) % 10;
+        var kiloTens = Mth.floor(latinPowerKilo / 10d) % 10;
+        var kiloHundreds = Mth.floor(latinPowerKilo / 100d) % 10;
         var lastKilo = kilos.size() - 1;
-        var prefixFragments = new ArrayList<Text>();
+        var prefixFragments = new ArrayList<Component>();
 
         if (kiloOnes > 0 && (
             lastKilo == 0 ||
@@ -116,46 +115,46 @@ public class DynamicNumberFormatterType implements NumberFormatterType {
         if (kiloHundreds > 0) prefixFragments.addFirst(hundreds.get(kiloHundreds - 1));
 
         if (latinPowerKilo > 0 && milliaCount > 0) {
-            var millia = Text.empty();
+            var millia = Component.empty();
             for (int i = 0; i < kilos.size() - milliaCount; i++) millia = millia.append(this.millia);
             prefixFragments.addFirst(millia);
         }
 
         return prefixFragments.stream()
             .filter(s -> s != null && !s.getString().isBlank())
-            .collect(Text::empty, MutableText::append, MutableText::append);
+            .collect(Component::empty, MutableComponent::append, MutableComponent::append);
     }
 
-    private Text getKiloPrefix(int latinPower) {
+    private Component getKiloPrefix(int latinPower) {
         var kilos = splitKilos(String.valueOf(latinPower))
             .stream()
             .map(Integer::parseInt)
             .toList();
 
-        List<Text> kiloPrefixParts = new ArrayList<>();
+        List<Component> kiloPrefixParts = new ArrayList<>();
         for (int i = 0; i < kilos.size(); i++) {
             kiloPrefixParts.add(getKiloKilo(kilos.get(i), i, kilos));
         }
 
-        return Texts.join(kiloPrefixParts, Text.empty());
+        return ComponentUtils.formatList(kiloPrefixParts, Component.empty());
     }
 
     @Nullable
-    private Text getIllion(int latinPower) {
+    private Component getIllion(int latinPower) {
         var powerKilo = latinPower % 1000;
 
         if (powerKilo < 5 && powerKilo > 0 && latinPower < 1000) return null;
 
-        if (powerKilo >= 7 && powerKilo <= 10 || MathHelper.floor(powerKilo / 10d) % 10 == 1) return illion;
+        if (powerKilo >= 7 && powerKilo <= 10 || Mth.floor(powerKilo / 10d) % 10 == 1) return illion;
 
         return tillion;
     }
 
     @Nullable
-    private Text getKiloName(int power) {
-        List<Text> fragments;
+    private Component getKiloName(int power) {
+        List<Component> fragments;
 
-        if (power < 2) return power == 1 ? Text.empty().append(prefix).append(thousand) : null;
+        if (power < 2) return power == 1 ? Component.empty().append(prefix).append(thousand) : null;
 
         fragments = new ArrayList<>();
         fragments.add(prefix);
@@ -165,6 +164,6 @@ public class DynamicNumberFormatterType implements NumberFormatterType {
 
         return fragments.stream()
             .filter(s -> s != null && !s.getString().isBlank())
-            .collect(Text::empty, MutableText::append, MutableText::append);
+            .collect(Component::empty, MutableComponent::append, MutableComponent::append);
     }
 }

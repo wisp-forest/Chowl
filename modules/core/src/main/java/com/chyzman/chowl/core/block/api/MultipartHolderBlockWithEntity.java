@@ -6,48 +6,51 @@ import com.chyzman.chowl.core.multipart.api.MultipartVoxelShape;
 import com.chyzman.chowl.core.multipart.api.Part;
 import com.chyzman.chowl.core.multipart.api.PartType;
 import com.chyzman.chowl.core.registry.CoreBlockEntities;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.Util;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.*;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.BitSetDiscreteVoxelShape;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.CubeVoxelShape;
+import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class MultipartHolderBlockWithEntity extends BlockWithEntity {
+public abstract class MultipartHolderBlockWithEntity extends BaseEntityBlock {
     private final BlockEntityFactory<?> factory;
     private final @Nullable PartType<?> initialPart;
     private static final VoxelShape UNSET = Util.make(() -> {
-        VoxelSet voxelSet = new BitSetVoxelSet(1, 1, 1);
-        voxelSet.set(0, 0, 0);
-        return new SimpleVoxelShape(voxelSet);
+        DiscreteVoxelShape voxelSet = new BitSetDiscreteVoxelShape(1, 1, 1);
+        voxelSet.fill(0, 0, 0);
+        return new CubeVoxelShape(voxelSet);
     });
 
-    protected MultipartHolderBlockWithEntity(BlockEntityFactory<?> factory, @Nullable PartType<?> initialPart, Settings settings) {
+    protected MultipartHolderBlockWithEntity(BlockEntityFactory<?> factory, @Nullable PartType<?> initialPart, Properties settings) {
         super(settings);
         this.factory = factory;
         this.initialPart = initialPart;
 //        CoreBlockEntities.MULTIPART.addSupportedBlock(this);
     }
 
-    protected MultipartHolderBlockWithEntity(BlockEntityFactory<?> factory, Settings settings) {
+    protected MultipartHolderBlockWithEntity(BlockEntityFactory<?> factory, Properties settings) {
         this(factory, null, settings);
     }
 
     @Override
-    public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         var holder = factory.create(pos, state);
         if (initialPart != null) {
             holder.addPart(initialPart.create(holder));
@@ -60,12 +63,12 @@ public abstract class MultipartHolderBlockWithEntity extends BlockWithEntity {
         T create(BlockPos pos, BlockState state);
     }
 
-    public VoxelShape getBlockOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getBlockOutlineShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return UNSET;
     }
 
     @Override
-    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         VoxelShape blockOutlineShape = getBlockOutlineShape(state, world, pos, context);
         if (!(world.getBlockEntity(pos) instanceof MultipartHolderBlockEntity multipart)) {
             return blockOutlineShape;
@@ -86,22 +89,22 @@ public abstract class MultipartHolderBlockWithEntity extends BlockWithEntity {
         return shape;
     }
 
-    protected ActionResult onNonPartUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        return super.onUse(state, world, pos, player, hit);
+    protected InteractionResult onNonPartUse(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+        return super.useWithoutItem(state, world, pos, player, hit);
     }
 
-    protected ActionResult onNonPartUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+    protected InteractionResult onNonPartUseWithItem(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return super.useItemOn(stack, state, world, pos, player, hand, hit);
     }
 
     @Override
     @ApiStatus.NonExtendable
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         if (hit instanceof MultipartHitResult hitResult && world.getBlockEntity(pos) instanceof MultipartHolderBlockEntity holder) {
             Part part = Part.findPart(hitResult.getPart(), holder.getParts());
             if (part != null) {
-                ActionResult result = part.onUse(state, world, pos, player, hit);
-                if (result.isAccepted()) {
+                InteractionResult result = part.onUse(state, world, pos, player, hit);
+                if (result.consumesAction()) {
                     return result;
                 }
             }
@@ -112,12 +115,12 @@ public abstract class MultipartHolderBlockWithEntity extends BlockWithEntity {
 
     @Override
     @ApiStatus.NonExtendable
-    protected ActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (hit instanceof MultipartHitResult hitResult && world.getBlockEntity(pos) instanceof MultipartHolderBlockEntity holder) {
             Part part = Part.findPart(hitResult.getPart(), holder.getParts());
             if (part != null) {
-                ActionResult result = part.onUseWithItem(stack, state, world, pos, player, hand, hit);
-                if (result.isAccepted()) {
+                InteractionResult result = part.onUseWithItem(stack, state, world, pos, player, hand, hit);
+                if (result.consumesAction()) {
                     return result;
                 }
             }

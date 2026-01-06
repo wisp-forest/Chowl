@@ -9,10 +9,10 @@ import com.chyzman.chowl.core.registry.CoreBlockEntities;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.InvalidateRenderStateCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 public class ChowlClient implements ClientModInitializer {
 
@@ -21,18 +21,18 @@ public class ChowlClient implements ClientModInitializer {
         ChowlPackets.registerClient();
         AttachablesEvents.clientInit();
 
-        BlockEntityRendererFactories.register(CoreBlockEntities.MULTIPART, MultipartBlockEntityRenderer::new);
+        BlockEntityRenderers.register(CoreBlockEntities.MULTIPART, MultipartBlockEntityRenderer::new);
 
         WorldRenderEvents.END_EXTRACTION.register(PartRenderManager::extract);
         WorldRenderEvents.AFTER_ENTITIES.register(PartRenderManager::render);
         InvalidateRenderStateCallback.EVENT.register(PartRenderManager::reset);
     }
 
-    public static void reloadPos(World world, BlockPos pos) {
-        MinecraftClient client = MinecraftClient.getInstance();
+    public static void reloadPos(Level world, BlockPos pos) {
+        Minecraft client = Minecraft.getInstance();
 
-        if (world == client.world) {
-            client.worldRenderer.scheduleBlockRenders(pos.getX(), pos.getY(), pos.getZ(), pos.getX(), pos.getY(), pos.getZ());
+        if (world == client.level) {
+            client.levelRenderer.setBlocksDirty(pos.getX(), pos.getY(), pos.getZ(), pos.getX(), pos.getY(), pos.getZ());
         }
 
 

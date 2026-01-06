@@ -1,39 +1,37 @@
 package com.chyzman.chowl.core.util;
 
 import com.google.common.collect.Maps;
-import net.minecraft.block.Block;
-import net.minecraft.block.enums.Orientation;
+import net.minecraft.core.Direction;
+import net.minecraft.core.FrontAndTop;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import java.util.List;
 import java.util.Map;
 
 public class VoxelShapeHelper {
     public static VoxelShape rotate(VoxelShape shape, Direction.Axis axis, int amount) {
-        List<Box> boxes = shape.getBoundingBoxes();
+        List<AABB> boxes = shape.toAabbs();
 
-        VoxelShape newShape = VoxelShapes.empty();
+        VoxelShape newShape = Shapes.empty();
 
-        for (Box box : boxes) {
-            Vec3d minPos = rotateVec3d(box.getMinPos(), axis, amount);
-            Vec3d maxPos = rotateVec3d(box.getMaxPos(), axis, amount);
-            newShape = VoxelShapes.union(newShape, VoxelShapes.cuboid(new Box(minPos, maxPos)));
+        for (AABB box : boxes) {
+            Vec3 minPos = rotateVec3d(box.getMinPosition(), axis, amount);
+            Vec3 maxPos = rotateVec3d(box.getMaxPosition(), axis, amount);
+            newShape = Shapes.or(newShape, Shapes.create(new AABB(minPos, maxPos)));
         }
 
-        return newShape.simplify();
+        return newShape.optimize();
     }
 
-    private static Vec3d rotateVec3d(Vec3d pos, Direction.Axis axis, int amount) {
-        Vec3d newPos = pos.subtract(0.5, 0.5, 0.5);
+    private static Vec3 rotateVec3d(Vec3 pos, Direction.Axis axis, int amount) {
+        Vec3 newPos = pos.subtract(0.5, 0.5, 0.5);
         return (switch (axis) {
-            case X -> newPos.rotateX(amount * (float) (Math.PI / 2));
-            case Y -> newPos.rotateY(amount * (float) (Math.PI / 2));
-            case Z -> newPos.rotateZ(amount * (float) (Math.PI / 2));
+            case X -> newPos.xRot(amount * (float) (Math.PI / 2));
+            case Y -> newPos.yRot(amount * (float) (Math.PI / 2));
+            case Z -> newPos.zRot(amount * (float) (Math.PI / 2));
         }).add(0.5, 0.5, 0.5);
     }
 
@@ -49,9 +47,9 @@ public class VoxelShapeHelper {
         };
     }
 
-    public static VoxelShape rotate(VoxelShape northUpShape, Orientation orientation) {
-        var facing = rotate(northUpShape, orientation.getFacing());
-        if (orientation.getRotation() == Direction.UP) return facing;
-        return rotate(facing ,orientation.getRotation());
+    public static VoxelShape rotate(VoxelShape northUpShape, FrontAndTop orientation) {
+        var facing = rotate(northUpShape, orientation.front());
+        if (orientation.top() == Direction.UP) return facing;
+        return rotate(facing ,orientation.top());
     }
 }

@@ -24,7 +24,7 @@ public class AttachableRendererFactories {
             try {
                 builder.put(type, factory.create(args));
             } catch (Exception e) {
-                throw new IllegalStateException("Failed to create model for " + ChowlRegistries.ATTACHABLE_TYPE.getId(type), e);
+                throw new IllegalStateException("Failed to create model for " + ChowlRegistries.ATTACHABLE_TYPE.getKey(type), e);
             }
         });
         return builder.build();

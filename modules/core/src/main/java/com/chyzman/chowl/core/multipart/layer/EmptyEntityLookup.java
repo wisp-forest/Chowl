@@ -2,16 +2,14 @@ package com.chyzman.chowl.core.multipart.layer;
 
 import java.util.UUID;
 import java.util.function.Consumer;
-
-import net.minecraft.entity.Entity;
-import net.minecraft.util.TypeFilter;
-import net.minecraft.util.function.LazyIterationConsumer;
-import net.minecraft.util.math.Box;
-import net.minecraft.world.entity.EntityLike;
-import net.minecraft.world.entity.EntityLookup;
+import net.minecraft.util.AbortableIterationConsumer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.entity.EntityTypeTest;
+import net.minecraft.world.level.entity.LevelEntityGetter;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
-public class EmptyEntityLookup implements EntityLookup<Entity> {
+public class EmptyEntityLookup implements LevelEntityGetter<Entity> {
 
 	@Override
 	public @Nullable Entity get(int id) {
@@ -24,16 +22,16 @@ public class EmptyEntityLookup implements EntityLookup<Entity> {
 	}
 
 	@Override
-	public Iterable<Entity> iterate() {
+	public Iterable<Entity> getAll() {
 		return null;
 	}
 
 	@Override
-	public void forEachIntersects(Box box, Consumer action) {}
+	public void get(AABB box, Consumer action) {}
 
 	@Override
-	public void forEachIntersects(TypeFilter filter, Box box, LazyIterationConsumer consumer) {}
+	public void get(EntityTypeTest filter, AABB box, AbortableIterationConsumer consumer) {}
 
 	@Override
-	public void forEach(TypeFilter filter, LazyIterationConsumer consumer) {}
+	public void get(EntityTypeTest filter, AbortableIterationConsumer consumer) {}
 }

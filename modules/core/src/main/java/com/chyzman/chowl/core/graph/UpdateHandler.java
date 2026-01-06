@@ -4,8 +4,8 @@ import com.chyzman.chowl.core.graph.cache.NetworkStorageCache;
 import com.kneelawk.graphlib.api.graph.GraphEntityContext;
 import com.kneelawk.graphlib.api.graph.user.GraphEntity;
 import com.kneelawk.graphlib.api.graph.user.GraphEntityType;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import org.apache.commons.lang3.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,7 +15,7 @@ public class UpdateHandler implements GraphEntity<UpdateHandler> {
     @Nullable
     private ChangeType queuedUpdate;
 
-    public static void scheduleUpdate(ServerWorld world, BlockPos pos, ChangeType type) {
+    public static void scheduleUpdate(ServerLevel world, BlockPos pos, ChangeType type) {
         NetworkRegistry.UNIVERSE.getGraphWorld(world)
                 .getLoadedGraphsAt(pos)
                 .map(graph -> graph.getGraphEntity(NetworkRegistry.UPDATE_HANDLER_TYPE))
@@ -29,7 +29,7 @@ public class UpdateHandler implements GraphEntity<UpdateHandler> {
     @Override
     public void onTick() {
         if (queuedUpdate == null) return;
-        if (!(context.getBlockWorld() instanceof ServerWorld world)) return;
+        if (!(context.getBlockWorld() instanceof ServerLevel world)) return;
 
         NetworkStorageCache networkStorageCache = context.getGraph().getGraphEntity(NetworkRegistry.STORAGE_CACHE_TYPE);
         if (queuedUpdate == ChangeType.CONTENT) {

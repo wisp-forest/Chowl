@@ -1,33 +1,33 @@
 package com.chyzman.chowl.core.registry;
 
 import io.wispforest.owo.registration.reflect.AutoRegistryContainer;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.component.ComponentType;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
-public class ChowlComponents implements AutoRegistryContainer<ComponentType<?>> {
+public class ChowlComponents implements AutoRegistryContainer<DataComponentType<?>> {
 
-    public static final ComponentType<BlockState> TEMPLATE_STATE = ComponentType.<BlockState>builder()
-        .codec(BlockState.CODEC)
-        .packetCodec(PacketCodecs.entryOf(Block.STATE_IDS))
+    public static final DataComponentType<BlockState> TEMPLATE_STATE = DataComponentType.<BlockState>builder()
+        .persistent(BlockState.CODEC)
+        .networkSynchronized(ByteBufCodecs.idMapper(Block.BLOCK_STATE_REGISTRY))
         .build();
 
-    public static final ComponentType<BlockState> TEMPLATE_MODEL_STATE = ComponentType.<BlockState>builder()
-            .codec(BlockState.CODEC)
-            .packetCodec(PacketCodecs.entryOf(Block.STATE_IDS))
+    public static final DataComponentType<BlockState> TEMPLATE_MODEL_STATE = DataComponentType.<BlockState>builder()
+            .persistent(BlockState.CODEC)
+            .networkSynchronized(ByteBufCodecs.idMapper(Block.BLOCK_STATE_REGISTRY))
             .build();
 
     @Override
-    public Registry<ComponentType<?>> getRegistry() {
-        return Registries.DATA_COMPONENT_TYPE;
+    public Registry<DataComponentType<?>> getRegistry() {
+        return BuiltInRegistries.DATA_COMPONENT_TYPE;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Class<ComponentType<?>> getTargetFieldType() {
-        return (Class<ComponentType<?>>)(Object) ComponentType.class;
+    public Class<DataComponentType<?>> getTargetFieldType() {
+        return (Class<DataComponentType<?>>)(Object) DataComponentType.class;
     }
 }

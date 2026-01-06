@@ -1,8 +1,7 @@
 package com.chyzman.chowl.core.attachables.network.C2S;
 
-import net.minecraft.util.math.Vec3d;
-
 import java.util.UUID;
+import net.minecraft.world.phys.Vec3;
 
-public record C2SPlayerAttackAttachable(UUID attachableUuid, Vec3d pos) {
+public record C2SPlayerAttackAttachable(UUID attachableUuid, Vec3 pos) {
 }

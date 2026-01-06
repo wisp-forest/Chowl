@@ -7,10 +7,9 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.text.Text;
-import net.minecraft.util.Language;
-import net.minecraft.util.Pair;
-
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Tuple;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -37,33 +36,33 @@ public class SOMEWHATNEWERNumberFormatter {
         }
     }
 
-    public static Text format(Number number, NumberAbbreviationMode abbreviationMode) {
+    public static Component format(Number number, NumberAbbreviationMode abbreviationMode) {
         var digits = OvercomplicatedMathHelper.intDigits(number);
         if (digits != null && digits > digits_before_abbreviation && number.doubleValue() != 0) {
-            return ABBREVIATION_CACHE.getUnchecked(new Pair<>(digits, "word")).apply(getShownDigits(number));
+            return ABBREVIATION_CACHE.getUnchecked(new Tuple<>(digits, "word")).apply(getShownDigits(number));
         } else {
-            return Text.literal(addCommas(number.toString()));
+            return Component.literal(addCommas(number.toString()));
         }
     }
 
 
-    private static final LoadingCache<Pair<Integer, String>, Function<String, Text>> ABBREVIATION_CACHE = CacheBuilder.newBuilder()
+    private static final LoadingCache<Tuple<Integer, String>, Function<String, Component>> ABBREVIATION_CACHE = CacheBuilder.newBuilder()
             .concurrencyLevel(1)
             .expireAfterAccess(Duration.ofSeconds(10))
             .build(CacheLoader.from(abbreviationKey -> {
-                var key = KEY_BASE + "abbreviation." + abbreviationKey.getRight();
+                var key = KEY_BASE + "abbreviation." + abbreviationKey.getB();
 
                 //check for static translations
                 for (int i = 0; i > -3; i--) {
-                    var digits = abbreviationKey.getLeft() - 1 + i;
+                    var digits = abbreviationKey.getA() - 1 + i;
                     var target = key + ".unique." + digits;
-                    if (Language.getInstance().hasTranslation(target)) {
-                        return integer -> Text.translatable(target, integer);
+                    if (Language.getInstance().has(target)) {
+                        return integer -> Component.translatable(target, integer);
                     }
                 }
 
                 //check for dynamic translations
-                var digitsString = String.valueOf((abbreviationKey.getLeft() - 4) / 3);
+                var digitsString = String.valueOf((abbreviationKey.getA() - 4) / 3);
                 var toApply = new ArrayList<String>();
                 for (int i = digitsString.length() - 1; i > 0; i--) {
                     var digit = digitsString.charAt(i);
@@ -72,11 +71,11 @@ public class SOMEWHATNEWERNumberFormatter {
                     toApply.add(target);
                 }
                 var affix = key + ".dynamic.affix";
-                if (Language.getInstance().hasTranslation(affix)) toApply.add(affix);
+                if (Language.getInstance().has(affix)) toApply.add(affix);
 //                if (toApply.size() == digitsString.length()) {
                 return count -> {
-                    var text = Text.literal(count);
-                    for (var t : toApply) text = Text.translatable(t, text);
+                    var text = Component.literal(count);
+                    for (var t : toApply) text = Component.translatable(t, text);
                     return text;
                 };
 //                }
@@ -117,6 +116,6 @@ public class SOMEWHATNEWERNumberFormatter {
     }
 
     private static String getSeparator(String type) {
-        return Language.getInstance().get(KEY_BASE + "separator." + type, ",");
+        return Language.getInstance().getOrDefault(KEY_BASE + "separator." + type, ",");
     }
 }

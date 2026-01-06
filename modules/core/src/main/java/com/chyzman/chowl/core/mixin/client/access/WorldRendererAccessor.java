@@ -1,11 +1,11 @@
 package com.chyzman.chowl.core.mixin.client.access;
 
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(WorldRenderer.class)
+@Mixin(LevelRenderer.class)
 public interface WorldRendererAccessor {
-    @Accessor ClientWorld getWorld();
+    @Accessor ClientLevel getLevel();
 }

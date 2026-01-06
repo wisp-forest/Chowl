@@ -6,35 +6,34 @@ import com.chyzman.chowl.core.multipart.api.PartType;
 import com.chyzman.chowl.core.registry.CoreBlocks;
 import com.chyzman.chowl.test.multipart.FramePanel;
 import com.chyzman.chowl.test.registry.TestParts;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsageContext;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 
 public class FramePanelItem extends Item implements Multipart<FramePanel> {
-    public FramePanelItem(Settings settings) {
-        super(settings);
+    public FramePanelItem(Properties properties) {
+        super(properties);
     }
 
     @Override
-    public ActionResult useOnBlock(ItemUsageContext context) {
-        World world = context.getWorld();
-        BlockPos pos = context.getBlockPos();
+    public InteractionResult useOn(UseOnContext context) {
+        var level = context.getLevel();
+        BlockPos pos = context.getClickedPos();
 
-        BlockState state = world.getBlockState(pos);
-        BlockEntity blockEntity = world.getBlockEntity(pos);
-        if (state.isOf(CoreBlocks.DRAWER_FRAME) && blockEntity instanceof MultipartBlockEntity entity) {
-            FramePanel panel = new FramePanel(context.getSide(), ItemStack.EMPTY, List.of(), 0, 64);
+        BlockState state = level.getBlockState(pos);
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (state.is(CoreBlocks.DRAWER_FRAME) && blockEntity instanceof MultipartBlockEntity entity) {
+            FramePanel panel = new FramePanel(context.getClickedFace(), ItemStack.EMPTY, List.of(), 0, 64);
             entity.addPart(panel.init(entity));
         }
 
-        return super.useOnBlock(context);
+        return super.useOn(context);
     }
 
     @Override

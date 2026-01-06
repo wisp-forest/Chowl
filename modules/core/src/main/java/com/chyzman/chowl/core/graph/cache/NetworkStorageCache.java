@@ -7,9 +7,9 @@ import com.kneelawk.graphlib.api.graph.user.GraphEntityType;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.TransferVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import java.util.List;
 
 public interface NetworkStorageCache extends GraphEntity<NetworkStorageCache> {
 
-    static <T, V extends TransferVariant<T>, S extends Storage<V>> CombinedStorage<V, S> get(Class<V> variantClass, Class<S> storageClass, ServerWorld world, BlockPos pos) {
+    static <T, V extends TransferVariant<T>, S extends Storage<V>> CombinedStorage<V, S> get(Class<V> variantClass, Class<S> storageClass, ServerLevel world, BlockPos pos) {
         return NetworkRegistry.UNIVERSE.getGraphWorld(world)
                 .getLoadedGraphsAt(pos)
                 .map(graph -> graph.getGraphEntity(NetworkRegistry.STORAGE_CACHE_TYPE))
@@ -40,9 +40,9 @@ public interface NetworkStorageCache extends GraphEntity<NetworkStorageCache> {
 
     @NotNull NetworkStorageCache split(@NotNull BlockGraph originalGraph, @NotNull BlockGraph newGraph);
 
-    List<Text> getDebugInfo();
+    List<Component> getDebugInfo();
 
-    Text getDebugInfo(BlockPos pos);
+    Component getDebugInfo(BlockPos pos);
 
     @Override
     @NotNull

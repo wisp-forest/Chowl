@@ -3,18 +3,17 @@ package com.chyzman.chowl.core.multipart.api;
 import com.chyzman.chowl.core.blockentity.api.MultipartHolderBlockEntity;
 import com.chyzman.chowl.core.registry.ChowlRegistries;
 import io.wispforest.endec.StructEndec;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
-
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 
 public class PartType<T extends Part> {
     private final StructEndec<T> endec;
     private final PartFactory<T> factory;
-    private final RegistryEntry.Reference<PartType<?>> registryEntry = ChowlRegistries.PART.createEntry(this);
+    private final Holder.Reference<PartType<?>> registryEntry = ChowlRegistries.PART.createIntrusiveHolder(this);
 
     public PartType(StructEndec<T> endec, PartFactory<T> factory) {
         this.endec = endec;
@@ -35,12 +34,12 @@ public class PartType<T extends Part> {
         return part;
     }
 
-    public RegistryEntry.Reference<PartType<?>> getRegistryEntry() {
+    public Holder.Reference<PartType<?>> getRegistryEntry() {
         return registryEntry;
     }
 
     public Identifier getId() {
-        return registryEntry.getKey().map(RegistryKey::getValue).orElseThrow(() -> new IllegalStateException("Can not get ID of unregistered part"));
+        return registryEntry.unwrapKey().map(ResourceKey::identifier).orElseThrow(() -> new IllegalStateException("Can not get ID of unregistered part"));
     }
 
     public interface PartFactory<T extends Part> {

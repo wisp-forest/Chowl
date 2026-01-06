@@ -6,17 +6,17 @@ import com.chyzman.chowl.core.multipart.api.client.render.PartRenderer;
 import com.chyzman.chowl.core.multipart.api.client.render.state.PartRenderState;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.item.ItemModelManager;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.render.block.entity.BlockEntityRenderManager;
-import net.minecraft.client.render.entity.EntityRenderManager;
-import net.minecraft.client.render.entity.model.EntityModelLayer;
-import net.minecraft.client.render.entity.model.LoadedEntityModels;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.texture.PlayerSkinCache;
-import net.minecraft.client.texture.SpriteHolder;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.PlayerSkinRenderCache;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.resources.model.MaterialSet;
 
 @FunctionalInterface
 @Environment(EnvType.CLIENT)
@@ -26,18 +26,18 @@ public interface PartRendererFactory<T extends Part, S extends PartRenderState> 
     @Environment(EnvType.CLIENT)
     record Context(
       PartRenderDispatcher renderDispatcher,
-      BlockRenderManager blockRenderDispatcher,
-      BlockEntityRenderManager blockEntityRenderDispatcher,
-      ItemModelManager itemModelResolver,
+      BlockRenderDispatcher blockRenderDispatcher,
+      BlockEntityRenderDispatcher blockEntityRenderDispatcher,
+      ItemModelResolver itemModelResolver,
       ItemRenderer itemRenderer,
-      EntityRenderManager entityRenderer,
-      LoadedEntityModels loadedEntityModels,
-      TextRenderer font,
-      SpriteHolder materials,
-      PlayerSkinCache playerSkinRenderCache
+      EntityRenderDispatcher entityRenderer,
+      EntityModelSet loadedEntityModels,
+      Font font,
+      MaterialSet materials,
+      PlayerSkinRenderCache playerSkinRenderCache
     ) {
-        public ModelPart getLayerModelPart(EntityModelLayer modelLayer) {
-            return this.loadedEntityModels.getModelPart(modelLayer);
+        public ModelPart getLayerModelPart(ModelLayerLocation modelLayer) {
+            return this.loadedEntityModels.bakeLayer(modelLayer);
         }
     }
 }

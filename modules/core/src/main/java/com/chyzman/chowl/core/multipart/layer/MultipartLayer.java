@@ -2,119 +2,117 @@ package com.chyzman.chowl.core.multipart.layer;
 
 import com.chyzman.chowl.core.multipart.mixin.accessor.ChainRestrictedNeighborUpdaterAccessor;
 import com.chyzman.chowl.core.multipart.mixin.accessor.WorldAccessor;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.component.type.MapIdComponent;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.boss.dragon.EnderDragonPart;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.FuelRegistry;
-import net.minecraft.item.map.MapState;
-import net.minecraft.particle.BlockParticleEffect;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.recipe.BrewingRecipeRegistry;
-import net.minecraft.recipe.RecipeManager;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.resource.featuretoggle.FeatureSet;
-import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.collection.Pool;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.MutableWorldProperties;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldProperties;
-import net.minecraft.world.attribute.WorldEnvironmentAttributeAccess;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
-import net.minecraft.world.block.ChainRestrictedNeighborUpdater;
-import net.minecraft.world.border.WorldBorder;
-import net.minecraft.world.chunk.ChunkManager;
-import net.minecraft.world.entity.EntityLookup;
-import net.minecraft.world.event.GameEvent;
-import net.minecraft.world.explosion.ExplosionBehavior;
-import net.minecraft.world.tick.QueryableTickScheduler;
-import net.minecraft.world.tick.TickManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ExplosionParticleInfo;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.random.WeightedList;
+import net.minecraft.world.TickRateManager;
+import net.minecraft.world.attribute.EnvironmentAttributeSystem;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragonPart;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.item.alchemy.PotionBrewing;
+import net.minecraft.world.item.crafting.RecipeAccess;
+import net.minecraft.world.level.ExplosionDamageCalculator;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.FuelValues;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.chunk.ChunkSource;
+import net.minecraft.world.level.entity.LevelEntityGetter;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.saveddata.maps.MapId;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraft.world.level.storage.LevelData;
+import net.minecraft.world.level.storage.WritableLevelData;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.scores.Scoreboard;
+import net.minecraft.world.ticks.LevelTickAccess;
 
-public class MultipartLayer extends World {
-    private final World mainWorld;
+public class MultipartLayer extends Level {
+    private final Level mainWorld;
     private final MultipartChunkManager chunkManager;
     private final EmptyEntityLookup entityLookup;
 
-    protected MultipartLayer(World mainWorld) {
+    protected MultipartLayer(Level mainWorld) {
         super(
-          (MutableWorldProperties) mainWorld.getLevelProperties(),
-          mainWorld.getRegistryKey(),
-          mainWorld.getRegistryManager(),
-          mainWorld.getDimensionEntry(),
-          mainWorld.isClient(),
-          mainWorld.isDebugWorld(),
+          (WritableLevelData) mainWorld.getLevelData(),
+          mainWorld.dimension(),
+          mainWorld.registryAccess(),
+          mainWorld.dimensionTypeRegistration(),
+          mainWorld.isClientSide(),
+          mainWorld.isDebug(),
           0L,
-          ((ChainRestrictedNeighborUpdaterAccessor) (((WorldAccessor) mainWorld).getNeighborUpdater())).getMaxChainDepth()
+          ((ChainRestrictedNeighborUpdaterAccessor) (((WorldAccessor) mainWorld).getNeighborUpdater())).getMaxChainedNeighborUpdates()
         );
         this.mainWorld = mainWorld;
-        this.chunkManager = new MultipartChunkManager(mainWorld.getChunkManager());
+        this.chunkManager = new MultipartChunkManager(mainWorld.getChunkSource());
         this.entityLookup = new EmptyEntityLookup();
     }
 
     @Override
-    public void updateListeners(BlockPos pos, BlockState oldState, BlockState newState, int flags) {}
+    public void sendBlockUpdated(BlockPos pos, BlockState oldState, BlockState newState, int flags) {}
 
     @Override
-    public void playSound(@Nullable Entity source, double x, double y, double z, RegistryEntry<SoundEvent> sound, SoundCategory category, float volume, float pitch, long seed) {}
+    public void playSeededSound(@Nullable Entity source, double x, double y, double z, Holder<SoundEvent> sound, SoundSource category, float volume, float pitch, long seed) {}
 
     @Override
-    public void playSoundFromEntity(@Nullable Entity source, Entity entity, RegistryEntry<SoundEvent> sound, SoundCategory category, float volume, float pitch, long seed) {}
+    public void playSeededSound(@Nullable Entity source, Entity entity, Holder<SoundEvent> sound, SoundSource category, float volume, float pitch, long seed) {}
 
     @Override
-    public void createExplosion(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionBehavior behavior, double x, double y, double z, float power, boolean createFire, ExplosionSourceType explosionSourceType, ParticleEffect smallParticle, ParticleEffect largeParticle, Pool<BlockParticleEffect> blockParticles, RegistryEntry<SoundEvent> soundEvent) {}
+    public void explode(@Nullable Entity entity, @Nullable DamageSource damageSource, @Nullable ExplosionDamageCalculator behavior, double x, double y, double z, float power, boolean createFire, ExplosionInteraction explosionSourceType, ParticleOptions smallParticle, ParticleOptions largeParticle, WeightedList<ExplosionParticleInfo> blockParticles, Holder<SoundEvent> soundEvent) {}
 
     @Override
-    public String asString() {
+    public String gatherChunkSourceStats() {
         return "";
     }
 
     @Override
-    public void setSpawnPoint(WorldProperties.SpawnPoint spawnPoint) {
+    public void setRespawnData(LevelData.RespawnData spawnPoint) {
 
     }
 
     @Override
-    public WorldProperties.SpawnPoint getSpawnPoint() {
+    public LevelData.RespawnData getRespawnData() {
         return null;
     }
 
     @Override
-    public @Nullable Entity getEntityById(int id) {
+    public @Nullable Entity getEntity(int id) {
         return null;
     }
 
     @Override
-    public Collection<EnderDragonPart> getEnderDragonParts() {
+    public Collection<EnderDragonPart> dragonParts() {
         return List.of();
     }
 
     @Override
-    public TickManager getTickManager() {
-        return mainWorld.getTickManager();
+    public TickRateManager tickRateManager() {
+        return mainWorld.tickRateManager();
     }
 
     @Override
-    public @Nullable MapState getMapState(MapIdComponent id) {
-        return mainWorld.getMapState(id);
+    public @Nullable MapItemSavedData getMapData(MapId id) {
+        return mainWorld.getMapData(id);
     }
 
     @Override
-    public void setBlockBreakingInfo(int entityId, BlockPos pos, int progress) {
+    public void destroyBlockProgress(int entityId, BlockPos pos, int progress) {
 
     }
 
@@ -124,51 +122,51 @@ public class MultipartLayer extends World {
     }
 
     @Override
-    public RecipeManager getRecipeManager() {
-        return mainWorld.getRecipeManager();
+    public RecipeAccess recipeAccess() {
+        return mainWorld.recipeAccess();
     }
 
     @Override
-    protected EntityLookup<Entity> getEntityLookup() {
+    protected LevelEntityGetter<Entity> getEntities() {
         return entityLookup;
     }
 
     @Override
-    public WorldEnvironmentAttributeAccess getEnvironmentAttributes() {
+    public EnvironmentAttributeSystem environmentAttributes() {
         return null;
     }
 
     @Override
-    public BrewingRecipeRegistry getBrewingRecipeRegistry() {
-        return mainWorld.getBrewingRecipeRegistry();
+    public PotionBrewing potionBrewing() {
+        return mainWorld.potionBrewing();
     }
 
     @Override
-    public FuelRegistry getFuelRegistry() {
-        return mainWorld.getFuelRegistry();
+    public FuelValues fuelValues() {
+        return mainWorld.fuelValues();
     }
 
     @Override
-    public ChunkManager getChunkManager() {
+    public ChunkSource getChunkSource() {
         return chunkManager;
     }
 
     @Override
-    public void syncWorldEvent(@org.jspecify.annotations.Nullable Entity source, int eventId, BlockPos pos, int data) {}
+    public void levelEvent(@org.jspecify.annotations.Nullable Entity source, int eventId, BlockPos pos, int data) {}
 
     @Override
-    public void emitGameEvent(RegistryEntry<GameEvent> event, Vec3d emitterPos, GameEvent.Emitter emitter) {}
+    public void gameEvent(Holder<GameEvent> event, Vec3 emitterPos, GameEvent.Context emitter) {}
 
     @Override
-    public List<? extends PlayerEntity> getPlayers() {
+    public List<? extends Player> players() {
         return List.of();
     }
 
     @Override
-    public RegistryEntry<Biome> getGeneratorStoredBiome(int biomeX, int biomeY, int biomeZ) {
-        return mainWorld.getRegistryManager().getOptionalEntry(BiomeKeys.THE_VOID)
-          .map(biomes -> (RegistryEntry<Biome>) biomes) // Map to RegistryEntry so I can use orElse
-          .orElse(mainWorld.getGeneratorStoredBiome(biomeX, biomeY, biomeZ));
+    public Holder<Biome> getUncachedNoiseBiome(int biomeX, int biomeY, int biomeZ) {
+        return mainWorld.registryAccess().get(Biomes.THE_VOID)
+          .map(biomes -> (Holder<Biome>) biomes) // Map to RegistryEntry so I can use orElse
+          .orElse(mainWorld.getUncachedNoiseBiome(biomeX, biomeY, biomeZ));
     }
 
     @Override
@@ -177,23 +175,23 @@ public class MultipartLayer extends World {
     }
 
     @Override
-    public FeatureSet getEnabledFeatures() {
-        return mainWorld.getEnabledFeatures();
+    public FeatureFlagSet enabledFeatures() {
+        return mainWorld.enabledFeatures();
     }
 
     @Override
-    public float getBrightness(Direction direction, boolean shaded) {
+    public float getShade(Direction direction, boolean shaded) {
         return 0;
     }
 
     @Override
-    public QueryableTickScheduler<Block> getBlockTickScheduler() {
-        return mainWorld.getBlockTickScheduler();
+    public LevelTickAccess<Block> getBlockTicks() {
+        return mainWorld.getBlockTicks();
     }
 
     @Override
-    public QueryableTickScheduler<Fluid> getFluidTickScheduler() {
-        return mainWorld.getFluidTickScheduler();
+    public LevelTickAccess<Fluid> getFluidTicks() {
+        return mainWorld.getFluidTicks();
     }
 
     @Override

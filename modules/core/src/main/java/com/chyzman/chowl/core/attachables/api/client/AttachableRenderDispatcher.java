@@ -4,51 +4,51 @@ import com.chyzman.chowl.core.attachables.api.Attachable;
 import com.chyzman.chowl.core.attachables.api.AttachableType;
 import com.chyzman.chowl.core.registry.ChowlRegistries;
 import com.google.common.collect.ImmutableMap;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.item.ItemModelManager;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.render.block.entity.BlockEntityRenderManager;
-import net.minecraft.client.render.entity.EntityRenderManager;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.SynchronousResourceReloader;
-import net.minecraft.util.crash.CrashException;
-import net.minecraft.util.crash.CrashReport;
-import net.minecraft.util.crash.CrashReportSection;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.world.World;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
+import net.minecraft.client.Camera;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
 @Environment(EnvType.CLIENT)
-public class AttachableRenderDispatcher implements SynchronousResourceReloader {
+public class AttachableRenderDispatcher implements ResourceManagerReloadListener {
     private Map<AttachableType<?>, AttachableRenderer<?>> renderers = ImmutableMap.of();
 
-    public World world;
+    public Level world;
     public Camera camera;
     public HitResult crosshairTarget;
 
     private final ItemRenderer itemRenderer;
-    private final ItemModelManager itemModelManager;
-    private final BlockRenderManager blockRenderManager;
-    private final BlockEntityRenderManager blockEntityRenderManager;
-    private final EntityRenderManager entityRenderManager;
-    private final TextRenderer textRenderer;
+    private final ItemModelResolver itemModelManager;
+    private final BlockRenderDispatcher blockRenderManager;
+    private final BlockEntityRenderDispatcher blockEntityRenderManager;
+    private final EntityRenderDispatcher entityRenderManager;
+    private final Font textRenderer;
 
     public AttachableRenderDispatcher(
         ItemRenderer itemRenderer,
-        ItemModelManager itemModelManager,
-        BlockRenderManager blockRenderManager,
-        BlockEntityRenderManager blockEntityRenderManager,
-        EntityRenderManager entityRenderManager,
-        TextRenderer textRenderer
+        ItemModelResolver itemModelManager,
+        BlockRenderDispatcher blockRenderManager,
+        BlockEntityRenderDispatcher blockEntityRenderManager,
+        EntityRenderDispatcher entityRenderManager,
+        Font textRenderer
     ) {
         this.itemRenderer = itemRenderer;
         this.itemModelManager = itemModelManager;
@@ -63,7 +63,7 @@ public class AttachableRenderDispatcher implements SynchronousResourceReloader {
         return (AttachableRenderer<A>) this.renderers.get(attachableState.getType());
     }
 
-    public void configure(World world, Camera camera, HitResult crosshairTarget) {
+    public void configure(Level world, Camera camera, HitResult crosshairTarget) {
         if (this.world != world) {
             this.setWorld(world);
         }
@@ -75,19 +75,19 @@ public class AttachableRenderDispatcher implements SynchronousResourceReloader {
     public <A extends Attachable> void render(
         A attachable,
         float tickDelta,
-        MatrixStack matrices,
-        VertexConsumerProvider vertexConsumers
+        PoseStack matrices,
+        MultiBufferSource vertexConsumers
     ) {
         var attachableRenderer = this.get(attachable);
         if (attachableRenderer != null) {
-            if (attachableRenderer.isInRenderDistance(attachable, this.camera.getCameraPos())) {
+            if (attachableRenderer.isInRenderDistance(attachable, this.camera.position())) {
                 try {
                     render(attachableRenderer, attachable, tickDelta, matrices, vertexConsumers);
                 } catch (Throwable throwable) {
-                    CrashReport crashReport = CrashReport.create(throwable, "Rendering Attachable");
-                    CrashReportSection crashReportSection = crashReport.addElement("Attachable Details");
-                    crashReportSection.add("Name", ChowlRegistries.ATTACHABLE_TYPE.getId(attachable.getType()) + " // " + attachable.getClass().getCanonicalName());
-                    throw new CrashException(crashReport);
+                    CrashReport crashReport = CrashReport.forThrowable(throwable, "Rendering Attachable");
+                    CrashReportCategory crashReportSection = crashReport.addCategory("Attachable Details");
+                    crashReportSection.setDetail("Name", ChowlRegistries.ATTACHABLE_TYPE.getKey(attachable.getType()) + " // " + attachable.getClass().getCanonicalName());
+                    throw new ReportedException(crashReport);
                 }
             }
         }
@@ -96,8 +96,8 @@ public class AttachableRenderDispatcher implements SynchronousResourceReloader {
     public <A extends Attachable> void renderOutline(
         A attachable,
         Camera camera,
-        VertexConsumerProvider.Immediate vertexConsumers,
-        MatrixStack matrices
+        MultiBufferSource.BufferSource vertexConsumers,
+        PoseStack matrices
     ) {
         var attachableRenderer = this.get(attachable);
         if (attachableRenderer != null) {
@@ -114,8 +114,8 @@ public class AttachableRenderDispatcher implements SynchronousResourceReloader {
         AttachableRenderer<T> renderer,
         T attachableState,
         float tickDelta,
-        MatrixStack matrices,
-        VertexConsumerProvider vertexConsumers
+        PoseStack matrices,
+        MultiBufferSource vertexConsumers
     ) {
 //        World world = attachable.getWorld();
 //        int i;
@@ -125,10 +125,10 @@ public class AttachableRenderDispatcher implements SynchronousResourceReloader {
 //            i = 15728880;
 //        }
 
-        renderer.render(attachableState, tickDelta, matrices, vertexConsumers, 15728880, OverlayTexture.DEFAULT_UV);
+        renderer.render(attachableState, tickDelta, matrices, vertexConsumers, 15728880, OverlayTexture.NO_OVERLAY);
     }
 
-    public void setWorld(@Nullable World world) {
+    public void setWorld(@Nullable Level world) {
         this.world = world;
         if (world == null) {
             this.camera = null;
@@ -137,7 +137,7 @@ public class AttachableRenderDispatcher implements SynchronousResourceReloader {
     }
 
     @Override
-    public void reload(ResourceManager manager) {
+    public void onResourceManagerReload(ResourceManager manager) {
         AttachableRendererFactory.Context context = new AttachableRendererFactory.Context(
             this,
             this.itemRenderer,

@@ -1,25 +1,25 @@
 package com.chyzman.chowl.core.multipart.layer;
 
 import com.chyzman.chowl.core.multipart.pond.LayerChunkHolder;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkManager;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.light.LightingProvider;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BooleanSupplier;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkSource;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.level.lighting.LevelLightEngine;
 
-public class MultipartChunkManager extends ChunkManager {
-    private final ChunkManager mainManager;
+public class MultipartChunkManager extends ChunkSource {
+    private final ChunkSource mainManager;
 
-    public MultipartChunkManager(ChunkManager mainManager) {
+    public MultipartChunkManager(ChunkSource mainManager) {
         this.mainManager = mainManager;
     }
 
     @Override
-    public @Nullable Chunk getChunk(int x, int z, ChunkStatus leastStatus, boolean create) {
-        Chunk chunk = mainManager.getChunk(x, z, leastStatus, create);
+    public @Nullable ChunkAccess getChunk(int x, int z, ChunkStatus leastStatus, boolean create) {
+        ChunkAccess chunk = mainManager.getChunk(x, z, leastStatus, create);
         if (chunk == null) return null;
 
         return ((LayerChunkHolder) chunk).chowl$getMultipartLayer();
@@ -29,22 +29,22 @@ public class MultipartChunkManager extends ChunkManager {
     public void tick(BooleanSupplier shouldKeepTicking, boolean tickChunks) {}
 
     @Override
-    public String getDebugString() {
+    public String gatherStats() {
         return "";
     }
 
     @Override
-    public int getLoadedChunkCount() {
+    public int getLoadedChunksCount() {
         return 0;
     }
 
     @Override
-    public LightingProvider getLightingProvider() {
+    public LevelLightEngine getLightEngine() {
         return null;
     }
 
     @Override
-    public BlockView getWorld() {
+    public BlockGetter getLevel() {
         return null;
     }
 }

@@ -3,16 +3,15 @@ package com.chyzman.chowl.core.util;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import net.minecraft.util.Pair;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import net.minecraft.util.Tuple;
 
 public final class BigIntUtils {
-    private static final LoadingCache<Pair<BigInteger, BigInteger>, BigInteger> CAPACITY_CACHE = CacheBuilder.newBuilder()
+    private static final LoadingCache<Tuple<BigInteger, BigInteger>, BigInteger> CAPACITY_CACHE = CacheBuilder.newBuilder()
         .concurrencyLevel(1)
         .maximumSize(200)
-        .build(CacheLoader.from(input ->  BigIntUtils.pow(BigInteger.TWO, input.getLeft()).multiply(input.getRight())));
+        .build(CacheLoader.from(input ->  BigIntUtils.pow(BigInteger.TWO, input.getA()).multiply(input.getB())));
 
     private static final BigDecimal LOG10_OF_2 = BigDecimal.valueOf(Math.log10(2));
 
@@ -29,7 +28,7 @@ public final class BigIntUtils {
     }
 
     public static BigInteger powOf2(BigInteger multiplier, BigInteger exponent) {
-        return CAPACITY_CACHE.getUnchecked(new Pair<>(exponent, multiplier));
+        return CAPACITY_CACHE.getUnchecked(new Tuple<>(exponent, multiplier));
     }
 
     public static BigInteger pow(BigInteger base, BigInteger exponent) {

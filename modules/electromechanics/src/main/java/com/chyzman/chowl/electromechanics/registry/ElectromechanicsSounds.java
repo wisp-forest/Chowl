@@ -2,17 +2,17 @@ package com.chyzman.chowl.electromechanics.registry;
 
 import com.chyzman.chowl.electromechanics.Electromechanics;
 import io.wispforest.owo.registration.reflect.AutoRegistryContainer;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.sound.SoundEvent;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.sounds.SoundEvent;
 
 public class ElectromechanicsSounds implements AutoRegistryContainer<SoundEvent> {
 
-    public static final SoundEvent BLOCK_KNOCKER_CLICK = SoundEvent.of(Electromechanics.id("block.knocker.click"));
+    public static final SoundEvent BLOCK_KNOCKER_CLICK = SoundEvent.createVariableRangeEvent(Electromechanics.id("block.knocker.click"));
 
     @Override
     public Registry<SoundEvent> getRegistry() {
-        return Registries.SOUND_EVENT;
+        return BuiltInRegistries.SOUND_EVENT;
     }
 
     @Override

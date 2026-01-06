@@ -1,9 +1,8 @@
 package com.chyzman.chowl.core.block.api;
 
-import net.minecraft.block.BlockState;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class FluidFillHandler {
     private static final List<CanFill> PREDICATES = new ArrayList<>();

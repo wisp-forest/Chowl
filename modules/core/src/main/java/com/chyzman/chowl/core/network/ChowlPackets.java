@@ -9,8 +9,6 @@ import com.chyzman.chowl.core.attachables.network.C2S.C2SPlayerInteractAttachabl
 import io.wispforest.owo.network.OwoNetChannel;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 
 public class ChowlPackets {
     public static final OwoNetChannel CHANNEL = OwoNetChannel.create(Chowl.id("main"));

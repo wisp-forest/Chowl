@@ -1,24 +1,21 @@
 package com.chyzman.chowl.core.attachables.api.client;
 
 import com.chyzman.chowl.core.attachables.api.Attachable;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.VertexRendering;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public interface AttachableRenderer<T extends Attachable> {
-    void render(T attachable, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay);
+    void render(T attachable, float tickDelta, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay);
 
-    void renderOutline(T attachable, Camera camera, VertexConsumerProvider.Immediate vertexConsumers, MatrixStack matrices);
+    void renderOutline(T attachable, Camera camera, MultiBufferSource.BufferSource vertexConsumers, PoseStack matrices);
 
     default boolean rendersOutsideBoundingBox(T attachable) {
         return false;
@@ -28,11 +25,11 @@ public interface AttachableRenderer<T extends Attachable> {
         return 64;
     }
 
-    default boolean isInRenderDistance(T attachable, Vec3d pos) {
-        return attachable.getClosestPointTo(pos).isInRange(pos, this.getRenderDistance());
+    default boolean isInRenderDistance(T attachable, Vec3 pos) {
+        return attachable.getClosestPointTo(pos).closerThan(pos, this.getRenderDistance());
     }
 
-    static void drawDebugVector(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vec3d pos, Quaternionf rotation) {
+    static void drawDebugVector(PoseStack matrices, MultiBufferSource vertexConsumers, Vec3 pos, Quaternionf rotation) {
         // FIXME: I'm too tired to figure this one out today
         /*if (!MinecraftClient.getInstance().getEntityRenderDispatcher().shouldRenderHitboxes()) return;
         VertexRendering.drawVector(
@@ -44,7 +41,7 @@ public interface AttachableRenderer<T extends Attachable> {
         );*/
     }
 
-    static void drawDebugBoundingBox(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Vec3d pos, Quaternionf rotation, Box shape) {
+    static void drawDebugBoundingBox(PoseStack matrices, MultiBufferSource vertexConsumers, Vec3 pos, Quaternionf rotation, AABB shape) {
         // FIXME: I'm too tired to figure this one out today
         /*if (!MinecraftClient.getInstance().getEntityRenderDispatcher().shouldRenderHitboxes()) return;
         matrices.push();

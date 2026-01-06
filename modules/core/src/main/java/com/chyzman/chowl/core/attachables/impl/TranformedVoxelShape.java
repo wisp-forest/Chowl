@@ -1,34 +1,34 @@
 package com.chyzman.chowl.core.attachables.impl;
 
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 
 import java.util.Objects;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public record TranformedVoxelShape(
         VoxelShape shape,
         Quaternionf rotation
 ) {
     @Nullable
-    public Vec3d raycast(Vec3d start, Vec3d end, Vec3d pos) {
+    public Vec3 raycast(Vec3 start, Vec3 end, Vec3 pos) {
         if (this.shape().isEmpty()) return null;
-        var realStart = new Vec3d(rotation.transformInverse(start.subtract(pos).toVector3f())).add(pos);
-        var realEnd = new Vec3d(rotation.transformInverse(end.subtract(pos).toVector3f())).add(pos);
-        var hitPos = this.shape.getBoundingBoxes()
+        var realStart = new Vec3(rotation.transformInverse(start.subtract(pos).toVector3f())).add(pos);
+        var realEnd = new Vec3(rotation.transformInverse(end.subtract(pos).toVector3f())).add(pos);
+        var hitPos = this.shape.toAabbs()
                 .stream()
-                .map(box -> box.offset(pos).raycast(realStart, realEnd).orElse(null))
+                .map(box -> box.move(pos).clip(realStart, realEnd).orElse(null))
                 .filter(Objects::nonNull)
                 .reduce(realEnd, (best, current) -> current.distanceTo(realStart) < best.distanceTo(realStart) ? current : best);
         if (hitPos.equals(realEnd)) return null;
-        return new Vec3d(rotation.transform(hitPos.subtract(pos).toVector3f())).add(pos);
+        return new Vec3(rotation.transform(hitPos.subtract(pos).toVector3f())).add(pos);
     }
 
     @Nullable
-    public Vec3d getClosestPointTo(Vec3d pos) {
-        return this.shape.getClosestPointTo(new Vec3d(rotation.transformInverse(pos.subtract(pos).toVector3f())).add(pos))
-                .map(v -> new Vec3d(rotation.transform(v.toVector3f())).add(pos))
+    public Vec3 getClosestPointTo(Vec3 pos) {
+        return this.shape.closestPointTo(new Vec3(rotation.transformInverse(pos.subtract(pos).toVector3f())).add(pos))
+                .map(v -> new Vec3(rotation.transform(v.toVector3f())).add(pos))
                 .orElse(null);
     }
 }

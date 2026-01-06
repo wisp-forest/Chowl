@@ -6,8 +6,8 @@ import com.chyzman.chowl.core.registry.ChowlRegistries;
 import com.chyzman.chowl.test.ChowlTest;
 import com.chyzman.chowl.test.multipart.FramePanel;
 import com.chyzman.chowl.test.multipart.TestPart;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.core.Registry;
+import net.minecraft.core.Vec3i;
 
 public class TestParts {
     public static final PartType<TestPart> TEST_PART = register("test_part", new PartType<>(TestPart.ENDEC, (parts) -> {

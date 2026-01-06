@@ -1,16 +1,17 @@
 package com.chyzman.chowl.test.mixin;
 
-import net.minecraft.client.render.item.ItemRenderState;
-import net.minecraft.client.render.item.model.special.SpecialModelRenderer;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ItemRenderState.class)
+@Mixin(ItemStackRenderState.class)
 public interface ItemRenderStateAccessor {
-    @Accessor ItemRenderState.LayerRenderState[] getLayers();
+    @Accessor ItemStackRenderState.LayerRenderState[] getLayers();
 
-    @Mixin(ItemRenderState.LayerRenderState.class)
+    @Mixin(ItemStackRenderState.LayerRenderState.class)
     interface LayerRenderStateAccessor {
-        @Accessor SpecialModelRenderer<Object> getSpecialModelType();
+        @Accessor
+        SpecialModelRenderer<Object> getSpecialRenderer();
     }
 }

@@ -5,32 +5,24 @@ import com.chyzman.chowl.core.registry.ChowlRegistries;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
 import io.wispforest.owo.serialization.endec.MinecraftEndecs;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.crash.CrashCallable;
-import net.minecraft.util.crash.CrashReportSection;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.HeightLimitView;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class Part {
     public static final Endec<List<Part>> SET_ENDEC = Endec.dispatchedStruct(
@@ -55,7 +47,7 @@ public abstract class Part {
     protected final List<Part> subParts;
     protected @Nullable BlockPos pos;
     protected @Nullable MultipartHolderBlockEntity holder;
-    protected @Nullable World world;
+    protected @Nullable Level level;
     protected @Nullable VoxelShape shapeCache = null;
 
     /**
@@ -78,8 +70,8 @@ public abstract class Part {
         }
 
         this.holder = holder;
-        this.pos = holder.getPos();
-        this.world = holder.getWorld();
+        this.pos = holder.getBlockPos();
+        this.level = holder.getLevel();
 
         return this;
     }
@@ -100,12 +92,12 @@ public abstract class Part {
         return holder;
     }
 
-    public @Nullable World getWorld() {
-        return world;
+    public @Nullable Level getLevel() {
+        return level;
     }
 
     public boolean hasWorld() {
-        return world != null;
+        return level != null;
     }
 
     public void addSubPart(Part part) {
@@ -117,17 +109,17 @@ public abstract class Part {
         return subParts;
     }
 
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        return ActionResult.PASS;
+    public InteractionResult onUse(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+        return InteractionResult.PASS;
     }
 
-    public ActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        return ActionResult.PASS_TO_DEFAULT_BLOCK_ACTION;
+    public InteractionResult onUseWithItem(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
-    public abstract VoxelShape getPartOutlineShape(List<Part> otherParts, BlockView world, BlockPos pos, ShapeContext context);
+    public abstract VoxelShape getPartOutlineShape(List<Part> otherParts, BlockGetter world, BlockPos pos, CollisionContext context);
 
-    public VoxelShape getOutlineShape(List<Part> otherParts, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getOutlineShape(List<Part> otherParts, BlockGetter world, BlockPos pos, CollisionContext context) {
         if (shapeCache != null) return shapeCache;
 
         List<VoxelShape> partsShapes = subParts.stream().map(part -> part.getOutlineShape(subParts, world, pos, context)).collect(Collectors.toList());
@@ -143,20 +135,20 @@ public abstract class Part {
         this.shapeCache = shape;
     }
 
-    public void populateCrashReport(CrashReportSection crashReportSection) {
+    public void populateCrashReport(CrashReportCategory crashReportSection) {
         if (isInitialized()) {
-            holder.populateCrashReport(crashReportSection);
+            holder.fillCrashReportCategory(crashReportSection);
         }
 
-        crashReportSection.add("(Chowl) Part Name", this::getNameForReport);
+        crashReportSection.setDetail("(Chowl) Part Name", this::getNameForReport);
     }
 
     private @NotNull String getNameForReport() {
-        return ChowlRegistries.PART.getId(this.getType()) + " // " + this.getClass().getCanonicalName();
+        return ChowlRegistries.PART.getKey(this.getType()) + " // " + this.getClass().getCanonicalName();
     }
 
     @SuppressWarnings("unchecked")
     private static StructEndec<Part> getPartEndec(Identifier identifier) {
-        return (StructEndec<Part>) ChowlRegistries.PART.get(identifier).getEndec();
+        return (StructEndec<Part>) ChowlRegistries.PART.getValue(identifier).getEndec();
     }
 }

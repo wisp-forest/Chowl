@@ -7,69 +7,69 @@ import com.chyzman.chowl.core.block.api.MultipartHolderBlockWithEntity;
 import com.chyzman.chowl.core.blockentity.MultipartBlockEntity;
 import com.chyzman.chowl.core.pond.ExtendedShapeContext;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class FrameBlock extends MultipartHolderBlockWithEntity {
-    public static final MapCodec<FrameBlock> CODEC = createCodec(FrameBlock::new);
-    public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
-    public static final VoxelShape OUTLINE = VoxelShapes.combine(VoxelShapes.fullCube(), VoxelShapes.union(
-      Block.createCuboidShape(2, 0, 2, 14, 16, 14),
-      Block.createCuboidShape(0, 2, 2, 16, 14, 14),
-      Block.createCuboidShape(2, 2, 0, 14, 14, 16)
+    public static final MapCodec<FrameBlock> CODEC = simpleCodec(FrameBlock::new);
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+    public static final VoxelShape OUTLINE = Shapes.joinUnoptimized(Shapes.block(), Shapes.or(
+      Block.box(2, 0, 2, 14, 16, 14),
+      Block.box(0, 2, 2, 16, 14, 14),
+      Block.box(2, 2, 0, 14, 14, 16)
     ), (a, b) -> a && !b);
 
-    public FrameBlock(Settings settings) {
+    public FrameBlock(Properties settings) {
         super(FrameBlockEntity::new, settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, false));
+        this.registerDefaultState(this.stateDefinition.any().setValue(WATERLOGGED, false));
     }
 
     @Override
-    protected void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-        super.onBlockAdded(state, world, pos, oldState, notify);
+    protected void onPlace(BlockState state, Level world, BlockPos pos, BlockState oldState, boolean notify) {
+        super.onPlace(state, world, pos, oldState, notify);
 
-        if (world instanceof ServerWorld sw) NetworkRegistry.UNIVERSE.getGraphWorld(sw).updateNodes(pos);
+        if (world instanceof ServerLevel sw) NetworkRegistry.UNIVERSE.getGraphWorld(sw).updateNodes(pos);
     }
 
     @Override
-    protected void onStateReplaced(BlockState state, ServerWorld world, BlockPos pos, boolean moved) {
-        super.onStateReplaced(state, world, pos, moved);
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel world, BlockPos pos, boolean moved) {
+        super.affectNeighborsAfterRemoval(state, world, pos, moved);
 
         NetworkRegistry.UNIVERSE.getGraphWorld(world).updateNodes(pos);
     }
 
     @Override
-    protected MapCodec<? extends BlockWithEntity> getCodec() {
+    protected MapCodec<? extends BaseEntityBlock> codec() {
         return CODEC;
     }
 
     @Override
-    public VoxelShape getBlockOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getBlockOutlineShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return OUTLINE;
     }
 
     @Override
-    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         if (((ExtendedShapeContext) context).chowl$isHolding(stack -> stack.getItem() instanceof Multipart<?>)) {
-            return VoxelShapes.fullCube();
+            return Shapes.block();
         }
 
-        return super.getOutlineShape(state, world, pos, context);
+        return super.getShape(state, world, pos, context);
     }
 
     /*@Override
@@ -99,20 +99,20 @@ public class FrameBlock extends MultipartHolderBlockWithEntity {
     }*/
 
     @Override
-    public @Nullable BlockState getPlacementState(ItemPlacementContext ctx) {
-        BlockPos blockPos = ctx.getBlockPos();
-        FluidState fluidState = ctx.getWorld().getFluidState(blockPos);
+    public @Nullable BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        BlockPos blockPos = ctx.getClickedPos();
+        FluidState fluidState = ctx.getLevel().getFluidState(blockPos);
 
-        return this.getDefaultState().with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER);
+        return this.defaultBlockState().setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(WATERLOGGED);
     }
 
     @Override
     protected FluidState getFluidState(BlockState state) {
-        return state.get(WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+        return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
     }
 }

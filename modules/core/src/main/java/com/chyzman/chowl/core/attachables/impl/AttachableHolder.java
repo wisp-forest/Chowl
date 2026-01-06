@@ -10,10 +10,10 @@ import io.wispforest.owo.serialization.CodecUtils;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentSyncPredicate;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -74,20 +74,20 @@ public class AttachableHolder {
         }
     }
 
-    static <T, C> T raycast(Vec3d start, Vec3d end, C context, BiFunction<C, BlockPos, T> blockHitFactory, Function<C, T> missFactory) {
+    static <T, C> T raycast(Vec3 start, Vec3 end, C context, BiFunction<C, BlockPos, T> blockHitFactory, Function<C, T> missFactory) {
         if (start.equals(end)) {
             return missFactory.apply(context);
         } else {
-            double startX = MathHelper.lerp(-1.0E-7, end.x, start.x);
-            double startY = MathHelper.lerp(-1.0E-7, end.y, start.y);
-            double startZ = MathHelper.lerp(-1.0E-7, end.z, start.z);
-            double endX = MathHelper.lerp(-1.0E-7, start.x, end.x);
-            double endY = MathHelper.lerp(-1.0E-7, start.y, end.y);
-            double endZ = MathHelper.lerp(-1.0E-7, start.z, end.z);
-            int flooredX = MathHelper.floor(endX);
-            int flooredY = MathHelper.floor(endY);
-            int flooredZ = MathHelper.floor(endZ);
-            BlockPos.Mutable targetPos = new BlockPos.Mutable(flooredX, flooredY, flooredZ);
+            double startX = Mth.lerp(-1.0E-7, end.x, start.x);
+            double startY = Mth.lerp(-1.0E-7, end.y, start.y);
+            double startZ = Mth.lerp(-1.0E-7, end.z, start.z);
+            double endX = Mth.lerp(-1.0E-7, start.x, end.x);
+            double endY = Mth.lerp(-1.0E-7, start.y, end.y);
+            double endZ = Mth.lerp(-1.0E-7, start.z, end.z);
+            int flooredX = Mth.floor(endX);
+            int flooredY = Mth.floor(endY);
+            int flooredZ = Mth.floor(endZ);
+            BlockPos.MutableBlockPos targetPos = new BlockPos.MutableBlockPos(flooredX, flooredY, flooredZ);
             T firstHit = blockHitFactory.apply(context, targetPos);
             if (firstHit != null) {
                 return firstHit;
@@ -96,15 +96,15 @@ public class AttachableHolder {
                 double yDist = startY - endY;
                 double zDist = startZ - endZ;
                 //"sign" = 1 if positive -1 if negative, 0 if zero
-                int xSign = MathHelper.sign(xDist);
-                int ySign = MathHelper.sign(yDist);
-                int zSign = MathHelper.sign(zDist);
+                int xSign = Mth.sign(xDist);
+                int ySign = Mth.sign(yDist);
+                int zSign = Mth.sign(zDist);
                 double s = xSign == 0 ? Double.MAX_VALUE : xSign / xDist;
                 double t = ySign == 0 ? Double.MAX_VALUE : ySign / yDist;
                 double u = zSign == 0 ? Double.MAX_VALUE : zSign / zDist;
-                double v = s * (xSign > 0 ? 1.0 - MathHelper.fractionalPart(endX) : MathHelper.fractionalPart(endX));
-                double w = t * (ySign > 0 ? 1.0 - MathHelper.fractionalPart(endY) : MathHelper.fractionalPart(endY));
-                double x = u * (zSign > 0 ? 1.0 - MathHelper.fractionalPart(endZ) : MathHelper.fractionalPart(endZ));
+                double v = s * (xSign > 0 ? 1.0 - Mth.frac(endX) : Mth.frac(endX));
+                double w = t * (ySign > 0 ? 1.0 - Mth.frac(endY) : Mth.frac(endY));
+                double x = u * (zSign > 0 ? 1.0 - Mth.frac(endZ) : Mth.frac(endZ));
 
                 while (v <= 1.0 || w <= 1.0 || x <= 1.0) {
                     if (v < w) {

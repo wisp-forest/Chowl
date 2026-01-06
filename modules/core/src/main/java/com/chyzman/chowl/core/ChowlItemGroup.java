@@ -4,27 +4,23 @@ import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.itemgroup.OwoItemGroup;
 import io.wispforest.owo.itemgroup.gui.ItemGroupTab;
 import io.wispforest.owo.util.OwoFreezer;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.Items;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.resource.featuretoggle.FeatureSet;
-import net.minecraft.util.Pair;
-
 import java.util.Comparator;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.item.Items;
 
 public class ChowlItemGroup {
     private static Supplier<Icon> CURRENT_ICON = () -> Icon.of(Items.SPONGE);
     private static int ICON_PRIORITY = -1;
 
-    private static final TreeSet<Pair<Consumer<OwoItemGroup>, Integer>> INITIALIZERS = new TreeSet<>(Comparator.comparing(pair -> -pair.getRight()));
+    private static final TreeSet<Tuple<Consumer<OwoItemGroup>, Integer>> INITIALIZERS = new TreeSet<>(Comparator.comparing(pair -> -pair.getB()));
 
     private static final OwoItemGroup GROUP = OwoItemGroup.builder(Chowl.id("group"), ChowlItemGroup::getIcon)
             .initializer(group -> {
                 for (var entry : INITIALIZERS) {
-                    entry.getLeft().accept(group);
+                    entry.getA().accept(group);
                 }
             })
             .tabStackHeight(5)
@@ -47,7 +43,7 @@ public class ChowlItemGroup {
     public static void addInitializer(Consumer<OwoItemGroup> initializer, int priority) {
         OwoFreezer.checkRegister("Chowl item group initializers");
 
-        INITIALIZERS.add(new Pair<>(initializer, priority));
+        INITIALIZERS.add(new Tuple<>(initializer, priority));
     }
 
     private static Icon getIcon() {

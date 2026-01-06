@@ -14,9 +14,9 @@ public class AttachablesEvents {
             var gameRenderer = ctx.gameRenderer();
             if (gameRenderer == null) return;
 
-            var client = gameRenderer.getClient();
+            var client = gameRenderer.getMinecraft();
 
-            var world = client.world;
+            var world = client.level;
             if (world == null) return;
 
             var attachables = world.getAttachedOrCreate(AttachableHolder.TYPE).attachables;
@@ -27,14 +27,14 @@ public class AttachablesEvents {
             var matrices = ctx.matrices();
 
             for (AttachableContainer container : attachables.values()) {
-                matrices.push();
+                matrices.pushPose();
 
-                matrices.translate(gameRenderer.getCamera().getCameraPos().multiply(-1));
+                matrices.translate(gameRenderer.getMainCamera().position().scale(-1));
 
                 //TODO: idk if this should be fixed or dynamic
-                dispatcher.render(container.getContained(), client.getRenderTickCounter().getFixedDeltaTicks(), matrices, ctx.consumers());
+                dispatcher.render(container.getContained(), client.getDeltaTracker().getRealtimeDeltaTicks(), matrices, ctx.consumers());
 
-                matrices.pop();
+                matrices.popPose();
             }
         });
     }

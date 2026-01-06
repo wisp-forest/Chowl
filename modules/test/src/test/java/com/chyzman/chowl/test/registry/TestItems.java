@@ -2,23 +2,23 @@ package com.chyzman.chowl.test.registry;
 
 import com.chyzman.chowl.test.ChowlTest;
 import com.chyzman.chowl.test.item.FramePanelItem;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.Item;
 
 public class TestItems {
     public static final Item FRAME_PANEL = register(
       "frame_panel",
       FramePanelItem::new,
-      new Item.Settings()
+      new Item.Properties()
     );
 
-    private static Item register(String id, ItemFactory factory, Item.Settings settings) {
+    private static Item register(String id, ItemFactory factory, Item.Properties properties) {
         Identifier chowlId = ChowlTest.id(id);
-        return Registry.register(Registries.ITEM, chowlId, factory.create(settings.registryKey(RegistryKey.of(RegistryKeys.ITEM, chowlId))));
+        return Registry.register(BuiltInRegistries.ITEM, chowlId, factory.create(properties.setId(ResourceKey.create(Registries.ITEM, chowlId))));
     }
 
     public static void init() {
@@ -26,6 +26,6 @@ public class TestItems {
 
     @FunctionalInterface
     interface ItemFactory {
-        Item create(Item.Settings settings);
+        Item create(Item.Properties settings);
     }
 }

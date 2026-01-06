@@ -5,15 +5,15 @@ import com.chyzman.chowl.electromechanics.registry.*;
 import io.wispforest.owo.itemgroup.Icon;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
-import static net.minecraft.item.Items.REDSTONE;
+import static net.minecraft.world.item.Items.REDSTONE;
 
 public class Electromechanics implements ModInitializer {
     public static final String MODID = "chowl-electromechanics";
 
     public static Identifier id(String path) {
-        return Identifier.of(MODID, path);
+        return Identifier.fromNamespaceAndPath(MODID, path);
     }
 
     @Override
@@ -29,8 +29,8 @@ public class Electromechanics implements ModInitializer {
 
         ChowlItemGroup.addInitializer(group -> {
             group.addCustomTab(Icon.of(REDSTONE.asItem()), "electromechanics", (context, entries) -> {
-                entries.add(ElectromechanicsItems.KNOCKER);
-                entries.add(ElectromechanicsItems.WATCHER);
+                entries.accept(ElectromechanicsItems.KNOCKER);
+                entries.accept(ElectromechanicsItems.WATCHER);
             }, false);
         }, 70);
     }

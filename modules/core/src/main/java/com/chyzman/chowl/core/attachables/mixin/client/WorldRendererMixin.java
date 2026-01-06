@@ -1,15 +1,12 @@
 package com.chyzman.chowl.core.attachables.mixin.client;
 
-import com.chyzman.chowl.core.attachables.pond.HitResultDuck;
 import com.chyzman.chowl.core.attachables.pond.MinecraftClientDuck;
-import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.*;
-import net.minecraft.client.util.ObjectAllocator;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.hit.BlockHitResult;
+import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
+import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Final;
@@ -19,14 +16,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(WorldRenderer.class)
+@Mixin(LevelRenderer.class)
 public class WorldRendererMixin {
-    @Shadow @Final private MinecraftClient client;
+    @Shadow @Final private Minecraft minecraft;
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/block/entity/BlockEntityRenderManager;configure(Lnet/minecraft/client/render/Camera;)V"))
+    @Inject(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderDispatcher;prepare(Lnet/minecraft/client/Camera;)V"))
     private void configureAttachableRenderDispatcher(
-      ObjectAllocator allocator,
-      RenderTickCounter tickCounter,
+      GraphicsResourceAllocator allocator,
+      DeltaTracker tickCounter,
       boolean renderBlockOutline,
       Camera camera,
       Matrix4f positionMatrix,
@@ -37,10 +34,10 @@ public class WorldRendererMixin {
       boolean renderSky,
       CallbackInfo ci
     ) {
-        ((MinecraftClientDuck) this.client).chowl$getAttachableRenderDispatcher().configure(
-          this.client.world,
+        ((MinecraftClientDuck) this.minecraft).chowl$getAttachableRenderDispatcher().configure(
+          this.minecraft.level,
           camera,
-          this.client.crosshairTarget
+          this.minecraft.hitResult
         );
     }
 

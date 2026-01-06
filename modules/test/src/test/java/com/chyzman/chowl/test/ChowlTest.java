@@ -5,7 +5,7 @@ import com.chyzman.chowl.test.registry.TestBlocks;
 import com.chyzman.chowl.test.registry.TestItems;
 import com.chyzman.chowl.test.registry.TestParts;
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 public class ChowlTest implements ModInitializer {
     public static final String MODID = "chowl-test";
@@ -19,6 +19,6 @@ public class ChowlTest implements ModInitializer {
     }
 
     public static Identifier id(String path) {
-        return Identifier.of(MODID, path);
+        return Identifier.fromNamespaceAndPath(MODID, path);
     }
 }

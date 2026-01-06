@@ -4,12 +4,12 @@ import com.chyzman.chowl.core.multipart.api.Part;
 import com.chyzman.chowl.core.registry.CoreParts;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class EmptyPart extends Part {
     private static EmptyPart INSTANCE;
@@ -25,7 +25,7 @@ public class EmptyPart extends Part {
     }
 
     @Override
-    public VoxelShape getPartOutlineShape(List<Part> otherParts, BlockView world, BlockPos pos, ShapeContext context) {
-        return VoxelShapes.empty();
+    public VoxelShape getPartOutlineShape(List<Part> otherParts, BlockGetter world, BlockPos pos, CollisionContext context) {
+        return Shapes.empty();
     }
 }

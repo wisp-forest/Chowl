@@ -3,12 +3,12 @@ package com.chyzman.chowl.core.attachables.api.client;
 import com.chyzman.chowl.core.attachables.api.Attachable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.item.ItemModelManager;
-import net.minecraft.client.render.block.BlockRenderManager;
-import net.minecraft.client.render.block.entity.BlockEntityRenderManager;
-import net.minecraft.client.render.entity.EntityRenderManager;
-import net.minecraft.client.render.item.ItemRenderer;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.item.ItemModelResolver;
 
 @FunctionalInterface
 @Environment(EnvType.CLIENT)
@@ -19,20 +19,20 @@ public interface AttachableRendererFactory<T extends Attachable> {
     class Context {
         private final AttachableRenderDispatcher renderDispatcher;
         private final ItemRenderer itemRenderer;
-        private final ItemModelManager itemModelManager;
-        private final BlockRenderManager blockRenderManager;
-        private final BlockEntityRenderManager blockEntityRenderManager;
-        private final EntityRenderManager entityRenderManager;
-        private final TextRenderer textRenderer;
+        private final ItemModelResolver itemModelManager;
+        private final BlockRenderDispatcher blockRenderManager;
+        private final BlockEntityRenderDispatcher blockEntityRenderManager;
+        private final EntityRenderDispatcher entityRenderManager;
+        private final Font textRenderer;
 
         public Context(
                 AttachableRenderDispatcher renderDispatcher,
                 ItemRenderer itemRenderer,
-                ItemModelManager itemModelManager,
-                BlockRenderManager blockRenderManager,
-                EntityRenderManager entityRenderManager,
-                BlockEntityRenderManager blockEntityRenderManager,
-                TextRenderer textRenderer
+                ItemModelResolver itemModelManager,
+                BlockRenderDispatcher blockRenderManager,
+                EntityRenderDispatcher entityRenderManager,
+                BlockEntityRenderDispatcher blockEntityRenderManager,
+                Font textRenderer
         ) {
             this.renderDispatcher = renderDispatcher;
             this.itemRenderer = itemRenderer;
@@ -51,23 +51,23 @@ public interface AttachableRendererFactory<T extends Attachable> {
             return this.itemRenderer;
         }
 
-        public ItemModelManager itemModelManager() {
+        public ItemModelResolver itemModelManager() {
             return this.itemModelManager;
         }
 
-        public BlockRenderManager blockRenderManager() {
+        public BlockRenderDispatcher blockRenderManager() {
             return this.blockRenderManager;
         }
 
-        public BlockEntityRenderManager blockEntityRenderDispatcher() {
+        public BlockEntityRenderDispatcher blockEntityRenderDispatcher() {
             return this.blockEntityRenderManager;
         }
 
-        public EntityRenderManager entityRenderDispatcher() {
+        public EntityRenderDispatcher entityRenderDispatcher() {
             return this.entityRenderManager;
         }
 
-        public TextRenderer textRenderer() {
+        public Font textRenderer() {
             return this.textRenderer;
         }
     }

@@ -5,19 +5,21 @@ import com.chyzman.chowl.core.multipart.api.client.PartRendererFactory;
 import com.chyzman.chowl.core.multipart.api.client.render.PartRenderer;
 import com.chyzman.chowl.test.multipart.FramePanel;
 import com.chyzman.chowl.test.registry.TestItems;
-import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.ItemDisplayContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec3d;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.SubmitNodeCollection;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
+import org.jspecify.annotations.NonNull;
+import org.w3c.dom.Text;
 
 public class FramePanelRenderer implements PartRenderer<FramePanel, FramePanelRenderState> {
     private final PartRendererFactory.Context context;
@@ -57,7 +59,13 @@ public class FramePanelRenderer implements PartRenderer<FramePanel, FramePanelRe
     }
 
     @Override
-    public void updateRenderState(@NotNull FramePanel part, @NotNull FramePanelRenderState state, float tickProgress, @NotNull Vec3d cameraPos, ModelCommandRenderer.@Nullable CrumblingOverlayCommand crumblingOverlay) {
+    public void updateRenderState(
+        @NonNull FramePanel part,
+        @NonNull FramePanelRenderState state,
+        float tickProgress,
+        @NotNull Vec3 cameraPos,
+        ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay
+    ) {
         PartRenderer.super.updateRenderState(part, state, tickProgress, cameraPos, crumblingOverlay);
         state.face = part.getFace();
         state.item = part.getItem();
@@ -65,17 +73,17 @@ public class FramePanelRenderer implements PartRenderer<FramePanel, FramePanelRe
         state.count = part.getCount();
         state.size = part.getSize();
 
-        ItemStack stack = TestItems.FRAME_PANEL.getDefaultStack();
-        stack.set(DataComponentTypes.ITEM_MODEL, Chowl.id("panel_base"));
-        context.itemModelResolver().clearAndUpdate(state.removeButtonRenderState, stack, ItemDisplayContext.ON_SHELF, part.getWorld(), part, 0);
+        ItemStack stack = TestItems.FRAME_PANEL.getDefaultInstance();
+        stack.set(DataComponents.ITEM_MODEL, Chowl.id("panel_base"));
+        context.itemModelResolver().updateForTopItem(state.removeButtonRenderState, stack, ItemDisplayContext.ON_SHELF, part.getLevel(), part, 0);
     }
 
     @Override
-    public void renderBaked(FramePanelRenderState renderState, MatrixStack matrices, OrderedRenderCommandQueue queue) {
-        matrices.push();
+    public void renderBaked(FramePanelRenderState renderState, PoseStack matrices, SubmitNodeCollector queue) {
+        matrices.pushPose();
         matrices.translate(0.5, 0.5, 0.5);
 
-        matrices.multiply(switch (renderState.face) {
+        matrices.mulPose(switch (renderState.face) {
             case NORTH -> new Quaternionf();
             case WEST -> new Quaternionf().rotationY((float) (Math.PI / 2));
             case SOUTH -> new Quaternionf().rotationY((float) (Math.PI));
@@ -85,21 +93,21 @@ public class FramePanelRenderer implements PartRenderer<FramePanel, FramePanelRe
         });
 
         matrices.translate(-0.5, -0.5, -0.5);
-        matrices.push();
+        matrices.pushPose();
         matrices.translate(0, 0, -7 / 16f);
 
         // TODO: rendering
 
-        matrices.pop();
-        matrices.pop();
+        matrices.popPose();
+        matrices.popPose();
     }
 
     @Override
-    public void renderUnbaked(FramePanelRenderState renderState, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraRenderState) {
-        matrices.push();
+    public void renderUnbaked(FramePanelRenderState renderState, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraRenderState) {
+        matrices.pushPose();
         matrices.translate(0.5, 0.5, 0.5);
 
-        matrices.multiply(switch (renderState.face) {
+        matrices.mulPose(switch (renderState.face) {
             case NORTH -> new Quaternionf();
             case WEST -> new Quaternionf().rotationY((float) (Math.PI / 2));
             case SOUTH -> new Quaternionf().rotationY((float) (Math.PI));
@@ -118,30 +126,30 @@ public class FramePanelRenderer implements PartRenderer<FramePanel, FramePanelRe
         if (!item.isEmpty()) {
             // context.getItemRenderer().renderItem(item, ModelTransformationMode.FIXED, light, overlay, matrices, vertexConsumers, part.getWorld(), 0);
 
-            matrices.push();
-            int width = context.font().getWidth(item.getName());
+            matrices.pushPose();
+            int width = context.font().width(item.getHoverName());
             matrices.translate(0, -8 / 16f, 0);
             scale = Math.min(1.5f / width, 1 / 32f);
 
             matrices.scale(-scale, -scale, scale);
             // context.getTextRenderer().draw(item.getName(), -width / 2f, 0, 0xFFFFFF, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light, false);
-            matrices.pop();
+            matrices.popPose();
 
-            matrices.push();
-            MutableText count = Text.literal(String.valueOf(renderState.count)).append("/").append(String.valueOf(renderState.size));
-            width = context.font().getWidth(count);
+            matrices.pushPose();
+            var count = Component.literal(String.valueOf(renderState.count)).append("/").append(String.valueOf(renderState.size));
+            width = context.font().width(count);
             matrices.translate(0, 23 / 32f, 0);
             scale = Math.min(1.5f / width, 1 / 32f);
 
             matrices.scale(-scale, -scale, scale);
             // context.getTextRenderer().draw(count, -width / 2f, 0, 0xFFFFFF, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light, false);
-            matrices.pop();
+            matrices.popPose();
         }
-        matrices.pop();
+        matrices.popPose();
     }
 
     @Override
-    public boolean shouldBake(FramePanel part, float tickProgress, Vec3d cameraPos) {
+    public boolean shouldBake(FramePanel part, float tickProgress, Vec3 cameraPos) {
         return true;
     }
 }

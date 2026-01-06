@@ -8,19 +8,19 @@ import com.chyzman.chowl.core.multipart.api.client.render.PartRenderManager;
 import com.chyzman.chowl.core.multipart.api.client.render.PartRenderer;
 import com.chyzman.chowl.core.multipart.api.client.render.state.PartRenderState;
 import com.chyzman.chowl.core.multipart.pond.MinecraftClientDuck;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Vec3d;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class MultipartBlockEntityRenderer implements BlockEntityRenderer<MultipartBlockEntity, MultipartBlockEntityRenderState> {
-    public MultipartBlockEntityRenderer(BlockEntityRendererFactory.Context ignored) {}
+    public MultipartBlockEntityRenderer(BlockEntityRendererProvider.Context ignored) {}
 
     @Override
     public MultipartBlockEntityRenderState createRenderState() {
@@ -28,9 +28,9 @@ public class MultipartBlockEntityRenderer implements BlockEntityRenderer<Multipa
     }
 
     @Override
-    public void updateRenderState(MultipartBlockEntity blockEntity, MultipartBlockEntityRenderState state, float tickProgress, Vec3d cameraPos, @Nullable ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlay) {
-        BlockEntityRenderer.super.updateRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
-        PartRenderDispatcher dispatcher = ((MinecraftClientDuck) MinecraftClient.getInstance()).chowl$getPartRenderDispatcher();
+    public void extractRenderState(MultipartBlockEntity blockEntity, MultipartBlockEntityRenderState state, float tickProgress, Vec3 cameraPos, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
+        BlockEntityRenderer.super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
+        PartRenderDispatcher dispatcher = ((MinecraftClientDuck) Minecraft.getInstance()).chowl$getPartRenderDispatcher();
 
         PartRenderManager.scheduleBlockEntity(blockEntity);
         for (Part part : blockEntity.getParts()) {
@@ -51,15 +51,15 @@ public class MultipartBlockEntityRenderer implements BlockEntityRenderer<Multipa
     }
 
     @Override
-    public void render(@NotNull MultipartBlockEntityRenderState state, @NotNull MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraState) {
-        PartRenderDispatcher dispatcher = ((MinecraftClientDuck) MinecraftClient.getInstance()).chowl$getPartRenderDispatcher();
+    public void submit(@NotNull MultipartBlockEntityRenderState state, @NotNull PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraState) {
+        PartRenderDispatcher dispatcher = ((MinecraftClientDuck) Minecraft.getInstance()).chowl$getPartRenderDispatcher();
 
-        matrices.push();
+        matrices.pushPose();
         for (PartRenderState partState : state.partsToRender) {
-            matrices.push();
+            matrices.pushPose();
             dispatcher.render(partState, matrices, queue, cameraState);
-            matrices.pop();
+            matrices.popPose();
         }
-        matrices.pop();
+        matrices.popPose();
     }
 }

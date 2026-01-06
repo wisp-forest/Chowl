@@ -1,22 +1,22 @@
 package com.chyzman.chowl.core.multipart.layer;
 
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.chunk.UpgradeData;
-import net.minecraft.world.chunk.WorldChunk;
-import net.minecraft.world.tick.ChunkTickScheduler;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.UpgradeData;
+import net.minecraft.world.ticks.LevelChunkTicks;
 
-public class MultipartChunk extends WorldChunk {
-    private WorldChunk mainChunk;
+public class MultipartChunk extends LevelChunk {
+    private LevelChunk mainChunk;
 
     public MultipartChunk(
       MultipartLayer layer,
-      WorldChunk mainChunk,
+      LevelChunk mainChunk,
       ChunkPos pos
     ) {
-        super(layer, pos, UpgradeData.NO_UPGRADE_DATA, new ChunkTickScheduler<>(), new ChunkTickScheduler<>(), 0L, null, null, null);
+        super(layer, pos, UpgradeData.EMPTY, new LevelChunkTicks<>(), new LevelChunkTicks<>(), 0L, null, null, null);
         this.mainChunk = mainChunk;
     }
 
     @Override
-    public void loadEntities() {}
+    public void runPostLoad() {}
 }

@@ -1,18 +1,17 @@
 package com.chyzman.chowl.core.mixin.client;
 
 import com.chyzman.chowl.core.ext.ExtendedParticleSpriteBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.particle.ParticleManager;
-import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.particle.ParticleEngine;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
-@Mixin(ParticleManager.class)
+@Mixin(ParticleEngine.class)
 public class ParticleManagerMixin {
-    @Shadow protected ClientWorld world;
+    @Shadow protected ClientLevel level;
 
     // FIXME
     /*@ModifyArgs(method = {"addBlockBreakingParticles", "method_34020"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/BlockDustParticle;<init>(Lnet/minecraft/client/world/ClientWorld;DDDDDDLnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)V"))

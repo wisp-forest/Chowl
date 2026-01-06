@@ -6,11 +6,10 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import io.wispforest.owo.command.EnumArgumentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandSourceStack;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 public class DebugCommand {
     public static final EnumArgumentType<NumberFormatterTypes> NUMBER_FORMATTER_ARGUMENT_TYPE = EnumArgumentType.create(
@@ -34,9 +33,9 @@ public class DebugCommand {
         });
     }
 
-    public static int formatNumber(CommandContext<ServerCommandSource> context, NumberFormatterTypes type) {
+    public static int formatNumber(CommandContext<CommandSourceStack> context, NumberFormatterTypes type) {
         var number = StringArgumentType.getString(context, "number");
-        context.getSource().sendFeedback(() -> NumberFormatter.format(number, type), false);
+        context.getSource().sendSuccess(() -> NumberFormatter.format(number, type), false);
         return 1;
     }
 }

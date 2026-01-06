@@ -11,18 +11,6 @@ import com.google.common.cache.LoadingCache;
 import io.wispforest.endec.Endec;
 import io.wispforest.endec.StructEndec;
 import io.wispforest.owo.serialization.CodecUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.RaycastContext;
-import net.minecraft.world.World;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -30,6 +18,18 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class Attachable {
     protected static final LoadingCache<Attachable, TranformedVoxelShape> SHAPE_CACHE = CacheBuilder.newBuilder()
@@ -41,7 +41,7 @@ public abstract class Attachable {
     public static final StructEndec<Attachable> ENDEC = Endec.dispatchedStruct(
             attachableType -> attachableType.endec,
             attachableState -> attachableState.type,
-            CodecUtils.toEndec(ChowlRegistries.ATTACHABLE_TYPE.getCodec())
+            CodecUtils.toEndec(ChowlRegistries.ATTACHABLE_TYPE.byNameCodec())
     );
 
     public Attachable(AttachableType<?> type) {
@@ -60,41 +60,41 @@ public abstract class Attachable {
 
     protected abstract TranformedVoxelShape createShape();
 
-    public Vec3d getClosestPointTo(Vec3d point) {
+    public Vec3 getClosestPointTo(Vec3 point) {
         return getShape().getClosestPointTo(point);
     }
 
-    public abstract boolean isSupported(World world);
+    public abstract boolean isSupported(Level world);
 
-    public abstract Vec3d raycast(Vec3d start, Vec3d end);
+    public abstract Vec3 raycast(Vec3 start, Vec3 end);
 
-    public ActionResult onUse(World world, PlayerEntity player, Hand hand, AttachableHitResult hit) {
-        return ActionResult.PASS;
+    public InteractionResult onUse(Level world, Player player, InteractionHand hand, AttachableHitResult hit) {
+        return InteractionResult.PASS;
     }
 
-    public ActionResult onAttack(World world, PlayerEntity player, AttachableHitResult hit) {
-        if (world.isClient()) return ActionResult.SUCCESS;
+    public InteractionResult onAttack(Level world, Player player, AttachableHitResult hit) {
+        if (world.isClientSide()) return InteractionResult.SUCCESS;
 
         var attachableHolder = world.getAttachedOrCreate(AttachableHolder.TYPE);
         attachableHolder.removeAttachable(hit.getContainer().getUuid());
 
-        hit.getAttachable().onBroken(world, hit.getPos());
+        hit.getAttachable().onBroken(world, hit.getLocation());
 
         world.setAttached(AttachableHolder.TYPE, attachableHolder);
 
-        return ActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
-    public abstract void onBroken(World world, Vec3d pos);
+    public abstract void onBroken(Level world, Vec3 pos);
 
-    public static boolean checkForSupport(Attachable attachable, World world, Vec3d pos, Quaternionf rotation) {
-        if (!world.isPosLoaded(BlockPos.ofFloored(pos))) return true;
-        var hit = world.raycast(new RaycastContext(
+    public static boolean checkForSupport(Attachable attachable, Level world, Vec3 pos, Quaternionf rotation) {
+        if (!world.isLoaded(BlockPos.containing(pos))) return true;
+        var hit = world.clip(new ClipContext(
                 pos,
-                pos.add(new Vec3d(rotation.transform(new Vector3f(0, 0.01f, 0)))),
-                RaycastContext.ShapeType.COLLIDER,
-                RaycastContext.FluidHandling.NONE,
-                ShapeContext.absent()
+                pos.add(new Vec3(rotation.transform(new Vector3f(0, 0.01f, 0)))),
+                ClipContext.Block.COLLIDER,
+                ClipContext.Fluid.NONE,
+                CollisionContext.empty()
         ));
         return hit.getType().equals(HitResult.Type.BLOCK) ||
                (((HitResultDuck)hit).chowl$getHitAttachable() != null &&
@@ -110,7 +110,7 @@ public abstract class Attachable {
             double maxZ,
             double scale
     ) {
-        return Block.createCuboidShape(
+        return Block.box(
                 minX / scale,
                 minY / scale,
                 minZ / scale,
@@ -120,7 +120,7 @@ public abstract class Attachable {
         );
     }
 
-    public static Set<ChunkPos> getChunksBetween(Vec3d start, Vec3d end) {
+    public static Set<ChunkPos> getChunksBetween(Vec3 start, Vec3 end) {
         var chunks = new HashSet<ChunkPos>();
 
         var xLength = end.x - start.x;

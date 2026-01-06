@@ -4,10 +4,10 @@ import com.chyzman.chowl.core.multipart.api.client.render.PartRenderer;
 import com.chyzman.chowl.core.multipart.api.client.PartRendererFactory;
 import com.chyzman.chowl.core.multipart.api.client.render.state.PartRenderState;
 import com.chyzman.chowl.test.multipart.TestPart;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Vec3d;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 public class TestPartRenderer implements PartRenderer<TestPart, PartRenderState> {
@@ -23,7 +23,12 @@ public class TestPartRenderer implements PartRenderer<TestPart, PartRenderState>
     }
 
     @Override
-    public void renderBaked(PartRenderState renderState, MatrixStack matrices, OrderedRenderCommandQueue queue) {
+    public void renderBaked(PartRenderState renderState, PoseStack matrices, SubmitNodeCollector queue) {
+
+    }
+
+    @Override
+    public void renderUnbaked(PartRenderState renderState, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraRenderState) {
         /*matrixStack.push();
         matrixStack.scale(0.25f, 0.25f, 0.25f);
         matrixStack.translate(part.getStartPos().getX() / 4f, part.getStartPos().getY() / 4f, part.getStartPos().getZ() / 4f);
@@ -46,12 +51,7 @@ public class TestPartRenderer implements PartRenderer<TestPart, PartRenderState>
     }
 
     @Override
-    public void renderUnbaked(PartRenderState renderState, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraRenderState) {
-
-    }
-
-    @Override
-    public boolean shouldBake(TestPart part, float tickProgress, Vec3d cameraPos) {
+    public boolean shouldBake(TestPart part, float tickProgress, Vec3 cameraPos) {
         return true;
     }
 }

@@ -4,18 +4,18 @@ import com.chyzman.chowl.core.format.number.NumberFormatter;
 import com.chyzman.chowl.core.format.number.api.NumberFormatterType;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import net.minecraft.text.Text;
 import org.jspecify.annotations.NonNull;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashSet;
 import java.util.Set;
+import net.minecraft.network.chat.Component;
 
 public class ScalingNumberFormatterType implements NumberFormatterType {
     private static final int MAX_SEARCH = 10;
 
-    private static final UnitReference DUMMY_UNIT = new UnitReference(Text.empty(), 0);
+    private static final UnitReference DUMMY_UNIT = new UnitReference(Component.empty(), 0);
 
     private final String baseKey;
 
@@ -27,7 +27,7 @@ public class ScalingNumberFormatterType implements NumberFormatterType {
     }
 
     @Override
-    public Text format(String number) {
+    public Component format(String number) {
         var bd = new BigDecimal(number);
         var negative = bd.signum() < 0;
         var abs = bd.abs();
@@ -46,8 +46,8 @@ public class ScalingNumberFormatterType implements NumberFormatterType {
         var rounded = scaled.setScale(NumberFormatter.abbreviation_precision, RoundingMode.DOWN);
         var mantissa = (negative ? "-" : "") + rounded.stripTrailingZeros().toPlainString();
 
-        if (unit.text() == null || unit.text().getString().isEmpty()) return Text.literal(mantissa);
-        return Text.literal(mantissa).append(unit.text());
+        if (unit.text() == null || unit.text().getString().isEmpty()) return Component.literal(mantissa);
+        return Component.literal(mantissa).append(unit.text());
     }
 
     private UnitReference getUnit(int scale) {
@@ -57,13 +57,13 @@ public class ScalingNumberFormatterType implements NumberFormatterType {
         if (cached != null) return cached;
 
         Set<Integer> traversed = new HashSet<>();
-        Text foundLabel = null;
+        Component foundLabel = null;
         Integer foundScale = null;
 
         for (int i = scale; i >= scale - MAX_SEARCH; i--) {
             traversed.add(i);
             String target = baseKey + i;
-            Text label = Text.translatableWithFallback(target, "");
+            Component label = Component.translatableWithFallback(target, "");
             if (!label.getString().isEmpty()) {
                 foundLabel = label;
                 foundScale = i;
@@ -85,5 +85,5 @@ public class ScalingNumberFormatterType implements NumberFormatterType {
         unit_cache.invalidateAll();
     }
 
-    private record UnitReference(Text text, int offset) {}
+    private record UnitReference(Component text, int offset) {}
 }

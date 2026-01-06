@@ -3,40 +3,40 @@ package com.chyzman.chowl.core.registry;
 import com.chyzman.chowl.core.Chowl;
 import com.chyzman.chowl.core.block.FrameBlock;
 import com.chyzman.chowl.core.block.api.FluidFillHandler;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 
 public class CoreBlocks {
     public static final Block DRAWER_FRAME = register(
         "drawer_frame",
         FrameBlock::new,
         //TODO: changed copyshallow to copy, make sure this is ok
-        AbstractBlock.Settings.copy(Blocks.OAK_PLANKS)
-            .nonOpaque()
-            .dynamicBounds()
-            .allowsSpawning(Blocks::never)
-            .solidBlock(Blocks::never)
-            .suffocates(Blocks::never)
-            .blockVision(Blocks::never)
+        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS)
+            .noOcclusion()
+            .dynamicShape()
+            .isValidSpawn(Blocks::never)
+            .isRedstoneConductor(Blocks::never)
+            .isSuffocating(Blocks::never)
+            .isViewBlocking(Blocks::never)
 //      .luminance(FrameBlock.STATE_TO_LUMINANCE)
     );
 
-    private static Block register(String id, BlockFactory factory, AbstractBlock.Settings settings) {
+    private static Block register(String id, BlockFactory factory, BlockBehaviour.Properties settings) {
         Identifier chowlId = Chowl.id(id);
-        Block block = Registry.register(Registries.BLOCK, chowlId, factory.create(settings.registryKey(RegistryKey.of(RegistryKeys.BLOCK, chowlId))));
-        Items.register(block);
+        Block block = Registry.register(BuiltInRegistries.BLOCK, chowlId, factory.create(settings.setId(ResourceKey.create(Registries.BLOCK, chowlId))));
+        Items.registerBlock(block);
         return block;
     }
 
     private static Block registerWithoutItem(String id, Block block) {
-        return Registry.register(Registries.BLOCK, Chowl.id(id), block);
+        return Registry.register(BuiltInRegistries.BLOCK, Chowl.id(id), block);
     }
 
     public static void init() {
@@ -45,6 +45,6 @@ public class CoreBlocks {
 
     @FunctionalInterface
     interface BlockFactory {
-        Block create(Block.Settings settings);
+        Block create(BlockBehaviour.Properties properties);
     }
 }

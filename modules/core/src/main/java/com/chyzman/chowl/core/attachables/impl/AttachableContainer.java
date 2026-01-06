@@ -4,14 +4,13 @@ import com.chyzman.chowl.core.attachables.api.Attachable;
 import io.wispforest.endec.StructEndec;
 import io.wispforest.endec.impl.BuiltInEndecs;
 import io.wispforest.endec.impl.StructEndecBuilder;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
-
 import java.util.*;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ChunkPos;
 
 public class AttachableContainer {
-    private static final Random RANDOM = Random.create();
+    private static final RandomSource RANDOM = RandomSource.create();
 
     private final Attachable contained;
     protected UUID uuid;
@@ -30,7 +29,7 @@ public class AttachableContainer {
     }
 
     public AttachableContainer(Attachable contained) {
-        this(contained, MathHelper.randomUuid(RANDOM));
+        this(contained, Mth.createInsecureUUID(RANDOM));
     }
 
     public Attachable getContained() {

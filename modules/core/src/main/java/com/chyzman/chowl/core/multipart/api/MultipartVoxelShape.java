@@ -1,17 +1,17 @@
 package com.chyzman.chowl.core.multipart.api;
 
 import it.unimi.dsi.fastutil.doubles.DoubleList;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class MultipartVoxelShape extends VoxelShape {
     private final VoxelShape internalShape;
@@ -23,29 +23,29 @@ public class MultipartVoxelShape extends VoxelShape {
     }
 
     public MultipartVoxelShape(List<VoxelShape> shapes, boolean hasBaseShape) {
-        this(shapes.stream().reduce(VoxelShapes::union).orElse(VoxelShapes.empty()), shapes, hasBaseShape);
+        this(shapes.stream().reduce(Shapes::or).orElse(Shapes.empty()), shapes, hasBaseShape);
     }
 
     public MultipartVoxelShape(VoxelShape internalShape, List<VoxelShape> shapes, boolean hasBaseShape) {
-        super(internalShape.voxels);
+        super(internalShape.shape);
         this.internalShape = internalShape;
         this.shapes = List.copyOf(shapes);
         this.hasBaseShape = hasBaseShape;
     }
 
     @Override
-    public DoubleList getPointPositions(Direction.Axis axis) {
-        return internalShape.getPointPositions(axis);
+    public DoubleList getCoords(Direction.Axis axis) {
+        return internalShape.getCoords(axis);
     }
 
     @Override
-    public @Nullable BlockHitResult raycast(Vec3d start, Vec3d end, BlockPos pos) {
+    public @Nullable BlockHitResult clip(Vec3 start, Vec3 end, BlockPos pos) {
         byte i = (byte) (hasBaseShape ? -1 : 0);
         BlockHitResult result = null;
         for (VoxelShape shape : shapes) {
-            BlockHitResult raycastResult = shape.raycast(start, end, pos);
+            BlockHitResult raycastResult = shape.clip(start, end, pos);
             if (raycastResult != null) {
-                end = raycastResult.getPos();
+                end = raycastResult.getLocation();
             }
 
             byte increment = (byte) (i > -1 ? 1 : 0);

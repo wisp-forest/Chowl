@@ -9,7 +9,7 @@ import com.chyzman.chowl.core.registry.CoreBlockEntities;
 import com.chyzman.chowl.core.registry.CoreBlocks;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,8 +22,9 @@ public class Chowl implements ModInitializer {
     @Override
     public void onInitialize() {
         ChowlRegistries.init();
-        CoreBlocks.init();
         CoreBlockEntities.init();
+        CoreBlocks.init();
+
         ChowlPackets.registerCommon();
 
         NetworkRegistry.init();
@@ -34,6 +35,6 @@ public class Chowl implements ModInitializer {
     }
 
     public static Identifier id(String path) {
-        return Identifier.of(MODID, path);
+        return Identifier.fromNamespaceAndPath(MODID, path);
     }
 }

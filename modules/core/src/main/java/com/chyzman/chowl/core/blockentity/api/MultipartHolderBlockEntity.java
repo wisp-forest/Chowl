@@ -3,16 +3,16 @@ package com.chyzman.chowl.core.blockentity.api;
 import com.chyzman.chowl.core.multipart.api.Part;
 import com.chyzman.chowl.core.multipart.api.client.render.PartRenderManager;
 import com.chyzman.chowl.core.multipart.api.client.render.PartRenderer;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class MultipartHolderBlockEntity extends BlockEntity {
     private @Nullable VoxelShape shapeCache = null;
@@ -24,14 +24,14 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void readData(ReadView view) {
-        super.readData(view);
+    protected void loadAdditional(ValueInput view) {
+        super.loadAdditional(view);
 
         parts.clear();
         clearShapeCache();
         if (view.contains("chowl:multipart")) {
-            if (world != null && world.isClient()) {
-                PartRenderManager.markForRebuild(getPos());
+            if (level != null && level.isClientSide()) {
+                PartRenderManager.markForRebuild(getBlockPos());
             }
 
             List<? extends Part> partMap = view.get(Part.SET_ENDEC.keyed("chowl:multipart", Collections.emptyList()));
@@ -41,16 +41,16 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void writeData(WriteView view) {
-        super.writeData(view);
+    protected void saveAdditional(ValueOutput view) {
+        super.saveAdditional(view);
 
         view.put(Part.SET_ENDEC.keyed("chowl:multipart", Collections.emptyList()), parts);
     }
 
     public void markDirtyAndUpdateClients() {
-        super.markDirty();
-        if (world != null) {
-            world.updateListeners(pos, getCachedState(), getCachedState(), 0);
+        super.setChanged();
+        if (level != null) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 0);
         }
     }
 
@@ -59,8 +59,8 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
         markDirtyAndUpdateClients();
         clearShapeCache();
 
-        if (world != null && world.isClient()) {
-            PartRenderManager.markForRebuild(getPos());
+        if (level != null && level.isClientSide()) {
+            PartRenderManager.markForRebuild(getBlockPos());
         }
     }
 
@@ -69,8 +69,8 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
         markDirtyAndUpdateClients();
         clearShapeCache();
 
-        if (world != null && world.isClient()) {
-            PartRenderManager.markForRebuild(getPos());
+        if (level != null && level.isClientSide()) {
+            PartRenderManager.markForRebuild(getBlockPos());
         }
     }
 
@@ -79,8 +79,8 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
         markDirtyAndUpdateClients();
         clearShapeCache();
 
-        if (world != null && world.isClient()) {
-            PartRenderManager.markForRebuild(getPos());
+        if (level != null && level.isClientSide()) {
+            PartRenderManager.markForRebuild(getBlockPos());
         }
     }
 
@@ -101,11 +101,11 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void markRemoved() {
-        if (world != null && world.isClient()) {
-            PartRenderManager.markForRebuild(getPos());
+    public void setRemoved() {
+        if (level != null && level.isClientSide()) {
+            PartRenderManager.markForRebuild(getBlockPos());
         }
 
-        super.markRemoved();
+        super.setRemoved();
     }
 }

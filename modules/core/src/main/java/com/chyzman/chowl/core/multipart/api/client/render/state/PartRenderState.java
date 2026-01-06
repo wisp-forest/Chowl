@@ -2,32 +2,32 @@ package com.chyzman.chowl.core.multipart.api.client.render.state;
 
 import com.chyzman.chowl.core.multipart.api.Part;
 import com.chyzman.chowl.core.multipart.api.PartType;
-import net.minecraft.client.render.command.ModelCommandRenderer;
-import net.minecraft.util.crash.CrashReportSection;
-import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.core.BlockPos;
 
 public class PartRenderState {
-    public BlockPos pos = BlockPos.ORIGIN;
+    public BlockPos pos = BlockPos.ZERO;
     public List<? extends PartRenderState> subParts = Collections.emptyList();
     public PartType<?> type = null; // TODO: Use a default type instead of null
     @Nullable
-    public ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlay;
+    public ModelFeatureRenderer.CrumblingOverlay crumblingOverlay;
 
-    public static void updatePartRenderState(Part part, PartRenderState state, @Nullable ModelCommandRenderer.CrumblingOverlayCommand crumblingOverlay) {
+    public static void updatePartRenderState(Part part, PartRenderState state, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
         state.pos = part.getPos();
         state.type = part.getType();
         state.crumblingOverlay = crumblingOverlay;
     }
 
-    public void populateCrashReport(CrashReportSection crashReportSection) {
-        crashReportSection.add("Part render state class", this.getClass().getCanonicalName());
-        crashReportSection.add("Position", this.pos);
-        crashReportSection.add("Type", this.type);
-        crashReportSection.add("Sub parts", "%s %s".formatted(this.subParts.size(), Arrays.toString(this.subParts.toArray())));
+    public void populateCrashReport(CrashReportCategory crashReportSection) {
+        crashReportSection.setDetail("Part render state class", this.getClass().getCanonicalName());
+        crashReportSection.setDetail("Position", this.pos);
+        crashReportSection.setDetail("Type", this.type);
+        crashReportSection.setDetail("Sub parts", "%s %s".formatted(this.subParts.size(), Arrays.toString(this.subParts.toArray())));
     }
 }

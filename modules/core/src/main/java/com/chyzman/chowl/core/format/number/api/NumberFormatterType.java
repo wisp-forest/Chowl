@@ -1,9 +1,9 @@
 package com.chyzman.chowl.core.format.number.api;
 
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 public interface NumberFormatterType {
-    Text format(String number);
+    Component format(String number);
 
     default void invalidateCache() {}
 }

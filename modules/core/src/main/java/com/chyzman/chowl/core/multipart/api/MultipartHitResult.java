@@ -2,41 +2,41 @@ package com.chyzman.chowl.core.multipart.api;
 
 import com.chyzman.chowl.core.network.codecs.MorePacketCodecs;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class MultipartHitResult extends BlockHitResult {
-    public static final PacketCodec<ByteBuf, MultipartHitResult> PACKET_CODEC = PacketCodec.tuple(
+    public static final StreamCodec<ByteBuf, MultipartHitResult> PACKET_CODEC = StreamCodec.composite(
       MorePacketCodecs.VEC_3D,
-      MultipartHitResult::getPos,
-      Direction.PACKET_CODEC,
-      MultipartHitResult::getSide,
-      BlockPos.PACKET_CODEC,
+      MultipartHitResult::getLocation,
+      Direction.STREAM_CODEC,
+      MultipartHitResult::getDirection,
+      BlockPos.STREAM_CODEC,
       MultipartHitResult::getBlockPos,
-      PacketCodecs.BYTE_ARRAY,
+      ByteBufCodecs.BYTE_ARRAY,
       MultipartHitResult::getPart,
-      PacketCodecs.BOOLEAN,
-      MultipartHitResult::isInsideBlock,
-      PacketCodecs.BOOLEAN,
-      MultipartHitResult::isAgainstWorldBorder,
+      ByteBufCodecs.BOOL,
+      MultipartHitResult::isInside,
+      ByteBufCodecs.BOOL,
+      MultipartHitResult::isWorldBorderHit,
       MultipartHitResult::new
     );
 
     private final byte[] part;
 
     public MultipartHitResult(BlockHitResult result, byte[] part) {
-        this(result.getPos(), result.getSide(), result.getBlockPos(), part, result.isInsideBlock(), result.isAgainstWorldBorder());
+        this(result.getLocation(), result.getDirection(), result.getBlockPos(), part, result.isInside(), result.isWorldBorderHit());
     }
 
-    public MultipartHitResult(Vec3d pos, Direction side, BlockPos blockPos, byte[] part, boolean insideBlock) {
+    public MultipartHitResult(Vec3 pos, Direction side, BlockPos blockPos, byte[] part, boolean insideBlock) {
         this(pos, side, blockPos, part, insideBlock, false);
     }
 
-    public MultipartHitResult(Vec3d pos, Direction side, BlockPos blockPos, byte[] part, boolean insideBlock, boolean againstWorldBorder) {
+    public MultipartHitResult(Vec3 pos, Direction side, BlockPos blockPos, byte[] part, boolean insideBlock, boolean againstWorldBorder) {
         super(pos, side, blockPos, insideBlock, againstWorldBorder);
         this.part = part;
     }
