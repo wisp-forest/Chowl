@@ -13,7 +13,7 @@ extensions.configure<LoomGradleExtensionAPI> {
             ideConfigGenerated(true)
             name("Testmod Client")
             runDir("../../run")
-            source("testmod")
+            source("test")
         }
 
         create("testmodServer") {
@@ -21,7 +21,7 @@ extensions.configure<LoomGradleExtensionAPI> {
             ideConfigGenerated(true)
             name("Testmod Server")
             runDir("../../run")
-            source("testmod")
+            source("test")
         }
 
         /*maybeCreate("clientRenderDoc").apply {
@@ -41,7 +41,7 @@ extensions.configure<LoomGradleExtensionAPI> {
             vmArg("-Dfabric.log.disableAnsi=false")
             vmArg("-Dmixin.debug.export=true")
             runDir("../../run")
-            source("testmod")
+            source("test")
         }
 
         configureEach {

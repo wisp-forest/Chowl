@@ -1,7 +1,6 @@
 package com.chyzman.chowl.core.multipart.api.client.render;
 
 import com.chyzman.chowl.core.multipart.api.Part;
-import com.chyzman.chowl.core.multipart.api.client.PartRendererFactory;
 import com.chyzman.chowl.core.multipart.api.client.render.state.PartRenderState;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -16,11 +15,11 @@ import org.jetbrains.annotations.Nullable;
 public interface PartRenderer<T extends Part, S extends PartRenderState> {
     @NotNull S createRenderState();
 
-    default void updateRenderState(@NotNull T part, @NotNull S state, float tickProgress, @NotNull Vec3 cameraPos, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
+    default void extractRenderState(@NotNull T part, @NotNull S state, float tickProgress, @NotNull Vec3 cameraPos, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
         PartRenderState.updatePartRenderState(part, state, crumblingOverlay);
     }
 
-    default void updateBakedRenderState(@NotNull T part, @NotNull S state) {
+    default void extractBakingRenderState(@NotNull T part, @NotNull S state) {
         PartRenderState.updatePartRenderState(part, state, null);
     }
 
@@ -35,13 +34,13 @@ public interface PartRenderer<T extends Part, S extends PartRenderState> {
 
     /**
      * Handles invalidation and passing of rendered vertices to the baking system.
-     * Override {@link #renderBaked(PartRenderState, PoseStack, SubmitNodeCollector)} and
-     * {@link #renderUnbaked(PartRenderState, PoseStack, SubmitNodeCollector, CameraRenderState)} instead of this method.
+     * Override {@link #submitForBaking(PartRenderState, PoseStack, SubmitNodeCollector)} and
+     * {@link #submitForRendering(PartRenderState, PoseStack, SubmitNodeCollector, CameraRenderState)} instead of this method.
      */
     @ApiStatus.Internal
     @ApiStatus.NonExtendable
     default void render(S renderState, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraRenderState) {
-        renderUnbaked(renderState, matrices, queue, cameraRenderState);
+        submitForRendering(renderState, matrices, queue, cameraRenderState);
     }
 
     /**
@@ -51,14 +50,14 @@ public interface PartRenderer<T extends Part, S extends PartRenderState> {
      * You must use the provided VertexConsumerProvider and MatrixStack to render your vertices - any use of Tessellator
      * or RenderSystem here will not work. If you need custom rendering settings, you can use a custom RenderLayer.
      */
-    void renderBaked(S renderState, PoseStack matrices, SubmitNodeCollector queue);
+    void submitForBaking(S renderState, PoseStack matrices, SubmitNodeCollector queue);
 
     /**
      * Render vertices immediately. This works exactly the same way as a normal BER render method, and can be used for dynamic
      * rendering that changes every frame. In this method you can also check for render invalidation and call {@link PartRenderManager#markForRebuild(BlockPos)}
      * as appropriate.
      */
-    void renderUnbaked(S renderState, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraRenderState);
+    void submitForRendering(S renderState, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraRenderState);
 
     /**
      * Defines if the part should be baked. This is only checked when baking is required.

@@ -23,12 +23,7 @@ public class TestPartRenderer implements PartRenderer<TestPart, PartRenderState>
     }
 
     @Override
-    public void renderBaked(PartRenderState renderState, PoseStack matrices, SubmitNodeCollector queue) {
-
-    }
-
-    @Override
-    public void renderUnbaked(PartRenderState renderState, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraRenderState) {
+    public void submitForBaking(PartRenderState renderState, PoseStack matrices, SubmitNodeCollector queue) {
         /*matrixStack.push();
         matrixStack.scale(0.25f, 0.25f, 0.25f);
         matrixStack.translate(part.getStartPos().getX() / 4f, part.getStartPos().getY() / 4f, part.getStartPos().getZ() / 4f);
@@ -48,6 +43,11 @@ public class TestPartRenderer implements PartRenderer<TestPart, PartRenderState>
         }
 
         matrixStack.pop();*/
+    }
+
+    @Override
+    public void submitForRendering(PartRenderState renderState, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraRenderState) {
+
     }
 
     @Override

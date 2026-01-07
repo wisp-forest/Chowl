@@ -2,7 +2,6 @@ package com.chyzman.chowl.core.client;
 
 import com.chyzman.chowl.core.attachables.impl.AttachablesEvents;
 import com.chyzman.chowl.core.multipart.api.client.render.PartRenderManager;
-import com.chyzman.chowl.core.multipart.api.client.render.PartRenderer;
 import com.chyzman.chowl.core.client.render.block.entity.MultipartBlockEntityRenderer;
 import com.chyzman.chowl.core.network.ChowlPackets;
 import com.chyzman.chowl.core.registry.CoreBlockEntities;
@@ -22,8 +21,10 @@ public class ChowlClient implements ClientModInitializer {
         AttachablesEvents.clientInit();
 
         BlockEntityRenderers.register(CoreBlockEntities.MULTIPART, MultipartBlockEntityRenderer::new);
+        BlockEntityRenderers.register(CoreBlockEntities.FRAME, MultipartBlockEntityRenderer::new);
 
         WorldRenderEvents.END_EXTRACTION.register(PartRenderManager::extract);
+        WorldRenderEvents.AFTER_ENTITIES.register(PartRenderManager::submit);
         WorldRenderEvents.AFTER_ENTITIES.register(PartRenderManager::render);
         InvalidateRenderStateCallback.EVENT.register(PartRenderManager::reset);
     }

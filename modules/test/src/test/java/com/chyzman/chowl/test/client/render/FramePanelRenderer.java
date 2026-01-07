@@ -6,10 +6,12 @@ import com.chyzman.chowl.core.multipart.api.client.render.PartRenderer;
 import com.chyzman.chowl.test.multipart.FramePanel;
 import com.chyzman.chowl.test.registry.TestItems;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.SubmitNodeCollection;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -19,7 +21,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.jspecify.annotations.NonNull;
-import org.w3c.dom.Text;
 
 public class FramePanelRenderer implements PartRenderer<FramePanel, FramePanelRenderState> {
     private final PartRendererFactory.Context context;
@@ -59,27 +60,47 @@ public class FramePanelRenderer implements PartRenderer<FramePanel, FramePanelRe
     }
 
     @Override
-    public void updateRenderState(
+    public void extractRenderState(
         @NonNull FramePanel part,
         @NonNull FramePanelRenderState state,
         float tickProgress,
         @NotNull Vec3 cameraPos,
         ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay
     ) {
-        PartRenderer.super.updateRenderState(part, state, tickProgress, cameraPos, crumblingOverlay);
+        PartRenderer.super.extractRenderState(part, state, tickProgress, cameraPos, crumblingOverlay);
         state.face = part.getFace();
         state.item = part.getItem();
         state.upgrades = part.getUpgrades();
         state.count = part.getCount();
         state.size = part.getSize();
+        //noinspection DataFlowIssue
+        state.lightmapCoordinates = part.getLevel() != null ? LevelRenderer.getLightColor(part.getLevel(), part.getPos()) : 15728880;
 
         ItemStack stack = TestItems.FRAME_PANEL.getDefaultInstance();
         stack.set(DataComponents.ITEM_MODEL, Chowl.id("panel_base"));
-        context.itemModelResolver().updateForTopItem(state.removeButtonRenderState, stack, ItemDisplayContext.ON_SHELF, part.getLevel(), part, 0);
+        context.itemModelResolver().updateForTopItem(state.itemRenderStates.getOrCreate("remove"), stack, ItemDisplayContext.FIXED, part.getLevel(), part, 0);
+        context.itemModelResolver().updateForTopItem(state.itemRenderStates.getOrCreate("item"), state.item, ItemDisplayContext.FIXED, part.getLevel(), part, 0);
     }
 
     @Override
-    public void renderBaked(FramePanelRenderState renderState, PoseStack matrices, SubmitNodeCollector queue) {
+    public void extractBakingRenderState(@NotNull FramePanel part, @NotNull FramePanelRenderState state) {
+        PartRenderer.super.extractBakingRenderState(part, state);
+        state.face = part.getFace();
+        state.item = part.getItem();
+        state.upgrades = part.getUpgrades();
+        state.count = part.getCount();
+        state.size = part.getSize();
+        //noinspection DataFlowIssue
+        state.lightmapCoordinates = part.getLevel() != null ? LevelRenderer.getLightColor(part.getLevel(), part.getPos()) : 15728880;
+
+        ItemStack stack = TestItems.FRAME_PANEL.getDefaultInstance();
+        stack.set(DataComponents.ITEM_MODEL, Chowl.id("panel_base"));
+        context.itemModelResolver().updateForTopItem(state.itemRenderStates.getOrCreate("remove"), stack, ItemDisplayContext.FIXED, part.getLevel(), part, 0);
+        context.itemModelResolver().updateForTopItem(state.itemRenderStates.getOrCreate("item"), state.item, ItemDisplayContext.FIXED, part.getLevel(), part, 0);
+    }
+
+    @Override
+    public void submitForBaking(FramePanelRenderState renderState, PoseStack matrices, SubmitNodeCollector queue) {
         matrices.pushPose();
         matrices.translate(0.5, 0.5, 0.5);
 
@@ -103,7 +124,7 @@ public class FramePanelRenderer implements PartRenderer<FramePanel, FramePanelRe
     }
 
     @Override
-    public void renderUnbaked(FramePanelRenderState renderState, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraRenderState) {
+    public void submitForRendering(FramePanelRenderState renderState, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraRenderState) {
         matrices.pushPose();
         matrices.translate(0.5, 0.5, 0.5);
 
@@ -124,7 +145,7 @@ public class FramePanelRenderer implements PartRenderer<FramePanel, FramePanelRe
 
         ItemStack item = renderState.item;
         if (!item.isEmpty()) {
-            // context.getItemRenderer().renderItem(item, ModelTransformationMode.FIXED, light, overlay, matrices, vertexConsumers, part.getWorld(), 0);
+            renderState.itemRenderStates.get("item").submit(matrices, queue, renderState.lightmapCoordinates, OverlayTexture.NO_OVERLAY, 0);
 
             matrices.pushPose();
             int width = context.font().width(item.getHoverName());
@@ -132,7 +153,7 @@ public class FramePanelRenderer implements PartRenderer<FramePanel, FramePanelRe
             scale = Math.min(1.5f / width, 1 / 32f);
 
             matrices.scale(-scale, -scale, scale);
-            // context.getTextRenderer().draw(item.getName(), -width / 2f, 0, 0xFFFFFF, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light, false);
+            queue.submitText(matrices, -width / 2f, 0, item.getHoverName().getVisualOrderText(), false, Font.DisplayMode.POLYGON_OFFSET, renderState.lightmapCoordinates, 0xFFFFFFFF, 0, 0);
             matrices.popPose();
 
             matrices.pushPose();
@@ -142,7 +163,7 @@ public class FramePanelRenderer implements PartRenderer<FramePanel, FramePanelRe
             scale = Math.min(1.5f / width, 1 / 32f);
 
             matrices.scale(-scale, -scale, scale);
-            // context.getTextRenderer().draw(count, -width / 2f, 0, 0xFFFFFF, false, matrices.peek().getPositionMatrix(), vertexConsumers, TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light, false);
+            queue.submitText(matrices, -width / 2f, 0, count.getVisualOrderText(), false, Font.DisplayMode.POLYGON_OFFSET, renderState.lightmapCoordinates, 0xFFFFFFFF, 0, 0);
             matrices.popPose();
         }
         matrices.popPose();

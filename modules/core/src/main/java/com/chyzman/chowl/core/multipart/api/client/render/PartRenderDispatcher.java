@@ -46,6 +46,7 @@ public class PartRenderDispatcher implements ResourceManagerReloadListener {
     private final EntityRenderDispatcher entityRenderer;
     private final MaterialSet materials;
     private final PlayerSkinRenderCache playerSkinRenderCache;
+    PartRendererFactory.Context context;
 
     public PartRenderDispatcher(
       Font font,
@@ -94,7 +95,7 @@ public class PartRenderDispatcher implements ResourceManagerReloadListener {
 
         Vec3 vec3d = this.cameraPos;
         S blockEntityRenderState = partRenderer.createRenderState();
-        partRenderer.updateRenderState(part, blockEntityRenderState, tickProgress, vec3d, crumblingOverlay);
+        partRenderer.extractRenderState(part, blockEntityRenderState, tickProgress, vec3d, crumblingOverlay);
         return blockEntityRenderState;
     }
 
@@ -106,7 +107,7 @@ public class PartRenderDispatcher implements ResourceManagerReloadListener {
         }
 
         S blockEntityRenderState = partRenderer.createRenderState();
-        partRenderer.updateBakedRenderState(part, blockEntityRenderState);
+        partRenderer.extractBakingRenderState(part, blockEntityRenderState);
         return blockEntityRenderState;
     }
 
@@ -126,7 +127,7 @@ public class PartRenderDispatcher implements ResourceManagerReloadListener {
 
     @Override
     public void onResourceManagerReload(ResourceManager manager) {
-        PartRendererFactory.Context context = new PartRendererFactory.Context(
+        context = new PartRendererFactory.Context(
           this,
           this.blockRenderDispatcher,
           this.blockEntityRenderDispatcher,

@@ -12,7 +12,9 @@
     "accessor.WorldAccessor"
   ],
   "client": [
+    "client.BufferSourceMixin",
     "client.MinecraftClientMixin",
+    "client.MeshDataMixin",
     "client.WorldRendererMixin"
   ],
   "injectors": {

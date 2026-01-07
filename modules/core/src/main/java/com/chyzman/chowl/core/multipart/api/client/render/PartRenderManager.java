@@ -2,10 +2,12 @@ package com.chyzman.chowl.core.multipart.api.client.render;
 
 import com.chyzman.chowl.core.blockentity.api.MultipartHolderBlockEntity;
 import com.chyzman.chowl.core.mixin.client.access.GameRendererAccessor;
-import com.chyzman.chowl.core.mixin.client.access.WorldRendererAccessor;
 import com.chyzman.chowl.core.multipart.api.Part;
+import com.chyzman.chowl.core.multipart.api.client.PartRendererFactory;
 import com.chyzman.chowl.core.multipart.api.client.render.state.PartRenderState;
+import com.chyzman.chowl.core.multipart.pond.BakingBufferSource;
 import com.chyzman.chowl.core.multipart.pond.MinecraftClientDuck;
+import com.chyzman.chowl.core.multipart.pond.PersistentMeshData;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -28,17 +30,21 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.chunk.SectionBuffers;
+import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Tuple;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Matrix4fStack;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -56,6 +62,10 @@ public final class PartRenderManager {
     private static final Set<RenderRegionPos> needsRebuild = Sets.newHashSet();
     private static final Multimap<Long, MultipartHolderBlockEntity> blockEntities = HashMultimap.create();
     private static final Multimap<RenderRegionPos, PartRenderState> bakedRenderStates = HashMultimap.create();
+
+    private static final RenderBuffers renderBuffers = new RenderBuffers(0);
+    private static final SubmitNodeStorage renderQueue = new SubmitNodeStorage();
+    private static FeatureRenderDispatcher renderDispatcher;
 
     private static class CachedVertexConsumerProvider implements MultiBufferSource {
         private final Reference2ReferenceMap<RenderType, ByteBufferBuilder> allocators = new Reference2ReferenceOpenHashMap<>();
@@ -82,11 +92,16 @@ public final class PartRenderManager {
     // private static final CachedVertexConsumerProvider vcp = new CachedVertexConsumerProvider();
 
     private static class RegionBuffer {
-        private final Map<RenderType, SectionBuffers> layerBuffers = new Reference2ReferenceOpenHashMap<>();
-        private final Set<RenderType> uploadedLayers = new ObjectOpenHashSet<>();
+        private final Map<RenderType, MeshData> layerBuffers = new Reference2ReferenceOpenHashMap<>();
+        private boolean uploaded = false;
 
-        // FIXME: send help
-        public void render(RenderType layer, PoseStack matrices) {
+        public void render() {
+            ProfilerFiller profiler = Profiler.get();
+
+            profiler.push("drawing");
+            layerBuffers.forEach(RenderType::draw);
+            profiler.pop();
+
                 /*Framebuffer framebuffer;
                 if (layer instanceof RenderLayer.MultiPhase) {
                     framebuffer = ((RenderLayerMultiPhaseParametersAccessor) (Object) ((MultiPhaseRenderLayerAccessor) layer).getPhases()).getTarget().get();
@@ -163,86 +178,33 @@ public final class PartRenderManager {
                 //VertexBuffer.unbind();*/
         }
 
-        public void upload(RenderType layer, BufferBuilder newBuf) {
-            try (MeshData buffer = newBuf.build()) {
-                    /*if (buffer == null) return;
-
-                    CommandEncoder commandEncoder = RenderSystem.getDevice().createCommandEncoder();
-                    Buffers oldBuffers = this.layerBuffers.get(layer);
-                    if (oldBuffers != null) {
-                        if (oldBuffers.getVertexBuffer().size() < buffer.getBuffer().remaining()) {
-                            oldBuffers.getVertexBuffer().close();
-                            oldBuffers.setVertexBuffer(
-                              RenderSystem.getDevice()
-                                .createBuffer(
-                                  () -> "Glowcase Region vertex buffer - layer: " + layer.getName(),
-                                  GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_COPY_DST,
-                                  buffer.getBuffer()
-                                )
-                            );
-                        } else if (!oldBuffers.getVertexBuffer().isClosed()) {
-                            commandEncoder.writeToBuffer(oldBuffers.getVertexBuffer().slice(), buffer.getBuffer());
-                        }
-
-                        ByteBuffer byteBuffer = buffer.getSortedBuffer();
-                        if (byteBuffer != null) {
-                            if (oldBuffers.getIndexBuffer() != null && oldBuffers.getIndexBuffer().size() >= byteBuffer.remaining()) {
-                                if (!oldBuffers.getIndexBuffer().isClosed()) {
-                                    commandEncoder.writeToBuffer(oldBuffers.getIndexBuffer().slice(), byteBuffer);
-                                }
-                            } else {
-                                if (oldBuffers.getIndexBuffer() != null) {
-                                    oldBuffers.getIndexBuffer().close();
-                                }
-
-                                oldBuffers.setIndexBuffer(
-                                  RenderSystem.getDevice()
-                                    .createBuffer(
-                                      () -> "Glowcase Region index buffer - layer: " + layer.getName(),
-                                      GpuBuffer.USAGE_INDEX | GpuBuffer.USAGE_COPY_DST,
-                                      byteBuffer
-                                    )
-                                );
-                            }
-                        } else if (oldBuffers.getIndexBuffer() != null) {
-                            oldBuffers.getIndexBuffer().close();
-                            oldBuffers.setIndexBuffer(null);
-                        }
-
-                        oldBuffers.setIndexCount(buffer.getDrawParameters().indexCount());
-                        oldBuffers.setIndexType(buffer.getDrawParameters().indexType());
-                    } else {
-                        GpuBuffer vertexBuffer = RenderSystem.getDevice()
-                          .createBuffer(
-                            () -> "Glowcase Region vertex buffer - layer: " + layer.getName(),
-                            GpuBuffer.USAGE_VERTEX | GpuBuffer.USAGE_COPY_DST,
-                            buffer.getBuffer()
-                          );
-                        ByteBuffer sortedBuffer = buffer.getSortedBuffer();
-                        GpuBuffer indexBuffer = sortedBuffer != null
-                          ? RenderSystem.getDevice()
-                          .createBuffer(
-                            () -> "Glowcase Region index buffer - layer: " + layer.getName(),
-                            GpuBuffer.USAGE_INDEX | GpuBuffer.USAGE_COPY_DST,
-                            sortedBuffer
-                          )
-                          : null;
-                        this.layerBuffers.put(layer, new Buffers(vertexBuffer, indexBuffer, buffer.getDrawParameters().indexCount(), buffer.getDrawParameters().indexType()));
-                    }
-
-                    this.uploadedLayers.add(layer);*/
+        public void upload() {
+            ProfilerFiller profiler = Profiler.get();
+            profiler.push("baking");
+            if (renderDispatcher == null) {
+                throw new NullPointerException("Tried to use dispatcher but it was null! Did it submit before extraction?");
             }
+
+            renderDispatcher.renderAllFeatures();
+
+            BakingBufferSource bakingBuffer = (BakingBufferSource) renderBuffers.bufferSource();
+            layerBuffers.putAll(bakingBuffer.chowl$bakeAllBatches());
+
+            uploaded = true;
+            profiler.pop();
         }
 
         public void reset() {
-            layerBuffers.values().forEach(SectionBuffers::close);
+            layerBuffers.forEach((renderType, meshData) -> ((PersistentMeshData) meshData).chowl$close());
             layerBuffers.clear();
-            uploadedLayers.clear();
+            uploaded = false;
         }
     }
 
     public static void scheduleBlockEntity(MultipartHolderBlockEntity blockEntity) {
-        blockEntities.put(ChunkPos.asLong(blockEntity.getBlockPos()), blockEntity);
+        if (!blockEntity.isRemoved()) {
+            blockEntities.put(ChunkPos.asLong(blockEntity.getBlockPos()), blockEntity);
+        }
     }
 
     /**
@@ -266,7 +228,19 @@ public final class PartRenderManager {
 
         float tickProgress = context.tickCounter().getGameTimeDeltaPartialTick(false);
 
-        PartRenderDispatcher dispatcher = ((MinecraftClientDuck) Minecraft.getInstance()).chowl$getPartRenderDispatcher();
+        PartRenderDispatcher partRenderDispatcher = ((MinecraftClientDuck) Minecraft.getInstance()).chowl$getPartRenderDispatcher();
+        if (renderDispatcher == null) {
+            PartRendererFactory.Context renderContext = partRenderDispatcher.context;
+            renderDispatcher = new FeatureRenderDispatcher(
+              renderQueue,
+              renderContext.blockRenderDispatcher(),
+              renderBuffers.bufferSource(),
+              context.gameRenderer().getMinecraft().getAtlasManager(),
+              renderBuffers.outlineBufferSource(),
+              renderBuffers.crumblingBufferSource(),
+              renderContext.font()
+            );
+        }
 
         Vec3 cameraPos = context.gameRenderer().getMainCamera().position();
 
@@ -275,6 +249,7 @@ public final class PartRenderManager {
 
             List<Part> parts = new ArrayList<>();
             for (RenderRegionPos renderRegionPos : needsRebuild) {
+                bakedRenderStates.removeAll(renderRegionPos);
                 if (!isVisiblePos(renderRegionPos, cameraPos)) continue;
 
                 // For the current region, rebuild each render layer using the buffer builders
@@ -293,11 +268,11 @@ public final class PartRenderManager {
                 }
 
                 for (Part part : parts) {
-                    var renderer = dispatcher.get(part);
+                    var renderer = partRenderDispatcher.get(part);
                     if (renderer == null) continue;
 
                     if (renderer.shouldBake(part, tickProgress, cameraPos)) {
-                        bakedRenderStates.put(renderRegionPos, dispatcher.getBakedRenderState(part));
+                        bakedRenderStates.put(renderRegionPos, partRenderDispatcher.getBakedRenderState(part));
                     }
                 }
 
@@ -310,15 +285,16 @@ public final class PartRenderManager {
             profiler.pop();
         }
 
+        blockEntities.clear();
         profiler.pop();
     }
 
-    public static void render(WorldRenderContext wrc) {
+    public static void submit(WorldRenderContext context) {
         try {
-            renderInternal(wrc);
+            submitInternal(context);
         } catch (Exception e) {
-            CrashReport crashReport = CrashReport.forThrowable(e, "Baked Multipart Rendering");
-            CrashReportCategory crashReportSection = crashReport.addCategory("Multipart render details");
+            CrashReport crashReport = CrashReport.forThrowable(e, "Baked Multipart Submit");
+            CrashReportCategory crashReportSection = crashReport.addCategory("Multipart submit details");
             crashReportSection.setDetail(
               "Needs Rebuild",
               needsRebuild.size() + " | " +
@@ -334,13 +310,9 @@ public final class PartRenderManager {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private static void renderInternal(WorldRenderContext context) {
+    private static void submitInternal(WorldRenderContext context) {
         ProfilerFiller profiler = Profiler.get();
         profiler.push("chowl:multipart");
-
-        ClientLevel world = ((WorldRendererAccessor) context.worldRenderer()).getLevel();
-        Vec3 cameraPos = context.gameRenderer().getMainCamera().position();
 
         if (!bakedRenderStates.isEmpty()) {
             profiler.push("rebuild");
@@ -362,6 +334,7 @@ public final class PartRenderManager {
 
                 boolean bakedAnything = false;
 
+                profiler.push("submit");
                 for (var renderState : renderStates) {
                     var renderer = dispatcher.getByRenderState(renderState);
                     if (renderer == null) continue;
@@ -371,13 +344,15 @@ public final class PartRenderManager {
                     bakeMatrices.pushPose();
                     bakeMatrices.translate(pos.getX() & MAX_XZ_IN_REGION, pos.getY(), pos.getZ() & MAX_XZ_IN_REGION);
                     try {
-                        renderer.renderBaked(renderState, bakeMatrices, context.commandQueue());
+                        renderer.submitForBaking(renderState, bakeMatrices, renderQueue);
+
                         bakedAnything = true;
                     } catch (Throwable t) {
-                        LOGGER.error("Block entity renderer threw exception during baking : ", t);
+                        LOGGER.error("Part renderer threw exception during baking!", t);
                     }
                     bakeMatrices.popPose();
                 }
+                profiler.pop();
 
                 if (!bakedAnything) {
                     removing.add(renderRegionPos);
@@ -386,12 +361,8 @@ public final class PartRenderManager {
 
                 RegionBuffer buf = regions.computeIfAbsent(renderRegionPos, k -> new RegionBuffer());
                 buf.reset();
-                // vcp.builders.forEach(buf::upload);
-                // vcp.reset();
             }
 
-            // We've processed all pending rebuilds now
-            needsRebuild.clear();
             // These regions no longer contain anything
             removing.forEach(rrp -> {
                 RegionBuffer buf = regions.get(rrp);
@@ -401,8 +372,28 @@ public final class PartRenderManager {
                 }
             });
 
+            bakedRenderStates.clear();
             profiler.pop();
         }
+
+        profiler.pop();
+    }
+
+    public static void render(WorldRenderContext context) {
+        try {
+            renderInternal(context);
+        } catch (Exception e) {
+            CrashReport crashReport = CrashReport.forThrowable(e, "Baked Multipart Rendering");
+            CrashReportCategory crashReportSection = crashReport.addCategory("Multipart render details");
+            crashReportSection.setDetail("Region count", regions.size());
+
+            throw new ReportedException(crashReport);
+        }
+    }
+
+    private static void renderInternal(WorldRenderContext context) {
+        ProfilerFiller profiler = Profiler.get();
+        Vec3 cameraPos = context.gameRenderer().getMainCamera().position();
 
         if (!regions.isEmpty()) {
             profiler.push("render");
@@ -414,10 +405,11 @@ public final class PartRenderManager {
             GpuBufferSlice originalFog = RenderSystem.getShaderFog();
             RenderSystem.setShaderFog(((GameRendererAccessor) context.gameRenderer()).getFogRenderer().getBuffer(FogRenderer.FogMode.NONE));
             // Iterate over all RegionBuffers, render visible and remove non-visible RegionBuffers
-            PoseStack matrices = context.matrices();
-            matrices.pushPose();
+            Matrix4fStack matrices = RenderSystem.getModelViewStack();
+            matrices.pushMatrix();
             // matrices.multiplyPositionMatrix(context.positionMatrix());
-            matrices.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+            matrices.translate((float) -cameraPos.x, (float) -cameraPos.y, (float) -cameraPos.z);
+
             var iter = regions.object2ReferenceEntrySet().iterator();
             while (iter.hasNext()) {
                 var entry = iter.next();
@@ -425,27 +417,27 @@ public final class PartRenderManager {
                 RegionBuffer regionBuffer = entry.getValue();
                 if (isVisiblePos(entry.getKey(), cameraPos)) {
                     // Iterate over used render layers in the region, render them
-                    matrices.pushPose();
+                    matrices.pushMatrix();
                     matrices.translate(rrp.origin.getX(), rrp.origin.getY(), rrp.origin.getZ());
-                    for (RenderType l : regionBuffer.uploadedLayers) {
-                        regionBuffer.render(l, matrices);
-                    }
-                    matrices.popPose();
+
+                    if (!regionBuffer.uploaded) regionBuffer.upload();
+                    regionBuffer.render();
+
+                    matrices.popMatrix();
                 } else {
                     regionBuffer.reset();
                     iter.remove();
                 }
             }
+
+            //noinspection DataFlowIssue
             RenderSystem.setShaderFog(originalFog);
-            matrices.popPose();
+            matrices.popMatrix();
 
             profiler.pop();
         }
 
         // RenderSystem.setShaderColor(1, 1, 1, 1);
-
-        blockEntities.clear();
-        profiler.pop();
     }
 
     public static void activateRegion(BlockPos pos) {
