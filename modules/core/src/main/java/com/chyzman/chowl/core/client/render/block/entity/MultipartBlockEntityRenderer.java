@@ -15,6 +15,8 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +31,8 @@ public class MultipartBlockEntityRenderer implements BlockEntityRenderer<Multipa
 
     @Override
     public void extractRenderState(MultipartBlockEntity blockEntity, MultipartBlockEntityRenderState state, float tickProgress, Vec3 cameraPos, @Nullable ModelFeatureRenderer.CrumblingOverlay crumblingOverlay) {
+        final ProfilerFiller profiler = Profiler.get();
+        profiler.push("chowl:unbakedPartRenderState");
         BlockEntityRenderer.super.extractRenderState(blockEntity, state, tickProgress, cameraPos, crumblingOverlay);
         PartRenderDispatcher dispatcher = ((MinecraftClientDuck) Minecraft.getInstance()).chowl$getPartRenderDispatcher();
 
@@ -36,30 +40,28 @@ public class MultipartBlockEntityRenderer implements BlockEntityRenderer<Multipa
         for (Part part : blockEntity.getParts()) {
             PartRenderer<Part, PartRenderState> partRenderer = dispatcher.get(part);
             if (partRenderer == null) {
-                /*CrashReport crashReport = CrashReport.create(new IllegalStateException("Part type doesn't have an associated renderer"), "Baked Multipart Rendering");
-                CrashReportSection crashReportSection = crashReport.addElement("Multipart render details");
-                crashReportSection.add("Part class", part.getClass().getCanonicalName());
-                crashReportSection.add("Part type", DataFlow.tryOrDefault(part.getType(), type -> type.getClass().getCanonicalName(), "null"));
-
-                throw new CrashException(crashReport);*/
                 continue;
             }
 
             partRenderer.enteredRenderCycle(part, tickProgress, cameraPos);
             state.partsToRender.add(dispatcher.getRenderState(part, tickProgress, crumblingOverlay));
         }
+        profiler.pop();
     }
 
     @Override
-    public void submit(@NotNull MultipartBlockEntityRenderState state, @NotNull PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraState) {
+    public void submit(@NotNull MultipartBlockEntityRenderState state, @NotNull PoseStack matrices, @NotNull SubmitNodeCollector queue, @NotNull CameraRenderState cameraState) {
+        final ProfilerFiller profiler = Profiler.get();
+        profiler.push("chowl:unbakedPartSubmit");
         PartRenderDispatcher dispatcher = ((MinecraftClientDuck) Minecraft.getInstance()).chowl$getPartRenderDispatcher();
 
         matrices.pushPose();
         for (PartRenderState partState : state.partsToRender) {
             matrices.pushPose();
-            dispatcher.render(partState, matrices, queue, cameraState);
+            dispatcher.submit(partState, matrices, queue, cameraState);
             matrices.popPose();
         }
         matrices.popPose();
+        profiler.pop();
     }
 }

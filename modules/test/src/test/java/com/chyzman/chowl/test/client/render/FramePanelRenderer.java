@@ -10,6 +10,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.component.DataComponents;
@@ -76,27 +77,33 @@ public class FramePanelRenderer implements PartRenderer<FramePanel, FramePanelRe
         //noinspection DataFlowIssue
         state.lightmapCoordinates = part.getLevel() != null ? LevelRenderer.getLightColor(part.getLevel(), part.getPos()) : 15728880;
 
-        ItemStack stack = TestItems.FRAME_PANEL.getDefaultInstance();
-        stack.set(DataComponents.ITEM_MODEL, Chowl.id("panel_base"));
-        context.itemModelResolver().updateForTopItem(state.itemRenderStates.getOrCreate("remove"), stack, ItemDisplayContext.FIXED, part.getLevel(), part, 0);
-        context.itemModelResolver().updateForTopItem(state.itemRenderStates.getOrCreate("item"), state.item, ItemDisplayContext.FIXED, part.getLevel(), part, 0);
+        if (!state.item.isEmpty()) {
+            context.itemModelResolver().updateForTopItem(state.itemRenderStates.getOrCreate("item"), state.item, ItemDisplayContext.FIXED, part.getLevel(), part, 0);
+        }
     }
 
     @Override
     public void extractBakingRenderState(@NotNull FramePanel part, @NotNull FramePanelRenderState state) {
         PartRenderer.super.extractBakingRenderState(part, state);
         state.face = part.getFace();
-        state.item = part.getItem();
-        state.upgrades = part.getUpgrades();
-        state.count = part.getCount();
-        state.size = part.getSize();
         //noinspection DataFlowIssue
         state.lightmapCoordinates = part.getLevel() != null ? LevelRenderer.getLightColor(part.getLevel(), part.getPos()) : 15728880;
 
-        ItemStack stack = TestItems.FRAME_PANEL.getDefaultInstance();
-        stack.set(DataComponents.ITEM_MODEL, Chowl.id("panel_base"));
-        context.itemModelResolver().updateForTopItem(state.itemRenderStates.getOrCreate("remove"), stack, ItemDisplayContext.FIXED, part.getLevel(), part, 0);
-        context.itemModelResolver().updateForTopItem(state.itemRenderStates.getOrCreate("item"), state.item, ItemDisplayContext.FIXED, part.getLevel(), part, 0);
+        FramePanelRenderState.panelRenderState.tryLatch(() -> {
+            ItemStackRenderState renderState = new ItemStackRenderState();
+            ItemStack panel = TestItems.FRAME_PANEL.getDefaultInstance();
+            panel.set(DataComponents.ITEM_MODEL, Chowl.id("panel_base"));
+            context.itemModelResolver().updateForTopItem(renderState, panel, ItemDisplayContext.FIXED, part.getLevel(), part, 0);
+            return renderState;
+        });
+
+        FramePanelRenderState.removeIconRenderState.tryLatch(() -> {
+            ItemStackRenderState renderState = new ItemStackRenderState();
+            ItemStack stack = TestItems.FRAME_PANEL.getDefaultInstance();
+            stack.set(DataComponents.ITEM_MODEL, Chowl.id("remove"));
+            context.itemModelResolver().updateForTopItem(renderState, stack, ItemDisplayContext.FIXED, part.getLevel(), part, 0);
+            return renderState;
+        });
     }
 
     @Override
@@ -113,11 +120,14 @@ public class FramePanelRenderer implements PartRenderer<FramePanel, FramePanelRe
             case DOWN -> new Quaternionf().rotationX((float) (-Math.PI / 2));
         });
 
-        matrices.translate(-0.5, -0.5, -0.5);
+        //matrices.translate(-0.5, -0.5, -0.5);
         matrices.pushPose();
         matrices.translate(0, 0, -7 / 16f);
 
         // TODO: rendering
+        FramePanelRenderState.panelRenderState.get().submit(matrices, queue, renderState.lightmapCoordinates, OverlayTexture.NO_OVERLAY, 0);
+        FramePanelRenderState.removeIconRenderState.get().submit(matrices, queue, renderState.lightmapCoordinates, OverlayTexture.NO_OVERLAY, 0);
+        //renderState.itemRenderStates.get("panel")
 
         matrices.popPose();
         matrices.popPose();

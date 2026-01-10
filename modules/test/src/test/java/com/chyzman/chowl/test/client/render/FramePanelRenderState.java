@@ -2,6 +2,7 @@ package com.chyzman.chowl.test.client.render;
 
 import com.chyzman.chowl.core.multipart.api.client.render.state.PartRenderState;
 import com.chyzman.chowl.test.util.DefaultedMap;
+import com.chyzman.chowl.test.util.LatchingReference;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -15,5 +16,7 @@ public class FramePanelRenderState extends PartRenderState {
     public int size = 64;
     public DefaultedMap<String, ItemStackRenderState> itemRenderStates = new DefaultedMap<>(ItemStackRenderState::new);
     public int lightmapCoordinates;
+    public static LatchingReference<ItemStackRenderState> panelRenderState = new LatchingReference<>(null, false);
+    public static LatchingReference<ItemStackRenderState> removeIconRenderState = new LatchingReference<>(null, false);
 
 }
