@@ -13,8 +13,9 @@
   ],
   "client": [
     "client.BufferSourceMixin",
-    "client.MinecraftClientMixin",
     "client.MeshDataMixin",
+    "client.MinecraftClientMixin",
+    "client.RenderSectionMixin",
     "client.WorldRendererMixin"
   ],
   "injectors": {

@@ -111,7 +111,7 @@ public class PartRenderDispatcher implements ResourceManagerReloadListener {
         return blockEntityRenderState;
     }
 
-    public <S extends PartRenderState> void render(S renderState, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraRenderState) {
+    public <S extends PartRenderState> void submit(S renderState, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraRenderState) {
         PartRenderer<?, S> partRenderer = this.getByRenderState(renderState);
         if (partRenderer != null) {
             try {

@@ -13,16 +13,11 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Object2ReferenceOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldExtractionContext;
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext;
@@ -30,15 +25,12 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.SubmitNodeStorage;
-import net.minecraft.client.renderer.chunk.SectionBuffers;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Tuple;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.ChunkPos;
@@ -53,7 +45,7 @@ public final class PartRenderManager {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     // 2x2 chunks size for regions
-    public static final int REGION_FROM_CHUNK_SHIFT = 1;
+    public static final int REGION_FROM_CHUNK_SHIFT = 5;
     public static final int REGION_SHIFT = 4 + REGION_FROM_CHUNK_SHIFT;
     public static final int MAX_XZ_IN_REGION = (16 << REGION_FROM_CHUNK_SHIFT) - 1;
     public static final int VIEW_RADIUS = 3;
@@ -61,35 +53,11 @@ public final class PartRenderManager {
     private static final Object2ReferenceMap<RenderRegionPos, RegionBuffer> regions = new Object2ReferenceOpenHashMap<>();
     private static final Set<RenderRegionPos> needsRebuild = Sets.newHashSet();
     private static final Multimap<Long, MultipartHolderBlockEntity> blockEntities = HashMultimap.create();
-    private static final Multimap<RenderRegionPos, PartRenderState> bakedRenderStates = HashMultimap.create();
+    private static final Multimap<RenderRegionPos, PartRenderState> bakingRenderStates = HashMultimap.create();
 
     private static final RenderBuffers renderBuffers = new RenderBuffers(0);
     private static final SubmitNodeStorage renderQueue = new SubmitNodeStorage();
     private static FeatureRenderDispatcher renderDispatcher;
-
-    private static class CachedVertexConsumerProvider implements MultiBufferSource {
-        private final Reference2ReferenceMap<RenderType, ByteBufferBuilder> allocators = new Reference2ReferenceOpenHashMap<>();
-        private final Reference2ReferenceMap<RenderType, BufferBuilder> builders = new Reference2ReferenceOpenHashMap<>();
-
-        @Override
-        public VertexConsumer getBuffer(RenderType layer) {
-            return builders.computeIfAbsent(layer, ignored1 -> new BufferBuilder(
-              allocators.computeIfAbsent(layer, ignored2 -> new ByteBufferBuilder(layer.bufferSize())),
-              layer.mode(),
-              layer.format())
-            );
-        }
-
-        /**
-         * Resets the provider so another scene can be rendered
-         */
-        public void reset() {
-            allocators.forEach((layer, allocator) -> allocator.discard());
-            builders.clear();
-        }
-    }
-
-    // private static final CachedVertexConsumerProvider vcp = new CachedVertexConsumerProvider();
 
     private static class RegionBuffer {
         private final Map<RenderType, MeshData> layerBuffers = new Reference2ReferenceOpenHashMap<>();
@@ -98,89 +66,14 @@ public final class PartRenderManager {
         public void render() {
             ProfilerFiller profiler = Profiler.get();
 
-            profiler.push("drawing");
+            profiler.push("chowl:multipart/draw");
             layerBuffers.forEach(RenderType::draw);
             profiler.pop();
-
-                /*Framebuffer framebuffer;
-                if (layer instanceof RenderLayer.MultiPhase) {
-                    framebuffer = ((RenderLayerMultiPhaseParametersAccessor) (Object) ((MultiPhaseRenderLayerAccessor) layer).getPhases()).getTarget().get();
-                } else {
-                    framebuffer = MinecraftClient.getInstance().getFramebuffer();
-                }
-
-                RenderPipeline pipeline;
-                if (layer instanceof RenderLayer.MultiPhase) {
-                    pipeline = ((MultiPhaseRenderLayerAccessor) layer).getPipeline();
-                } else {
-                    pipeline = RenderPipelines.SOLID;
-                }
-
-                layer.startDrawing();
-                GpuBufferSlice gpuBufferSlice = RenderSystem.getDynamicUniforms()
-                  .write(
-                    matrices.peek().getPositionMatrix(),
-                    new Vector4f(1.0F, 1.0F, 1.0F, 1.0F),
-                    RenderSystem.getModelOffset(),
-                    RenderSystem.getTextureMatrix(),
-                    RenderSystem.getShaderLineWidth()
-                  );
-
-                try (RenderPass renderPass = RenderSystem.getDevice()
-                  .createCommandEncoder()
-                  .createRenderPass(
-                    () -> "Glowcase baked BER section layers",
-                    framebuffer.getColorAttachmentView(),
-                    OptionalInt.empty(),
-                    framebuffer.getDepthAttachmentView(),
-                    OptionalDouble.empty()
-                  )) {
-                    Buffers buffers = layerBuffers.get(layer);
-
-                    GpuBuffer indexBuffer;
-                    VertexFormat.IndexType indexType;
-                    if (buffers.getIndexBuffer() == null) {
-                        RenderSystem.ShapeIndexBuffer shapeIndexBuffer = RenderSystem.getSequentialBuffer(layer.getDrawMode());
-                        indexBuffer = shapeIndexBuffer.getIndexBuffer(buffers.getIndexCount());
-                        indexType = shapeIndexBuffer.getIndexType();
-                    } else {
-                        indexBuffer = buffers.getIndexBuffer();
-                        indexType = buffers.getIndexType();
-                    }
-
-                    ScissorState scissorState = RenderSystem.getScissorStateForRenderTypeDraws();
-                    if (scissorState.method_72091()) {
-                        renderPass.enableScissor(scissorState.method_72092(), scissorState.method_72093(), scissorState.method_72094(), scissorState.method_72095());
-                    }
-
-                    for (int j = 0; j < 12; j++) {
-                        GpuTextureView gpuTextureView3 = RenderSystem.getShaderTexture(j);
-                        if (gpuTextureView3 != null) {
-                            renderPass.bindSampler("Sampler" + j, gpuTextureView3);
-                        }
-                    }
-
-                    renderPass.setPipeline(pipeline);
-                    renderPass.setUniform("DynamicTransforms", gpuBufferSlice);
-                    renderPass.setVertexBuffer(0, buffers.getVertexBuffer());
-                    renderPass.setIndexBuffer(indexBuffer, indexType);
-                    RenderSystem.bindDefaultUniforms(renderPass);
-
-                    renderPass.drawIndexed(0, 0, buffers.getIndexCount(), 1);
-                }
-                layer.endDrawing();
-
-                //VertexBuffer buf = layerBuffers.get(layer);
-                //buf.bind();
-                //layer.startDrawing();
-                //buf.draw(matrices.peek().getPositionMatrix(), projectionMatrix, RenderSystem.getShader());
-                //layer.endDrawing();
-                //VertexBuffer.unbind();*/
         }
 
         public void upload() {
             ProfilerFiller profiler = Profiler.get();
-            profiler.push("baking");
+            profiler.push("chowl:multipart/upload");
             if (renderDispatcher == null) {
                 throw new NullPointerException("Tried to use dispatcher but it was null! Did it submit before extraction?");
             }
@@ -208,14 +101,25 @@ public final class PartRenderManager {
     }
 
     /**
-     * Causes the render region containing this Part to be rebuilt -
+     * Causes the render region containing this position to be rebuilt -
      * do not call this too frequently as it will affect performance.
      * An invalidation will not immediately cause the next frame to contain an updated view (and call to renderBaked)
      * as all render region rebuilds must call every BER that is to be rendered, otherwise they will be missing from the
      * vertex buffer.
      */
     public static void markForRebuild(BlockPos pos) {
-        needsRebuild.add(new RenderRegionPos(pos));
+        markForRebuild(new RenderRegionPos(pos));
+    }
+
+    /**
+     * Causes the render region containing this position to be rebuilt -
+     * do not call this too frequently as it will affect performance.
+     * An invalidation will not immediately cause the next frame to contain an updated view (and call to renderBaked)
+     * as all render region rebuilds must call every BER that is to be rendered, otherwise they will be missing from the
+     * vertex buffer.
+     */
+    private static void markForRebuild(RenderRegionPos pos) {
+        needsRebuild.add(pos);
     }
 
     private static boolean isVisiblePos(RenderRegionPos rrp, Vec3 cam) {
@@ -224,7 +128,7 @@ public final class PartRenderManager {
 
     public static void extract(WorldExtractionContext context) {
         ProfilerFiller profiler = Profiler.get();
-        profiler.push("chowl:multipart");
+        profiler.push("chowl:multipart/extract");
 
         float tickProgress = context.tickCounter().getGameTimeDeltaPartialTick(false);
 
@@ -249,7 +153,7 @@ public final class PartRenderManager {
 
             List<Part> parts = new ArrayList<>();
             for (RenderRegionPos renderRegionPos : needsRebuild) {
-                bakedRenderStates.removeAll(renderRegionPos);
+                bakingRenderStates.removeAll(renderRegionPos);
                 if (!isVisiblePos(renderRegionPos, cameraPos)) continue;
 
                 // For the current region, rebuild each render layer using the buffer builders
@@ -263,7 +167,7 @@ public final class PartRenderManager {
                 }
 
                 if (parts.isEmpty()) {
-                    bakedRenderStates.put(renderRegionPos, null);
+                    bakingRenderStates.put(renderRegionPos, null);
                     continue;
                 }
 
@@ -272,7 +176,7 @@ public final class PartRenderManager {
                     if (renderer == null) continue;
 
                     if (renderer.shouldBake(part, tickProgress, cameraPos)) {
-                        bakedRenderStates.put(renderRegionPos, partRenderDispatcher.getBakedRenderState(part));
+                        bakingRenderStates.put(renderRegionPos, partRenderDispatcher.getBakedRenderState(part));
                     }
                 }
 
@@ -300,11 +204,6 @@ public final class PartRenderManager {
               needsRebuild.size() + " | " +
               Arrays.toString(needsRebuild.stream().map(pos -> "(" + pos.x + "," + pos.z + ")").toList().toArray())
             );
-            crashReportSection.setDetail(
-              "Regions",
-              regions.size() + " | " +
-              Arrays.toString(regions.keySet().stream().map(pos -> "(" + pos.x + "," + pos.z + ")").toList().toArray())
-            );
 
             throw new ReportedException(crashReport);
         }
@@ -312,9 +211,9 @@ public final class PartRenderManager {
 
     private static void submitInternal(WorldRenderContext context) {
         ProfilerFiller profiler = Profiler.get();
-        profiler.push("chowl:multipart");
+        profiler.push("chowl:multipart/submit");
 
-        if (!bakedRenderStates.isEmpty()) {
+        if (!bakingRenderStates.isEmpty()) {
             profiler.push("rebuild");
 
             PartRenderDispatcher dispatcher = ((MinecraftClientDuck) Minecraft.getInstance()).chowl$getPartRenderDispatcher();
@@ -323,7 +222,7 @@ public final class PartRenderManager {
             Set<RenderRegionPos> removing = Sets.newHashSet();
             PoseStack bakeMatrices = new PoseStack();
 
-            for (var entry : bakedRenderStates.asMap().entrySet()) {
+            for (var entry : bakingRenderStates.asMap().entrySet()) {
                 RenderRegionPos renderRegionPos = entry.getKey();
                 var renderStates = entry.getValue();
 
@@ -368,11 +267,11 @@ public final class PartRenderManager {
                 RegionBuffer buf = regions.get(rrp);
                 if (buf != null) {
                     buf.reset();
-                    regions.remove(rrp, buf);
+                    regions.remove(rrp);
                 }
             });
 
-            bakedRenderStates.clear();
+            bakingRenderStates.clear();
             profiler.pop();
         }
 
@@ -385,7 +284,11 @@ public final class PartRenderManager {
         } catch (Exception e) {
             CrashReport crashReport = CrashReport.forThrowable(e, "Baked Multipart Rendering");
             CrashReportCategory crashReportSection = crashReport.addCategory("Multipart render details");
-            crashReportSection.setDetail("Region count", regions.size());
+            crashReportSection.setDetail(
+              "Regions",
+              regions.size() + " | " +
+              Arrays.toString(regions.keySet().stream().map(pos -> "(" + pos.x + "," + pos.z + ")").toList().toArray())
+            );
 
             throw new ReportedException(crashReport);
         }
@@ -396,7 +299,7 @@ public final class PartRenderManager {
         Vec3 cameraPos = context.gameRenderer().getMainCamera().position();
 
         if (!regions.isEmpty()) {
-            profiler.push("render");
+            profiler.push("chowl:multipart/render");
 
             /*
              * Set the fog end to an extremely high value, this is a total hack but.
@@ -430,9 +333,9 @@ public final class PartRenderManager {
                 }
             }
 
+            matrices.popMatrix();
             //noinspection DataFlowIssue
             RenderSystem.setShaderFog(originalFog);
-            matrices.popMatrix();
 
             profiler.pop();
         }
@@ -447,10 +350,23 @@ public final class PartRenderManager {
         }
     }
 
+    public static void rebakeRegion(BlockPos pos) {
+        RenderRegionPos rrp = new RenderRegionPos(pos);
+        // ChunkPos chunkPos = new ChunkPos(pos);
+        // LOGGER.info("[{}, {}] | ({}, {}, {}) | [{}, {}]", rrp.x, rrp.z, pos.getX(), pos.getY(), pos.getZ(), chunkPos.getRegionX(), chunkPos.getRegionZ());
+        if (regions.containsKey(rrp) && !needsRebuild.contains(rrp)) {
+            markForRebuild(rrp);
+        }
+    }
+
     public static void reset() {
+        renderQueue.clear();
+        renderQueue.endFrame();
         regions.values().forEach(RegionBuffer::reset);
         regions.clear();
         needsRebuild.clear();
+        blockEntities.clear();
+        bakingRenderStates.clear();
     }
 
     private record RenderRegionPos(int x, int z, @NotNull BlockPos origin) {
