@@ -3,10 +3,8 @@ package com.chyzman.chowl.core;
 import com.chyzman.chowl.core.debug.DebugCommand;
 import com.chyzman.chowl.core.graph.NetworkRegistry;
 import com.chyzman.chowl.core.network.ChowlPackets;
-import com.chyzman.chowl.core.registry.ChowlComponents;
-import com.chyzman.chowl.core.registry.ChowlRegistries;
-import com.chyzman.chowl.core.registry.CoreBlockEntities;
-import com.chyzman.chowl.core.registry.CoreBlocks;
+import com.chyzman.chowl.core.panel.TemporaryPanelInitThingy;
+import com.chyzman.chowl.core.registry.*;
 import io.wispforest.owo.registration.reflect.FieldRegistrationHandler;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.resources.Identifier;
@@ -24,6 +22,7 @@ public class Chowl implements ModInitializer {
         ChowlRegistries.init();
         CoreBlockEntities.init();
         CoreBlocks.init();
+        CoreParts.init();
 
         ChowlPackets.registerCommon();
 
@@ -32,6 +31,8 @@ public class Chowl implements ModInitializer {
         FieldRegistrationHandler.register(ChowlComponents.class, MODID, true);
 
         DebugCommand.register();
+
+        TemporaryPanelInitThingy.init();
     }
 
     public static Identifier id(String path) {

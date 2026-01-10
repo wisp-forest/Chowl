@@ -4,6 +4,7 @@ import com.chyzman.chowl.core.attachables.impl.AttachablesEvents;
 import com.chyzman.chowl.core.multipart.api.client.render.PartRenderManager;
 import com.chyzman.chowl.core.client.render.block.entity.MultipartBlockEntityRenderer;
 import com.chyzman.chowl.core.network.ChowlPackets;
+import com.chyzman.chowl.core.panel.TemporaryPanelInitThingy;
 import com.chyzman.chowl.core.registry.CoreBlockEntities;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.InvalidateRenderStateCallback;
@@ -27,6 +28,8 @@ public class ChowlClient implements ClientModInitializer {
         WorldRenderEvents.AFTER_ENTITIES.register(PartRenderManager::submit);
         WorldRenderEvents.AFTER_ENTITIES.register(PartRenderManager::render);
         InvalidateRenderStateCallback.EVENT.register(PartRenderManager::reset);
+
+        TemporaryPanelInitThingy.clientInit();
     }
 
     public static void reloadPos(Level world, BlockPos pos) {

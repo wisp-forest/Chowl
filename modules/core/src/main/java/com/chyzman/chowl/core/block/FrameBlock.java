@@ -5,10 +5,17 @@ import com.chyzman.chowl.core.graph.NetworkRegistry;
 import com.chyzman.chowl.core.multipart.api.Multipart;
 import com.chyzman.chowl.core.block.api.MultipartHolderBlockWithEntity;
 import com.chyzman.chowl.core.blockentity.MultipartBlockEntity;
+import com.chyzman.chowl.core.panel.part.PanelPart;
 import com.chyzman.chowl.core.pond.ExtendedShapeContext;
+import com.chyzman.chowl.core.util.BlockSideUtils;
 import com.mojang.serialization.MapCodec;
+import io.wispforest.owo.ops.ItemOps;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -20,6 +27,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -70,6 +78,20 @@ public class FrameBlock extends MultipartHolderBlockWithEntity {
         }
 
         return super.getShape(state, world, pos, context);
+    }
+
+
+    @Override
+    protected InteractionResult onNonPartUseWithItem(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!(world.getBlockEntity(pos) instanceof FrameBlockEntity frame)) return super.onNonPartUseWithItem(stack, state, world, pos, player, hand, hit);
+
+        var orientation = BlockSideUtils.getOrientation(hit, player);
+
+        if (frame.getParts().stream().anyMatch(part -> part instanceof PanelPart panel && panel.orientation.front().equals(orientation.front()))) return super.onNonPartUseWithItem(stack, state, world, pos, player, hand, hit);
+
+        frame.addPart(new PanelPart(orientation, stack.copyWithCount(1)));
+        ItemOps.decrementPlayerHandItem(player, hand);
+        return InteractionResult.SUCCESS;
     }
 
     /*@Override
