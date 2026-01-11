@@ -4,7 +4,6 @@ import com.chyzman.chowl.core.blockentity.FrameBlockEntity;
 import com.chyzman.chowl.core.graph.NetworkRegistry;
 import com.chyzman.chowl.core.multipart.api.Multipart;
 import com.chyzman.chowl.core.block.api.MultipartHolderBlockWithEntity;
-import com.chyzman.chowl.core.blockentity.MultipartBlockEntity;
 import com.chyzman.chowl.core.panel.part.PanelPart;
 import com.chyzman.chowl.core.pond.ExtendedShapeContext;
 import com.chyzman.chowl.core.util.BlockSideUtils;
@@ -82,12 +81,12 @@ public class FrameBlock extends MultipartHolderBlockWithEntity {
 
 
     @Override
-    protected InteractionResult onNonPartUseWithItem(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (!(world.getBlockEntity(pos) instanceof FrameBlockEntity frame)) return super.onNonPartUseWithItem(stack, state, world, pos, player, hand, hit);
+    protected InteractionResult onUseItem(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!(world.getBlockEntity(pos) instanceof FrameBlockEntity frame)) return super.onUseItem(stack, state, world, pos, player, hand, hit);
 
         var orientation = BlockSideUtils.getOrientation(hit, player);
 
-        if (frame.getParts().stream().anyMatch(part -> part instanceof PanelPart panel && panel.orientation.front().equals(orientation.front()))) return super.onNonPartUseWithItem(stack, state, world, pos, player, hand, hit);
+        if (frame.getParts().stream().anyMatch(part -> part instanceof PanelPart panel && panel.orientation.front().equals(orientation.front()))) return super.onUseItem(stack, state, world, pos, player, hand, hit);
 
         frame.addPart(new PanelPart(orientation, stack.copyWithCount(1)));
         ItemOps.decrementPlayerHandItem(player, hand);
