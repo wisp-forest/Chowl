@@ -5,7 +5,6 @@ import com.chyzman.chowl.core.multipart.api.MultipartHitResult;
 import com.chyzman.chowl.core.multipart.api.MultipartVoxelShape;
 import com.chyzman.chowl.core.multipart.api.Part;
 import com.chyzman.chowl.core.multipart.api.PartType;
-import com.chyzman.chowl.core.registry.CoreBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Util;
 import net.minecraft.world.InteractionHand;
@@ -24,6 +23,7 @@ import net.minecraft.world.phys.shapes.CubeVoxelShape;
 import net.minecraft.world.phys.shapes.DiscreteVoxelShape;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -89,17 +89,18 @@ public abstract class MultipartHolderBlockWithEntity extends BaseEntityBlock {
         return shape;
     }
 
-    protected InteractionResult onNonPartUse(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+    protected InteractionResult onUseWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         return super.useWithoutItem(state, world, pos, player, hit);
     }
 
-    protected InteractionResult onNonPartUseWithItem(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult onUseItem(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         return super.useItemOn(stack, state, world, pos, player, hand, hit);
     }
 
     @Override
+    @NotNull
     @ApiStatus.NonExtendable
-    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(@NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull Player player, @NotNull BlockHitResult hit) {
         if (hit instanceof MultipartHitResult hitResult && world.getBlockEntity(pos) instanceof MultipartHolderBlockEntity holder) {
             Part part = Part.findPart(hitResult.getPart(), holder.getParts());
             if (part != null) {
@@ -110,12 +111,13 @@ public abstract class MultipartHolderBlockWithEntity extends BaseEntityBlock {
             }
         }
 
-        return onNonPartUse(state, world, pos, player, hit);
+        return onUseWithoutItem(state, world, pos, player, hit);
     }
 
     @Override
+    @NotNull
     @ApiStatus.NonExtendable
-    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(@NotNull ItemStack stack, @NotNull BlockState state, @NotNull Level world, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit) {
         if (hit instanceof MultipartHitResult hitResult && world.getBlockEntity(pos) instanceof MultipartHolderBlockEntity holder) {
             Part part = Part.findPart(hitResult.getPart(), holder.getParts());
             if (part != null) {
@@ -126,6 +128,6 @@ public abstract class MultipartHolderBlockWithEntity extends BaseEntityBlock {
             }
         }
 
-        return onNonPartUseWithItem(stack, state, world, pos, player, hand, hit);
+        return onUseItem(stack, state, world, pos, player, hand, hit);
     }
 }
