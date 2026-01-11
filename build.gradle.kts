@@ -93,6 +93,7 @@ allprojects {
         maven("https://maven.cafeteria.dev/releases/")
         maven("https://maven.kneelawk.com/releases/")
         maven("https://maven.alexiil.uk/")
+        maven("https://maven.parchmentmc.org")
         mavenCentral()
         gradlePluginPortal()
     }
@@ -100,7 +101,10 @@ allprojects {
     dependencies {
         minecraft("com.mojang:minecraft:${rootProject.property("minecraft_version")}")
 //        mappings("net.fabricmc:yarn:${rootProject.property("yarn_mappings")}:v2")
-        mappings(loom.officialMojangMappings())
+        mappings(loom.layered {
+            officialMojangMappings()
+            parchment("org.parchmentmc.data:parchment-1.21.11:2025.12.20@zip")
+        })
 
         modImplementation("net.fabricmc:fabric-loader:${rootProject.property("loader_version")}")
         modImplementation("net.fabricmc.fabric-api:fabric-api:${rootProject.property("fabric_version")}")
