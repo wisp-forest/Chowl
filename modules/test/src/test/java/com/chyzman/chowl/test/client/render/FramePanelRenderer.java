@@ -138,6 +138,7 @@ public class FramePanelRenderer implements PartRenderer<FramePanel, FramePanelRe
         matrices.pushPose();
         matrices.translate(0.5, 0.5, 0.5);
 
+//        matrices.mulPose(renderState.face.getRotation());
         matrices.mulPose(switch (renderState.face) {
             case NORTH -> new Quaternionf();
             case WEST -> new Quaternionf().rotationY((float) (Math.PI / 2));
