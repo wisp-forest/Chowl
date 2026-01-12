@@ -1,6 +1,7 @@
 package com.chyzman.chowl.core.panel.part;
 
 import com.chyzman.chowl.core.multipart.api.Part;
+import com.chyzman.chowl.core.panel.item.api.Frameable;
 import com.chyzman.chowl.core.panel.registry.PanelComponents;
 import com.chyzman.chowl.core.panel.registry.PanelParts;
 import com.chyzman.chowl.core.util.ChowlEndecs;
@@ -45,6 +46,7 @@ public class PanelPart extends Part implements ItemOwner {
 
         this.addSubPart(new RemovePart());
         if (panel.has(PanelComponents.LOCKED)) this.addSubPart(new LockPart());
+        if (panel.getItem() instanceof Frameable frameable) frameable.addSubParts(this, panel);
     }
 
     public PanelPart(List<Part> parts) {

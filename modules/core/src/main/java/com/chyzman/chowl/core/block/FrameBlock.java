@@ -86,6 +86,9 @@ public class FrameBlock extends MultipartHolderBlockWithEntity {
 
         var orientation = BlockSideUtils.getOrientation(hit, player);
 
+        //FIXME: this is currently inefficient because we store the panels based on orientation even tho the top and bottom orientations have 4 variants each
+        //       we might wanna store them based on direction then have a sepparate rotation value or something
+        //       the problem with that is orientations are nice for other stuff tho so idk
         if (frame.getParts().stream().anyMatch(part -> part instanceof PanelPart panel && panel.orientation.front().equals(orientation.front()))) return super.onUseItem(stack, state, world, pos, player, hand, hit);
 
         frame.addPart(new PanelPart(orientation, stack.copyWithCount(1)));
