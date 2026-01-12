@@ -56,7 +56,7 @@ public abstract class MultipartHolderBlockEntity extends BlockEntity {
 
     public void addPart(Part part) {
         parts.add(part);
-        part.init(this);
+        if (!part.isInitialized()) part.init(this);
         markDirtyAndUpdateClients();
         clearShapeCache();
 
